@@ -19,6 +19,19 @@ public class FilteringDataMartTest {
         return subscription;
     }
 
+    static MarketDataUpdate newQuote(String source, String exchange, String instrument,
+                                     double bid, double ask, double bidq, double askq) {
+        MarketDataUpdate update = DataValueClasses.newInstance(MarketDataUpdate.class);
+        update.setSource(source);
+        update.setExchange(exchange);
+        update.setInstrument(instrument);
+        update.setBid(bid);
+        update.setBidq(bidq);
+        update.setAsk(ask);
+        update.setAskq(askq);
+        return update;
+    }
+
     @Test
     public void testOnUpdate() throws Exception {
         MarketDataUpdate q1 = newQuote("source", "exchange", "instrument2", 10, 20, 10, 20);
@@ -35,8 +48,9 @@ public class FilteringDataMartTest {
         replay(dataMart);
         Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap = new HashMap<>();
         FilteringDataMart fdm = new FilteringDataMart("target", marketDataMap, dataMart);
+
         // boot strap
-        marketDataMap.values().forEach(dataMart::onUpdate);
+        fdm.calculate();
 
         fdm.addSubscription(newSubscription("target", "source", "exchange", "instrument2"));
         fdm.addSubscription(newSubscription("target", "source", null, "instrument3"));
@@ -66,18 +80,5 @@ public class FilteringDataMartTest {
         fdm.onUpdate(q5);
 
         verify(dataMart);
-    }
-
-    private MarketDataUpdate newQuote(String source, String exchange, String instrument,
-                                      double bid, double ask, double bidq, double askq) {
-        MarketDataUpdate update = DataValueClasses.newInstance(MarketDataUpdate.class);
-        update.setSource(source);
-        update.setExchange(exchange);
-        update.setInstrument(instrument);
-        update.setBid(bid);
-        update.setBidq(bidq);
-        update.setAsk(ask);
-        update.setAskq(askq);
-        return update;
     }
 }

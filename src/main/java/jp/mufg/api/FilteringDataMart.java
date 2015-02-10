@@ -14,12 +14,13 @@ public class FilteringDataMart implements DataMart {
     final String target;
     final Map<String, SubscriptionSet> sources = new HashMap<>();
     private final Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap;
-    private final DataMart dataMart;
+    private final Calculator calculator;
+    private boolean changed = false;
 
-    public FilteringDataMart(String target, Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap, DataMart dataMart) {
+    public FilteringDataMart(String target, Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap, Calculator calculator) {
         this.target = target;
         this.marketDataMap = marketDataMap;
-        this.dataMart = dataMart;
+        this.calculator = calculator;
     }
 
     @Override
@@ -32,7 +33,18 @@ public class FilteringDataMart implements DataMart {
         key.setInstrument(quote.getInstrument());
         key.setExchange(quote.getExchange());
         marketDataMap.put(key, quote);
-        dataMart.onUpdate(quote);
+        changed = true;
+    }
+
+    public boolean hasChanged() {
+        return changed;
+    }
+
+    @Override
+    public void calculate() {
+        if (changed)
+            calculator.calculate();
+        changed = false;
     }
 
     @Override
