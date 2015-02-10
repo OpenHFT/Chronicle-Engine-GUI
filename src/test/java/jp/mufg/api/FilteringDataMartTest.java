@@ -3,6 +3,9 @@ package jp.mufg.api;
 import net.openhft.lang.model.DataValueClasses;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.easymock.EasyMock.*;
 
 public class FilteringDataMartTest {
@@ -30,7 +33,11 @@ public class FilteringDataMartTest {
         dataMart.onUpdate(q4);
 
         replay(dataMart);
-        FilteringDataMart fdm = new FilteringDataMart("target", dataMart);
+        Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap = new HashMap<>();
+        FilteringDataMart fdm = new FilteringDataMart("target", marketDataMap, dataMart);
+        // boot strap
+        marketDataMap.values().forEach(dataMart::onUpdate);
+
         fdm.addSubscription(newSubscription("target", "source", "exchange", "instrument2"));
         fdm.addSubscription(newSubscription("target", "source", null, "instrument3"));
         fdm.addSubscription(newSubscription("target", "source", null, "instrument"));
