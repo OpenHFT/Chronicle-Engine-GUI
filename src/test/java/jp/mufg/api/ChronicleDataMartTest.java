@@ -30,23 +30,29 @@ public class ChronicleDataMartTest {
         calculator.calculate();
         replay(calculator);
 
-        ChronicleDataMart chronicleDataMart = new ChronicleDataMart(chronicle,
-                PrintAll.of(DataMart.class, new FilteringDataMart("target", marketDataMap, calculator)));
+        FilteringDataMart fdm = new FilteringDataMart("target", marketDataMap, calculator);
+        ChronicleDataMart chronicleDataMart = new ChronicleDataMart("target", chronicle,
+                PrintAll.of(DataMart.class, fdm));
+
+//        ChronicleDataMart chronicleDataMart2 = new ChronicleDataMart(chronicle,
+//                PrintAll.of(DataMart.class, new FilteringDataMart("target", marketDataMap, calculator)));
 
         DataMart writer = ToChronicle.of(DataMart.class, chronicle);
-        writer.addSubscription(newSubscription("target", "source", "exchange", "instrument2"));
-        writer.addSubscription(newSubscription("target", "source", null, "instrument3"));
-        writer.addSubscription(newSubscription("target", "source", null, "instrument"));
+        writer.addSubscription(newSubscription("target", "one", "source", "exchange", "instrument2"));
+        writer.addSubscription(newSubscription("target", "two", "source", null, "instrument3"));
+        writer.addSubscription(newSubscription("target", "three", "source", null, "instrument"));
 
         writer.onUpdate(newQuote("source", "exchange", "instrument", 10, 21, 10, 20));
         writer.onUpdate(newQuote("source", "exchange", "instrument2", 13, 22, 10, 20));
         writer.onUpdate(newQuote("source", "exchangeX", "instrument3", 16, 23, 10, 20));
 
         for (int i = 0; i < 2; i++) {
-            while (chronicleDataMart.runOnce()) {
+            while (chronicleDataMart.runOnce()/* |
+                    chronicleDataMart2.runOnce()*/) {
 
             }
             chronicleDataMart.onIdle();
+//            chronicleDataMart2.onIdle();
         }
         verify(calculator);
         chronicle.close();

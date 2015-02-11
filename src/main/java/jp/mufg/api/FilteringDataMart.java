@@ -40,7 +40,9 @@ public class FilteringDataMart implements DataMart {
     }
 
     @Override
-    public void calculate() {
+    public void calculate(String target) {
+        if (!this.target.equals(target))
+            return;
         if (changed)
             calculator.calculate();
         changed = false;

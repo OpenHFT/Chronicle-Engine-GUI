@@ -32,12 +32,12 @@ public class FilteringDataMartTest {
         FilteringDataMart fdm = new FilteringDataMart("target", marketDataMap, calculator);
 
         // boot strap
-        fdm.calculate();
+        fdm.calculate("target");
 
-        fdm.addSubscription(newSubscription("target", "source", "exchange", "instrument2"));
-        fdm.addSubscription(newSubscription("target", "source", null, "instrument3"));
-        fdm.addSubscription(newSubscription("target", "source", null, "instrument"));
-        fdm.addSubscription(newSubscription("no-target", null, null, null));
+        fdm.addSubscription(newSubscription("target", "one", "source", "exchange", "instrument2"));
+        fdm.addSubscription(newSubscription("target", "two", "source", null, "instrument3"));
+        fdm.addSubscription(newSubscription("target", "three", "source", null, "instrument"));
+        fdm.addSubscription(newSubscription("no-target", "four", null, null, null));
 
         assertFalse(fdm.hasChanged());
 
@@ -48,7 +48,7 @@ public class FilteringDataMartTest {
         fdm.onUpdate(q5);
 
         assertTrue(fdm.hasChanged());
-        fdm.calculate();
+        fdm.calculate("target");
         assertFalse(fdm.hasChanged());
 
         verify(calculator);
@@ -62,8 +62,8 @@ public class FilteringDataMartTest {
 
         replay(calculator);
         replay(marketDataMap);
-        fdm.removeSubscription(newSubscription("target", "source", "exchange", "instrument2"));
-        fdm.removeSubscription(newSubscription("target", "source", null, "instrument3"));
+        fdm.removeSubscription(newSubscription("target", "two", "source", "exchange", "instrument2"));
+        fdm.removeSubscription(newSubscription("target", "three", "source", null, "instrument3"));
 
         fdm.onUpdate(q1);
         fdm.onUpdate(q2);
@@ -72,7 +72,7 @@ public class FilteringDataMartTest {
         fdm.onUpdate(q5);
 
         assertTrue(fdm.hasChanged());
-        fdm.calculate();
+        fdm.calculate("target");
         assertFalse(fdm.hasChanged());
 
         verify(marketDataMap);

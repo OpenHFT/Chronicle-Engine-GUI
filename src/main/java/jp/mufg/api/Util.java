@@ -2,6 +2,7 @@ package jp.mufg.api;
 
 import net.openhft.lang.model.DataValueClasses;
 
+// TODO these methods should be migrated to their classes once JLANG-54 is fixed
 public enum Util {
     ;
 
@@ -20,9 +21,11 @@ public enum Util {
         return key;
     }
 
-    public static Subscription newSubscription(String target, String source, String exchange, String instrument) {
+    public static Subscription newSubscription(String target, String subscriptionId,
+                                               String source, String exchange, String instrument) {
         Subscription subscription = DataValueClasses.newInstance(Subscription.class);
         subscription.setTarget(target);
+        subscription.setSubscriptionId(subscriptionId);
         subscription.setSource(source);
         subscription.setExchange(exchange);
         subscription.setInstrument(instrument);
@@ -41,6 +44,5 @@ public enum Util {
         update.setAskq(askq);
         return update;
     }
-    // TODO these methods should be migrated to their classes once JLANG-54 is fixed
 
 }

@@ -1,6 +1,8 @@
 package jp.mufg.api;
 
-public interface DataMart extends Calculator {
+public interface DataMart {
+    public void calculate(String target);
+
     public boolean hasChanged();
 
     public void onUpdate(MarketDataUpdate quote);

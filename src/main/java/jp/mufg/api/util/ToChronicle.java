@@ -16,7 +16,9 @@ public class ToChronicle implements InvocationHandler {
     }
 
     public static <T> T of(Class<T> interfaceType, Chronicle chroncile) throws IOException {
-        return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[]{interfaceType}, new ToChronicle(chroncile.createAppender()));
+        return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(),
+                new Class[]{interfaceType},
+                new ToChronicle(chroncile.createAppender()));
     }
 
     @Override

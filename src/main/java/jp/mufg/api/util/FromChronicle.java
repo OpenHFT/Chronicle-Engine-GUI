@@ -29,8 +29,8 @@ public class FromChronicle<T> {
             return false;
         }
         MetaData.get().readMarshallable(tailer);
-        String metaName = tailer.readUTFΔ();
-        Method m = findMethod(metaName);
+        String methodName = tailer.readUTFΔ();
+        Method m = findMethod(methodName);
         Object[] args = null;
         int len = (int) tailer.readStopBit();
         if (len > 0) {
@@ -38,6 +38,7 @@ public class FromChronicle<T> {
             for (int i = 0; i < len; i++)
                 args[i] = tailer.readObject();
         }
+//        System.out.println("Calling "+methodName+(args == null ? "()" : Arrays.toString(args)));
         try {
             m.invoke(instance, args);
         } catch (IllegalAccessException e) {
