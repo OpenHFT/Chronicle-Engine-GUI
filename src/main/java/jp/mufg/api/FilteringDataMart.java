@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class FilteringDataMart implements DataMart {
+public class FilteringDataMart implements DirectDataMart {
     static final Logger LOGGER = LoggerFactory.getLogger(FilteringDataMart.class);
     final String target;
     final Map<String, SubscriptionSet> sources = new HashMap<>();

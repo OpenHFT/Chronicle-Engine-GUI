@@ -9,16 +9,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 public class ToChronicle implements InvocationHandler {
-    final ExcerptAppender appender;
+    private final Chronicle chronicle;
 
-    public ToChronicle(ExcerptAppender appender) {
-        this.appender = appender;
+    public ToChronicle(Chronicle chronicle) {
+        this.chronicle = chronicle;
     }
 
     public static <T> T of(Class<T> interfaceType, Chronicle chroncile) throws IOException {
         return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(),
                 new Class[]{interfaceType},
-                new ToChronicle(chroncile.createAppender()));
+                new ToChronicle(chroncile));
     }
 
     @Override
@@ -26,6 +26,7 @@ public class ToChronicle implements InvocationHandler {
         if (method.getDeclaringClass() == Object.class) {
             return method.invoke(this, args);
         }
+        ExcerptAppender appender = chronicle.createAppender();
         appender.startExcerpt();
         MetaData.get().writeMarshallable(appender);
         appender.writeUTFΔ(method.getName());

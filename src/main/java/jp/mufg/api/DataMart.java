@@ -1,15 +1,11 @@
 package jp.mufg.api;
 
 public interface DataMart {
-    public void calculate(String target);
+    void calculate(String target);
 
-    public boolean hasChanged();
+    void onUpdate(MarketDataUpdate quote);
 
-    public String getTarget();
+    void addSubscription(Subscription subscription);
 
-    public void onUpdate(MarketDataUpdate quote);
-
-    public void addSubscription(Subscription subscription);
-
-    public void removeSubscription(Subscription subscription);
+    void removeSubscription(Subscription subscription);
 }
