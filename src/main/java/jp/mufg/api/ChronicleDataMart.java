@@ -1,38 +1,36 @@
 package jp.mufg.api;
 
-import jp.mufg.api.util.FromChronicle;
+import jp.mufg.api.util.ManyFromChronicle;
 import jp.mufg.api.util.ToChronicle;
 import net.openhft.chronicle.Chronicle;
 
 import java.io.IOException;
+import java.util.List;
 
 public class ChronicleDataMart {
-    private final String target;
-    private final Chronicle chronicle;
     private final DataMart writer;
-    private final FromChronicle<DataMart> reader;
-    private final DataMart dataMart;
+    private final ManyFromChronicle<DataMart> reader;
+    private final List<DataMart> instances;
 
-    public ChronicleDataMart(String target, Chronicle chronicle, DataMart dataMart) throws IOException {
-        this.target = target;
-        this.chronicle = chronicle;
+    public ChronicleDataMart(Chronicle chronicle,
+                             List<DataMart> instances) throws IOException {
         writer = ToChronicle.of(DataMart.class, chronicle);
-        this.dataMart = dataMart;
-        reader = FromChronicle.of(this.dataMart, chronicle.createTailer());
+        this.instances = instances;
+        reader = ManyFromChronicle.of(this.instances, chronicle.createTailer());
     }
 
     public boolean runOnce() {
         return reader.readOne();
     }
 
-    public void onIdle() {
-        if (dataMart.hasChanged())
-            writer.calculate(target);
-        else
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                throw new AssertionError(e);
+    public boolean onIdle() {
+        boolean busy = false;
+        for (DataMart dataMart : instances) {
+            if (dataMart.hasChanged()) {
+                writer.calculate(dataMart.getTarget());
+                busy = true;
             }
+        }
+        return busy;
     }
 }

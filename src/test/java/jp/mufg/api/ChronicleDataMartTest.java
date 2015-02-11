@@ -9,6 +9,7 @@ import net.openhft.chronicle.tools.ChronicleTools;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ import static org.easymock.EasyMock.*;
 
 public class ChronicleDataMartTest {
     @Test
-    public void testHasChanged() throws IOException {
+    public void testHasChanged() throws IOException, InterruptedException {
         String basePath = "testHasChanged-" + System.nanoTime();
         ChronicleTools.deleteDirOnExit(basePath);
 
@@ -30,9 +31,11 @@ public class ChronicleDataMartTest {
         calculator.calculate();
         replay(calculator);
 
-        FilteringDataMart fdm = new FilteringDataMart("target", marketDataMap, calculator);
-        ChronicleDataMart chronicleDataMart = new ChronicleDataMart("target", chronicle,
-                PrintAll.of(DataMart.class, fdm));
+        FilteringDataMart fdm = new FilteringDataMart("target",
+                marketDataMap, calculator);
+        ChronicleDataMart chronicleDataMart = new ChronicleDataMart(
+                chronicle,
+                Arrays.asList(PrintAll.of(DataMart.class, fdm)));
 
 //        ChronicleDataMart chronicleDataMart2 = new ChronicleDataMart(chronicle,
 //                PrintAll.of(DataMart.class, new FilteringDataMart("target", marketDataMap, calculator)));
@@ -46,12 +49,13 @@ public class ChronicleDataMartTest {
         writer.onUpdate(newQuote("source", "exchange", "instrument2", 13, 22, 10, 20));
         writer.onUpdate(newQuote("source", "exchangeX", "instrument3", 16, 23, 10, 20));
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 3; i++) {
             while (chronicleDataMart.runOnce()/* |
                     chronicleDataMart2.runOnce()*/) {
 
             }
-            chronicleDataMart.onIdle();
+            if (!chronicleDataMart.onIdle())
+                Thread.sleep(10);
 //            chronicleDataMart2.onIdle();
         }
         verify(calculator);

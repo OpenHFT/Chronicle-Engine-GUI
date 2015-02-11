@@ -25,6 +25,11 @@ public class FilteringDataMart implements DataMart {
     }
 
     @Override
+    public String getTarget() {
+        return target;
+    }
+
+    @Override
     public void onUpdate(MarketDataUpdate quote) {
         SubscriptionSet subscriptionSet = sources.get(quote.getSource());
         if (subscriptionSet == null || !subscriptionSet.matches(quote.getExchange(), quote.getInstrument()))

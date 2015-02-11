@@ -5,6 +5,8 @@ public interface DataMart {
 
     public boolean hasChanged();
 
+    public String getTarget();
+
     public void onUpdate(MarketDataUpdate quote);
 
     public void addSubscription(Subscription subscription);
