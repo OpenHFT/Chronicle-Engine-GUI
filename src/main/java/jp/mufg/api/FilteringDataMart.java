@@ -1,6 +1,5 @@
 package jp.mufg.api;
 
-import net.openhft.lang.model.DataValueClasses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +16,9 @@ public class FilteringDataMart implements DataMart {
     private final Calculator calculator;
     private boolean changed = false;
 
-    public FilteringDataMart(String target, Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap, Calculator calculator) {
+    public FilteringDataMart(String target,
+                             Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap,
+                             Calculator calculator) {
         this.target = target;
         this.marketDataMap = marketDataMap;
         this.calculator = calculator;
@@ -28,13 +29,11 @@ public class FilteringDataMart implements DataMart {
         SubscriptionSet subscriptionSet = sources.get(quote.getSource());
         if (subscriptionSet == null || !subscriptionSet.matches(quote.getExchange(), quote.getInstrument()))
             return;
-        SourceExchangeInstrument key = DataValueClasses.newInstance(SourceExchangeInstrument.class);
-        key.setSource(quote.getSource());
-        key.setInstrument(quote.getInstrument());
-        key.setExchange(quote.getExchange());
+        SourceExchangeInstrument key = Util.seiFrom(quote);
         marketDataMap.put(key, quote);
         changed = true;
     }
+
 
     public boolean hasChanged() {
         return changed;

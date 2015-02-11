@@ -14,4 +14,5 @@ public interface SourceExchangeInstrument {
     public String getInstrument();
 
     public void setInstrument(@MaxSize(16) String instrument);
+
 }

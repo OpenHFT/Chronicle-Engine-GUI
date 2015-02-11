@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static jp.mufg.api.FilteringDataMartTest.newQuote;
-import static jp.mufg.api.FilteringDataMartTest.newSubscription;
+import static jp.mufg.api.Util.newQuote;
+import static jp.mufg.api.Util.newSubscription;
 import static org.easymock.EasyMock.*;
 
 public class ChronicleDataMartTest {

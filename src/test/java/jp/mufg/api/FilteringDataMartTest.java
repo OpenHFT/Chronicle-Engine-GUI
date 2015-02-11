@@ -1,53 +1,35 @@
 package jp.mufg.api;
 
-import net.openhft.lang.model.DataValueClasses;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import static jp.mufg.api.Util.newSubscription;
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class FilteringDataMartTest {
 
-    public static Subscription newSubscription(String target, String source, String exchange, String instrument) {
-        Subscription subscription = DataValueClasses.newInstance(Subscription.class);
-        subscription.setTarget(target);
-        subscription.setSource(source);
-        subscription.setExchange(exchange);
-        subscription.setInstrument(instrument);
-        return subscription;
-    }
-
-    static MarketDataUpdate newQuote(String source, String exchange, String instrument,
-                                     double bid, double ask, double bidq, double askq) {
-        MarketDataUpdate update = DataValueClasses.newInstance(MarketDataUpdate.class);
-        update.setSource(source);
-        update.setExchange(exchange);
-        update.setInstrument(instrument);
-        update.setBid(bid);
-        update.setBidq(bidq);
-        update.setAsk(ask);
-        update.setAskq(askq);
-        return update;
-    }
-
     @Test
     public void testOnUpdate() throws Exception {
-        MarketDataUpdate q1 = newQuote("source", "exchange", "instrument2", 10, 20, 10, 20);
-        MarketDataUpdate q2 = newQuote("source2", "exchange2", "instrument2", 10, 20, 10, 20);
-        MarketDataUpdate q3 = newQuote("source", "exchangeX", "instrument3", 10, 20, 10, 20);
-        MarketDataUpdate q4 = newQuote("source", "exchange", "instrument", 10, 20, 10, 20);
-        MarketDataUpdate q5 = newQuote(null, null, null, 10, 20, 10, 20);
+        MarketDataUpdate q1 = Util.newQuote("source", "exchange", "instrument2", 10, 20, 10, 20);
+        MarketDataUpdate q2 = Util.newQuote("source2", "exchange2", "instrument2", 10, 20, 10, 20);
+        MarketDataUpdate q3 = Util.newQuote("source", "exchangeX", "instrument3", 10, 20, 10, 20);
+        MarketDataUpdate q4 = Util.newQuote("source", "exchange", "instrument", 10, 20, 10, 20);
+        MarketDataUpdate q5 = Util.newQuote(null, null, null, 10, 20, 10, 20);
 
-        DataMart dataMart = createMock(DataMart.class);
-        dataMart.onUpdate(q1);
-        dataMart.onUpdate(q3);
-        dataMart.onUpdate(q4);
+        Calculator calculator = createMock(Calculator.class);
+        Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap = createMock(Map.class);
+        expect(marketDataMap.put(Util.seiFrom(q1), q1)).andReturn(null);
+        expect(marketDataMap.put(Util.seiFrom(q3), q3)).andReturn(null);
+        expect(marketDataMap.put(Util.seiFrom(q4), q4)).andReturn(null);
 
-        replay(dataMart);
-        Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap = new HashMap<>();
-        FilteringDataMart fdm = new FilteringDataMart("target", marketDataMap, dataMart);
+        calculator.calculate();
+
+        replay(calculator);
+        replay(marketDataMap);
+        FilteringDataMart fdm = new FilteringDataMart("target", marketDataMap, calculator);
 
         // boot strap
         fdm.calculate();
@@ -57,19 +39,29 @@ public class FilteringDataMartTest {
         fdm.addSubscription(newSubscription("target", "source", null, "instrument"));
         fdm.addSubscription(newSubscription("no-target", null, null, null));
 
+        assertFalse(fdm.hasChanged());
+
         fdm.onUpdate(q1);
         fdm.onUpdate(q2);
         fdm.onUpdate(q3);
         fdm.onUpdate(q4);
         fdm.onUpdate(q5);
 
-        verify(dataMart);
+        assertTrue(fdm.hasChanged());
+        fdm.calculate();
+        assertFalse(fdm.hasChanged());
+
+        verify(calculator);
+        verify(marketDataMap);
 
         // test removals.
-        reset(dataMart);
-        dataMart.onUpdate(q4);
+        reset(calculator);
+        reset(marketDataMap);
+        expect(marketDataMap.put(Util.seiFrom(q4), q4)).andReturn(null);
+        calculator.calculate();
 
-        replay(dataMart);
+        replay(calculator);
+        replay(marketDataMap);
         fdm.removeSubscription(newSubscription("target", "source", "exchange", "instrument2"));
         fdm.removeSubscription(newSubscription("target", "source", null, "instrument3"));
 
@@ -79,6 +71,11 @@ public class FilteringDataMartTest {
         fdm.onUpdate(q4);
         fdm.onUpdate(q5);
 
-        verify(dataMart);
+        assertTrue(fdm.hasChanged());
+        fdm.calculate();
+        assertFalse(fdm.hasChanged());
+
+        verify(marketDataMap);
+        verify(calculator);
     }
 }
