@@ -4,6 +4,7 @@ import jp.mufg.api.util.ToChronicle;
 import net.openhft.chronicle.Chronicle;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,35 +15,46 @@ import static org.easymock.EasyMock.*;
 
 public class DataMartEngineTest {
 
+    static void addCalculator(String target, DataMartEngine engine, Chronicle chronicle, Calculator calculator) throws IOException {
+        Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap = new HashMap<>();
+
+        calculator.calculate();
+        replay(calculator);
+
+        FilteringDataMart fdm = new FilteringDataMart(target,
+                marketDataMap, calculator);
+        DirectDataMart dataMart = fdm; //PrintAll.of(DirectDataMart.class, fdm);
+        engine.add(new ChronicleDataMart(chronicle, dataMart));
+    }
+
     @Test
     public void testAdd() throws Exception {
         DataMartEngine engine = new DataMartEngine();
 
         Chronicle chronicle = createChronicle("testAdd");
 
-        Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap = new HashMap<>();
         Calculator calculator = createMock(Calculator.class);
-        calculator.calculate();
-        replay(calculator);
+        addCalculator("target", engine, chronicle, calculator);
 
-        FilteringDataMart fdm = new FilteringDataMart("target",
-                marketDataMap, calculator);
-        DirectDataMart dataMart = fdm; //PrintAll.of(DirectDataMart.class, fdm);
-        engine.add(new ChronicleDataMart(chronicle, dataMart));
+        Calculator calculator2 = createMock(Calculator.class);
+        addCalculator("target2", engine, chronicle, calculator2);
 
         DataMart writer = ToChronicle.of(DirectDataMart.class, chronicle);
         writer.addSubscription(newSubscription("target", "one", "source", "exchange", "instrument2"));
         writer.addSubscription(newSubscription("target", "two", "source", null, "instrument3"));
         writer.addSubscription(newSubscription("target", "three", "source", null, "instrument"));
 
+        writer.addSubscription(newSubscription("target2", "one", "source", "exchange", "instrument2"));
+
         writer.onUpdate(newQuote("source", "exchange", "instrument", 10, 21, 10, 20));
         writer.onUpdate(newQuote("source", "exchange", "instrument2", 13, 22, 10, 20));
         writer.onUpdate(newQuote("source", "exchangeX", "instrument3", 16, 23, 10, 20));
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
             Thread.sleep(100);
             try {
                 verify(calculator);
+                verify(calculator2);
                 break;
             } catch (AssertionError keepTrying) {
 
@@ -51,5 +63,6 @@ public class DataMartEngineTest {
 
         engine.shutdown();
         verify(calculator);
+        verify(calculator2);
     }
 }
