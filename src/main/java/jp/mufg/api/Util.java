@@ -7,10 +7,23 @@ import org.jetbrains.annotations.NotNull;
 public enum Util {
     ;
 
+    public static SubscriptionKey keyFor(Subscription subscription) {
+        SubscriptionKey key = DataValueClasses.newInstance(SubscriptionKey.class);
+        key.setTarget(subscription.getTarget());
+        key.setSubscriptionId(subscription.getSubscriptionId());
+        return key;
+    }
     public static SourceExchangeInstrument seiFrom(@NotNull MarketDataUpdate quote) {
         String source = quote.getSource();
         String instrument = quote.getInstrument();
         String exchange = quote.getExchange();
+        return seiOf(source, instrument, exchange);
+    }
+
+    public static SourceExchangeInstrument seiFrom(@NotNull Subscription subscription) {
+        String source = subscription.getSource();
+        String instrument = subscription.getInstrument();
+        String exchange = subscription.getExchange();
         return seiOf(source, instrument, exchange);
     }
 

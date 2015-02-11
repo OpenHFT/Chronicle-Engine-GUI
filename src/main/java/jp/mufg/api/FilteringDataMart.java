@@ -50,6 +50,11 @@ public class FilteringDataMart implements DirectDataMart {
     }
 
     @Override
+    public void startup(String target) {
+
+    }
+
+    @Override
     public void calculate(String target) {
         if (!this.target.equals(target))
             return;
@@ -62,11 +67,13 @@ public class FilteringDataMart implements DirectDataMart {
     public void addSubscription(@NotNull Subscription subscription) {
         if (!subscription.getTarget().equals(target))
             return;
+        SourceExchangeInstrument sei = Util.seiFrom(subscription);
+        // if it's a retransmit, only add if not present.
+        if (subscription.getRetransmit() && sourceToId.containsKey(sei))
+            return;
 
         String subscriptionId = subscription.getSubscriptionId();
         remove(subscriptionId);
-        SourceExchangeInstrument sei = Util.seiOf(subscription.getSource(),
-                subscription.getInstrument(), subscription.getExchange());
         try {
             sourceToId.put(sei, subscriptionId);
         } catch (Exception e) {
