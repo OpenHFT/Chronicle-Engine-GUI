@@ -1,13 +1,14 @@
 package jp.mufg.api.util;
 
 import net.openhft.lang.io.Bytes;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
 public enum BytesUtils {
     ;
 
-    public static void writeBounded(Bytes bytes, Consumer<Bytes> bytesConsumer) {
+    public static void writeBounded(@NotNull Bytes bytes, @NotNull Consumer<Bytes> bytesConsumer) {
         long position = bytes.position();
         bytes.writeUnsignedShort(0);
 
@@ -19,7 +20,7 @@ public enum BytesUtils {
         bytes.writeUnsignedShort(position, (int) length);
     }
 
-    public static void readBounded(Bytes bytes, Consumer<Bytes> bytesConsumer) {
+    public static void readBounded(@NotNull Bytes bytes, @NotNull Consumer<Bytes> bytesConsumer) {
         // support future schema changes by length.
         int length = bytes.readUnsignedShort();
         long limit = bytes.limit();

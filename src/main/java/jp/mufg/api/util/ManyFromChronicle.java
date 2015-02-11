@@ -1,6 +1,7 @@
 package jp.mufg.api.util;
 
 import net.openhft.chronicle.ExcerptTailer;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -10,11 +11,12 @@ import java.util.List;
 import java.util.Map;
 
 public class ManyFromChronicle<T> {
+    @NotNull
     private final List<T> instances;
     private final ExcerptTailer tailer;
     private final Map<String, Method> methodMap = new HashMap<>();
 
-    private ManyFromChronicle(List<T> instances, ExcerptTailer tailer) {
+    private ManyFromChronicle(@NotNull List<T> instances, ExcerptTailer tailer) {
         this.instances = instances;
         this.tailer = tailer;
         for (Method m : instances.get(0).getClass().getMethods())
@@ -22,7 +24,8 @@ public class ManyFromChronicle<T> {
                 methodMap.put(m.getName(), m);
     }
 
-    public static <T> ManyFromChronicle<T> of(List<T> instances, ExcerptTailer tailer) {
+    @NotNull
+    public static <T> ManyFromChronicle<T> of(@NotNull List<T> instances, ExcerptTailer tailer) {
         return new ManyFromChronicle<>(instances, tailer);
     }
 

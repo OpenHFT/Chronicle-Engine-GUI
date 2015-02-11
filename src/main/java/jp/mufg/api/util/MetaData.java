@@ -4,6 +4,7 @@ import net.openhft.chronicle.Chronicle;
 import net.openhft.chronicle.ExcerptCommon;
 import net.openhft.lang.io.Bytes;
 import net.openhft.lang.io.serialization.BytesMarshallable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.WeakHashMap;
  */
 public class MetaData implements BytesMarshallable {
     static final ThreadLocal<MetaData> META_DATA_THREAD_LOCAL = new ThreadLocal<MetaData>() {
+        @NotNull
         @Override
         protected MetaData initialValue() {
             return new MetaData();
@@ -22,9 +24,12 @@ public class MetaData implements BytesMarshallable {
     static final Map<Chronicle, Byte> CHRONICLE_TO_ID =
             Collections.synchronizedMap(new WeakHashMap<Chronicle, Byte>());
     int timeCount = 0;
+    @NotNull
     long[] times = new long[20];
     int sourceCount = 0;
+    @NotNull
     byte[] sourceIds = new byte[10];
+    @NotNull
     long[] sources = new long[10];
 
     public static MetaData get() {
@@ -36,7 +41,7 @@ public class MetaData implements BytesMarshallable {
     }
 
     @Override
-    public void readMarshallable(Bytes bytes) throws IllegalStateException {
+    public void readMarshallable(@NotNull Bytes bytes) throws IllegalStateException {
         BytesUtils.readBounded(bytes, b -> {
             timeCount = (int) bytes.readStopBit();
             for (int i = 0; i < timeCount; i++) {
@@ -57,7 +62,7 @@ public class MetaData implements BytesMarshallable {
     }
 
     @Override
-    public void writeMarshallable(Bytes bytes) {
+    public void writeMarshallable(@NotNull Bytes bytes) {
         BytesUtils.writeBounded(bytes, b -> {
             b.writeStopBit(timeCount + 1);
             for (int i = 0; i < timeCount; i++) {
@@ -73,6 +78,7 @@ public class MetaData implements BytesMarshallable {
         });
     }
 
+    @NotNull
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("MetaData times,");

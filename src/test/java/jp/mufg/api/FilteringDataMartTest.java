@@ -17,13 +17,17 @@ public class FilteringDataMartTest {
         MarketDataUpdate q2 = Util.newQuote("source2", "exchange2", "instrument2", 10, 20, 10, 20);
         MarketDataUpdate q3 = Util.newQuote("source", "exchangeX", "instrument3", 10, 20, 10, 20);
         MarketDataUpdate q4 = Util.newQuote("source", "exchange", "instrument", 10, 20, 10, 20);
-        MarketDataUpdate q5 = Util.newQuote(null, null, null, 10, 20, 10, 20);
+        MarketDataUpdate q5 = Util.newQuote("sourceX", "exchangeX", "instrumentX", 10, 20, 10, 20);
 
         Calculator calculator = createMock(Calculator.class);
-        Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap = createMock(Map.class);
-        expect(marketDataMap.put(Util.seiFrom(q1), q1)).andReturn(null);
-        expect(marketDataMap.put(Util.seiFrom(q3), q3)).andReturn(null);
-        expect(marketDataMap.put(Util.seiFrom(q4), q4)).andReturn(null);
+        Map<String, MarketDataUpdate> marketDataMap = createMock(Map.class);
+
+        expect(marketDataMap.get("one")).andReturn(null);
+        expect(marketDataMap.get("two")).andReturn(null);
+        expect(marketDataMap.get("three")).andReturn(null);
+        expect(marketDataMap.put("one", q1)).andReturn(null);
+        expect(marketDataMap.put("two", q3)).andReturn(null);
+        expect(marketDataMap.put("three", q4)).andReturn(null);
 
         calculator.calculate();
 
@@ -35,9 +39,9 @@ public class FilteringDataMartTest {
         fdm.calculate("target");
 
         fdm.addSubscription(newSubscription("target", "one", "source", "exchange", "instrument2"));
-        fdm.addSubscription(newSubscription("target", "two", "source", null, "instrument3"));
-        fdm.addSubscription(newSubscription("target", "three", "source", null, "instrument"));
-        fdm.addSubscription(newSubscription("no-target", "four", null, null, null));
+        fdm.addSubscription(newSubscription("target", "two", "source", "exchangeX", "instrument3"));
+        fdm.addSubscription(newSubscription("target", "three", "source", "exchange", "instrument"));
+        fdm.addSubscription(newSubscription("no-target", "four", "source", "exchange", "instrument"));
 
         assertFalse(fdm.hasChanged());
 
@@ -57,13 +61,14 @@ public class FilteringDataMartTest {
         // test removals.
         reset(calculator);
         reset(marketDataMap);
-        expect(marketDataMap.put(Util.seiFrom(q4), q4)).andReturn(null);
+        expect(marketDataMap.get("one")).andReturn(null);
+        expect(marketDataMap.put("one", q1)).andReturn(null);
         calculator.calculate();
 
         replay(calculator);
         replay(marketDataMap);
-        fdm.removeSubscription(newSubscription("target", "two", "source", "exchange", "instrument2"));
-        fdm.removeSubscription(newSubscription("target", "three", "source", null, "instrument3"));
+        fdm.removeSubscription(newSubscription("target", "two", "source", "exchangeX", "instrument3"));
+        fdm.removeSubscription(newSubscription("target", "three", "source", "exchange", "instrument"));
 
         fdm.onUpdate(q1);
         fdm.onUpdate(q2);

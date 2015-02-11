@@ -1,5 +1,7 @@
 package jp.mufg.api;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -8,7 +10,7 @@ public class DataMartEngine {
     final ExecutorService executor = Executors.newCachedThreadPool();
     volatile boolean running = true;
 
-    public void add(DataMartWrapper dataMartWrapper) {
+    public void add(@NotNull DataMartWrapper dataMartWrapper) {
         executor.submit(() -> {
             try {
                 String name = "Engine-" + dataMartWrapper.getTarget();

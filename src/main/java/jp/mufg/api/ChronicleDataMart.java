@@ -3,10 +3,12 @@ package jp.mufg.api;
 import jp.mufg.api.util.FromChronicle;
 import jp.mufg.api.util.ToChronicle;
 import net.openhft.chronicle.Chronicle;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
 public class ChronicleDataMart implements DataMartWrapper {
+    @NotNull
     private final DataMart writer;
     private final DirectDataMart dataMart;
     private final Chronicle chronicle;

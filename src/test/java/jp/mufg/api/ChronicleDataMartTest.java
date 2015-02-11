@@ -6,6 +6,7 @@ import jp.mufg.api.util.ToChronicle;
 import net.openhft.chronicle.Chronicle;
 import net.openhft.chronicle.ChronicleQueueBuilder;
 import net.openhft.chronicle.tools.ChronicleTools;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import static jp.mufg.api.Util.newSubscription;
 import static org.easymock.EasyMock.*;
 
 public class ChronicleDataMartTest {
+    @NotNull
     static Chronicle createChronicle(String name) throws IOException {
         String basePath = name + "-" + System.nanoTime();
         ChronicleTools.deleteDirOnExit(basePath);
@@ -30,7 +32,7 @@ public class ChronicleDataMartTest {
     public void testSingleThread() throws IOException, InterruptedException {
         Chronicle chronicle = createChronicle("testSingleThread");
 
-        Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap = new HashMap<>();
+        Map<String, MarketDataUpdate> marketDataMap = new HashMap<>();
         Calculator calculator = createMock(Calculator.class);
         calculator.calculate();
         replay(calculator);
@@ -46,8 +48,8 @@ public class ChronicleDataMartTest {
 
         DataMart writer = ToChronicle.of(DirectDataMart.class, chronicle);
         writer.addSubscription(newSubscription("target", "one", "source", "exchange", "instrument2"));
-        writer.addSubscription(newSubscription("target", "two", "source", null, "instrument3"));
-        writer.addSubscription(newSubscription("target", "three", "source", null, "instrument"));
+        writer.addSubscription(newSubscription("target", "two", "source", "exchange", "instrument3"));
+        writer.addSubscription(newSubscription("target", "three", "source", "exchange", "instrument"));
 
         writer.onUpdate(newQuote("source", "exchange", "instrument", 10, 21, 10, 20));
         writer.onUpdate(newQuote("source", "exchange", "instrument2", 13, 22, 10, 20));

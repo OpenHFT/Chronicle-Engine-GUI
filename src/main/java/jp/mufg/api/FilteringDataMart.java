@@ -1,23 +1,22 @@
 package jp.mufg.api;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class FilteringDataMart implements DirectDataMart {
-    static final Logger LOGGER = LoggerFactory.getLogger(FilteringDataMart.class);
     final String target;
-    final Map<String, SubscriptionSet> sources = new HashMap<>();
-    private final Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap;
+    final Map<SourceExchangeInstrument, String> sourceToId = new HashMap<>();
+    final Map<String, SourceExchangeInstrument> idToSource = new HashMap<>();
+
+    private final Map<String, MarketDataUpdate> marketDataMap;
     private final Calculator calculator;
     private boolean changed = false;
 
     public FilteringDataMart(String target,
-                             Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap,
+                             Map<String, MarketDataUpdate> marketDataMap,
                              Calculator calculator) {
         this.target = target;
         this.marketDataMap = marketDataMap;
@@ -30,15 +29,21 @@ public class FilteringDataMart implements DirectDataMart {
     }
 
     @Override
-    public void onUpdate(MarketDataUpdate quote) {
-        SubscriptionSet subscriptionSet = sources.get(quote.getSource());
-        if (subscriptionSet == null || !subscriptionSet.matches(quote.getExchange(), quote.getInstrument()))
+    public void onUpdate(@NotNull MarketDataUpdate quote) {
+        SourceExchangeInstrument sei = Util.seiFrom(quote);
+        String generalId = sourceToId.get(sei);
+        if (generalId == null)
             return;
-        SourceExchangeInstrument key = Util.seiFrom(quote);
-        marketDataMap.put(key, quote);
-        changed = true;
+        MarketDataUpdate previous = marketDataMap.get(generalId);
+        if (newer(previous, quote)) {
+            marketDataMap.put(generalId, quote);
+            changed = true;
+        }
     }
 
+    private boolean newer(@Nullable MarketDataUpdate previous, @NotNull MarketDataUpdate quote) {
+        return previous == null || !quote.getRetransmit();
+    }
 
     public boolean hasChanged() {
         return changed;
@@ -54,64 +59,36 @@ public class FilteringDataMart implements DirectDataMart {
     }
 
     @Override
-    public void addSubscription(Subscription subscription) {
+    public void addSubscription(@NotNull Subscription subscription) {
         if (!subscription.getTarget().equals(target))
             return;
 
-        String source = subscription.getSource();
-        SubscriptionSet subscriptions = sources.computeIfAbsent(source, s -> new SubscriptionSet());
-        subscriptions.add(subscription);
+        String subscriptionId = subscription.getSubscriptionId();
+        remove(subscriptionId);
+        SourceExchangeInstrument sei = Util.seiOf(subscription.getSource(),
+                subscription.getInstrument(), subscription.getExchange());
+        try {
+            sourceToId.put(sei, subscriptionId);
+        } catch (Exception e) {
+            System.out.println("sei: " + sei);
+            throw e;
+        }
+        idToSource.put(subscriptionId, sei);
     }
 
     @Override
-    public void removeSubscription(Subscription subscription) {
-        SubscriptionSet subscriptionSet = sources.get(subscription.getSource());
-        if (subscriptionSet == null)
+    public void removeSubscription(@NotNull Subscription subscription) {
+        if (!subscription.getTarget().equals(target))
             return;
-        subscriptionSet.remove(subscription);
+
+        String subscriptionId = subscription.getSubscriptionId();
+        remove(subscriptionId);
     }
 
-    class SubscriptionSet {
-        Set<String> allExchangesForInstrument = new HashSet<>();
-        Map<String, Set<String>> exchangesForInstrument = new HashMap<>();
-
-        public void add(Subscription subscription) {
-            String instrument = subscription.getInstrument();
-            String exchange = subscription.getExchange();
-            if (exchange == null) {
-                exchangesForInstrument.remove(instrument);
-                allExchangesForInstrument.add(instrument);
-            } else if (!allExchangesForInstrument.contains(instrument)) {
-                Set<String> exchanges = exchangesForInstrument.computeIfAbsent(instrument, i -> new HashSet<>());
-                exchanges.add(exchange);
-            }
-        }
-
-        public boolean matches(String exchange, String instrument) {
-            if (allExchangesForInstrument.contains(instrument))
-                return true;
-            Set<String> exchanges = exchangesForInstrument.get(instrument);
-            return exchanges != null && exchanges.contains(exchange);
-        }
-
-        public void remove(Subscription subscription) {
-            String instrument = subscription.getInstrument();
-            String exchange = subscription.getExchange();
-            if (exchange == null) {
-                allExchangesForInstrument.remove(instrument);
-                exchangesForInstrument.remove(instrument);
-            } else {
-                Set<String> exchanges = exchangesForInstrument.get(instrument);
-                if (exchanges != null) {
-                    exchanges.remove(exchange);
-                    if (exchanges.isEmpty())
-                        exchangesForInstrument.remove(instrument);
-                }
-                if (allExchangesForInstrument.contains(instrument)) {
-                    LOGGER.warn("Attempt to remove " + instrument + " for " + exchange + " when it is in all exchanges");
-                }
-            }
-        }
+    private void remove(String subscriptionId) {
+        SourceExchangeInstrument sei = idToSource.remove(subscriptionId);
+        if (sei != null)
+            sourceToId.remove(sei);
     }
 }
 

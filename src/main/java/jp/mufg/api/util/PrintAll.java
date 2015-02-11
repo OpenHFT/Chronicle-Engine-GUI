@@ -1,5 +1,8 @@
 package jp.mufg.api.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -12,16 +15,19 @@ public class PrintAll implements InvocationHandler {
         this.chained = chained;
     }
 
-    public static <T> T of(Class<T> interfaceType) {
+    @NotNull
+    public static <T> T of(@NotNull Class<T> interfaceType) {
         return of(interfaceType, null);
     }
 
-    public static <T> T of(Class<T> interfaceType, T t) {
+    @NotNull
+    public static <T> T of(@NotNull Class<T> interfaceType, T t) {
         return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[]{interfaceType}, new PrintAll(t));
     }
 
+    @Nullable
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, @NotNull Method method, @Nullable Object[] args) throws Throwable {
         if (method.getDeclaringClass() == Object.class) {
             return method.invoke(this, args);
         }

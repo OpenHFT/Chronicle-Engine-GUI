@@ -2,6 +2,7 @@ package jp.mufg.api;
 
 import jp.mufg.api.util.ToChronicle;
 import net.openhft.chronicle.Chronicle;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -15,8 +16,8 @@ import static org.easymock.EasyMock.*;
 
 public class DataMartEngineTest {
 
-    static void addCalculator(String target, DataMartEngine engine, Chronicle chronicle, Calculator calculator) throws IOException {
-        Map<SourceExchangeInstrument, MarketDataUpdate> marketDataMap = new HashMap<>();
+    static void addCalculator(String target, @NotNull DataMartEngine engine, Chronicle chronicle, @NotNull Calculator calculator) throws IOException {
+        Map<String, MarketDataUpdate> marketDataMap = new HashMap<>();
 
         calculator.calculate();
         replay(calculator);
@@ -41,8 +42,8 @@ public class DataMartEngineTest {
 
         DataMart writer = ToChronicle.of(DirectDataMart.class, chronicle);
         writer.addSubscription(newSubscription("target", "one", "source", "exchange", "instrument2"));
-        writer.addSubscription(newSubscription("target", "two", "source", null, "instrument3"));
-        writer.addSubscription(newSubscription("target", "three", "source", null, "instrument"));
+        writer.addSubscription(newSubscription("target", "two", "source", "exchange", "instrument3"));
+        writer.addSubscription(newSubscription("target", "three", "source", "exchange", "instrument"));
 
         writer.addSubscription(newSubscription("target2", "one", "source", "exchange", "instrument2"));
 
