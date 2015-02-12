@@ -2,6 +2,7 @@ package jp.mufg.api;
 
 import jp.mufg.api.util.ToChronicle;
 import net.openhft.chronicle.Chronicle;
+import net.openhft.lang.model.DataValueClasses;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -54,15 +55,17 @@ public class DataMartEngineTest {
         addCalculator("target2", engine, chronicle, calculator2);
 
         DataMart writer = ToChronicle.of(DirectDataMart.class, chronicle);
+        MarketDataUpdate update = DataValueClasses.newInstance(MarketDataUpdate.class);
+
         writer.addSubscription(newSubscription("target", "one", "source", "exchange", "instrument2"));
         writer.addSubscription(newSubscription("target", "two", "source", "exchange", "instrument3"));
         writer.addSubscription(newSubscription("target", "three", "source", "exchange", "instrument"));
 
         writer.addSubscription(newSubscription("target2", "one", "source", "exchange", "instrument2"));
 
-        writer.onUpdate(newQuote("source", "exchange", "instrument", 10, 21, 10, 20));
-        writer.onUpdate(newQuote("source", "exchange", "instrument2", 13, 22, 10, 20));
-        writer.onUpdate(newQuote("source", "exchangeX", "instrument3", 16, 23, 10, 20));
+        writer.onUpdate(newQuote(update, "source", "exchange", "instrument", 10, 21, 10, 20));
+        writer.onUpdate(newQuote(update, "source", "exchange", "instrument2", 13, 22, 10, 20));
+        writer.onUpdate(newQuote(update, "source", "exchangeX", "instrument3", 16, 23, 10, 20));
 
         for (int i = 0; i < 20; i++) {
             Thread.sleep(100);
@@ -108,6 +111,7 @@ public class DataMartEngineTest {
         addCalculatorPerf("target2", engine, chronicle, calculator2);
 
         DataMart writer = ToChronicle.of(DirectDataMart.class, chronicle);
+        MarketDataUpdate update = DataValueClasses.newInstance(MarketDataUpdate.class);
         for(int j=0; j<3; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 10_000_000; i += 3) {
@@ -119,9 +123,9 @@ public class DataMartEngineTest {
                     writer.addSubscription(newSubscription("target2", "one", "source", "exchange", "instrument2"));
                 }
 
-                writer.onUpdate(newQuote("source", "exchange", "instrument", 10, 21, 10, 20));
-                writer.onUpdate(newQuote("source", "exchange", "instrument2", 13, 22, 10, 20));
-                writer.onUpdate(newQuote("source", "exchangeX", "instrument3", 16, 23, 10, 20));
+                writer.onUpdate(newQuote(update, "source", "exchange", "instrument", 10, 21, 10, 20));
+                writer.onUpdate(newQuote(update, "source", "exchange", "instrument2", 13, 22, 10, 20));
+                writer.onUpdate(newQuote(update, "source", "exchangeX", "instrument3", 16, 23, 10, 20));
             }
             System.out.println("Time for iteration " + j + " was " + (System.currentTimeMillis()-start));
         }
