@@ -11,7 +11,7 @@ public class FilteringDataMart implements DirectDataMart {
     final String target;
     final Map<SourceExchangeInstrument, String> sourceToId = new HashMap<>();
     final Map<String, SourceExchangeInstrument> idToSource = new HashMap<>();
-
+    final SourceExchangeInstrument tmpSEI = DataValueClasses.newInstance(SourceExchangeInstrument.class);
     private final Map<String, MarketDataUpdate> marketDataMap;
     private final Calculator calculator;
     private boolean changed = false;
@@ -29,10 +29,9 @@ public class FilteringDataMart implements DirectDataMart {
         return target;
     }
 
-    final SourceExchangeInstrument tmpSEI = DataValueClasses.newInstance(SourceExchangeInstrument.class);
     @Override
     public void onUpdate(@NotNull MarketDataUpdate quote) {
-        SourceExchangeInstrument sei = Util.seiFrom(quote);
+        SourceExchangeInstrument sei = Util.copyTo(quote, tmpSEI);
         String generalId = sourceToId.get(sei);
         if (generalId == null)
             return;
