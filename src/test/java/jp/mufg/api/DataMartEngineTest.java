@@ -1,7 +1,6 @@
 package jp.mufg.api;
 
 import net.openhft.chronicle.Chronicle;
-import net.openhft.lang.model.DataValueClasses;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -14,6 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static jp.mufg.api.ChronicleDataMartWrapperTest.createChronicle;
 import static jp.mufg.api.Util.newQuote;
 import static jp.mufg.api.Util.newSubscription;
+import static net.openhft.lang.model.DataValueClasses.newInstance;
 import static org.easymock.EasyMock.*;
 
 public class DataMartEngineTest {
@@ -54,7 +54,7 @@ public class DataMartEngineTest {
         addCalculator("target2", engine, chronicle, calculator2);
 
         DataMart writer = new ChronicleDataMartWriter(chronicle);
-        MarketDataUpdate update = DataValueClasses.newInstance(MarketDataUpdate.class);
+        MarketDataUpdate update = newInstance(MarketDataUpdate.class);
         writer.addSubscription(newSubscription("target", "one", "source", "exchange", "instrument2"));
         writer.addSubscription(newSubscription("target", "two", "source", "exchange", "instrument3"));
         writer.addSubscription(newSubscription("target", "three", "source", "exchange", "instrument"));
@@ -109,7 +109,7 @@ public class DataMartEngineTest {
         addCalculatorPerf("target2", engine, chronicle, calculator2);
 
         DataMart writer = new ChronicleDataMartWriter(chronicle);
-        MarketDataUpdate update = DataValueClasses.newInstance(MarketDataUpdate.class);
+        MarketDataUpdate update = newInstance(MarketDataUpdate.class);
         for(int j=0; j<3; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 10_000_000; i += 3) {

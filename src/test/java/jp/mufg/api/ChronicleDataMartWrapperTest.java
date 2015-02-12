@@ -5,7 +5,6 @@ import jp.mufg.api.util.PrintAll;
 import net.openhft.chronicle.Chronicle;
 import net.openhft.chronicle.ChronicleQueueBuilder;
 import net.openhft.chronicle.tools.ChronicleTools;
-import net.openhft.lang.model.DataValueClasses;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -15,6 +14,7 @@ import java.util.Map;
 
 import static jp.mufg.api.Util.newQuote;
 import static jp.mufg.api.Util.newSubscription;
+import static net.openhft.lang.model.DataValueClasses.newInstance;
 import static org.easymock.EasyMock.*;
 
 public class ChronicleDataMartWrapperTest {
@@ -50,7 +50,7 @@ public class ChronicleDataMartWrapperTest {
         writer.addSubscription(newSubscription("target", "one", "source", "exchange", "instrument2"));
         writer.addSubscription(newSubscription("target", "two", "source", "exchange", "instrument3"));
         writer.addSubscription(newSubscription("target", "three", "source", "exchange", "instrument"));
-        MarketDataUpdate update = DataValueClasses.newInstance(MarketDataUpdate.class);
+        MarketDataUpdate update = newInstance(MarketDataUpdate.class);
 
         writer.onUpdate(newQuote(update, "source", "exchange", "instrument", 10, 21, 10, 20));
         writer.onUpdate(newQuote(update, "source", "exchange", "instrument2", 13, 22, 10, 20));

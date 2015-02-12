@@ -2,13 +2,14 @@ package jp.mufg.api;
 
 import jp.mufg.api.util.MetaData;
 import net.openhft.chronicle.ExcerptTailer;
-import net.openhft.lang.model.DataValueClasses;
 import org.jetbrains.annotations.NotNull;
+
+import static net.openhft.lang.model.DataValueClasses.newInstance;
 
 public class ChronicleDataMartReader {
     //TODO Reuse this object when ChronicleMap is used.
 //    final MarketDataUpdate mdu = DataValueClasses.newInstance(MarketDataUpdate.class);
-    final Subscription sub = DataValueClasses.newInstance(Subscription.class);
+    final Subscription sub = newInstance(Subscription.class);
     @NotNull
     private final DataMart instance;
     private final ExcerptTailer tailer;
@@ -47,7 +48,7 @@ public class ChronicleDataMartReader {
             //void onUpdate(MarketDataUpdate quote);
             case "onUpdate": {
                 //TODO Reuse this object when ChronicleMap is used.
-                MarketDataUpdate mdu = DataValueClasses.newInstance(MarketDataUpdate.class);
+                MarketDataUpdate mdu = newInstance(MarketDataUpdate.class);
                 mdu.readMarshallable(tailer);
                 instance.onUpdate(mdu);
                 break;

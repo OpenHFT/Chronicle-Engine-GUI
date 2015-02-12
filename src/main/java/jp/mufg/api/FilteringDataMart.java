@@ -1,17 +1,18 @@
 package jp.mufg.api;
 
-import net.openhft.lang.model.DataValueClasses;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static net.openhft.lang.model.DataValueClasses.newInstance;
+
 public class FilteringDataMart implements DirectDataMart {
     final String target;
     final Map<SourceExchangeInstrument, String> sourceToId = new HashMap<>();
     final Map<String, SourceExchangeInstrument> idToSource = new HashMap<>();
-    final SourceExchangeInstrument tmpSEI = DataValueClasses.newInstance(SourceExchangeInstrument.class);
+    final SourceExchangeInstrument tmpSEI = newInstance(SourceExchangeInstrument.class);
     private final Map<String, MarketDataUpdate> marketDataMap;
     private final Calculator calculator;
     private boolean changed = false;
