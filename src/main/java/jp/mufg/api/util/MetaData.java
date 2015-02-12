@@ -81,24 +81,26 @@ public class MetaData implements BytesMarshallable {
         long position = bytes.position();
         bytes.writeUnsignedShort(0);
 
-
-        bytes.writeStopBit(timeCount + 1);
-            for (int i = 0; i < timeCount; i++) {
-                bytes.writeLong(times[i]);
-            }
-        bytes.writeLong(System.nanoTime());
-
-        bytes.writeStopBit(sourceCount);
-        bytes.write(sourceIds, 0, sourceCount);
-            for (int i = 0; i < sourceCount; i++) {
-                bytes.writeLong(sources[i]);
-            }
-
+        writeMarshallable0(bytes);
 
         long length = bytes.position() - position - 2;
         if (length >= 1 << 16)
             throw new AssertionError("length: " + length);
         bytes.writeUnsignedShort(position, (int) length);
+    }
+
+    private void writeMarshallable0(Bytes bytes) {
+        bytes.writeStopBit(timeCount + 1);
+        for (int i = 0; i < timeCount; i++) {
+            bytes.writeLong(times[i]);
+        }
+        bytes.writeLong(System.nanoTime());
+
+        bytes.writeStopBit(sourceCount);
+        bytes.write(sourceIds, 0, sourceCount);
+        for (int i = 0; i < sourceCount; i++) {
+            bytes.writeLong(sources[i]);
+        }
     }
 
     @NotNull

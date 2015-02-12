@@ -18,15 +18,17 @@ public class DataMartEngine {
                 System.out.printf("%s: Started after %.3f%n",
                         name, (System.nanoTime() - started) / 1e9);
                 dataMartWrapper.start();
+                int count = 1;
                 while (running) {
                     while (dataMartWrapper.runOnce()) {
-            //            System.out.println("ran one");
+                        //            System.out.println("ran one");
                     }
                     if (dataMartWrapper.onIdle()) {
-        //                System.out.println("onIdle");
+                        //                System.out.println("onIdle");
+                        count = 1;
                     } else {
 //                        System.out.println("zzzz");
-                        Thread.sleep(20);
+                        Thread.sleep(Math.min(20, count++));
                     }
                 }
             } catch (Throwable e) {
