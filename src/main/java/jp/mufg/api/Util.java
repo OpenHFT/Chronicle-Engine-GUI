@@ -46,6 +46,20 @@ public enum Util {
         return subscription;
     }
 
+    static MarketDataUpdate newQuote(MarketDataUpdate update,
+                                     @NotNull String source, @NotNull String exchange,
+                                     @NotNull String instrument,
+                                     double bid, double ask, double bidq, double askq) {
+        update.setSource(source);
+        update.setExchange(exchange);
+        update.setInstrument(instrument);
+        update.setBid(bid);
+        update.setBidq(bidq);
+        update.setAsk(ask);
+        update.setAskq(askq);
+        return update;
+    }
+
     static MarketDataUpdate newQuote(@NotNull String source, @NotNull String exchange,
                                      @NotNull String instrument,
                                      double bid, double ask, double bidq, double askq) {

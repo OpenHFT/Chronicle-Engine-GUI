@@ -5,6 +5,7 @@ import jp.mufg.api.util.PrintAll;
 import net.openhft.chronicle.Chronicle;
 import net.openhft.chronicle.ChronicleQueueBuilder;
 import net.openhft.chronicle.tools.ChronicleTools;
+import net.openhft.lang.model.DataValueClasses;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -49,10 +50,11 @@ public class ChronicleDataMartWrapperTest {
         writer.addSubscription(newSubscription("target", "one", "source", "exchange", "instrument2"));
         writer.addSubscription(newSubscription("target", "two", "source", "exchange", "instrument3"));
         writer.addSubscription(newSubscription("target", "three", "source", "exchange", "instrument"));
+        MarketDataUpdate update = DataValueClasses.newInstance(MarketDataUpdate.class);
 
-        writer.onUpdate(newQuote("source", "exchange", "instrument", 10, 21, 10, 20));
-        writer.onUpdate(newQuote("source", "exchange", "instrument2", 13, 22, 10, 20));
-        writer.onUpdate(newQuote("source", "exchangeX", "instrument3", 16, 23, 10, 20));
+        writer.onUpdate(newQuote(update, "source", "exchange", "instrument", 10, 21, 10, 20));
+        writer.onUpdate(newQuote(update, "source", "exchange", "instrument2", 13, 22, 10, 20));
+        writer.onUpdate(newQuote(update, "source", "exchangeX", "instrument3", 16, 23, 10, 20));
 
         for (int i = 0; i < 3; i++) {
             while (dataMartWrapper.runOnce()/* |
