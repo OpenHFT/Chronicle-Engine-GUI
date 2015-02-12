@@ -15,8 +15,8 @@ public class DataMartEngine {
             try {
                 String name = "Engine-" + dataMartWrapper.getTarget();
                 Thread.currentThread().setName(name);
-                System.out.printf("Started after %.3f%n",
-                        (System.nanoTime() - started) / 1e9);
+                System.out.printf("%s: Started after %.3f%n",
+                        name, (System.nanoTime() - started) / 1e9);
                 dataMartWrapper.start();
                 while (running) {
                     while (dataMartWrapper.runOnce()) {
