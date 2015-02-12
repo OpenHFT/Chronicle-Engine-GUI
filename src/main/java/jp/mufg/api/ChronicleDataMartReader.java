@@ -6,7 +6,8 @@ import net.openhft.lang.model.DataValueClasses;
 import org.jetbrains.annotations.NotNull;
 
 public class ChronicleDataMartReader {
-    final MarketDataUpdate mdu = DataValueClasses.newInstance(MarketDataUpdate.class);
+    //TODO Reuse this object when ChronicleMap is used.
+//    final MarketDataUpdate mdu = DataValueClasses.newInstance(MarketDataUpdate.class);
     final Subscription sub = DataValueClasses.newInstance(Subscription.class);
     @NotNull
     private final DataMart instance;
@@ -45,6 +46,8 @@ public class ChronicleDataMartReader {
 
             //void onUpdate(MarketDataUpdate quote);
             case "onUpdate": {
+                //TODO Reuse this object when ChronicleMap is used.
+                MarketDataUpdate mdu = DataValueClasses.newInstance(MarketDataUpdate.class);
                 mdu.readMarshallable(tailer);
                 instance.onUpdate(mdu);
                 break;
