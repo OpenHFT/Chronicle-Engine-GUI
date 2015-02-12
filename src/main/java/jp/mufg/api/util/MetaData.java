@@ -6,7 +6,6 @@ import net.openhft.lang.io.Bytes;
 import net.openhft.lang.io.serialization.BytesMarshallable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -21,8 +20,7 @@ public class MetaData implements BytesMarshallable {
             return new MetaData();
         }
     };
-    static final Map<Chronicle, Byte> CHRONICLE_TO_ID =
-            Collections.synchronizedMap(new WeakHashMap<Chronicle, Byte>());
+    static volatile Map<Chronicle, Byte> CHRONICLE_TO_ID = new WeakHashMap<>();
     int timeCount = 0;
     @NotNull
     long[] times = new long[20];
@@ -36,8 +34,10 @@ public class MetaData implements BytesMarshallable {
         return META_DATA_THREAD_LOCAL.get();
     }
 
-    public static void setId(Chronicle c, byte id) {
-        CHRONICLE_TO_ID.put(c, id);
+    public static synchronized void setId(Chronicle c, byte id) {
+        Map<Chronicle, Byte> copy = new WeakHashMap<>(CHRONICLE_TO_ID);
+        copy.put(c, id);
+        CHRONICLE_TO_ID = copy;
     }
 
     @Override

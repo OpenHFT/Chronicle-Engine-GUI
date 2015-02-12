@@ -1,9 +1,10 @@
 package jp.mufg.api;
 
+import net.openhft.lang.io.serialization.BytesMarshallable;
 import net.openhft.lang.model.constraints.MaxSize;
 import org.jetbrains.annotations.NotNull;
 
-public interface MarketDataUpdate {
+public interface MarketDataUpdate extends BytesMarshallable {
     @NotNull
     public String getSource();
 

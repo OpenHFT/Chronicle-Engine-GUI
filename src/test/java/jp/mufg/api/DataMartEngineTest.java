@@ -1,6 +1,5 @@
 package jp.mufg.api;
 
-import jp.mufg.api.util.ToChronicle;
 import net.openhft.chronicle.Chronicle;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
@@ -53,7 +52,7 @@ public class DataMartEngineTest {
         Calculator calculator2 = createMock(Calculator.class);
         addCalculator("target2", engine, chronicle, calculator2);
 
-        DataMart writer = ToChronicle.of(DirectDataMart.class, chronicle);
+        DataMart writer = new ChronicleDataMartWriter(chronicle);
         writer.addSubscription(newSubscription("target", "one", "source", "exchange", "instrument2"));
         writer.addSubscription(newSubscription("target", "two", "source", "exchange", "instrument3"));
         writer.addSubscription(newSubscription("target", "three", "source", "exchange", "instrument"));
@@ -107,7 +106,7 @@ public class DataMartEngineTest {
 
         addCalculatorPerf("target2", engine, chronicle, calculator2);
 
-        DataMart writer = ToChronicle.of(DirectDataMart.class, chronicle);
+        DataMart writer = new ChronicleDataMartWriter(chronicle);
         for(int j=0; j<3; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 10_000_000; i += 3) {

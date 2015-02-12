@@ -1,6 +1,5 @@
 package jp.mufg.api;
 
-import jp.mufg.api.util.FromChronicle;
 import jp.mufg.api.util.PrintAll;
 import net.openhft.chronicle.Chronicle;
 import net.openhft.chronicle.ChronicleQueueBuilder;
@@ -12,7 +11,8 @@ public class ChronicleReader {
 
     public static void main(String... ignored) throws IOException, InterruptedException {
         Chronicle chronicle = ChronicleQueueBuilder.vanilla(CHRONICLE_BASE).build();
-        FromChronicle<DataMart> tailer = FromChronicle.of(PrintAll.of(DataMart.class), chronicle.createTailer());
+        ChronicleDataMartReader tailer = ChronicleDataMartReader.of(
+                PrintAll.of(DataMart.class), chronicle.createTailer());
         while (!Thread.interrupted()) {
             if (!tailer.readOne())
                 Thread.sleep(50);

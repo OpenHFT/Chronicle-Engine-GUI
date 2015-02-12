@@ -1,9 +1,10 @@
 package jp.mufg.api;
 
+import net.openhft.lang.io.serialization.BytesMarshallable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface Subscription {
+public interface Subscription extends BytesMarshallable {
     @NotNull
     String getTarget();
 

@@ -1,7 +1,5 @@
 package jp.mufg.api;
 
-import jp.mufg.api.util.FromChronicle;
-import jp.mufg.api.util.ToChronicle;
 import net.openhft.chronicle.Chronicle;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,12 +10,12 @@ public class ChronicleDataMartWrapper implements DataMartWrapper {
     private final DataMart writer;
     private final DirectDataMart dataMart;
     private final Chronicle chronicle;
-    private FromChronicle<DataMart> reader;
+    private ChronicleDataMartReader reader;
 
     public ChronicleDataMartWrapper(Chronicle chronicle,
                                     DirectDataMart dataMart) throws IOException {
         this.chronicle = chronicle;
-        writer = ToChronicle.of(DirectDataMart.class, chronicle);
+        writer = new ChronicleDataMartWriter(chronicle);
         this.dataMart = dataMart;
     }
 
@@ -35,7 +33,7 @@ public class ChronicleDataMartWrapper implements DataMartWrapper {
     public boolean runOnce() {
         try {
             if (reader == null)
-                reader = FromChronicle.of(dataMart, chronicle.createTailer());
+                reader = ChronicleDataMartReader.of(dataMart, chronicle.createTailer());
             return reader.readOne();
         } catch (IOException e) {
             throw new AssertionError(e);

@@ -1,7 +1,6 @@
 package jp.mufg.api;
 
 import jp.mufg.api.util.MetaData;
-import jp.mufg.api.util.ToChronicle;
 import net.openhft.chronicle.Chronicle;
 import net.openhft.chronicle.ChronicleQueueBuilder;
 
@@ -23,7 +22,7 @@ public class EngineMain {
         Map<SourceExchangeInstrument, MarketDataUpdate> mduMap = new HashMap<>();
         Map<SubscriptionKey, Subscription> subMap = new HashMap<>();
 
-        DataMart writer = ToChronicle.of(DataMart.class, chronicle);
+        DataMart writer = new ChronicleDataMartWriter(chronicle);
         BootstrapDataMart bootstrap = new BootstrapDataMart(mduMap, subMap, writer);
         engine.add(new ChronicleDataMartWrapper(chronicle, bootstrap));
 

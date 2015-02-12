@@ -2,7 +2,6 @@ package jp.mufg.api;
 
 import jp.mufg.api.util.MetaData;
 import jp.mufg.api.util.PrintAll;
-import jp.mufg.api.util.ToChronicle;
 import net.openhft.chronicle.Chronicle;
 import net.openhft.chronicle.ChronicleQueueBuilder;
 import net.openhft.chronicle.tools.ChronicleTools;
@@ -46,7 +45,7 @@ public class ChronicleDataMartWrapperTest {
 //        ChronicleDataMart chronicleDataMart2 = new ChronicleDataMart(chronicle,
 //                PrintAll.of(DataMart.class, new FilteringDataMart("target", marketDataMap, calculator)));
 
-        DataMart writer = ToChronicle.of(DirectDataMart.class, chronicle);
+        DataMart writer = new ChronicleDataMartWriter(chronicle);
         writer.addSubscription(newSubscription("target", "one", "source", "exchange", "instrument2"));
         writer.addSubscription(newSubscription("target", "two", "source", "exchange", "instrument3"));
         writer.addSubscription(newSubscription("target", "three", "source", "exchange", "instrument"));
