@@ -26,7 +26,7 @@ public class DataMartEngine {
         //                System.out.println("onIdle");
                     } else {
 //                        System.out.println("zzzz");
-                        Thread.sleep(10);
+                        Thread.sleep(20);
                     }
                 }
             } catch (Throwable e) {

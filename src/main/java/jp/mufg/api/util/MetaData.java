@@ -42,40 +42,63 @@ public class MetaData implements BytesMarshallable {
 
     @Override
     public void readMarshallable(@NotNull Bytes bytes) throws IllegalStateException {
-        BytesUtils.readBounded(bytes, b -> {
-            timeCount = (int) bytes.readStopBit();
-            for (int i = 0; i < timeCount; i++) {
-                times[i] = bytes.readLong();
-            }
-            times[timeCount++] = System.nanoTime();
-            sourceCount = (int) bytes.readStopBit();
-            bytes.read(sourceIds, 0, sourceCount);
-            for (int i = 0; i < sourceCount; i++)
-                sources[i] = bytes.readLong();
-            if (bytes instanceof ExcerptCommon) {
-                ExcerptCommon excerpt = (ExcerptCommon) bytes;
-                Byte id = CHRONICLE_TO_ID.get(excerpt.chronicle());
-                sourceIds[sourceCount] = id == null ? (byte) -1 : id;
-                sources[sourceCount++] = excerpt.index();
-            }
-        });
+        // support future schema changes by length.
+        int length = bytes.readUnsignedShort();
+        long limit = bytes.limit();
+        long limit2 = bytes.position() + length;
+        assert limit2 <= limit;
+        // TODO doesn't work due to JLANG-51
+//        bytes.limit(limit2);
+        try {
+            readMarshallable0(bytes);
+            assert bytes.position() <= limit2;
+        } finally {
+            bytes.limit(limit);
+            bytes.position(limit2);
+        }
+    }
+
+    private void readMarshallable0(Bytes bytes) {
+        timeCount = (int) bytes.readStopBit();
+        for (int i = 0; i < timeCount; i++) {
+            times[i] = bytes.readLong();
+        }
+        times[timeCount++] = System.nanoTime();
+        sourceCount = (int) bytes.readStopBit();
+        bytes.read(sourceIds, 0, sourceCount);
+        for (int i = 0; i < sourceCount; i++)
+            sources[i] = bytes.readLong();
+        if (bytes instanceof ExcerptCommon) {
+            ExcerptCommon excerpt = (ExcerptCommon) bytes;
+            Byte id = CHRONICLE_TO_ID.get(excerpt.chronicle());
+            sourceIds[sourceCount] = id == null ? (byte) -1 : id;
+            sources[sourceCount++] = excerpt.index();
+        }
     }
 
     @Override
     public void writeMarshallable(@NotNull Bytes bytes) {
-        BytesUtils.writeBounded(bytes, b -> {
-            b.writeStopBit(timeCount + 1);
-            for (int i = 0; i < timeCount; i++) {
-                b.writeLong(times[i]);
-            }
-            b.writeLong(System.nanoTime());
+        long position = bytes.position();
+        bytes.writeUnsignedShort(0);
 
-            b.writeStopBit(sourceCount);
-            b.write(sourceIds, 0, sourceCount);
-            for (int i = 0; i < sourceCount; i++) {
-                b.writeLong(sources[i]);
+
+        bytes.writeStopBit(timeCount + 1);
+            for (int i = 0; i < timeCount; i++) {
+                bytes.writeLong(times[i]);
             }
-        });
+        bytes.writeLong(System.nanoTime());
+
+        bytes.writeStopBit(sourceCount);
+        bytes.write(sourceIds, 0, sourceCount);
+            for (int i = 0; i < sourceCount; i++) {
+                bytes.writeLong(sources[i]);
+            }
+
+
+        long length = bytes.position() - position - 2;
+        if (length >= 1 << 16)
+            throw new AssertionError("length: " + length);
+        bytes.writeUnsignedShort(position, (int) length);
     }
 
     @NotNull
