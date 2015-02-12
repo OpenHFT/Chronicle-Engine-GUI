@@ -17,7 +17,7 @@ import static jp.mufg.api.Util.newQuote;
 import static jp.mufg.api.Util.newSubscription;
 import static org.easymock.EasyMock.*;
 
-public class ChronicleDataMartTest {
+public class ChronicleDataMartWrapperTest {
     @NotNull
     static Chronicle createChronicle(String name) throws IOException {
         String basePath = name + "-" + System.nanoTime();
@@ -39,7 +39,7 @@ public class ChronicleDataMartTest {
 
         FilteringDataMart fdm = new FilteringDataMart("target",
                 marketDataMap, calculator);
-        DataMartWrapper dataMartWrapper = new ChronicleDataMart(
+        DataMartWrapper dataMartWrapper = new ChronicleDataMartWrapper(
                 chronicle,
                 PrintAll.of(DirectDataMart.class, fdm));
 

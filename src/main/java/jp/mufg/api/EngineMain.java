@@ -25,13 +25,13 @@ public class EngineMain {
 
         DataMart writer = ToChronicle.of(DataMart.class, chronicle);
         BootstrapDataMart bootstrap = new BootstrapDataMart(mduMap, subMap, writer);
-        engine.add(new ChronicleDataMart(chronicle, bootstrap));
+        engine.add(new ChronicleDataMartWrapper(chronicle, bootstrap));
 
         for (String name : CALCULATORS.split(",")) {
             Calculator calculator = (Calculator) Class.forName(name)
                     .newInstance();
             DirectDataMart dataMart = new FilteringDataMart(TARGET, new HashMap<>(), calculator);
-            engine.add(new ChronicleDataMart(chronicle, dataMart));
+            engine.add(new ChronicleDataMartWrapper(chronicle, dataMart));
         }
     }
 }

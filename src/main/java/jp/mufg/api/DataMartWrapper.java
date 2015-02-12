@@ -6,4 +6,8 @@ public interface DataMartWrapper {
     boolean onIdle();
 
     String getTarget();
+
+    void start();
+
+    void stop();
 }

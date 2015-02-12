@@ -7,18 +7,28 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
-public class ChronicleDataMart implements DataMartWrapper {
+public class ChronicleDataMartWrapper implements DataMartWrapper {
     @NotNull
     private final DataMart writer;
     private final DirectDataMart dataMart;
     private final Chronicle chronicle;
     private FromChronicle<DataMart> reader;
 
-    public ChronicleDataMart(Chronicle chronicle,
-                             DirectDataMart dataMart) throws IOException {
+    public ChronicleDataMartWrapper(Chronicle chronicle,
+                                    DirectDataMart dataMart) throws IOException {
         this.chronicle = chronicle;
         writer = ToChronicle.of(DirectDataMart.class, chronicle);
         this.dataMart = dataMart;
+    }
+
+    @Override
+    public void start() {
+        writer.startup(getTarget());
+    }
+
+    @Override
+    public void stop() {
+        writer.stopped(getTarget());
     }
 
     @Override

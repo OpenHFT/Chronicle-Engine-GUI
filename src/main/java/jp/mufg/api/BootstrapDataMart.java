@@ -39,17 +39,20 @@ public class BootstrapDataMart implements DirectDataMart {
 
     @Override
     public void onUpdate(MarketDataUpdate quote) {
-        mduMap.put(Util.seiFrom(quote), quote);
+        // ignore our retransmitted updates
+        if (!quote.getRetransmit())
+            mduMap.put(Util.seiFrom(quote), quote);
     }
 
     @Override
     public void addSubscription(Subscription subscription) {
+        subMap.put(Util.keyFor(subscription), subscription);
+
         MarketDataUpdate mdu = mduMap.get(Util.seiFrom(subscription));
         if (mdu == null)
             return;
         mdu.setRetransmit(true);
         writer.onUpdate(mdu);
-        subMap.put(Util.keyFor(subscription), subscription);
     }
 
     @Override

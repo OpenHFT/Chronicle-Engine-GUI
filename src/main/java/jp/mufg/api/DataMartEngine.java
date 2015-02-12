@@ -17,6 +17,7 @@ public class DataMartEngine {
                 Thread.currentThread().setName(name);
                 System.out.printf("Started after %.3f%n",
                         (System.nanoTime() - started) / 1e9);
+                dataMartWrapper.start();
                 while (running) {
                     while (dataMartWrapper.runOnce()) {
                         System.out.println("ran one");
@@ -30,6 +31,8 @@ public class DataMartEngine {
                 }
             } catch (Throwable e) {
                 e.printStackTrace();
+            } finally {
+                dataMartWrapper.stop();
             }
         });
     }

@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static jp.mufg.api.ChronicleDataMartTest.createChronicle;
+import static jp.mufg.api.ChronicleDataMartWrapperTest.createChronicle;
 import static jp.mufg.api.Util.newQuote;
 import static jp.mufg.api.Util.newSubscription;
 import static org.easymock.EasyMock.*;
@@ -25,7 +25,7 @@ public class DataMartEngineTest {
         FilteringDataMart fdm = new FilteringDataMart(target,
                 marketDataMap, calculator);
         DirectDataMart dataMart = fdm; //PrintAll.of(DirectDataMart.class, fdm);
-        engine.add(new ChronicleDataMart(chronicle, dataMart));
+        engine.add(new ChronicleDataMartWrapper(chronicle, dataMart));
     }
 
     @Test
