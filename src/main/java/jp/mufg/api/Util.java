@@ -60,4 +60,10 @@ public enum Util {
         return update;
     }
 
+    public static SourceExchangeInstrument copyTo(MarketDataUpdate quote, SourceExchangeInstrument sei) {
+        sei.setSource(quote.getSource());
+        sei.setInstrument(quote.getInstrument());
+        sei.setExchange(quote.getExchange());
+        return sei;
+    }
 }

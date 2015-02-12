@@ -3,6 +3,7 @@ package jp.mufg.api;
 import jp.mufg.api.util.ToChronicle;
 import net.openhft.chronicle.Chronicle;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -80,6 +81,7 @@ public class DataMartEngineTest {
     }
 
     @Test
+    @Ignore("long running test")
     public void testAddPerf() throws Exception {
         DataMartEngine engine = new DataMartEngine();
 
@@ -108,7 +110,7 @@ public class DataMartEngineTest {
         DataMart writer = ToChronicle.of(DirectDataMart.class, chronicle);
         for(int j=0; j<3; j++) {
             long start = System.currentTimeMillis();
-            for (int i = 0; i < 1_000_000; i += 3) {
+            for (int i = 0; i < 10_000_000; i += 3) {
                 if (i % 1000 == 0) {
                     writer.addSubscription(newSubscription("target", "one", "source", "exchange", "instrument2"));
                     writer.addSubscription(newSubscription("target", "two", "source", "exchange", "instrument3"));

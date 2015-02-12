@@ -1,5 +1,6 @@
 package jp.mufg.api;
 
+import net.openhft.lang.model.DataValueClasses;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +29,7 @@ public class FilteringDataMart implements DirectDataMart {
         return target;
     }
 
+    final SourceExchangeInstrument tmpSEI = DataValueClasses.newInstance(SourceExchangeInstrument.class);
     @Override
     public void onUpdate(@NotNull MarketDataUpdate quote) {
         SourceExchangeInstrument sei = Util.seiFrom(quote);
