@@ -16,9 +16,9 @@ public class CountersMapTest {
         {
             CountersMap cm = new CountersMap(file);
             LongValue one = cm.acquireCounter("one");
-            one.addAtomicValue(1);
+            one.setOrderedValue(1);
             LongValue two = cm.acquireCounter("two");
-            two.addAtomicValue(10);
+            two.setOrderedValue(10);
             cm.close();
         }
         {

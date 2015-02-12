@@ -15,7 +15,7 @@ public class CountersMap {
                 .of(String.class, LongValue.class)
                 .actualSegments(1)
                 .averageKeySize(16)
-                .entries(100)
+                .entries(256)
                 .createPersistedTo(new File(fileName));
     }
 
