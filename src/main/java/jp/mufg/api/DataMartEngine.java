@@ -20,10 +20,10 @@ public class DataMartEngine {
                 dataMartWrapper.start();
                 while (running) {
                     while (dataMartWrapper.runOnce()) {
-                        System.out.println("ran one");
+            //            System.out.println("ran one");
                     }
                     if (dataMartWrapper.onIdle()) {
-                        System.out.println("onIdle");
+        //                System.out.println("onIdle");
                     } else {
 //                        System.out.println("zzzz");
                         Thread.sleep(10);
