@@ -25,7 +25,7 @@ public class MapTestProgram
 
 
         //This seems to work, presumably because values are of the same type?
-//        runMapWriteReadWithStrings();
+//        runMapWriteReadWithString();
 
 
         //This seems to work, presumably because values are of the same type?
@@ -33,11 +33,11 @@ public class MapTestProgram
 
 
         //This works just fine
-//        runMapAsMethodParamNotInObjectStringDouble();
+//        runMapAsMethodParamStringDouble();
 
 
         //This works just fine
-        runMapAsMethodParamNotInObjectStringObject();
+        runMapAsMethodParamStringObject();
     }
 
     //This fails because the DataValueClasses.newInstance cannot create a class which has map or collection. Is this by design?
@@ -110,7 +110,7 @@ public class MapTestProgram
     }
 
     //This seems to work, presumably because values are of the same type?
-    private static void runMapWriteReadWithStrings()
+    private static void runMapWriteReadWithString()
     {
         try
         {
@@ -184,7 +184,7 @@ public class MapTestProgram
     }
 
     //This works just fine
-    private static void runMapAsMethodParamNotInObjectStringDouble()
+    private static void runMapAsMethodParamStringDouble()
     {
         try
         {
@@ -213,7 +213,7 @@ public class MapTestProgram
     }
 
     //This works just fine
-    private static void runMapAsMethodParamNotInObjectStringObject()
+    private static void runMapAsMethodParamStringObject()
     {
         try
         {
