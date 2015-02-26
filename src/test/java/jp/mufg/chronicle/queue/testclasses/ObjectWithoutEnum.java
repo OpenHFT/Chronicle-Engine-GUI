@@ -1,4 +1,4 @@
-package jp.mufg.examples.objectSerializationExamples;
+package jp.mufg.chronicle.queue.testclasses;
 
 import java.io.*;
 
