@@ -1,5 +1,7 @@
 package jp.mufg.examples.objectSerializationExamples;
 
+import java.util.*;
+
 /**
  * Created by daniels on 26/02/2015.
  */
@@ -38,5 +40,21 @@ public class EnumTestImpl implements EnumTest
     {
         System.out.println("writeObjectWithEnumExternalizable");
         System.out.println(objectWithEnumExternalizable);
+    }
+
+    @Override
+    public void writeObjectWithEnumExternalizableAndStringObjectMap(ObjectWithEnumExternalizable objectWithEnumExternalizable, Map<String, Object> stringObjectMap)
+    {
+        System.out.println("writeObjectWithEnumExternalizableAndStringObjectMap");
+        System.out.println(objectWithEnumExternalizable);
+        System.out.println(stringObjectMap);
+    }
+
+    @Override
+    public void writeObjectWithEnumExternalizableAndEnumObjectMap(ObjectWithEnumExternalizable objectWithEnumExternalizable, Map<TestEnum, Object> enumObjectMap)
+    {
+        System.out.println("writeObjectWithEnumExternalizableAndStringObjectMap");
+        System.out.println(objectWithEnumExternalizable);
+        System.out.println(enumObjectMap);
     }
 }

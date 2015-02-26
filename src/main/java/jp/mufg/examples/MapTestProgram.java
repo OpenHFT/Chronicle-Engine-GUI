@@ -1,5 +1,6 @@
 package jp.mufg.examples;
 
+import com.sun.tools.javac.util.*;
 import jp.mufg.api.util.*;
 import net.openhft.chronicle.*;
 import net.openhft.chronicle.tools.*;
@@ -32,15 +33,15 @@ public class MapTestProgram
 //        runMapWriteReadWithDouble();
 
 
-        //This works just fine
+        //This writes the event to the queue twice
 //        runMapAsMethodParamStringDouble();
 
 
+        //This writes the event to the queue twice
+        runMapAsMethodParamStringObject();
+
         //This works just fine
-//        runMapAsMethodParamStringObject();
-
-
-        runMapAsMethodParamEnumObject();
+//        runMapAsMethodParamEnumObject();
     }
 
     //This fails because the DataValueClasses.newInstance cannot create a class which has map or collection. Is this by design?
@@ -208,7 +209,9 @@ public class MapTestProgram
             writer.onMarketDataUpdateMapStringDouble("TestString - Map<String, Double>", mapStringDouble);
 
             //This should read the onMarketDataUpdateMapStringDouble with string and map
-            reader.readOne();
+            Assert.check(reader.readOne());
+            Assert.check(!reader.readOne());
+            Assert.check(!reader.readOne());
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -237,7 +240,10 @@ public class MapTestProgram
             writer.onMarketDataUpdateMapStringObject("TestString - Map<String, Double>", mapStringObject);
 
             //This should read the onMarketDataUpdateMapStringDouble with string and map
-            reader.readOne();
+            //Read from queue
+            Assert.check(reader.readOne());
+            Assert.check(!reader.readOne());
+            Assert.check(!reader.readOne());
         } catch (IOException e)
         {
             e.printStackTrace();

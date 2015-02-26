@@ -8,6 +8,7 @@ import net.openhft.chronicle.tools.*;
 import net.openhft.lang.model.*;
 
 import java.io.*;
+import java.util.*;
 
 /**
  * Created by daniels on 26/02/2015.
@@ -17,7 +18,7 @@ public class Run
     public static void main(String[] args)
     {
         //This writes two objects to the queue for some reason
-        runObjectWithEnumExample();
+//        runObjectWithEnumExample();
 
         //This writes two objects to the queue for some reason
 //        runObjectWithoutEnumExample();
@@ -28,8 +29,17 @@ public class Run
         //This only writes one object to the queue as expected
 //        runObjectWithoutEnumExternalizable();
 
+        //This only writes one object to the queue as expected
 //        runObjectWithEnumExternalizable();
 
+
+        //Having an Externalizable object and a map as arguments
+
+        //This writes two objects to the queue for some reason
+//        runObjectWithEnumExternalizableAndStringObjectMap();
+
+        //This writes two objects to the queue for some reason
+        runObjectWithEnumExternalizableAndEnumObjectMap();
     }
 
     private static void runObjectWithEnumExample()
@@ -49,10 +59,10 @@ public class Run
             objectWithEnum.setSomeString("some random string");
             objectWithEnum.setTestEnum(TestEnum.TEST1);
 
-            //Put a MapMarketDataUpdate on the queue
+            //Put on queue
             writer.writeObjectWithEnum(objectWithEnum);
 
-            //This should read the MapMarketDataUpdate from the queue and call the implementation
+            //Read from queue
             Assert.check(reader.readOne());
             Assert.check(!reader.readOne());
             Assert.check(!reader.readOne());
@@ -82,10 +92,10 @@ public class Run
             objectWithoutEnum.setSomeDouble(1.0);
             objectWithoutEnum.setSomeInt(42);
 
-            //Put a MapMarketDataUpdate on the queue
+            //Put on queue
             writer.writeObjectWithoutEnum(objectWithoutEnum);
 
-            //This should read the MapMarketDataUpdate from the queue and call the implementation
+            //Read from queue
             Assert.check(reader.readOne());
             Assert.check(!reader.readOne());
             Assert.check(!reader.readOne());
@@ -114,10 +124,10 @@ public class Run
             objectWithoutEnumDataValueClass.setSomeDouble(1.0);
             objectWithoutEnumDataValueClass.setSomeInt(42);
 
-            //Put a MapMarketDataUpdate on the queue
+            //Put on queue
             writer.writeObjectWithoutEnumDataValueClass(objectWithoutEnumDataValueClass);
 
-            //This should read the MapMarketDataUpdate from the queue and call the implementation
+            //Read from queue
             Assert.check(reader.readOne());
             Assert.check(!reader.readOne());
             Assert.check(!reader.readOne());
@@ -146,10 +156,10 @@ public class Run
             objectWithoutEnumExternalizable.setSomeDouble(1.0);
             objectWithoutEnumExternalizable.setSomeInt(42);
 
-            //Put a MapMarketDataUpdate on the queue
+            //Put on queue
             writer.writeObjectWithoutEnumExternalizable(objectWithoutEnumExternalizable);
 
-            //This should read the MapMarketDataUpdate from the queue and call the implementation
+            //Read from queue
             Assert.check(reader.readOne());
             Assert.check(!reader.readOne());
             Assert.check(!reader.readOne());
@@ -177,10 +187,80 @@ public class Run
             objectWithEnumExternalizable.setSomeString("some random string");
             objectWithEnumExternalizable.setTestEnum(TestEnum.RANDOM);
 
-            //Put a MapMarketDataUpdate on the queue
+            //Put on queue
             writer.writeObjectWithEnumExternalizable(objectWithEnumExternalizable);
 
-            //This should read the MapMarketDataUpdate from the queue and call the implementation
+            //Read from queue
+            Assert.check(reader.readOne());
+            Assert.check(!reader.readOne());
+            Assert.check(!reader.readOne());
+
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private static void runObjectWithEnumExternalizableAndStringObjectMap()
+    {
+        try
+        {
+            String chronicleQueueBase = "C:\\LocalFolder\\Chronicle\\data";
+            Chronicle chronicle = ChronicleQueueBuilder.vanilla(chronicleQueueBase).build();
+            ChronicleTools.deleteDirOnExit(chronicleQueueBase);
+
+            EnumTestImpl enumTest = new EnumTestImpl();
+
+            EnumTest writer = ToChronicle.of(EnumTest.class, chronicle);
+            FromChronicle<EnumTestImpl> reader = FromChronicle.of(enumTest, chronicle.createTailer());
+
+            ObjectWithEnumExternalizable objectWithEnumExternalizable = new ObjectWithEnumExternalizable();
+            objectWithEnumExternalizable.setSomeString("some random string");
+            objectWithEnumExternalizable.setTestEnum(TestEnum.RANDOM);
+
+            Map<String, Object> stringObjectMap = new HashMap<>();
+            stringObjectMap.put("String1", "newString");
+            stringObjectMap.put("Double1", 2.0);
+
+            //Put on queue
+            writer.writeObjectWithEnumExternalizableAndStringObjectMap(objectWithEnumExternalizable, stringObjectMap);
+
+            //Read from queue
+            Assert.check(reader.readOne());
+            Assert.check(!reader.readOne());
+            Assert.check(!reader.readOne());
+
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private static void runObjectWithEnumExternalizableAndEnumObjectMap()
+    {
+        try
+        {
+            String chronicleQueueBase = "C:\\LocalFolder\\Chronicle\\data";
+            Chronicle chronicle = ChronicleQueueBuilder.vanilla(chronicleQueueBase).build();
+            ChronicleTools.deleteDirOnExit(chronicleQueueBase);
+
+            EnumTestImpl enumTest = new EnumTestImpl();
+
+            EnumTest writer = ToChronicle.of(EnumTest.class, chronicle);
+            FromChronicle<EnumTestImpl> reader = FromChronicle.of(enumTest, chronicle.createTailer());
+
+            ObjectWithEnumExternalizable objectWithEnumExternalizable = new ObjectWithEnumExternalizable();
+            objectWithEnumExternalizable.setSomeString("some random string");
+            objectWithEnumExternalizable.setTestEnum(TestEnum.RANDOM);
+
+            Map<TestEnum, Object> enumObjectMap = new HashMap<>();
+            enumObjectMap.put(TestEnum.RANDOM, "StringValue");
+            enumObjectMap.put(TestEnum.TEST2, 2.1);
+
+            //Put on queue
+            writer.writeObjectWithEnumExternalizableAndEnumObjectMap(objectWithEnumExternalizable, enumObjectMap);
+
+            //Read from queue
             Assert.check(reader.readOne());
             Assert.check(!reader.readOne());
             Assert.check(!reader.readOne());
