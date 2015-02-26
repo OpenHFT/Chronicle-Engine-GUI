@@ -4,6 +4,7 @@ import jp.mufg.api.util.*;
 import net.openhft.chronicle.*;
 import net.openhft.chronicle.tools.*;
 import net.openhft.lang.model.*;
+import org.junit.Assert;
 
 import java.io.*;
 import java.util.*;
@@ -31,13 +32,13 @@ public class Run
         runObjectWithoutEnumExternalizable();
 
         //This only writes one object to the queue as expected
-//        runObjectWithEnumExternalizable();
+        runObjectWithEnumExternalizable();
 
 
         //Having an Externalizable object and a map as arguments
 
         //This writes two objects to the queue for some reason
-//        runObjectWithEnumExternalizableAndStringObjectMap();
+        runObjectWithEnumExternalizableAndStringObjectMap();
 
         //This writes two objects to the queue for some reason
         runObjectWithEnumExternalizableAndEnumObjectMap();
@@ -228,9 +229,9 @@ public class Run
             writer.writeObjectWithEnumExternalizableAndStringObjectMap(objectWithEnumExternalizable, stringObjectMap);
 
             //Read from queue
-            Assert.check(reader.readOne());
-            Assert.check(!reader.readOne());
-            Assert.check(!reader.readOne());
+            assertTrue(reader.readOne());
+            assertFalse(reader.readOne());
+            assertFalse(reader.readOne());
 
         } catch (IOException e)
         {
@@ -263,9 +264,9 @@ public class Run
             writer.writeObjectWithEnumExternalizableAndEnumObjectMap(objectWithEnumExternalizable, enumObjectMap);
 
             //Read from queue
-            Assert.check(reader.readOne());
-            Assert.check(!reader.readOne());
-            Assert.check(!reader.readOne());
+            assertTrue(reader.readOne());
+            assertFalse(reader.readOne());
+            assertFalse(reader.readOne());
 
         } catch (IOException e)
         {
