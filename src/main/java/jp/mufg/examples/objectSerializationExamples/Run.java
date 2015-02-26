@@ -1,7 +1,8 @@
-package jp.mufg.examples.ObjectWithEnumExamples;
+package jp.mufg.examples.objectSerializationExamples;
 
 import com.sun.tools.javac.util.*;
 import jp.mufg.api.util.*;
+import jp.mufg.examples.objectSerializationExamples.*;
 import net.openhft.chronicle.*;
 import net.openhft.chronicle.tools.*;
 import net.openhft.lang.model.*;

@@ -1,4 +1,4 @@
-package jp.mufg.examples.ObjectWithEnumExamples;
+package jp.mufg.examples.objectSerializationExamples;
 
 import java.io.*;
 
