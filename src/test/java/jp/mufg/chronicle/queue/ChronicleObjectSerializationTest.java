@@ -37,6 +37,7 @@ public class ChronicleObjectSerializationTest
     @After
     public void tearDown() throws Exception
     {
+        ChronicleTools.deleteDirOnExit(chronicleQueueBase);
 
     }
 
