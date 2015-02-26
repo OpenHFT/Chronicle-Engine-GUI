@@ -33,4 +33,12 @@ public class ChronicleMapTesterImpl implements ChronicleMapTester
         System.out.println("onMarketDataUpdateMapStringObject string: " + someString);
         System.out.println("onMarketDataUpdateMapStringObject Map: " + map);
     }
+
+    @Override
+    public void onMarketDataUpdateMapEnumObject(String someString, Map<Enum, Object> map)
+    {
+        System.out.println("Received onMarketDataUpdateMapEnumObject");
+        System.out.println("onMarketDataUpdateMapEnumObject string: " + someString);
+        System.out.println("onMarketDataUpdateMapEnumObject Map: " + map);
+    }
 }

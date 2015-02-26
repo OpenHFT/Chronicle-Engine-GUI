@@ -14,4 +14,6 @@ public interface ChronicleMapTester
     void onMarketDataUpdateMapStringDouble(String someString, Map<String, Double> map);
 
     void onMarketDataUpdateMapStringObject(String someString, Map<String, Object> map);
+
+    void onMarketDataUpdateMapEnumObject(String someString, Map<Enum, Object> map);
 }

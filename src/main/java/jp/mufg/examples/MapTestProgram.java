@@ -37,7 +37,10 @@ public class MapTestProgram
 
 
         //This works just fine
-        runMapAsMethodParamStringObject();
+//        runMapAsMethodParamStringObject();
+
+
+        runMapAsMethodParamEnumObject();
     }
 
     //This fails because the DataValueClasses.newInstance cannot create a class which has map or collection. Is this by design?
@@ -239,5 +242,40 @@ public class MapTestProgram
         {
             e.printStackTrace();
         }
+    }
+
+    private static void runMapAsMethodParamEnumObject()
+    {
+        try
+        {
+            String chronicleQueueBase = "C:\\LocalFolder\\Chronicle\\data";
+            Chronicle chronicle = ChronicleQueueBuilder.vanilla(chronicleQueueBase).build();
+            ChronicleTools.deleteDirOnExit(chronicleQueueBase);
+
+            ChronicleMapTesterImpl chronicleMapTesterImpl = new ChronicleMapTesterImpl();
+
+            ChronicleMapTester writer = ToChronicle.of(ChronicleMapTester.class, chronicle);
+            FromChronicle<ChronicleMapTesterImpl> reader = FromChronicle.of(chronicleMapTesterImpl, chronicle.createTailer());
+
+            //Call method that has a map as param
+            Map<Enum, Object> mapEnumObject = new HashMap<Enum, Object>();
+            mapEnumObject.put(TestEnum.SELECT1, 1.0);
+            mapEnumObject.put(TestEnum.RANDOMSELECTION, "valueString");
+
+            writer.onMarketDataUpdateMapEnumObject("TestString - Map<Enum, Double>", mapEnumObject);
+
+            //This should read the onMarketDataUpdateMapStringDouble with string and map
+            reader.readOne();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private enum TestEnum
+    {
+        SELECT1,
+        SELECT2,
+        RANDOMSELECTION
     }
 }
