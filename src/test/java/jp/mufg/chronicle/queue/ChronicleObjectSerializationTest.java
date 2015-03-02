@@ -6,12 +6,9 @@ import net.openhft.chronicle.*;
 import net.openhft.chronicle.tools.*;
 import net.openhft.lang.model.*;
 import org.junit.*;
-import org.junit.Assert;
 
 import java.io.*;
 import java.util.*;
-
-import static org.junit.Assert.*;
 
 public class ChronicleObjectSerializationTest
 {
@@ -235,31 +232,31 @@ public class ChronicleObjectSerializationTest
     }
 
     @Test
-     public void testWriteReadStringStringMapStraightToFromQueue() throws IOException
-{
-    ExcerptAppender appender = chronicle.createAppender();
-    appender.startExcerpt();
+    public void testWriteReadStringStringMapStraightToFromQueue() throws IOException
+    {
+        ExcerptAppender appender = chronicle.createAppender();
+        appender.startExcerpt();
 
-    Map<String, String> putMap = new HashMap<String, String>();
-    putMap.put("TestKey", "TestValue");
-    putMap.put("TestKey2", "sdsd");
+        Map<String, String> putMap = new HashMap<String, String>();
+        putMap.put("TestKey", "TestValue");
+        putMap.put("TestKey2", "sdsd");
 
-    appender.writeMap(putMap);
+        appender.writeMap(putMap);
 
-    appender.finish();
+        appender.finish();
 
-    ExcerptTailer tailer = chronicle.createTailer();
+        ExcerptTailer tailer = chronicle.createTailer();
 
-    Map<String, String> newMap = new HashMap<String, String>();
+        Map<String, String> newMap = new HashMap<String, String>();
 
-    Assert.assertTrue(tailer.nextIndex());
+        Assert.assertTrue(tailer.nextIndex());
 
-    tailer.readMap(newMap, String.class, String.class);
+        tailer.readMap(newMap, String.class, String.class);
 
-    Assert.assertEquals(putMap, newMap);
+        Assert.assertEquals(putMap, newMap);
 
-    Assert.assertFalse(tailer.nextIndex());
-}
+        Assert.assertFalse(tailer.nextIndex());
+    }
 
     @Test
     public void testWriteReadStringDoubleMapStraightToFromQueue() throws IOException
@@ -287,7 +284,6 @@ public class ChronicleObjectSerializationTest
 
         Assert.assertFalse(tailer.nextIndex());
     }
-
 
 
 //    @Test
