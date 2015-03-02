@@ -186,7 +186,7 @@ public class ChronicleObjectSerializationTest
     }
 
     @Test
-    public void testDataValueClassWithStringAndStringDoubleMap()
+    public void testDataValueClassWithEnumAndObjectMap()
     {
         Map<TestEnum, Object> enumObjectMap = new HashMap<>();
         enumObjectMap.put(TestEnum.RANDOM, "StringValue");
@@ -215,7 +215,7 @@ public class ChronicleObjectSerializationTest
 
         Map<String, Object> putMap = new HashMap<String, Object>();
         putMap.put("TestKey", "TestValue");
-        putMap.put("TestKey2", "sdsd");
+        putMap.put("TestKey2", 1.0);
 
         appender.writeMap(putMap);
 
@@ -235,31 +235,31 @@ public class ChronicleObjectSerializationTest
     }
 
     @Test
-    public void testWriteReadStringStringMapStraightToFromQueue() throws IOException
-    {
-        ExcerptAppender appender = chronicle.createAppender();
-        appender.startExcerpt();
+     public void testWriteReadStringStringMapStraightToFromQueue() throws IOException
+{
+    ExcerptAppender appender = chronicle.createAppender();
+    appender.startExcerpt();
 
-        Map<String, String> putMap = new HashMap<String, String>();
-        putMap.put("TestKey", "TestValue");
-        putMap.put("TestKey2", "sdsd");
+    Map<String, String> putMap = new HashMap<String, String>();
+    putMap.put("TestKey", "TestValue");
+    putMap.put("TestKey2", "sdsd");
 
-        appender.writeMap(putMap);
+    appender.writeMap(putMap);
 
-        appender.finish();
+    appender.finish();
 
-        ExcerptTailer tailer = chronicle.createTailer();
+    ExcerptTailer tailer = chronicle.createTailer();
 
-        Map<String, String> newMap = new HashMap<String, String>();
+    Map<String, String> newMap = new HashMap<String, String>();
 
-        Assert.assertTrue(tailer.nextIndex());
+    Assert.assertTrue(tailer.nextIndex());
 
-        tailer.readMap(newMap, String.class, String.class);
+    tailer.readMap(newMap, String.class, String.class);
 
-        Assert.assertEquals(putMap, newMap);
+    Assert.assertEquals(putMap, newMap);
 
-        Assert.assertFalse(tailer.nextIndex());
-    }
+    Assert.assertFalse(tailer.nextIndex());
+}
 
     @Test
     public void testWriteReadStringDoubleMapStraightToFromQueue() throws IOException
