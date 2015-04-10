@@ -14,8 +14,8 @@ public class FillLargeMaps
 
         String mapName = "LargeMapWithSmallStrings";
 
-        int noOfEntriesExpected = 90000000;
-        int noOfEntriesToPut = 140000000;
+        int noOfEntriesExpected = 320000000;
+        int noOfEntriesToPut = 260000000;
 
         String value = "Random String";
 
@@ -27,8 +27,8 @@ public class FillLargeMaps
 
         String mapName = "LargeMapWithDoubles";
 
-        int noOfEntriesExpected = 120000000;
-        int noOfEntriesToPut = 180000000;
+        int noOfEntriesExpected = 320000000;
+        int noOfEntriesToPut = 260000000;
 
         double value = 2.5;
 
