@@ -9,33 +9,33 @@ import java.io.*;
  */
 public class FillLargeMaps
 {
-    public static boolean fillLargeMapWithSmallStrings(){
+    public static boolean fillLargeMapWithSmallStrings(boolean deleteMapOnExit){
         System.out.println("Starting fillLargeMapWithSmallStrings");
 
         String mapName = "LargeMapWithSmallStrings";
 
-        int noOfEntriesExpected = 100000000;
-        int noOfEntriesToPut = 150000000;
+        int noOfEntriesExpected = 90000000;
+        int noOfEntriesToPut = 140000000;
 
         String value = "Random String";
 
-        return putValueInMapNoOfTimes(String.class, value, noOfEntriesExpected, noOfEntriesToPut, mapName, value.getBytes().length);
+        return putValueInMapNoOfTimes(String.class, value, noOfEntriesExpected, noOfEntriesToPut, mapName, value.getBytes().length, deleteMapOnExit);
     }
 
-    public static boolean fillLargeMapWithDoubles(){
+    public static boolean fillLargeMapWithDoubles(boolean deleteMapOnExit){
         System.out.println("Starting fillLargeMapWithDoubles");
 
         String mapName = "LargeMapWithDoubles";
 
         int noOfEntriesExpected = 120000000;
-        int noOfEntriesToPut = 150000000;
+        int noOfEntriesToPut = 180000000;
 
         double value = 2.5;
 
-        return putValueInMapNoOfTimes(Double.class, value, noOfEntriesExpected, noOfEntriesToPut, mapName, 8);
+        return putValueInMapNoOfTimes(Double.class, value, noOfEntriesExpected, noOfEntriesToPut, mapName, 8, deleteMapOnExit);
     }
 
-    private static <T> boolean putValueInMapNoOfTimes(Class<T> clazz, T value, int noOfEntriesExpected, int noOfEntriesToPut, String mapName, long valueSizeInBytes)
+    private static <T> boolean putValueInMapNoOfTimes(Class<T> clazz, T value, int noOfEntriesExpected, int noOfEntriesToPut, String mapName, long valueSizeInBytes, boolean deleteMapOnExit)
     {
         System.out.println("Approximate total value size of map (no overhead): "
                 + getApproximateTotalSize(valueSizeInBytes, noOfEntriesToPut) + " bytes");
@@ -88,7 +88,10 @@ public class FillLargeMaps
 
         System.out.println("File size in bytes: " + mapFile.length());
 
-        deleteFile(mapFile);
+        if(deleteMapOnExit)
+        {
+            deleteFile(mapFile);
+        }
 
         System.out.println("Finished fillLargeMapWithSmallStrings!");
 

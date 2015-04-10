@@ -9,12 +9,12 @@ public class FillLargeMapsTest
     @Test
     public void testFillLargeMapWithSmallStrings() throws Exception
     {
-        Assert.assertTrue(FillLargeMaps.fillLargeMapWithSmallStrings());
+        Assert.assertTrue(FillLargeMaps.fillLargeMapWithSmallStrings(true));
     }
 
     @Test
     public void testFillLargeMapWithDoubles() throws Exception
     {
-        Assert.assertTrue(FillLargeMaps.fillLargeMapWithDoubles());
+        Assert.assertTrue(FillLargeMaps.fillLargeMapWithDoubles(true));
     }
 }
