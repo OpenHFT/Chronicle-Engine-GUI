@@ -7,6 +7,7 @@ import org.junit.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class ChronicleMapPutPerformanceTest
 {
@@ -72,6 +73,34 @@ public class ChronicleMapPutPerformanceTest
         setMarketDataMapToHashMap();
 
         putConfiguredNumberOfKeyValues();
+
+        putConfiguredNumberOfKeyValues();
+
+        putConfiguredNumberOfKeyValues();
+    }
+
+    @Test
+     public void testConcurrentHashMapPuts() throws IOException
+{
+    setMarketDataMapToConcurrentHashMap();
+
+    putConfiguredNumberOfKeyValues();
+
+    putConfiguredNumberOfKeyValues();
+
+    putConfiguredNumberOfKeyValues();
+}
+
+    @Test
+    public void testConcurrentHashMapPutsMany() throws IOException
+    {
+        setMarketDataMapToConcurrentHashMap();
+
+        putConfiguredNumberOfKeyValuesMany();
+
+        putConfiguredNumberOfKeyValuesMany();
+
+        putConfiguredNumberOfKeyValuesMany();
     }
 
     private long putConfiguredNumberOfKeyValues()
@@ -94,6 +123,34 @@ public class ChronicleMapPutPerformanceTest
             {
                 marketDataCache.put(quoteMapKey2, i);
             }
+        }
+
+        return calculateAndPrintRuntime(startTime);
+    }
+
+    private long putConfiguredNumberOfKeyValuesMany()
+    {
+        QuoteMapKey quoteMapKeyTemp = generateExampleQuoteMapKey1();
+        String id = "MyId";
+
+        long startTime = System.nanoTime();
+
+        for (double i = 0.0; i < noOfPuts; i++)
+        {
+            quoteMapKeyTemp.updateValues(quoteMapKeyTemp.getSupplier(), quoteMapKeyTemp.getSource(), id + (i % 200), quoteMapKeyTemp.getField());
+
+//            System.out.println(quoteMapKeyTemp.getId());
+
+            if (!marketDataCache.containsKey(quoteMapKeyTemp))
+            {
+                marketDataCache.put(new QuoteMapKey(quoteMapKeyTemp.getSupplier(), quoteMapKeyTemp.getSource(), id + (i % 200), quoteMapKeyTemp.getField()), i);
+            }
+            else
+            {
+                marketDataCache.put(quoteMapKeyTemp, i);
+            }
+
+//            System.out.println(marketDataCache.size());
         }
 
         return calculateAndPrintRuntime(startTime);
@@ -134,6 +191,11 @@ public class ChronicleMapPutPerformanceTest
     private void setMarketDataMapToHashMap()
     {
         marketDataCache = new HashMap<>();
+    }
+
+    private void setMarketDataMapToConcurrentHashMap()
+    {
+        marketDataCache = new ConcurrentHashMap<>();
     }
 
     private QuoteMapKey generateExampleQuoteMapKey1()
