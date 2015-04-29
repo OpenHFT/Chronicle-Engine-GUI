@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ddp.Api", "Ddp.Api\Ddp.Api.csproj", "{974033E1-9D8B-4A80-B63B-92A70213B61F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{974033E1-9D8B-4A80-B63B-92A70213B61F}.Debug|x86.ActiveCfg = Debug|x86
+		{974033E1-9D8B-4A80-B63B-92A70213B61F}.Debug|x86.Build.0 = Debug|x86
+		{974033E1-9D8B-4A80-B63B-92A70213B61F}.Release|x86.ActiveCfg = Release|x86
+		{974033E1-9D8B-4A80-B63B-92A70213B61F}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
