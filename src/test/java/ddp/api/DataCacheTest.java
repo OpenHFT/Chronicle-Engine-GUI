@@ -280,9 +280,10 @@ public class DataCacheTest
     @Test
     public void testServerLiborCurveJpy() throws Exception
     {
-        String resourcePath = "ServerLiborCurves\\JPYValEnv.xml";
+        String resourcePath = "ServerLiborCurves" + File.separator + "JPYValEnv.xml";
         int noOfPutAndGets = 50;
         int maxRuntime = 1000000000;
+
 
         verifyRuntimeForNumberOfPutAndGetsDifferentKeysStringMap(resourcePath, noOfPutAndGets, maxRuntime, true);
     }
@@ -298,7 +299,7 @@ public class DataCacheTest
     @Test
     public void testServerLiborCurveUsd() throws Exception
     {
-        String resourcePath = "ServerLiborCurves\\USDValEnv.xml";
+        String resourcePath = "ServerLiborCurves" + File.separator + "USDValEnv.xml";
         int noOfPutAndGets = 50;
         int maxRuntime = 1000000000;
 
@@ -314,9 +315,9 @@ public class DataCacheTest
     @Test
     public void testServerLiborDfCsvAsMap() throws Exception
     {
-        String resourcePath = "ServerLiborDf\\EURBasis.csv";
+        String resourcePath = "ServerLiborDf" + File.separator + "EURBasis.csv";
         int noOfPutAndGets = 50;
-        int maxRuntime = 100000000;
+        int maxRuntime = 1_000_000_000;
 
         verifyRuntimeForNumberOfPutAndGetsDifferentKeysDoubleMap(resourcePath, noOfPutAndGets, maxRuntime);
     }
@@ -330,7 +331,7 @@ public class DataCacheTest
     @Test
     public void testServerLiborDfCsvAsString() throws Exception
     {
-        String resourcePath = "ServerLiborDf\\EURBasis.csv";
+        String resourcePath = "ServerLiborDf" + File.separator + "EURBasis.csv";
         int noOfPutAndGets = 50;
         int maxRuntime = 100000000;
 
@@ -340,7 +341,7 @@ public class DataCacheTest
     @Test
     public void testServerLiborDfCsvAsStringPerformanceComparedToFile() throws Exception
     {
-        String resourcePath = "ServerLiborDf\\EURBasis.csv";
+        String resourcePath = "ServerLiborDf" + File.separator + "EURBasis.csv";
         String testFileExtension = ".xml";
         int noOfPuts = 1;
 
@@ -358,7 +359,7 @@ public class DataCacheTest
     @Test
     public void testTraderIrCurveCollateral() throws Exception
     {
-        String resourcePath = "TraderIrCurves\\Collateral_valenvOIS.xml";
+        String resourcePath = "TraderIrCurves" + File.separator + "Collateral_valenvOIS.xml";
         int noOfPutAndGets = 1;
         int maxRuntime = 1000000000;
 
@@ -375,7 +376,7 @@ public class DataCacheTest
     @Test
     public void testTraderIrCurveCollateralPerformanceComparedToFile() throws Exception
     {
-        String resourcePath = "TraderIrCurves\\Collateral_valenvOIS.xml";
+        String resourcePath = "TraderIrCurves" + File.separator + "Collateral_valenvOIS.xml";
         String testFileExtension = ".xml";
         int noOfPuts = 1;
 
@@ -409,7 +410,7 @@ public class DataCacheTest
     @Test
     public void testTraderIrCurveMxValEnvPerformanceComparedToFile() throws Exception
     {
-        String resourcePath = "TraderIrCurves\\mxvalenv.xml";
+        String resourcePath = "TraderIrCurves" + File.separator + "mxvalenv.xml";
         String testFileExtension = ".xml";
         int noOfPuts = 1;
 
