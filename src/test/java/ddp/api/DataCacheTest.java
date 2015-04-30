@@ -317,7 +317,7 @@ public class DataCacheTest
     {
         String resourcePath = "ServerLiborDf" + File.separator + "EURBasis.csv";
         int noOfPutAndGets = 50;
-        int maxRuntime = 1_000_000_000;
+        int maxRuntime = 100_000_000;//0.1s
 
         verifyRuntimeForNumberOfPutAndGetsDifferentKeysDoubleMap(resourcePath, noOfPutAndGets, maxRuntime);
     }
