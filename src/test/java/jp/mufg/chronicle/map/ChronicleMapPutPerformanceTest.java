@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ChronicleMapPutPerformanceTest
 {
-    private String chronicleMapFile = Jvm.TMP + "/Chronicle/chroniclemap";
+    private String chronicleMapFile = Jvm.TMP + "/chroniclemap";
     private File file;
     private int noOfPuts = 10_000_000;
     private Map<QuoteMapKey, Object> marketDataCache;
