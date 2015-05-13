@@ -1,6 +1,7 @@
 package jp.mufg.api;
 
 import net.openhft.lang.io.serialization.BytesMarshallable;
+import net.openhft.lang.model.constraints.MaxSize;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,28 +9,28 @@ public interface Subscription extends BytesMarshallable {
     @NotNull
     String getTarget();
 
-    void setTarget(String target);
+    void setTarget(@MaxSize(64) String target);
 
     @NotNull
     String getSource();
 
-    void setSource(@NotNull String source);
+    void setSource(@MaxSize(64) @NotNull String source);
 
     @NotNull
     String getExchange();
 
-    void setExchange(@Nullable String exchange);
+    void setExchange(@MaxSize(64) @Nullable String exchange);
 
     @NotNull
     String getInstrument();
 
-    void setInstrument(@Nullable String instrument);
+    void setInstrument(@MaxSize(64) @Nullable String instrument);
 
     // @GroupId
     @NotNull
     String getSubscriptionId();
 
-    void setSubscriptionId(String subscriptionId);
+    void setSubscriptionId(@MaxSize(64) String subscriptionId);
 
     public boolean getRetransmit();
 

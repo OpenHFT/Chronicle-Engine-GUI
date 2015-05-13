@@ -1,19 +1,18 @@
 package jp.mufg.chronicle.map;
 
 import jp.mufg.chronicle.map.testclasses.*;
-import net.openhft.chronicle.map.*;
-import net.openhft.chronicle.tools.*;
-import net.openhft.lang.model.constraints.*;
-import org.junit.*;
+import net.openhft.chronicle.tools.ChronicleTools;
+import net.openhft.lang.Jvm;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.*;
+import java.io.File;
+import java.io.IOException;
 
 public class ChronicleMapPutPerformanceTestUpdated
 {
-    private String chronicleMapFile = "C:\\LocalFolder\\temp\\Chronicle\\chroniclemap2";
+    private String chronicleMapFile = Jvm.TMP + "/Chronicle/chroniclemap2";
     private File file;
     private int noOfPuts = 10000000;
     private MapContainer marketDataCache;

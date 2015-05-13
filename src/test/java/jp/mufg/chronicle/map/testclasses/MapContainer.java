@@ -1,12 +1,14 @@
 package jp.mufg.chronicle.map.testclasses;
 
-import net.openhft.chronicle.hash.replication.*;
-import net.openhft.chronicle.map.*;
-import net.openhft.lang.model.*;
+import net.openhft.chronicle.hash.replication.TcpTransportAndNetworkConfig;
+import net.openhft.chronicle.map.ChronicleMap;
+import net.openhft.chronicle.map.ChronicleMapBuilder;
+import net.openhft.chronicle.map.MapKeyContext;
 
-import java.io.*;
-import java.net.*;
-import java.util.function.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.function.Consumer;
 
 /**
  * Created by daniels on 17/03/2015.
@@ -56,7 +58,7 @@ public class MapContainer implements AutoCloseable
         _marketDataKey.setSource(source);
         _marketDataKey.setSupplier(supplier);
 
-        try (WriteContext<MarketDataKey, MarketDataValue> c = marketDataCache.acquireUsingLocked(_marketDataKey, _marketDataValue))
+        try (MapKeyContext<MarketDataKey, MarketDataValue> c = marketDataCache.acquireContext(_marketDataKey, _marketDataValue))
         {
             consumer.accept(_marketDataValue);
         }
@@ -85,7 +87,7 @@ public class MapContainer implements AutoCloseable
         _marketDataKey.setId(id);
 
 
-        try (WriteContext<MarketDataKey, MarketDataValue> context = marketDataCache.acquireUsingLocked(_marketDataKey, _marketDataValue))
+        try (MapKeyContext<MarketDataKey, MarketDataValue> context = marketDataCache.acquireContext(_marketDataKey, _marketDataValue))
         {
             _marketDataValue.setAsk(ask);
         }

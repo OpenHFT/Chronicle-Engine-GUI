@@ -1,9 +1,14 @@
 package ddp.api;
 
-import java.io.*;
-import java.net.*;
-import java.nio.file.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestUtils
 {
@@ -14,8 +19,12 @@ public class TestUtils
      * @param startTimeInNanoseconds Start time in nanos.
      * @return Runtime in nanos.
      */
-    public static double calculateAndPrintRuntime(long startTimeInNanoseconds)
+    public static long calculateAndPrintRuntime(long startTimeInNanoseconds)
     {
+        return calculateAndPrintRuntime(startTimeInNanoseconds, 1);
+    }
+
+    public static long calculateAndPrintRuntime(long startTimeInNanoseconds, int count) {
         long endNanoTime = System.nanoTime();
 
         long runtimeNanoSeconds = endNanoTime - startTimeInNanoseconds;
@@ -24,8 +33,8 @@ public class TestUtils
 
         double runtimeSeconds = runtimeMilliseconds / 1000.0;
 
-        System.out.println("Runtime: " + runtimeNanoSeconds + " nanoseconds | "
-                + runtimeMilliseconds + " milliseconds | " + runtimeSeconds + " seconds");
+        System.out.printf("For %,d tests, Runtime: %,d nanoseconds | %.1f milliseconds | %.3f seconds%s%n",
+                count, runtimeNanoSeconds / count, runtimeMilliseconds / count, runtimeSeconds / count, count > 1 ? " average" : "");
 
         return runtimeNanoSeconds;
     }
@@ -43,7 +52,7 @@ public class TestUtils
         URI testFileUri = testFileUrl.toURI();
 
         final StringBuilder stringBuilder = new StringBuilder();
-        Files.lines(Paths.get(testFileUri)).forEach(x -> stringBuilder.append(x));
+        Files.lines(Paths.get(testFileUri)).forEach(stringBuilder::append);
 
         return stringBuilder.toString();
     }

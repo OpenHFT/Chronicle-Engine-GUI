@@ -1,10 +1,11 @@
 package jp.mufg.chronicle.map.testclasses;
 
-import jp.mufg.chronicle.queue.testclasses.*;
-import net.openhft.chronicle.map.*;
-import net.openhft.lang.model.*;
+import net.openhft.chronicle.map.ChronicleMap;
+import net.openhft.chronicle.map.ChronicleMapBuilder;
+import net.openhft.chronicle.map.MapKeyContext;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by daniels on 17/03/2015.
@@ -79,7 +80,7 @@ public class MapContainerEnum implements AutoCloseable
         _marketDataKey.setSupplier(supplier);
         _marketDataKey.setId(id);
 
-        try (WriteContext<MarketDataKeyEnum, MarketDataValue> context = marketDataCache.acquireUsingLocked(_marketDataKey, _marketDataValue))
+        try (MapKeyContext<MarketDataKeyEnum, MarketDataValue> context = marketDataCache.acquireContext(_marketDataKey, _marketDataValue))
         {
             _marketDataValue.setAsk(ask);
         }

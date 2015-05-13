@@ -1,5 +1,8 @@
 package ddp.api.util;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 /**
  * Utilities to help get information about the host machine.
  */
@@ -13,22 +16,25 @@ public class MachineInfoUtils
      */
     public static String getHostname()
     {
-        //As specified on Windows
-        String host = System.getenv("COMPUTERNAME");
+        try {
+            InetAddress localHost = InetAddress.getLocalHost();
+            return localHost.getHostName();
+        } catch (UnknownHostException e) {
+            //As specified on Windows
+            String host = System.getenv("COMPUTERNAME");
 
-        if (host != null)
-        {
-            return host;
+            if (host != null) {
+                return host;
+            }
+
+            //As specified on Linux
+            host = System.getenv("HOSTNAME");
+
+            if (host != null) {
+                return host;
+            }
+
+            return null;
         }
-
-        //As specified on Linux
-        host = System.getenv("HOSTNAME");
-
-        if (host != null)
-        {
-            return host;
-        }
-
-        return null;
     }
 }

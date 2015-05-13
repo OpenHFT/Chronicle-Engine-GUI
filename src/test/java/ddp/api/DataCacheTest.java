@@ -1,16 +1,22 @@
 package ddp.api;
 
-import net.openhft.chronicle.hash.replication.*;
-import net.openhft.chronicle.map.*;
-import org.easymock.*;
+import ddp.api.util.DdpAssert;
+import net.openhft.chronicle.hash.replication.TcpTransportAndNetworkConfig;
+import net.openhft.chronicle.map.ChronicleMap;
+import net.openhft.chronicle.map.ChronicleMapBuilder;
+import net.openhft.chronicle.map.ChronicleMapStatelessClientBuilder;
+import org.easymock.EasyMock;
 import org.junit.*;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-public class DataCacheTest
-{
+public class DataCacheTest {
     private static String _testMapsDirectory = "TestMaps";
     //<String, Double> data cache
     private static ChronicleMap<String, Double> _dataCacheChronicleMapDouble;
@@ -30,8 +36,7 @@ public class DataCacheTest
     private static String _dataCacheIp = "127.0.0.1";
 
     @BeforeClass
-    public static void setUpBeforeClass() throws Exception
-    {
+    public static void setUpBeforeClass() throws Exception {
         TestUtils.createDirectoryIfNotExists(_testMapsDirectory);
 
         //Create local Chronicle map String, Double
@@ -72,18 +77,26 @@ public class DataCacheTest
     }
 
     @After
-    public void tearDown() throws Exception
-    {
-        if (_dataCacheDouble != null)
-        {
+    public void tearDown() throws Exception {
+        if (_dataCacheDouble != null) {
             _dataCacheDouble.clear();
 //            _dataCacheDouble.close();
         }
 
-        if (_dataCacheString != null)
-        {
+        if (_dataCacheString != null) {
             _dataCacheString.clear();
 //            _dataCacheString.close();
+        }
+    }
+
+    @AfterClass
+    public static void stopAll() {
+        if (_dataCacheDouble != null) {
+            _dataCacheDouble.close();
+        }
+
+        if (_dataCacheString != null) {
+            _dataCacheString.close();
         }
     }
 
@@ -96,8 +109,7 @@ public class DataCacheTest
      * @throws Exception
      */
     @Test
-    public void testEventListenerAddedBeforeAnyActionsAndTriggeredOnPutAndRemove() throws Exception
-    {
+    public void testEventListenerAddedBeforeAnyActionsAndTriggeredOnPutAndRemove() throws Exception {
         String key = "testKeyBeforeInitialPut";
         double value = 1.0;
         double valueUpdated = 2.0;
@@ -150,8 +162,7 @@ public class DataCacheTest
      * @throws Exception
      */
     @Test
-    public void testEventListenerAddedAfterInitialPutAndTriggeredOnPutAndRemove() throws Exception
-    {
+    public void testEventListenerAddedAfterInitialPutAndTriggeredOnPutAndRemove() throws Exception {
         String key = "testKeyAfterInitialPut";
         double value = 1.0;
         double valueUpdated = 2.0;
@@ -194,8 +205,7 @@ public class DataCacheTest
      * @throws Exception
      */
     @Test
-    public void testEventListenerNoLongerTriggeredAfterRemoved() throws Exception
-    {
+    public void testEventListenerNoLongerTriggeredAfterRemoved() throws Exception {
         String key = "testKeyRemoval";
         double value = 1.0;
         double valueUpdated = 2.0;
@@ -230,8 +240,7 @@ public class DataCacheTest
      * @throws Exception
      */
     @Test
-    public void testEventListenerEventsAreTriggeredInCorrectOrder() throws Exception
-    {
+    public void testEventListenerEventsAreTriggeredInCorrectOrder() throws Exception {
         String key = "testKeyTriggerInOrder";
         double value = 0.0;
         int noOfPuts = 1000;
@@ -245,8 +254,7 @@ public class DataCacheTest
         _dataCacheDouble.addEventListener(dataCacheEventListener);
 
         //Expect both onPut methods to be triggered.
-        for (double i = 1.0; i <= noOfPuts; i++)
-        {
+        for (double i = 1.0; i <= noOfPuts; i++) {
             dataCacheEventListener.onPut(key, i, i - 1);
             dataCacheEventListener.onPut(key, i);
         }
@@ -254,8 +262,7 @@ public class DataCacheTest
         EasyMock.replay(dataCacheEventListener);
 
         //Perform the updates on the data cache in order
-        for (double i = 1.0; i <= noOfPuts; i++)
-        {
+        for (double i = 1.0; i <= noOfPuts; i++) {
             _dataCacheDouble.put(key, i);
         }
 
@@ -278,8 +285,7 @@ public class DataCacheTest
      * @throws Exception
      */
     @Test
-    public void testServerLiborCurveJpy() throws Exception
-    {
+    public void testServerLiborCurveJpy() throws Exception {
         String resourcePath = "ServerLiborCurves" + File.separator + "JPYValEnv.xml";
         int noOfPutAndGets = 50;
         int maxRuntime = 1000000000;
@@ -297,8 +303,7 @@ public class DataCacheTest
      * @throws Exception
      */
     @Test
-    public void testServerLiborCurveUsd() throws Exception
-    {
+    public void testServerLiborCurveUsd() throws Exception {
         String resourcePath = "ServerLiborCurves" + File.separator + "USDValEnv.xml";
         int noOfPutAndGets = 50;
         int maxRuntime = 1000000000;
@@ -313,8 +318,7 @@ public class DataCacheTest
      * @throws Exception
      */
     @Test
-    public void testServerLiborDfCsvAsMap() throws Exception
-    {
+    public void testServerLiborDfCsvAsMap() throws Exception {
         String resourcePath = "ServerLiborDf" + File.separator + "EURBasis.csv";
         int noOfPutAndGets = 50;
         int maxRuntime = 100_000_000;//0.1s
@@ -329,8 +333,7 @@ public class DataCacheTest
      * @throws Exception
      */
     @Test
-    public void testServerLiborDfCsvAsString() throws Exception
-    {
+    public void testServerLiborDfCsvAsString() throws Exception {
         String resourcePath = "ServerLiborDf" + File.separator + "EURBasis.csv";
         int noOfPutAndGets = 50;
         int maxRuntime = 100000000;
@@ -339,8 +342,7 @@ public class DataCacheTest
     }
 
     @Test
-    public void testServerLiborDfCsvAsStringPerformanceComparedToFile() throws Exception
-    {
+    public void testServerLiborDfCsvAsStringPerformanceComparedToFile() throws Exception {
         String resourcePath = "ServerLiborDf" + File.separator + "EURBasis.csv";
         String testFileExtension = ".xml";
         int noOfPuts = 1;
@@ -357,8 +359,7 @@ public class DataCacheTest
      * @throws Exception
      */
     @Test
-    public void testTraderIrCurveCollateral() throws Exception
-    {
+    public void testTraderIrCurveCollateral() throws Exception {
         String resourcePath = "TraderIrCurves" + File.separator + "Collateral_valenvOIS.xml";
         int noOfPutAndGets = 1;
         int maxRuntime = 1000000000;
@@ -368,14 +369,13 @@ public class DataCacheTest
 
     /**
      * Test that writing to the cache is as fast or faster than writing to file.
-     *
+     * <p>
      * File size c. 2.4 MB.
      *
      * @throws Exception
      */
     @Test
-    public void testTraderIrCurveCollateralPerformanceComparedToFile() throws Exception
-    {
+    public void testTraderIrCurveCollateralPerformanceComparedToFile() throws Exception {
         String resourcePath = "TraderIrCurves" + File.separator + "Collateral_valenvOIS.xml";
         String testFileExtension = ".xml";
         int noOfPuts = 1;
@@ -385,15 +385,14 @@ public class DataCacheTest
 
     /**
      * Valuation environment published to Murex. Updated app. every 2 minutes.
-     *
+     * <p>
      * File size c. 5MB
      *
      * @throws Exception
      */
     @Test
-    public void testTraderIrCurveMxValEnv() throws Exception
-    {
-        String resourcePath = "TraderIrCurves\\mxvalenv.xml";
+    public void testTraderIrCurveMxValEnv() throws Exception {
+        String resourcePath = "TraderIrCurves" + File.separator + "mxvalenv.xml";
         int noOfPutAndGets = 1;
         int maxRuntime = 100000000;
 
@@ -402,14 +401,13 @@ public class DataCacheTest
 
     /**
      * Test that writing to the cache is as fast or faster than writing to file.
-     *
+     * <p>
      * File size c. 5MB
      *
      * @throws Exception
      */
     @Test
-    public void testTraderIrCurveMxValEnvPerformanceComparedToFile() throws Exception
-    {
+    public void testTraderIrCurveMxValEnvPerformanceComparedToFile() throws Exception {
         String resourcePath = "TraderIrCurves" + File.separator + "mxvalenv.xml";
         String testFileExtension = ".xml";
         int noOfPuts = 1;
@@ -424,8 +422,7 @@ public class DataCacheTest
      * @throws Exception
      */
     @Test
-    public void testPutAllRaceConditionWithOtherPuts() throws Exception
-    {
+    public void testPutAllRaceConditionWithOtherPuts() throws Exception {
         String testKey = "BaseKey";
         String keyToCheck = testKey + 1;
 
@@ -438,34 +435,28 @@ public class DataCacheTest
         Map<String, String> memoryMap = new HashMap<>();
 
         //Put the large string value for the number of keys
-        for (int i = 0; i < noOfPuts; i++)
-        {
+        for (int i = 0; i < noOfPuts; i++) {
             memoryMap.put(testKey + i, testString);
         }
 
         //Create a new thread and let it finish before finishing execution of putAll
         Thread t = new Thread(
                 () -> {
-                    try
-                    {
+                    try {
                         Thread.sleep(1000);
 
                         boolean keepRunning = true;
                         boolean isValuePutAndGet = false;
 
-                        while (keepRunning)
-                        {
+                        while (keepRunning) {
                             ChronicleMap<String, String> otherStatelessClient = ChronicleMapStatelessClientBuilder
                                     .createClientOf(new InetSocketAddress(_dataCacheHostname, _dataCachePortString));
 
                             String valueFromMap = otherStatelessClient.get(testKey + 1);
 
-                            if (valueFromMap != null && valueFromMap.length() > 20)
-                            {
+                            if (valueFromMap != null && valueFromMap.length() > 20) {
                                 keepRunning = false;
-                            }
-                            else
-                            {
+                            } else {
                                 otherStatelessClient.put(keyToCheck, "ShortTestValue");
 
                                 isValuePutAndGet = true;
@@ -473,13 +464,9 @@ public class DataCacheTest
                         }
 
                         Assert.assertTrue(isValuePutAndGet);
-                    }
-                    catch (IOException e)
-                    {
+                    } catch (IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (InterruptedException e)
-                    {
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 });
@@ -488,8 +475,7 @@ public class DataCacheTest
 
         _dataCacheString.putAll(memoryMap);
 
-        while (t.isAlive())
-        {
+        while (t.isAlive()) {
             Thread.sleep(200);
         }
 
@@ -519,8 +505,7 @@ public class DataCacheTest
      * @throws Exception
      */
     @Test
-    public void testGetEntrySetSnap() throws Exception
-    {
+    public void testGetEntrySetSnap() throws Exception {
         Map<String, Double> populatedTestMap = getPopulatedTestMap();
 
         //Get first key from test map
@@ -534,10 +519,8 @@ public class DataCacheTest
         //Update the data cache
         _dataCacheDouble.put(keyToUpdate, valueToUpdate);
 
-        for (Map.Entry<String, Double> entry : populatedTestMap.entrySet())
-        {
-            if (entry.getKey().equals(keyToUpdate))
-            {
+        for (Map.Entry<String, Double> entry : populatedTestMap.entrySet()) {
+            if (entry.getKey().equals(keyToUpdate)) {
                 Assert.assertNotEquals(entry.getValue(), valueToUpdate, 0.0);
             }
 
@@ -547,18 +530,17 @@ public class DataCacheTest
 
     /**
      * Populates a map with test values.
+     *
      * @return
      */
-    private Map<String, Double> getPopulatedTestMap()
-    {
+    private Map<String, Double> getPopulatedTestMap() {
         String baseKey = "Key";
         double value = 1.0;
         int noOfKeys = 44;
 
         Map<String, Double> testMap = new HashMap<>();
 
-        for (int i = 0; i < noOfKeys; i++)
-        {
+        for (int i = 0; i < noOfKeys; i++) {
             testMap.put(baseKey + i, value + i);
         }
 
@@ -577,8 +559,7 @@ public class DataCacheTest
      * @throws IOException
      * @throws URISyntaxException
      */
-    private void verifyRuntimeForNumberOfPutAndGetsDifferentKeysStringMap(String resourcePath, int noOfPutAndGets, int maxRuntimeInNanos, boolean useDifferentKeys) throws IOException, URISyntaxException
-    {
+    private void verifyRuntimeForNumberOfPutAndGetsDifferentKeysStringMap(String resourcePath, int noOfPutAndGets, int maxRuntimeInNanos, boolean useDifferentKeys) throws IOException, URISyntaxException {
         String key = "BaseKey";
         StringBuilder keyPutStringBuilder = new StringBuilder(key);
         StringBuilder keyGetStringBuilder = new StringBuilder(key);
@@ -586,42 +567,38 @@ public class DataCacheTest
         String testString = TestUtils.loadSystemResourceFileToString(resourcePath);
 
         long startTime = System.nanoTime();
+        int count = 0;
+        while (System.nanoTime() - startTime < 2e9) {
+            count++;
 
-        //Put the large string value for the number of keys
-        for (int i = 0; i < noOfPutAndGets; i++)
-        {
-            if (useDifferentKeys)
-            {
-                _dataCacheString.put(keyPutStringBuilder.append(i).toString(), testString);
+            //Put the large string value for the number of keys
+            for (int i = 0; i < noOfPutAndGets; i++) {
+                if (useDifferentKeys) {
+                    _dataCacheString.put(keyPutStringBuilder.append(i).toString(), testString);
+                } else {
+                    _dataCacheString.put(key, testString);
+                }
             }
-            else
-            {
-                _dataCacheString.put(key, testString);
+
+            //Get the large string value for the number of keys
+            for (int i = 0; i < noOfPutAndGets; i++) {
+                String resultString = null;
+
+                if (useDifferentKeys) {
+                    resultString = _dataCacheString.get(keyGetStringBuilder.append(i).toString());
+                } else {
+                    resultString = _dataCacheString.get(key);
+                }
+
+                //Test that the string from the cache matches the put string
+                Assert.assertEquals(testString, resultString);
             }
         }
 
-        //Get the large string value for the number of keys
-        for (int i = 0; i < noOfPutAndGets; i++)
-        {
-            String resultString = null;
-
-            if (useDifferentKeys)
-            {
-                resultString = _dataCacheString.get(keyGetStringBuilder.append(i).toString());
-            }
-            else
-            {
-                resultString = _dataCacheString.get(key);
-            }
-
-            //Test that the string from the cache matches the put string
-            Assert.assertEquals(testString, resultString);
-        }
-
-        double runtimeInNanos = TestUtils.calculateAndPrintRuntime(startTime);
+        long runtimeInNanos = TestUtils.calculateAndPrintRuntime(startTime, count);
 
         //Test that the 50 puts and gets took 1 second or less
-        Assert.assertTrue(runtimeInNanos <= maxRuntimeInNanos);
+        DdpAssert.assertTimeLimit(maxRuntimeInNanos, runtimeInNanos / count);
     }
 
     /**
@@ -633,49 +610,55 @@ public class DataCacheTest
      * @param noOfPuts      Number of puts to perform for comparison.
      * @throws Exception
      */
-    private void compareFileSaveToPut(String resourcePath, String fileExtension, int noOfPuts) throws Exception
-    {
-        double timeToSaveFileToDiskInNanos = getTimeToSaveFileToDiskInNanos(resourcePath, fileExtension);
+    private void compareFileSaveToPut(String resourcePath, String fileExtension, int noOfPuts) throws Exception {
+        long timeToSaveFileToDiskInNanos = getTimeToSaveFileToDiskInNanos(resourcePath, fileExtension);
 
         String key = "BaseKey";
 
         String testString = TestUtils.loadSystemResourceFileToString(resourcePath);
 
         long startTime = System.nanoTime();
+        int count = 0;
+        while (System.nanoTime() - startTime < 2e9) {
+            count++;
 
-        //Put the large string value for the number of keys
-        for (int i = 0; i < noOfPuts; i++)
-        {
-            _dataCacheString.put(key, testString);
+            //Put the large string value for the number of keys
+            for (int i = 0; i < noOfPuts; i++) {
+                _dataCacheString.put(key + '-' + i, testString);
+            }
         }
 
-        double runtimeInNanos = TestUtils.calculateAndPrintRuntime(startTime);
+        long runtimeInNanos = TestUtils.calculateAndPrintRuntime(startTime, count);
 
         //Test that the 50 puts and gets took 1 second or less
-        Assert.assertTrue(runtimeInNanos <= timeToSaveFileToDiskInNanos * noOfPuts);
+        DdpAssert.assertTimeLimit(timeToSaveFileToDiskInNanos * noOfPuts, runtimeInNanos / count);
     }
 
     /**
      * Loads the resource as as string and saves it to a new test file with the given extension while measuring how long
      * it takes. Deletes the test file afterwards and returns the runtime.
-     * @param resourcePath Path to resource that is loaded as string.
+     *
+     * @param resourcePath  Path to resource that is loaded as string.
      * @param fileExtension File extension use for file saved.
      * @return Time it takes to save string as a new file.
      * @throws Exception
      */
-    public double getTimeToSaveFileToDiskInNanos(String resourcePath, String fileExtension) throws Exception
-    {
+    public long getTimeToSaveFileToDiskInNanos(String resourcePath, String fileExtension) throws Exception {
         String testString = TestUtils.loadSystemResourceFileToString(resourcePath);
 
         long startTime = System.nanoTime();
 
-        TestUtils.saveTestFileToDisk(fileExtension, testString);
+        int count = 0;
+        while (System.nanoTime() - startTime < 2e9) {
+            TestUtils.saveTestFileToDisk(fileExtension, testString);
+            count++;
+        }
 
-        double runtimeInNanos = TestUtils.calculateAndPrintRuntime(startTime);
+        long runtimeInNanos = TestUtils.calculateAndPrintRuntime(startTime, count);
 
         TestUtils.deleteTestFile(fileExtension);
 
-        return runtimeInNanos;
+        return runtimeInNanos / count;
     }
 
     /**
@@ -690,27 +673,27 @@ public class DataCacheTest
      * @throws IOException
      * @throws URISyntaxException
      */
-    private void verifyRuntimeForNumberOfPutAndGetsDifferentKeysDoubleMap(String resourcePath, int noOfPutAndGets, int maxRuntimeInNanos) throws IOException, URISyntaxException
-    {
+    private void verifyRuntimeForNumberOfPutAndGetsDifferentKeysDoubleMap(String resourcePath, int noOfPutAndGets, int maxRuntimeInNanos) throws IOException, URISyntaxException {
         Map<String, Double> testKvpMap = TestUtils.loadSystemResourceKeyValueCsvFileToMap(resourcePath);
 
         long startTime = System.nanoTime();
+        int count = 0;
+        while (System.nanoTime() - startTime < 2e9) {
+            //Put the large string value for the number of keys
+            for (int i = 0; i < noOfPutAndGets; i++) {
+                _dataCacheDouble.putAll(testKvpMap);
+            }
 
-        //Put the large string value for the number of keys
-        for (int i = 0; i < noOfPutAndGets; i++)
-        {
-            _dataCacheDouble.putAll(testKvpMap);
+            //Get the large string value for the number of keys
+            for (int i = 0; i < noOfPutAndGets; i++) {
+                _dataCacheDouble.forEach((k, v) -> Assert.assertEquals(testKvpMap.get(k), v));
+            }
+            count++;
         }
 
-        //Get the large string value for the number of keys
-        for (int i = 0; i < noOfPutAndGets; i++)
-        {
-            _dataCacheDouble.forEach((k, v) -> Assert.assertEquals(testKvpMap.get(k), v));
-        }
-
-        double runtimeInNanos = TestUtils.calculateAndPrintRuntime(startTime);
+        long runtimeInNanos = TestUtils.calculateAndPrintRuntime(startTime, count);
 
         //Test that the 50 puts and gets took 1 second or less
-        Assert.assertTrue(runtimeInNanos <= maxRuntimeInNanos);
+        DdpAssert.assertTimeLimit(maxRuntimeInNanos, runtimeInNanos / count);
     }
 }

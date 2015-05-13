@@ -28,6 +28,7 @@ public class ChronicleDataMartWrapperTest {
         return chronicle;
     }
 
+    // TODO Why should calculate be called once?
     @Test
     public void testSingleThread() throws IOException, InterruptedException {
         Chronicle chronicle = createChronicle("testSingleThread");

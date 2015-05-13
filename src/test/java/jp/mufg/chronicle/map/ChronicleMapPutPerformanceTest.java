@@ -1,19 +1,28 @@
 package jp.mufg.chronicle.map;
 
-import jp.mufg.chronicle.map.testclasses.*;
-import net.openhft.chronicle.map.*;
-import net.openhft.chronicle.tools.*;
-import org.junit.*;
+import ddp.api.TestUtils;
+import jp.mufg.chronicle.map.testclasses.MarketDataField;
+import jp.mufg.chronicle.map.testclasses.MarketDataSource;
+import jp.mufg.chronicle.map.testclasses.MarketDataSupplier;
+import jp.mufg.chronicle.map.testclasses.QuoteMapKey;
+import net.openhft.chronicle.map.ChronicleMapBuilder;
+import net.openhft.chronicle.tools.ChronicleTools;
+import net.openhft.lang.Jvm;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChronicleMapPutPerformanceTest
 {
-    private String chronicleMapFile = "C:\\LocalFolder\\temp\\Chronicle\\chroniclemap";
+    private String chronicleMapFile = Jvm.TMP + "/Chronicle/chroniclemap";
     private File file;
-    private int noOfPuts = 10000000;
+    private int noOfPuts = 10_000_000;
     private Map<QuoteMapKey, Object> marketDataCache;
 
     @Before
@@ -125,7 +134,7 @@ public class ChronicleMapPutPerformanceTest
             }
         }
 
-        return calculateAndPrintRuntime(startTime);
+        return TestUtils.calculateAndPrintRuntime(startTime);
     }
 
     private long putConfiguredNumberOfKeyValuesMany()
@@ -153,7 +162,7 @@ public class ChronicleMapPutPerformanceTest
 //            System.out.println(marketDataCache.size());
         }
 
-        return calculateAndPrintRuntime(startTime);
+        return TestUtils.calculateAndPrintRuntime(startTime);
     }
 
     private long replaceConfiguredNumberOfKeyValues()
@@ -178,7 +187,7 @@ public class ChronicleMapPutPerformanceTest
             }
         }
 
-        return calculateAndPrintRuntime(startTime);
+        return TestUtils.calculateAndPrintRuntime(startTime);
     }
 
     private void setMarketDataMapToChronicle() throws IOException
@@ -216,21 +225,5 @@ public class ChronicleMapPutPerformanceTest
         MarketDataField field = MarketDataField.ASK_PRICE;
 
         return new QuoteMapKey(supplier, source, id, field);
-    }
-
-    private long calculateAndPrintRuntime(long startTimeInNanoseconds)
-    {
-        long endNanoTime = System.nanoTime();
-
-        long runtimeNanoSeconds = endNanoTime - startTimeInNanoseconds;
-
-        double runtimeMilliseconds = (double)runtimeNanoSeconds / 1000000.0;
-
-        double runtimeSeconds = runtimeMilliseconds / 1000.0;
-
-        System.out.println("Runtime: " + runtimeNanoSeconds + " nanoseconds | "
-                + runtimeMilliseconds + " milliseconds | " + runtimeSeconds + " seconds");
-
-        return runtimeNanoSeconds;
     }
 }
