@@ -2,7 +2,6 @@ package jp.mufg.chronicle.map.eventlistener;
 
 import jp.mufg.TestUtils;
 import net.openhft.chronicle.map.ChronicleMap;
-import net.openhft.chronicle.tools.ChronicleTools;
 import net.openhft.lang.Jvm;
 import net.openhft.lang.values.StringValue;
 import org.junit.*;
@@ -14,12 +13,13 @@ import java.util.function.Consumer;
 /**
  * Created by daniels on 31/03/2015.
  */
+@Ignore("Event listeners not supported yet")
 public class MapEventListenerTest
 {
-    private static final String _chronicleMapStringFilePath = Jvm.TMP + "/Chronicle/chronicleMapStringListenerTest";
+    private static final String _chronicleMapStringFilePath = Jvm.TMP + "/chronicleMapStringListenerTest";
     private static File _chronicleStringMapFile;
 
-    private static final String _chronicleMapStringValueFilePath = Jvm.TMP + "/Chronicle/chronicleMapStringValueListenerTest";
+    private static final String _chronicleMapStringValueFilePath = Jvm.TMP + "/chronicleMapStringValueListenerTest";
     private static File _chronicleStringValueMapFile;
 
 //    private ChronicleTestEventListener _chronicleTestEventListener;
@@ -36,7 +36,9 @@ public class MapEventListenerTest
     public static void beforeClass() throws IOException
     {
         _chronicleStringMapFile = new File(_chronicleMapStringFilePath);
+        _chronicleStringMapFile.delete();
         _chronicleStringValueMapFile = new File(_chronicleMapStringValueFilePath);
+        _chronicleStringValueMapFile.delete();
     }
 
     @Before
@@ -58,13 +60,6 @@ public class MapEventListenerTest
                 .of(String.class, StringValue.class)
                 .eventListener(_chronicleTestEventListener)
                 .createPersistedTo(_chronicleStringValueMapFile);*/
-    }
-
-    @After
-    public void tearDown() throws Exception
-    {
-        ChronicleTools.deleteDirOnExit(_chronicleMapStringFilePath);
-        ChronicleTools.deleteDirOnExit(_chronicleMapStringValueFilePath);
     }
 
     /**

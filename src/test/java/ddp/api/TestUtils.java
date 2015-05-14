@@ -36,7 +36,7 @@ public class TestUtils
         System.out.printf("For %,d tests, Runtime: %,d nanoseconds | %.1f milliseconds | %.3f seconds%s%n",
                 count, runtimeNanoSeconds / count, runtimeMilliseconds / count, runtimeSeconds / count, count > 1 ? " average" : "");
 
-        return runtimeNanoSeconds;
+        return runtimeNanoSeconds / count;
     }
 
     /**

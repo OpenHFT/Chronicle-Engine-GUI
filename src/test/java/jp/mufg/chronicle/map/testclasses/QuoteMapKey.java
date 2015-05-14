@@ -1,9 +1,11 @@
 package jp.mufg.chronicle.map.testclasses;
 
-import java.io.*;
+import net.openhft.lang.io.Bytes;
+import net.openhft.lang.io.serialization.BytesMarshallable;
+import net.openhft.lang.model.constraints.NotNull;
 
 
-public class QuoteMapKey implements Externalizable
+public class QuoteMapKey implements BytesMarshallable
 {
     private MarketDataSource _source;
     private MarketDataSupplier _supplier;
@@ -77,25 +79,24 @@ public class QuoteMapKey implements Externalizable
     @Override
     public int hashCode()
     {
+        if (_hash == 0)
+            buildHashCode();
         return _hash;
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException
-    {
-        out.writeObject(_source);
-        out.writeObject(_supplier);
-        out.writeUTF(_id);
-        out.writeObject(_field);
+    public void readMarshallable(@NotNull Bytes in) throws IllegalStateException {
+        _source = in.readEnum(MarketDataSource.class);
+        _supplier = in.readEnum(MarketDataSupplier.class);
+        _id = in.readEnum(String.class);
+        _field = in.readEnum(MarketDataField.class);
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException
-    {
-        _source = (MarketDataSource) in.readObject();
-        _supplier = (MarketDataSupplier) in.readObject();
-        _id = in.readUTF();
-        _field = (MarketDataField) in.readObject();
-        buildHashCode();
+    public void writeMarshallable(@NotNull Bytes out) {
+        out.writeEnum(_source);
+        out.writeEnum(_supplier);
+        out.write8bitText(_id);
+        out.writeEnum(_field);
     }
 }
