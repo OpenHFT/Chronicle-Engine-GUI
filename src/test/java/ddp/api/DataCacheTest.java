@@ -52,6 +52,8 @@ public class DataCacheTest {
         _dataCacheChronicleMapDouble = ChronicleMapBuilder
                 .of(String.class, Double.class)
                 .replication((byte) 1, tcpConfigDouble)
+                .putReturnsNull(true)
+                .removeReturnsNull(true)
            //     .entries(1 << 13)
                .createPersistedTo(fileDouble);
 
@@ -71,6 +73,8 @@ public class DataCacheTest {
         _dataCacheChronicleMapString = ChronicleMapBuilder
                 .of(String.class, String.class)
                 .averageValueSize(31457280) //30MB should account for 22MB plus serialisation
+                .putReturnsNull(true)
+                .removeReturnsNull(true)
                 .entries(50)
                 .replication((byte) 1, tcpConfigString)
                 .createPersistedTo(fileString);

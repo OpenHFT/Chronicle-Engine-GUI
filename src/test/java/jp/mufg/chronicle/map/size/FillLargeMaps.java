@@ -47,6 +47,8 @@ public class FillLargeMaps {
             map = ChronicleMapBuilder
                     .of(String.class, clazz)
                     .entries(noOfEntriesExpected)
+                    .putReturnsNull(true)
+                    .removeReturnsNull(true)
                     .averageKeySize(10)
                     .constantValueSizeBySample(value)
                     .createPersistedTo(mapFile);
