@@ -473,8 +473,12 @@ public class DataCacheTest {
                         boolean isValuePutAndGet = false;
 
                         while (keepRunning) {
-                            ChronicleMap<String, String> otherStatelessClient = ChronicleMapStatelessClientBuilder
-                                    .createClientOf(new InetSocketAddress(_dataCacheHostname, _dataCachePortString));
+                            ChronicleMap<String, String> otherStatelessClient =
+                                    ChronicleMapStatelessClientBuilder.<String, String>of(new
+                                            InetSocketAddress(_dataCacheHostname,
+                                            _dataCachePortString))
+                                            .putReturnsNull(true)
+                                            .removeReturnsNull(true).create();
 
                             String valueFromMap = otherStatelessClient.get(testKey + 1);
 

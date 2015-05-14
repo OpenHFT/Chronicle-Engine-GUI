@@ -18,7 +18,8 @@ public class ChronicleAuthenticator implements Authenticator
         try
         {
             _chronicleAuthenticationMap = ChronicleMapBuilder
-                    .of(String.class, String.class).createPersistedTo(chronicleFile);
+                    .of(String.class, String.class).putReturnsNull(true).createPersistedTo
+                (chronicleFile);
         }
         catch (IOException e)
         {

@@ -1,15 +1,19 @@
 package ddp.api;
 
-import net.openhft.chronicle.hash.*;
-import net.openhft.chronicle.map.*;
-import org.slf4j.*;
-import sun.reflect.generics.reflectiveObjects.*;
+import net.openhft.chronicle.hash.RemoteCallTimeoutException;
+import net.openhft.chronicle.map.ChronicleMap;
+import net.openhft.chronicle.map.ChronicleMapStatelessClientBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * {@link ddp.api.DataCache} implementation specifically for Stateless Chronicle maps.
@@ -81,8 +85,9 @@ final class ChronicleDataCache<K, V> implements DataCache<K, V>
             _logger.info("Attemting to connect to Data Cache '{}'", dataCacheConfiguration);
 
             //TODO DS create stateless client
-            _chronicleMap = ChronicleMapStatelessClientBuilder
-                    .createClientOf(new InetSocketAddress(dataCacheConfiguration.getHostname(), dataCacheConfiguration.getPort()));
+            _chronicleMap = ChronicleMapStatelessClientBuilder.<K, V>of(new InetSocketAddress
+                    (dataCacheConfiguration.getHostname(), dataCacheConfiguration.getPort()))
+                    .putReturnsNull(true).removeReturnsNull(true).create();
 
             _logger.info("Successfully connected to Data Cache '{}'", dataCacheConfiguration);
 

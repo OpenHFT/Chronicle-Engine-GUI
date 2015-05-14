@@ -16,6 +16,7 @@ public class CountersMap {
                 .actualSegments(1)
                 .averageKeySize(16)
                 .entries(256)
+                .putReturnsNull(true)
                 .createPersistedTo(new File(fileName));
     }
 
