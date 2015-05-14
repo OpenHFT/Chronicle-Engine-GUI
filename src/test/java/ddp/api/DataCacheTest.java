@@ -52,7 +52,7 @@ public class DataCacheTest {
         _dataCacheChronicleMapDouble = ChronicleMapBuilder
                 .of(String.class, Double.class)
                 .replication((byte) 1, tcpConfigDouble)
-                .entries(1 << 13)
+           //     .entries(1 << 13)
                .createPersistedTo(fileDouble);
 
         //Create Data Cache String, Double
@@ -71,7 +71,7 @@ public class DataCacheTest {
         _dataCacheChronicleMapString = ChronicleMapBuilder
                 .of(String.class, String.class)
                 .averageValueSize(31457280) //30MB should account for 22MB plus serialisation
-                .entries(1 << 13)
+                .entries(50)
                 .replication((byte) 1, tcpConfigString)
                 .createPersistedTo(fileString);
 
@@ -580,21 +580,24 @@ public class DataCacheTest {
      * @throws URISyntaxException
      */
     private void verifyRuntimeForNumberOfPutAndGetsDifferentKeysStringMap(String resourcePath, int noOfPutAndGets, int maxRuntimeInNanos, boolean useDifferentKeys) throws IOException, URISyntaxException {
-        String key = "BaseKey";
-        StringBuilder keyPutStringBuilder = new StringBuilder(key);
-        StringBuilder keyGetStringBuilder = new StringBuilder(key);
 
         String testString = TestUtils.loadSystemResourceFileToString(resourcePath);
+        String key = "BaseKey";
 
         long startTime = System.nanoTime();
         int count = 0;
         while (System.nanoTime() - startTime < 2e9) {
+            StringBuilder keyPutStringBuilder = new StringBuilder(key);
+            StringBuilder keyGetStringBuilder = new StringBuilder(key);
             count++;
 
             //Put the large string value for the number of keys
             for (int i = 0; i < noOfPutAndGets; i++) {
+                //System.out.println(count + " : " +i + " : " + keyPutStringBuilder.append(i).toString());
+
                 if (useDifferentKeys) {
-                    _dataCacheString.put(keyPutStringBuilder.append(i).toString(), testString);
+                    //_dataCacheString.put(keyPutStringBuilder.append(i).toString(), testString);
+                    _dataCacheString.put(key +i, testString);
                 } else {
                     _dataCacheString.put(key, testString);
                 }
@@ -605,7 +608,7 @@ public class DataCacheTest {
                 String resultString = null;
 
                 if (useDifferentKeys) {
-                    resultString = _dataCacheString.get(keyGetStringBuilder.append(i).toString());
+                    resultString = _dataCacheString.get(key +i);
                 } else {
                     resultString = _dataCacheString.get(key);
                 }
