@@ -1,7 +1,6 @@
 package jp.mufg.chronicle.map;
 
 import jp.mufg.chronicle.map.testclasses.*;
-import net.openhft.chronicle.tools.ChronicleTools;
 import net.openhft.lang.Jvm;
 import org.junit.After;
 import org.junit.Before;
@@ -10,9 +9,10 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
+// TODO add expected performance measures.
 public class ChronicleMapPutPerformanceTestUpdated
 {
-    private String chronicleMapFile = System.getProperty("java.io.tmpdir") + "chroniclemap2.chron";
+    private String chronicleMapFile = Jvm.TMP + "/chroniclemap2";
     private File file;
     private int noOfPuts = 10000000;
     private MapContainer marketDataCache;
@@ -21,9 +21,9 @@ public class ChronicleMapPutPerformanceTestUpdated
     @Before
     public void setUp() throws Exception
     {
-        ChronicleTools.deleteDirOnExit(chronicleMapFile);
-
         file = new File(chronicleMapFile);
+        file.delete();
+        file.deleteOnExit();
 
         marketDataCache = new MapContainer(file);
 //        marketDataCache = new MapContainerEnum(file);
@@ -32,8 +32,7 @@ public class ChronicleMapPutPerformanceTestUpdated
     @After
     public void tearDown() throws Exception
     {
-
-        ChronicleTools.deleteDirOnExit(chronicleMapFile);
+        marketDataCache.close();
     }
 
 //    @Test

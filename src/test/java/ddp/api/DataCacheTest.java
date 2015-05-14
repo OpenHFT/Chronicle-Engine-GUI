@@ -441,6 +441,7 @@ public class DataCacheTest {
      * @throws Exception
      */
     @Test
+    @Ignore("TODO Fix test, resource is missing")
     public void testPutAllRaceConditionWithOtherPuts() throws Exception {
         String testKey = "BaseKey";
         String keyToCheck = testKey + 1;
@@ -617,7 +618,7 @@ public class DataCacheTest {
         long runtimeInNanos = TestUtils.calculateAndPrintRuntime(startTime, count);
 
         //Test that the 50 puts and gets took 1 second or less
-        DdpAssert.assertTimeLimit(maxRuntimeInNanos, runtimeInNanos / count);
+        DdpAssert.assertTimeLimit(maxRuntimeInNanos, runtimeInNanos);
     }
 
     /**
@@ -650,7 +651,7 @@ public class DataCacheTest {
         long runtimeInNanos = TestUtils.calculateAndPrintRuntime(startTime, count);
 
         //Test that the 50 puts and gets took 1 second or less
-        DdpAssert.assertTimeLimit(timeToSaveFileToDiskInNanos * noOfPuts, runtimeInNanos / count);
+        DdpAssert.assertTimeLimit(timeToSaveFileToDiskInNanos * noOfPuts, runtimeInNanos);
     }
 
     /**
@@ -677,7 +678,7 @@ public class DataCacheTest {
 
         TestUtils.deleteTestFile(fileExtension);
 
-        return runtimeInNanos / count;
+        return runtimeInNanos;
     }
 
     /**
@@ -713,6 +714,6 @@ public class DataCacheTest {
         long runtimeInNanos = TestUtils.calculateAndPrintRuntime(startTime, count);
 
         //Test that the 50 puts and gets took 1 second or less
-        DdpAssert.assertTimeLimit(maxRuntimeInNanos, runtimeInNanos / count);
+        DdpAssert.assertTimeLimit(maxRuntimeInNanos, runtimeInNanos);
     }
 }
