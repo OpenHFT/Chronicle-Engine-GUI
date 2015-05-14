@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public class ChronicleMapPutPerformanceTestUpdated
 {
-    private String chronicleMapFile = Jvm.TMP + "/Chronicle/chroniclemap2";
+    private String chronicleMapFile = System.getProperty("java.io.tmpdir") + "chroniclemap2.chron";
     private File file;
     private int noOfPuts = 10000000;
     private MapContainer marketDataCache;
