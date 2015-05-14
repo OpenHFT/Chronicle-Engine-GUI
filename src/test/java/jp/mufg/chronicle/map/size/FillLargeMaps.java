@@ -2,6 +2,7 @@ package jp.mufg.chronicle.map.size;
 
 import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
+import net.openhft.lang.Jvm;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +79,7 @@ public class FillLargeMaps {
         System.out.println("File size in bytes: " + mapFile.length());
 
         if (deleteMapOnExit) {
-            deleteFile(mapFile);
+            mapFile.delete();
         }
         long rate = noOfEntriesToPut * 1000L / (System.currentTimeMillis() - startTime);
         System.out.printf("%nput rate was %.3f million/sec%n%n", rate / 1e6);
@@ -89,17 +90,8 @@ public class FillLargeMaps {
     }
 
     private static File getFile(String fileName) {
-        File file = new File(fileName);
-        deleteFile(file);
-
+        File file = new File(Jvm.TMP + "/" + fileName);
+        file.delete();
         return file;
-    }
-
-    private static void deleteFile(File file) {
-        try {
-            file.delete();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

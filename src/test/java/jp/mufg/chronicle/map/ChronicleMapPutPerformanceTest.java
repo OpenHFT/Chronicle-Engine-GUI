@@ -28,7 +28,7 @@ public class ChronicleMapPutPerformanceTest {
     private File file;
     private int noOfPuts = 10_000_000;
     private Map<QuoteMapKey, Double> marketDataCache;
-    private static final QuoteMapKey[] quoteMapKey = {
+    static final QuoteMapKey[] quoteMapKey = {
             generateExampleQuoteMapKey1(),
             generateExampleQuoteMapKey1b(),
             generateExampleQuoteMapKey2(),
