@@ -1,6 +1,8 @@
 package jp.mufg.chronicle.map;
 
-import jp.mufg.chronicle.map.testclasses.*;
+import ddp.api.TestUtils;
+import jp.mufg.chronicle.map.testclasses.MapContainer;
+import jp.mufg.chronicle.map.testclasses.QuoteMapKey;
 import net.openhft.lang.Jvm;
 import org.junit.After;
 import org.junit.Before;
@@ -8,10 +10,10 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.stream.IntStream;
 
 // TODO add expected performance measures.
-public class ChronicleMapPutPerformanceTestUpdated
-{
+public class ChronicleMapPutPerformanceTestUpdated {
     private String chronicleMapFile = Jvm.TMP + "/chroniclemap2";
     private File file;
     private int noOfPuts = 10000000;
@@ -19,8 +21,7 @@ public class ChronicleMapPutPerformanceTestUpdated
 //    private MapContainerEnum marketDataCache;
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         file = new File(chronicleMapFile);
         file.delete();
         file.deleteOnExit();
@@ -30,8 +31,7 @@ public class ChronicleMapPutPerformanceTestUpdated
     }
 
     @After
-    public void tearDown() throws Exception
-    {
+    public void tearDown() throws Exception {
         marketDataCache.close();
     }
 
@@ -57,14 +57,7 @@ public class ChronicleMapPutPerformanceTestUpdated
 //    }
 
     @Test
-    public void testChronicleMapPuts() throws IOException
-    {
-        putConfiguredNumberOfKeyValues();
-
-        putConfiguredNumberOfKeyValues();
-
-        putConfiguredNumberOfKeyValues();
-
+    public void testChronicleMapPuts() throws IOException {
         putConfiguredNumberOfKeyValues();
     }
 
@@ -84,59 +77,22 @@ public class ChronicleMapPutPerformanceTestUpdated
 //        putConfiguredNumberOfKeyValues();
 //    }
 
-    private long putConfiguredNumberOfKeyValues()
-    {
-        QuoteMapKey quoteMapKey1 = generateExampleQuoteMapKey1();
-
+    private long putConfiguredNumberOfKeyValues() {
         long startTime = System.nanoTime();
 
-
-        new StringBuilder();
-
-        for (double i = 0.0; i < noOfPuts; i++)
-        {
-            marketDataCache.put(quoteMapKey1.getSource().name() , quoteMapKey1.getSupplier().name(), marketDataValue -> {
+        QuoteMapKey[] quoteMapKey = ChronicleMapPutPerformanceTest.quoteMapKey;
+        IntStream.range(0, noOfPuts).parallel().forEach(i -> {
+            QuoteMapKey quoteMapKey1 = quoteMapKey[i % quoteMapKey.length];
+            marketDataCache.put(quoteMapKey1.getSource().name(), quoteMapKey1.getSupplier().name(), marketDataValue -> {
                 marketDataValue.setAsk(10);
                 marketDataValue.setBid(10);
             });
-        }
+        });
 
         return calculateAndPrintRuntime(startTime);
     }
 
-    private QuoteMapKey generateExampleQuoteMapKey1()
-    {
-        MarketDataSupplier supplier = MarketDataSupplier.BROADWAY;
-        MarketDataSource source = MarketDataSource.BLOOMBERG;
-        String id = "Id1";
-        MarketDataField field = MarketDataField.BID_PRICE;
-
-        return new QuoteMapKey(supplier, source, id, field);
-    }
-
-    private QuoteMapKey generateExampleQuoteMapKey2()
-    {
-        MarketDataSupplier supplier = MarketDataSupplier.REUTERS;
-        MarketDataSource source = MarketDataSource.CME;
-        String id = "Id2";
-        MarketDataField field = MarketDataField.ASK_PRICE;
-
-        return new QuoteMapKey(supplier, source, id, field);
-    }
-
-    private long calculateAndPrintRuntime(long startTimeInNanoseconds)
-    {
-        long endNanoTime = System.nanoTime();
-
-        long runtimeNanoSeconds = endNanoTime - startTimeInNanoseconds;
-
-        double runtimeMilliseconds = (double)runtimeNanoSeconds / 1000000.0;
-
-        double runtimeSeconds = runtimeMilliseconds / 1000.0;
-
-        System.out.println("Runtime: " + runtimeNanoSeconds + " nanoseconds | "
-                + runtimeMilliseconds + " milliseconds | " + runtimeSeconds + " seconds");
-
-        return runtimeNanoSeconds;
+    private long calculateAndPrintRuntime(long startTimeInNanoseconds) {
+        return TestUtils.calculateAndPrintRuntime(startTimeInNanoseconds);
     }
 }
