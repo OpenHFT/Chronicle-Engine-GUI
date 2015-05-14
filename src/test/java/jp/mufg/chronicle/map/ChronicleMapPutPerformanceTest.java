@@ -171,7 +171,9 @@ public class ChronicleMapPutPerformanceTest {
 
     private void setMarketDataMapToChronicle() throws IOException {
         marketDataCache = ChronicleMapBuilder
-                .of(QuoteMapKey.class, Double.class)
+                .of(QuoteMapKey.class, Double.class).
+                        putReturnsNull(true).
+                        removeReturnsNull(true)
                 .createPersistedTo(file);
     }
 
