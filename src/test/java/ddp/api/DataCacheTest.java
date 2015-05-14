@@ -52,8 +52,8 @@ public class DataCacheTest {
         _dataCacheChronicleMapDouble = ChronicleMapBuilder
                 .of(String.class, Double.class)
                 .replication((byte) 1, tcpConfigDouble)
-                .entries(1 << 13).create();
-              //  .createPersistedTo(fileDouble);
+                .entries(1 << 13)
+               .createPersistedTo(fileDouble);
 
         //Create Data Cache String, Double
         DataCacheConfiguration dataCacheConfigurationDouble = new DataCacheConfiguration(_dataCacheHostname, _dataCacheIp, _dataCachePortDouble, _dataCacheNameDouble);
