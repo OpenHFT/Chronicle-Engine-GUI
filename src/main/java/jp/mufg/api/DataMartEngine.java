@@ -26,6 +26,7 @@ public class DataMartEngine {
                     if (dataMartWrapper.onIdle()) {
                         //                System.out.println("onIdle");
                         count = -10;
+
                     } else {
 //                        System.out.println("zzzz");
                         if (count <= 0)

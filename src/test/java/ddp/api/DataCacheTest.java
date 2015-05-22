@@ -20,8 +20,6 @@ public class DataCacheTest {
     public static final int MAX_RUNTIME = 2000000000;
     private static String _testMapsDirectory = System.getProperty("java.io.tmpdir");
 
-
-
     //<String, Double> data cache
     private static ChronicleMap<String, Double> _dataCacheChronicleMapDouble;
     private static String _dataCacheFilePathDouble = _testMapsDirectory + "/DdpDataCacheTestFileDouble";
@@ -61,7 +59,6 @@ public class DataCacheTest {
         DataCacheConfiguration dataCacheConfigurationDouble = new DataCacheConfiguration(_dataCacheHostname, _dataCacheIp, _dataCachePortDouble, _dataCacheNameDouble);
 
         _dataCacheDouble = new ChronicleDataCache<String, Double>(dataCacheConfigurationDouble);
-
 
         //Create local Chronicle map String, String
         TestUtils.deleteFile(_dataCacheFilePathString);
@@ -139,7 +136,6 @@ public class DataCacheTest {
 
         EasyMock.verify(dataCacheEventListener);
 
-
         //Test that the onPut methods with the updated value and old value set are triggered.
         EasyMock.reset(dataCacheEventListener);
 
@@ -151,7 +147,6 @@ public class DataCacheTest {
         _dataCacheDouble.put(key, valueUpdated);
 
         EasyMock.verify(dataCacheEventListener);
-
 
         //Test that the onRemove methods are called upon removal.
         EasyMock.reset(dataCacheEventListener);
@@ -196,7 +191,6 @@ public class DataCacheTest {
 
         EasyMock.verify(dataCacheEventListener);
 
-
         //Test that the onRemove methods are called upon removal.
         EasyMock.reset(dataCacheEventListener);
 
@@ -236,7 +230,6 @@ public class DataCacheTest {
         _dataCacheDouble.put(key, value);
 
         EasyMock.verify(dataCacheEventListener);
-
 
         //Remove the event listener and confirm no methods are triggered
         EasyMock.reset(dataCacheEventListener);
@@ -281,7 +274,6 @@ public class DataCacheTest {
         //Verify the events
         EasyMock.verify(dataCacheEventListener);
 
-
         //Verify the order for remove
         EasyMock.reset(dataCacheEventListener);
     }
@@ -301,7 +293,6 @@ public class DataCacheTest {
         String resourcePath = "ServerLiborCurves" + File.separator + "JPYValEnv.xml";
         int noOfPutAndGets = 50;
         int maxRuntime = MAX_RUNTIME;
-
 
         verifyRuntimeForNumberOfPutAndGetsDifferentKeysStringMap(resourcePath, noOfPutAndGets, maxRuntime, true);
     }
@@ -337,13 +328,11 @@ public class DataCacheTest {
             int maxRuntime = 100_000_000;//0.1s
 
             verifyRuntimeForNumberOfPutAndGetsDifferentKeysDoubleMap(resourcePath, noOfPutAndGets, maxRuntime);
-
         }
         {
             String resourcePath = "ServerLiborCurves" + File.separator + "JPYValEnv.xml";
             int noOfPutAndGets = 50;
             int maxRuntime = MAX_RUNTIME;
-
 
             verifyRuntimeForNumberOfPutAndGetsDifferentKeysStringMap(resourcePath, noOfPutAndGets, maxRuntime, true);
         }
@@ -484,6 +473,7 @@ public class DataCacheTest {
 
                             if (valueFromMap != null && valueFromMap.length() > 20) {
                                 keepRunning = false;
+
                             } else {
                                 otherStatelessClient.put(keyToCheck, "ShortTestValue");
 
@@ -604,6 +594,7 @@ public class DataCacheTest {
                 if (useDifferentKeys) {
                     //_dataCacheString.put(keyPutStringBuilder.append(i).toString(), testString);
                     _dataCacheString.put(key +i, testString);
+
                 } else {
                     _dataCacheString.put(key, testString);
                 }
@@ -615,6 +606,7 @@ public class DataCacheTest {
 
                 if (useDifferentKeys) {
                     resultString = _dataCacheString.get(key +i);
+
                 } else {
                     resultString = _dataCacheString.get(key);
                 }

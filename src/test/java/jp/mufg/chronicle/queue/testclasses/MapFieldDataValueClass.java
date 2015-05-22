@@ -1,6 +1,6 @@
 package jp.mufg.chronicle.queue.testclasses;
 
-import java.util.*;
+import java.util.Map;
 
 /**
  * Created by daniels on 20/02/2015.
@@ -14,5 +14,4 @@ public interface MapFieldDataValueClass
     Map<String, Double> getMap();
 
     void setMap(Map<String, Double> map);
-
 }

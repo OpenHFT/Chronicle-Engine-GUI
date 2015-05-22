@@ -61,7 +61,6 @@ public class FillLargeMaps {
                         .forEach(i -> map2.put(Integer.toString(i), value));
 
                 System.out.println("Keys put!, # of keys: " + map.size());
-
             } catch (Exception e) {
                 int size = map.size();
                 System.out.println("Exception caught. size = " + size);

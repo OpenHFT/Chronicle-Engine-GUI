@@ -73,7 +73,6 @@ public class DataMartEngineTest {
                 verify(calculator2);
                 break;
             } catch (AssertionError keepTrying) {
-
             }
         }
 
@@ -130,8 +129,6 @@ public class DataMartEngineTest {
             System.out.println("Time for iteration " + j + " was " + (System.currentTimeMillis()-start));
         }
 
-
         engine.shutdown();
-
     }
 }

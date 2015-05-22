@@ -1,6 +1,5 @@
 package jp.mufg.chronicle.map.testclasses;
 
-
 public enum MarketDataSource
 {
     CME,

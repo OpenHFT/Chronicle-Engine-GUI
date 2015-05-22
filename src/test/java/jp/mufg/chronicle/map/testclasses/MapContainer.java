@@ -24,7 +24,6 @@ public class MapContainer implements AutoCloseable
         InetSocketAddress mypc1 = new InetSocketAddress( "mypc",8081);
         InetSocketAddress mypc2 = new InetSocketAddress( "mypc",8082);
 
-
         TcpTransportAndNetworkConfig  config1 = TcpTransportAndNetworkConfig.of(8082,
                 mypc1,mypc2);
 
@@ -78,14 +77,12 @@ public class MapContainer implements AutoCloseable
 //
 //    }
 
-
     public void putAsk(CharSequence source, CharSequence supplier, CharSequence id, double ask)
     {
 
         _marketDataKey.setSource(source);
         _marketDataKey.setSupplier(supplier);
         _marketDataKey.setId(id);
-
 
         try (MapKeyContext<MarketDataKey, MarketDataValue> context = marketDataCache.acquireContext(_marketDataKey, _marketDataValue))
         {

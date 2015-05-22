@@ -13,7 +13,5 @@ public class MarketDataUpdateTest {
         mdu.setAsk(102);
         mdu.setAskq(2e6);
         System.out.println(mdu);
-
     }
-
 }

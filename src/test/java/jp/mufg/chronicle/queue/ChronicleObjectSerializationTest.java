@@ -22,7 +22,6 @@ public class ChronicleObjectSerializationTest
     EnumTestInterface writer;
     FromChronicle<EnumTestInterfaceImpl> reader;
 
-
     @Before
     public void setUp() throws Exception
     {
@@ -40,7 +39,6 @@ public class ChronicleObjectSerializationTest
     public void tearDown() throws Exception
     {
         ChronicleTools.deleteDirOnExit(chronicleQueueBase);
-
     }
 
     @Test
@@ -291,7 +289,6 @@ public class ChronicleObjectSerializationTest
 
         Assert.assertFalse(tailer.nextIndex());
     }
-
 
 //    @Test
 //    public void test()

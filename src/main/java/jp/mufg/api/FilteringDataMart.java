@@ -53,7 +53,6 @@ public class FilteringDataMart implements DirectDataMart {
 
     @Override
     public void startup(String target) {
-
     }
 
     @Override
@@ -100,5 +99,4 @@ public class FilteringDataMart implements DirectDataMart {
             sourceToId.remove(sei);
     }
 }
-
 

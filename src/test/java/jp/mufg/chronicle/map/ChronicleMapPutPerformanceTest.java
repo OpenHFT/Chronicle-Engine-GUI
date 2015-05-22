@@ -140,6 +140,7 @@ public class ChronicleMapPutPerformanceTest {
 
                 if (!marketDataCache.containsKey(quoteMapKeyTemp)) {
                     marketDataCache.put(new QuoteMapKey(quoteMapKeyTemp.getSupplier(), quoteMapKeyTemp.getSource(), id + (i % 200), quoteMapKeyTemp.getField()), (double) i);
+
                 } else {
                     marketDataCache.put(quoteMapKeyTemp, (double) i);
                 }

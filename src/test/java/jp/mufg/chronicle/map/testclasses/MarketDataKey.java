@@ -1,6 +1,6 @@
 package jp.mufg.chronicle.map.testclasses;
 
-import net.openhft.lang.model.constraints.*;
+import net.openhft.lang.model.constraints.MaxSize;
 
 /**
  * Created by daniels on 17/03/2015.
@@ -18,5 +18,4 @@ public interface MarketDataKey
      CharSequence getSupplier();
 
      void setSupplier(@MaxSize(20) CharSequence supplier);
-
 }

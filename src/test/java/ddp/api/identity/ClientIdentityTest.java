@@ -1,8 +1,7 @@
 package ddp.api.identity;
 
-import org.junit.*;
-
-import static org.junit.Assert.*;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ClientIdentityTest
 {
@@ -32,7 +31,6 @@ public class ClientIdentityTest
 
         //Test whether check against actual password returns true
         Assert.assertTrue(clientIdentity.checkPassword(password));
-
 
         //Create identity with password set to null.
         ClientIdentity clientIdentityNullPwd = new ClientIdentity(clientId, null, entity, hostname);

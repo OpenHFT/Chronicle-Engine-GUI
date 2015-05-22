@@ -62,7 +62,6 @@ public class ChronicleDataMartWrapperTest {
         for (int i = 0; i < 3; i++) {
             while (dataMartWrapper.runOnce()/* |
                     chronicleDataMart2.runOnce()*/) {
-
             }
             if (!dataMartWrapper.onIdle())
                 Thread.sleep(10);
