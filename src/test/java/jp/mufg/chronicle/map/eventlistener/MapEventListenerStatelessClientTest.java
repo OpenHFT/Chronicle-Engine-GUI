@@ -14,6 +14,7 @@ import org.junit.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static net.openhft.chronicle.engine2.Chassis.*;
@@ -32,7 +33,7 @@ public class MapEventListenerStatelessClientTest {
     private final String _value1 = new String(new char[2 << 20]);//;"TestValue1";
     private final String _value2;
 
-    private static int _noOfEventsTriggered = 0;
+    private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
 
     public MapEventListenerStatelessClientTest() {
         char[] value = new char[2 << 20];
@@ -50,7 +51,7 @@ public class MapEventListenerStatelessClientTest {
 
     @Before
     public void setUp() throws Exception {
-        _noOfEventsTriggered = 0;
+        _noOfEventsTriggered.set(0);
 
         _StringStringMap = Chassis.acquireMap("chronicleMapString?putReturnsNull=true", String.class, String.class);
         _StringStringMap.clear();
@@ -98,7 +99,6 @@ public class MapEventListenerStatelessClientTest {
         int noOfIterations = 50;
 
         _StringStringMap.put(testKey, _value2);
-        _noOfEventsTriggered = 0;
 
         Consumer<String> consumer = (x) -> _StringStringMap.replace(testKey, x);
 
@@ -201,7 +201,7 @@ public class MapEventListenerStatelessClientTest {
     private void testIterateAndAlternate(Consumer<String> consumer1, Consumer<String> consumer2, int noOfIterations) {
         long startTime = System.nanoTime();
         int count = 0;
-        while (System.nanoTime() - startTime < 500e9) {
+        while (System.nanoTime() - startTime < 5e9) {
             for (int i = 0; i < noOfIterations; i++) {
                 if (i % 2 == 0) {
                     consumer1.accept(_value1);
@@ -220,18 +220,18 @@ public class MapEventListenerStatelessClientTest {
         for (int i = 0; i < 100; i++) {
             try {
                 Thread.sleep(20);
-                if (_noOfEventsTriggered >= noOfIterations * count) break;
+                if (_noOfEventsTriggered.get() >= noOfIterations * count) break;
             } catch (InterruptedException e) {
                 throw new AssertionError(e);
             }
         }
-        Assert.assertEquals(noOfIterations * count, _noOfEventsTriggered);
+        Assert.assertEquals(noOfIterations * count, _noOfEventsTriggered.get(), count);
     }
 
     static class ChronicleTestEventListener implements TopicSubscriber<String, String> {
         @Override
         public void onMessage(String topic, String message) {
-            _noOfEventsTriggered++;
+            _noOfEventsTriggered.incrementAndGet();
         }
     }
 }
