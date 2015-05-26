@@ -201,7 +201,7 @@ public class MapEventListenerStatelessClientTest {
     private void testIterateAndAlternate(Consumer<String> consumer1, Consumer<String> consumer2, int noOfIterations) {
         long startTime = System.nanoTime();
         int count = 0;
-        while (System.nanoTime() - startTime < 5e9) {
+        while (System.nanoTime() - startTime < 500e9) {
             for (int i = 0; i < noOfIterations; i++) {
                 if (i % 2 == 0) {
                     consumer1.accept(_value1);
