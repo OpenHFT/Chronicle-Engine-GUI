@@ -1,6 +1,6 @@
 package jp.mufg.chronicle.map.eventlistener;
 
-import jp.mufg.TestUtils;
+import ddp.api.TestUtils;
 import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.lang.Jvm;
 import net.openhft.lang.values.StringValue;

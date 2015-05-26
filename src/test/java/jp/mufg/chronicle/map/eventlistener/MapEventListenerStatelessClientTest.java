@@ -1,12 +1,14 @@
 package jp.mufg.chronicle.map.eventlistener;
 
-import jp.mufg.TestUtils;
+import ddp.api.TestUtils;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.engine2.Chassis;
 import net.openhft.chronicle.engine2.api.Session;
 import net.openhft.chronicle.engine2.api.TopicSubscriber;
 import net.openhft.chronicle.engine2.api.map.KeyValueStore;
 import net.openhft.chronicle.engine2.map.FilePerKeyValueStore;
+import net.openhft.chronicle.engine2.map.VanillaStringStringKeyValueStore;
+import net.openhft.chronicle.engine2.session.StringStringKeyValueStore;
 import org.junit.*;
 
 import java.io.IOException;
@@ -42,6 +44,7 @@ public class MapEventListenerStatelessClientTest {
     public static void beforeClass() throws IOException {
         resetChassis();
 
+        registerFactory("", StringStringKeyValueStore.class, VanillaStringStringKeyValueStore::new);
         registerFactory("", KeyValueStore.class, context -> new FilePerKeyValueStore(context.basePath(_mapBasePath)));
     }
 
@@ -197,16 +200,19 @@ public class MapEventListenerStatelessClientTest {
      */
     private void testIterateAndAlternate(Consumer<String> consumer1, Consumer<String> consumer2, int noOfIterations) {
         long startTime = System.nanoTime();
-
-        for (int i = 0; i < noOfIterations; i++) {
-            if (i % 2 == 0) {
-                consumer1.accept(_value1);
-            } else {
-                consumer2.accept(_value2);
+        int count = 0;
+        while (System.nanoTime() - startTime < 5e9) {
+            for (int i = 0; i < noOfIterations; i++) {
+                if (i % 2 == 0) {
+                    consumer1.accept(_value1);
+                } else {
+                    consumer2.accept(_value2);
+                }
             }
+            count++;
         }
 
-        double runtime = TestUtils.calculateAndPrintRuntime(startTime);
+        double runtime = TestUtils.calculateAndPrintRuntime(startTime, count);
 
         //Test that 50 updates takes less than 1 second
 //        Assert.assertTrue(runtime < 1000000000);
@@ -214,12 +220,12 @@ public class MapEventListenerStatelessClientTest {
         for (int i = 0; i < 100; i++) {
             try {
                 Thread.sleep(20);
-                if (_noOfEventsTriggered == noOfIterations) break;
+                if (_noOfEventsTriggered >= noOfIterations * count) break;
             } catch (InterruptedException e) {
                 throw new AssertionError(e);
             }
         }
-        Assert.assertEquals(noOfIterations, _noOfEventsTriggered);
+        Assert.assertEquals(noOfIterations * count, _noOfEventsTriggered);
     }
 
     static class ChronicleTestEventListener implements TopicSubscriber<String, String> {
