@@ -1,7 +1,6 @@
 package jp.mufg.chronicle.map.eventlistener;
 
 import ddp.api.TestUtils;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.engine2.Chassis;
 import net.openhft.chronicle.engine2.api.Session;
 import net.openhft.chronicle.engine2.api.TopicSubscriber;
@@ -23,7 +22,7 @@ import static net.openhft.chronicle.engine2.Chassis.*;
  * Created by daniels on 31/03/2015.
  */
 public class MapEventListenerStatelessClientTest {
-    private static final String _mapBasePath = OS.TMP + "/Chronicle";
+    private static final String _mapBasePath = "Chronicle"; //OS.TMP + "/Chronicle";
 
     private ChronicleTestEventListener _chronicleTestEventListener;
 
