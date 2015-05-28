@@ -36,7 +36,7 @@ public class MachineInfoUtils {
 
             try {
                 return InetAddress.getLocalHost().getHostName();
-            } catch (UnknownHostException e) {
+            } catch (UnknownHostException e1) {
                 return "localhost";
             }
         }
