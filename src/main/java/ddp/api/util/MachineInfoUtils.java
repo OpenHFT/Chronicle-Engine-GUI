@@ -8,16 +8,14 @@ import java.net.UnknownHostException;
 /**
  * Utilities to help get information about the host machine.
  */
-public class MachineInfoUtils
-{
+public class MachineInfoUtils {
     /**
-     * Get the hostname of the machine where the process is running as defined by environment variables.
-     * Environment independent.
+     * Get the hostname of the machine where the process is running as defined by environment
+     * variables. Environment independent.
      *
      * @return Hostname of machine where the process is running.
      */
-    public static String getHostname()
-    {
+    public static String getHostname() {
         try {
             InetAddress localHost = InetAddress.getLocalHost();
             return localHost.getHostName();
@@ -36,10 +34,11 @@ public class MachineInfoUtils
                 return host;
             }
 
-        try {
-            return InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            return "localhost";
+            try {
+                return InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                return "localhost";
+            }
         }
     }
 }
