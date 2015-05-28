@@ -26,14 +26,14 @@ import static net.openhft.chronicle.engine2.Chassis.*;
 /**
  * Created by daniels on 31/03/2015.
  */
-@Ignore("todo fix")
+
 public class ChronicleMapEventListenerStatelessClientTest {
     private static final String _mapBasePath = "Chronicle"; //OS.TMP + "/Chronicle";
 
-    private ChronicleTestEventListener _chronicleTestEventListener;
+    private static ChronicleTestEventListener _chronicleTestEventListener;
 
-    private Map<String, String> _StringStringMap;
-    private Map<String, String> _StringStringMapClient;
+    private static Map<String, String> _StringStringMap;
+    private static Map<String, String> _StringStringMapClient;
 
     private final String _value1 = new String(new char[2 << 20]);//;"TestValue1";
     private final String _value2;
@@ -53,14 +53,9 @@ public class ChronicleMapEventListenerStatelessClientTest {
         registerFactory("", StringMarshallableKeyValueStore.class, VanillaStringMarshallableKeyValueStore::new);
         registerFactory("", KeyValueStore.class, context -> new ChronicleMapKeyValueStore(
                 context.averageValueSize(2 << 20).entries(50).wireType(writeType)));
-    }
-
-    @Before
-    public void setUp() throws Exception {
         _noOfEventsTriggered.set(0);
 
         _StringStringMap = Chassis.acquireMap("chronicleMapString?putReturnsNull=true", String.class, String.class);
-        _StringStringMap.clear();
 
         _chronicleTestEventListener = new ChronicleTestEventListener();
 
@@ -68,13 +63,19 @@ public class ChronicleMapEventListenerStatelessClientTest {
         // TODO change this to be a remote session.
         Session clientSession = defaultSession();
         _StringStringMapClient = clientSession.acquireMap("chronicleMapString", String.class, String.class);
-        clientSession.registerTopicSubscriber("chronicleMapString", String.class, String.class, _chronicleTestEventListener);
+        clientSession.registerTopicSubscriber("chronicleMapString", String.class,
+                String.class, _chronicleTestEventListener);
+
+    }
+
+    @Before
+    public void setUp() throws Exception {
 
     }
 
     @After
     public void tearDown() throws Exception {
-        _StringStringMap.clear();
+//        _StringStringMap.clear();
         Chassis.defaultSession().close();
     }
 
@@ -205,6 +206,7 @@ public class ChronicleMapEventListenerStatelessClientTest {
      * @param noOfIterations Number of iterations to perform.
      */
     private void testIterateAndAlternate(Consumer<String> consumer1, Consumer<String> consumer2, int noOfIterations) {
+        _noOfEventsTriggered.set(0);
         long startTime = System.nanoTime();
         int count = 0;
         while (System.nanoTime() - startTime < 5e9) {
@@ -217,20 +219,7 @@ public class ChronicleMapEventListenerStatelessClientTest {
             }
             count++;
         }
-
-        double runtime = TestUtils.calculateAndPrintRuntime(startTime, count);
-
-        //Test that 50 updates takes less than 1 second
-//        Assert.assertTrue(runtime < 1000000000);
-
-        for (int i = 0; i < 100; i++) {
-            try {
-                Thread.sleep(20);
-                if (_noOfEventsTriggered.get() >= noOfIterations * count) break;
-            } catch (InterruptedException e) {
-                throw new AssertionError(e);
-            }
-        }
+        TestUtils.calculateAndPrintRuntime(startTime, count);
         Assert.assertEquals(noOfIterations * count, _noOfEventsTriggered.get(), count);
     }
 
