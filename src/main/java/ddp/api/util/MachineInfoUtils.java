@@ -1,8 +1,6 @@
 package ddp.api.util;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
 /**
@@ -33,12 +31,12 @@ public class MachineInfoUtils {
             if (host != null) {
                 return host;
             }
-
-            try {
-                return InetAddress.getLocalHost().getHostName();
-            } catch (UnknownHostException e1) {
-                return "localhost";
-            }
         }
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            return "localhost";
+        }
+
     }
 }

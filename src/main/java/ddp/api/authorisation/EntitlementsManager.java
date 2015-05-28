@@ -1,10 +1,16 @@
 package ddp.api.authorisation;
 
-import ddp.api.identity.*;
-import ddp.api.security.*;
-import org.slf4j.*;
+import ddp.api.identity.ClientIdentity;
+import ddp.api.identity.IdentityProvider;
+import ddp.api.security.AdminAccessLevel;
+import ddp.api.security.DataAccessLevel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Manages entitlements.
@@ -31,7 +37,7 @@ public class EntitlementsManager
     }
 
     /**
-     * Get entitlement for the given user identity on the Data Cache with the given name.
+     * Get entitlement for the given user identity on the Data Cache with the given fullName.
      * @param dataCacheName Name of data cache to get user entitlement for.
      * @param clientIdentity Identity for which to get entitlement on given Data Cache.
      * @return The giver users entitlement on the given Data Cache.
