@@ -17,6 +17,7 @@ import org.junit.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -221,6 +222,12 @@ public class ChronicleMapEventListenerStatelessClientTest {
         }
         TestUtils.calculateAndPrintRuntime(startTime, count);
         Assert.assertEquals(noOfIterations * count, _noOfEventsTriggered.get(), count);
+        try {
+            //Give it a chance to print the times.
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     static class ChronicleTestEventListener implements TopicSubscriber<String, String> {
