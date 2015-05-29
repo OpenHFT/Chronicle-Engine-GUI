@@ -63,7 +63,7 @@ public class ChronicleMapEventListenerStatelessClientTest {
 
         // TODO change this to be a remote session.
         Session clientSession = defaultSession();
-        _StringStringMapClient = clientSession.acquireMap("chronicleMapString", String.class, String.class);
+        //_StringStringMapClient = clientSession.acquireMap("chronicleMapString", String.class, String.class);
         clientSession.registerTopicSubscriber("chronicleMapString", String.class,
                 String.class, _chronicleTestEventListener);
 
