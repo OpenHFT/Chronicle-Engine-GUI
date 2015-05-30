@@ -9,7 +9,6 @@ import net.openhft.chronicle.engine2.api.map.KeyValueStore;
 import net.openhft.chronicle.engine2.api.map.StringMarshallableKeyValueStore;
 import net.openhft.chronicle.engine2.map.ChronicleMapKeyValueStore;
 import net.openhft.chronicle.engine2.map.VanillaStringMarshallableKeyValueStore;
-
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
 import org.junit.*;
@@ -51,7 +50,7 @@ public class ChronicleMapEventListenerStatelessClientTest {
         resetChassis();
         Function<Bytes, Wire> writeType = TextWire::new;
         registerFactory("", StringMarshallableKeyValueStore.class, VanillaStringMarshallableKeyValueStore::new);
-        registerFactory("", KeyValueStore.class, context -> new ChronicleMapKeyValueStore(
+        registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) -> new ChronicleMapKeyValueStore(
                 context.averageValueSize(2 << 20).entries(50).wireType(writeType)));
     }
 

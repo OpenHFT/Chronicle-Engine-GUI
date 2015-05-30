@@ -44,7 +44,7 @@ public class FastMapEventListenerStatelessClientTest {
         resetChassis();
 
         registerFactory("", StringStringKeyValueStore.class, VanillaStringStringKeyValueStore::new);
-        registerFactory("", KeyValueStore.class, context -> new FilePerKeyValueStore(context.basePath(_mapBasePath)));
+        registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) -> new FilePerKeyValueStore(context.basePath(_mapBasePath), asset));
     }
 
     @Before

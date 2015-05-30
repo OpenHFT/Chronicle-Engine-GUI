@@ -8,7 +8,6 @@ import net.openhft.chronicle.engine2.api.map.KeyValueStore;
 import net.openhft.chronicle.engine2.api.map.StringStringKeyValueStore;
 import net.openhft.chronicle.engine2.map.FilePerKeyValueStore;
 import net.openhft.chronicle.engine2.map.VanillaStringStringKeyValueStore;
-
 import org.junit.*;
 
 import java.io.IOException;
@@ -47,7 +46,7 @@ public class MapEventListenerStatelessClientTest {
         resetChassis();
 
         registerFactory("", StringStringKeyValueStore.class, VanillaStringStringKeyValueStore::new);
-        registerFactory("", KeyValueStore.class, context -> new FilePerKeyValueStore(context.basePath(_mapBasePath)));
+        registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) -> new FilePerKeyValueStore(context.basePath(_mapBasePath), asset));
     }
 
     @Before
