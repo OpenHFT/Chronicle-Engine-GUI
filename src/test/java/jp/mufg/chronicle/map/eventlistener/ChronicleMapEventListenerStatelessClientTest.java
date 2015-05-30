@@ -52,7 +52,7 @@ public class ChronicleMapEventListenerStatelessClientTest {
         Function<Bytes, Wire> writeType = TextWire::new;
         registerFactory("", StringMarshallableKeyValueStore.class, VanillaStringMarshallableKeyValueStore::new);
         registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) -> new ChronicleMapKeyValueStore(
-                context.averageValueSize(2 << 20).entries(50).wireType(writeType)));
+                context.averageValueSize(2 << 20).entries(50).wireType(writeType), asset));
         _noOfEventsTriggered.set(0);
 
         _StringStringMap = Chassis.acquireMap("chronicleMapString?putReturnsNull=true", String.class, String.class);
