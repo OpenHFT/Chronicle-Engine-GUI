@@ -2,7 +2,7 @@ package jp.mufg.chronicle.map.eventlistener;
 
 import ddp.api.TestUtils;
 import net.openhft.chronicle.engine2.Chassis;
-import net.openhft.chronicle.engine2.api.Session;
+import net.openhft.chronicle.engine2.api.AssetTree;
 import net.openhft.chronicle.engine2.api.TopicSubscriber;
 import net.openhft.chronicle.engine2.api.map.KeyValueStore;
 import net.openhft.chronicle.engine2.api.map.StringStringKeyValueStore;
@@ -60,9 +60,9 @@ public class MapEventListenerStatelessClientTest {
 
 
         // TODO change this to be a remote session.
-        Session clientSession = defaultSession();
-        _StringStringMapClient = clientSession.acquireMap("chronicleMapString", String.class, String.class);
-        clientSession.registerTopicSubscriber("chronicleMapString", String.class, String.class, _chronicleTestEventListener);
+        AssetTree clientAssetTree = defaultSession();
+        _StringStringMapClient = clientAssetTree.acquireMap("chronicleMapString", String.class, String.class);
+        clientAssetTree.registerTopicSubscriber("chronicleMapString", String.class, String.class, _chronicleTestEventListener);
 
     }
 
