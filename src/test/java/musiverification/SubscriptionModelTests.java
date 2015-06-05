@@ -1,14 +1,18 @@
 package musiverification;
 
 import ddp.api.*;
+import junit.framework.*;
 import net.openhft.chronicle.engine2.*;
 import net.openhft.chronicle.engine2.api.*;
 import net.openhft.chronicle.engine2.api.map.*;
 import org.easymock.*;
 import org.junit.*;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.*;
 import java.util.function.*;
+import java.util.stream.*;
 
 public class SubscriptionModelTests
 {
@@ -51,9 +55,6 @@ public class SubscriptionModelTests
         MapEventListener<String, String> mapEventListener = EasyMock.createStrictMock(MapEventListener.class);
         _clientAssetTree.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
 
-        String testKeyBase = "Key-sub-";
-        String testValueBase = "Value-";
-
         int noOfKeys = 5;
         int noOfValues = 5;
 
@@ -62,98 +63,30 @@ public class SubscriptionModelTests
         //Setup insert events for all keys
         iterateAndExecuteConsumer((k, v) -> mapEventListener.insert(k, v), noOfKeys, _mapName, _mapName);
 
-//        for (int i = 0; i < noOfKeys; i++)
-//        {
-////            mapEventListener.insert(String.format("%s%s", testKeyBase, i), String.format("%s%s:%s", testValueBase, i, i - noOfKeys));
-//            mapEventListener.insert(TestUtils.getKey(_mapName, i),  TestUtils.getValue(_mapName, i));
-//
-//            System.out.println("Mock insert: " + TestUtils.getKey(_mapName, i) + " | " + TestUtils.getValue(_mapName, i));
-//        }
-
         //Setup update events for all keys
         for (int i = 0; i < noOfKeys * noOfValues; i++)
         {
-            int keyId = i % noOfKeys;
-            int value = i - noOfKeys;
-            String key = String.format("%s%s", testKeyBase, keyId);
-            String oldValue = String.format("%s%s:%s", testValueBase, keyId, value);
-            String newValue = String.format("%s%s:%s", testValueBase, keyId, i);
-
-//            mapEventListener.update(key, oldValue, newValue);
             mapEventListener.update(TestUtils.getKey(_mapName, i % noOfKeys), TestUtils.getValue(_mapName, i), TestUtils.getValue(_mapName, i + noOfKeys));
-
-            System.out.println("Mock UPDATE: " + TestUtils.getKey(_mapName, i % noOfKeys) + " | " + TestUtils.getValue(_mapName, i) + " | " + TestUtils.getValue(_mapName, i + noOfKeys));
         }
 
         //Setup remove events for all keys
         iterateAndExecuteConsumer((k, v) -> mapEventListener.remove(k, v), c -> c, c -> noOfKeys * noOfValues + c, noOfKeys, _mapName, _mapName);
-//        for (int i = 0; i < noOfKeys; i++)
-//        {
-//            String key = String.format("%s%s", testKeyBase, i);
-//            String newValue = String.format("%s%s:%s", testValueBase, i, noOfKeys * noOfValues - noOfKeys + i);
-//
-////            mapEventListener.remove(key, newValue);
-//
-//            System.out.println("Mock REMOVE: " + TestUtils.getKey(_mapName, i) + " | " + TestUtils.getValue(_mapName, noOfKeys * noOfValues + i));
-//            mapEventListener.remove(TestUtils.getKey(_mapName, i), TestUtils.getValue(_mapName, noOfKeys * noOfValues + i));
-//        }
 
         EasyMock.replay(mapEventListener);
 
         //Perform all initial puts (insert events)
         iterateAndExecuteConsumer((k, v) -> _stringStringMap.put(k, v), noOfKeys, _mapName, _mapName);
 
-//        for (int i = 0; i < noOfKeys; i++)
-//        {
-////            _stringStringMap.put(String.format("%s%s", testKeyBase, i), String.format("%s%s:%s", testValueBase, i, i - noOfKeys));
-//
-//            System.out.println("Real insert: " + TestUtils.getKey(_mapName, i) + " | " + TestUtils.getValue(_mapName, i));
-//
-//            _stringStringMap.put(TestUtils.getKey(_mapName, i), TestUtils.getValue(_mapName, i));
-//        }
-
         //Perform all puts (update events)
         for (int i = 0; i < noOfKeys * noOfValues; i++)
         {
-            int keyId = i % noOfKeys;
-            String key = String.format("%s%s", testKeyBase, keyId);
-            String newValue = String.format("%s%s:%s", testValueBase, keyId, i);
-
-            System.out.println("Mock UPDATE: " + TestUtils.getKey(_mapName, i % noOfKeys) + " | " + "?" + " | " + TestUtils.getValue(_mapName, i + noOfKeys));
-
-//            _stringStringMap.put(key, newValue);
             _stringStringMap.put(TestUtils.getKey(_mapName, i % noOfKeys), TestUtils.getValue(_mapName, i + noOfKeys));
         }
 
         //Perform all remove (remove events)
-        iterateAndExecuteConsumer((k, v) -> _stringStringMap.remove(k),noOfKeys, _mapName, _mapName);
-//        for (int i = 0; i < noOfKeys; i++)
-//        {
-//            String key = String.format("%s%s", testKeyBase, i);
-//
-////            _stringStringMap.remove(key);
-//
-//            System.out.println("Real REMOVE: " + TestUtils.getKey(_mapName, i));
-//            _stringStringMap.remove(TestUtils.getKey(_mapName, i));
-//        }
+        iterateAndExecuteConsumer((k, v) -> _stringStringMap.remove(k), noOfKeys, _mapName, _mapName);
 
         EasyMock.verify(mapEventListener);
-    }
-
-    private void iterateAndExecuteConsumer(BiConsumer<String, String> methodToExecute, Function<Integer, Integer> keyManipulation, Function<Integer, Integer> valueManipulation, int noOfKeys, String keyBase, String valueBase)
-    {
-        // TODO DS use int stream
-        for (int i = 0; i < noOfKeys; i++)
-        {
-            methodToExecute.accept(TestUtils.getKey(keyBase, keyManipulation.apply(i)), TestUtils.getValue(valueBase, valueManipulation.apply(i)));
-        }
-    }
-
-    //TODO DS move
-    //Setup insert events for all keys
-    private void iterateAndExecuteConsumer(BiConsumer<String, String> methodToExecute, int noOfKeys, String keyBase, String valueBase)
-    {
-        iterateAndExecuteConsumer(methodToExecute, c -> c, c -> c, noOfKeys, keyBase, valueBase);
     }
 
     /**
@@ -233,39 +166,34 @@ public class SubscriptionModelTests
         TopicSubscriber<String, String> topicSubscriberMock = EasyMock.createStrictMock(TopicSubscriber.class);
         _clientAssetTree.registerTopicSubscriber(_mapName, String.class, String.class, topicSubscriberMock);
 
-        String testKeyBase = "Key-sub-";
-        String testValueBase = "Value-";
-
         int noOfKeys = 5;
         int noOfValues = 5;
 
         //Setup the mock with the expected updates
-        for (int i = 0; i < noOfKeys * noOfValues; i++)
-        {
-            int keyId = i % noOfKeys;
-            topicSubscriberMock.onMessage(String.format("%s%s", testKeyBase, keyId), String.format("%s%s:%s", testValueBase, keyId, i));
-        }
+        iterateAndExecuteConsumer((k, v) -> {
+            try
+            {
+                topicSubscriberMock.onMessage(k, v);
+            }
+            catch (InvalidSubscriberException e)
+            {
+                TestCase.fail("Exception thrown");
+            }
+        }, c -> c % noOfKeys, c -> c, noOfKeys * noOfValues, _mapName, _mapName);
 
         //Setup the mock with the removes
         for (int i = 0; i < noOfKeys; i++)
         {
-            topicSubscriberMock.onMessage(String.format("%s%s", testKeyBase, i), null);
+            topicSubscriberMock.onMessage(TestUtils.getKey(_mapName, i), null);
         }
 
         EasyMock.replay(topicSubscriberMock);
 
         //Perform the updates
-        for (int i = 0; i < noOfKeys * noOfValues; i++)
-        {
-            int keyId = i % noOfKeys;
-            _stringStringMap.put(String.format("%s%s", testKeyBase, keyId), String.format("%s%s:%s", testValueBase, keyId, i));
-        }
+        iterateAndExecuteConsumer((k, v) -> _stringStringMap.put(k, v), c -> c % noOfKeys, c -> c, noOfKeys * noOfValues, _mapName, _mapName);
 
         //Perform the removes
-        for (int i = 0; i < noOfKeys; i++)
-        {
-            _stringStringMap.remove(String.format("%s%s", testKeyBase, i));
-        }
+        iterateAndExecuteConsumer((k, v) -> _stringStringMap.remove(k), noOfKeys, _mapName, _mapName);
 
         EasyMock.verify(topicSubscriberMock);
     }
@@ -328,6 +256,36 @@ public class SubscriptionModelTests
         Assert.assertNull(map2.get(keyMap1));
 
         EasyMock.verify(mapEventKeySubscriber);
+    }
+
+    /**
+     * Perform a for loop for the noOfKeys (from 0) and perform the methodToExecute with the given key (manipulated) and
+     * given value (manipulated).
+     *
+     * @param methodToExecute   Method to be executed for each iteration.
+     * @param keyManipulation   Manipulation to be performed on the key counter value before before creating the key.
+     * @param valueManipulation Manipulation to be performed on the value counter value before before creating the value.
+     * @param noOfKeys          No of iterations.
+     * @param keyBase           Base value for the key - typically the map name.
+     * @param valueBase         Base value for the value - typically the map name.
+     */
+    private void iterateAndExecuteConsumer(BiConsumer<String, String> methodToExecute, Function<Integer, Integer> keyManipulation, Function<Integer, Integer> valueManipulation, int noOfKeys, String keyBase, String valueBase)
+    {
+        IntStream.range(0, noOfKeys).forEach((i) -> methodToExecute.accept(TestUtils.getKey(keyBase, keyManipulation.apply(i)), TestUtils.getValue(valueBase, valueManipulation.apply(i))));
+    }
+
+    /**
+     * Perform a for loop for the noOfKeys (from 0) and perform the methodToExecute with key based on base value and counter
+     * and a value based on the base value and the counter.
+     *
+     * @param methodToExecute Method to be executed for each iteration.
+     * @param noOfKeys        No of iterations.
+     * @param keyBase         Base value for the key - typically the map name.
+     * @param valueBase       Base value for the value - typically the map name.
+     */
+    private void iterateAndExecuteConsumer(BiConsumer<String, String> methodToExecute, int noOfKeys, String keyBase, String valueBase)
+    {
+        iterateAndExecuteConsumer(methodToExecute, c -> c, c -> c, noOfKeys, keyBase, valueBase);
     }
 
     //TODO DS how do we remove maps? Add test.
