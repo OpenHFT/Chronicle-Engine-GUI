@@ -199,6 +199,7 @@ public class ManyMapsTests
         {
             String mapName = _mapBaseName + i;
 
+            //TODO this should be Chronicle (persisted) maps
             Map<String, String> map = Chassis.acquireMap(mapName, String.class, String.class);
 
             for (int j = 1; j <= _noOfKvps; j++)

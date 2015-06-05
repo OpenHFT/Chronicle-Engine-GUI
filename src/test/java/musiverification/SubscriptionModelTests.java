@@ -22,6 +22,7 @@ public class SubscriptionModelTests
     private static AssetTree _clientAssetTree;
 
     //TODO DS all events should be asynchronous
+    //TODO DS call back method must include map name (I don't think it does?), key name, value inserted - no longer necessary as you subscribe to a specific map
 
     @Before
     public void setUp() throws Exception
@@ -39,8 +40,6 @@ public class SubscriptionModelTests
     {
         Chassis.defaultSession().close();
     }
-
-    //TODO DS call back method must include map name (I don't think it does?), key name, value inserted
 
     /**
      * Test subscribing to all MapEvents for a given map.
@@ -90,11 +89,10 @@ public class SubscriptionModelTests
     }
 
     /**
-     * Test subscribing to updates on one specific key.
-     * Perform 2 puts and check the number of updates.
-     * Perform a put and and a replace and test the number of updates.
-     * Perform one put on test key and a number of operations on another key and check number of updater.
-     * Remove the test key and test the number of updates.
+     * Test subscribing to updates on a specific key.
+     * Perform initial puts (insert).
+     * Perform more puts (updates).
+     * Remove the key.
      *
      * @throws Exception
      */
@@ -144,6 +142,69 @@ public class SubscriptionModelTests
 
         //Remove the test key and test the number of updates
         _stringStringMap.remove(testKey);
+
+        EasyMock.verify(testChronicleKeyEventSubscriber);
+    }
+
+    /**
+     * Test that we get a key event for every insert, update, remove action performed on a key.
+     * Test order of events.
+     * @throws Exception
+     */
+    @Test
+    public void testSubscriptionKeyEvents() throws Exception
+    {
+        //TODO DS connecting to a server based Java component using the clietn API can be notified by callback methods for specified key in a given map
+
+        String testKey1 = "Key-sub-1";
+        String testKey2 = "Key-sub-2";
+        String testKey3 = "Key-sub-3";
+        String testKey4 = "Key-sub-4";
+        String testKey5 = "Key-sub-5";
+
+        KeySubscriber<String> testChronicleKeyEventSubscriber = EasyMock.createStrictMock(KeySubscriber.class);
+
+        String update1 = "Update1";
+        String update2 = "Update2";
+        String update3 = "Update3";
+        String update4 = "Update4";
+        String update5 = "Update5";
+
+        //Set up the mock
+        testChronicleKeyEventSubscriber.onMessage(testKey1);
+        testChronicleKeyEventSubscriber.onMessage(testKey2);
+//        testChronicleKeyEventSubscriber.onMessage(testKey3); // TODO DS replace not yet supported
+        testChronicleKeyEventSubscriber.onMessage(testKey4);
+        testChronicleKeyEventSubscriber.onMessage(testKey5);
+
+        //More updates on the same keys
+        testChronicleKeyEventSubscriber.onMessage(testKey1);
+        testChronicleKeyEventSubscriber.onMessage(testKey2);
+
+        //Removes
+        testChronicleKeyEventSubscriber.onMessage(testKey1);
+        testChronicleKeyEventSubscriber.onMessage(testKey5);
+
+        EasyMock.replay(testChronicleKeyEventSubscriber);
+
+
+        //Register as subscriber on map to get keys
+        _clientAssetTree.registerSubscriber(_mapName, String.class, testChronicleKeyEventSubscriber);
+
+        //Perform some puts and replace
+        _stringStringMap.put(testKey1, update1);
+        _stringStringMap.put(testKey2, update2);
+//        _stringStringMap.replace(testKey3, update2, update3); //TODO DS not yet supported
+        _stringStringMap.put(testKey4, update4);
+        _stringStringMap.put(testKey5, update5);
+
+        //Perform more events on the same keys
+        _stringStringMap.put(testKey1, update1);
+        _stringStringMap.put(testKey2, update2);
+
+        //Remove keys
+        _stringStringMap.remove(testKey1);
+        _stringStringMap.remove(testKey5);
 
         EasyMock.verify(testChronicleKeyEventSubscriber);
     }
@@ -221,7 +282,7 @@ public class SubscriptionModelTests
 
         AssetTree clientAssetTree = Chassis.defaultSession();
 
-        KeySubscriber<String> mapEventKeySubscriber = EasyMock.createStrictMock(KeySubscriber.class);
+        Subscriber<String> mapEventKeySubscriber = EasyMock.createStrictMock(Subscriber.class);
         clientAssetTree.registerSubscriber(mapBaseUri, String.class, mapEventKeySubscriber);
 
         //TODO DS how do we subscribe to get insert, update, remove events for maps (not map entities)?
