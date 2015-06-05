@@ -1,10 +1,11 @@
 package musiverification;
 
 import ddp.api.*;
-import net.openhft.chronicle.engine2.*;
-import net.openhft.chronicle.engine2.api.*;
-import net.openhft.chronicle.engine2.api.map.*;
-import net.openhft.chronicle.engine2.map.*;
+import net.openhft.chronicle.engine.*;
+import net.openhft.chronicle.engine.api.*;
+import net.openhft.chronicle.engine.api.map.*;
+import net.openhft.chronicle.engine.map.*;
+import net.openhft.lang.Jvm;
 import org.junit.*;
 
 import java.util.*;
@@ -100,27 +101,30 @@ public class ManyMapsTests
     }
 
     /**
-     * Test creating an engine with an underlying Chronicle Map store where the base path is specified as a folder that exist.
+     * Test creating an engine with an underlying Chronicle Map store where the base
+     * path is specified as a folder that exist.
      *
      * @throws Exception
      */
     @Test
     public void testChronicleMapCreationFolderBasePath() throws Exception
     {
-        String basePath = "C:\\LocalFolder\\temp\\Chronicle\\";
+        String basePath = Jvm.TMP;
+
 
         testMultipleMapsWithUnderlyingChronicleMap(basePath);
     }
 
     /**
-     * Test creating an engine with an underlying Chronicle Map store where the base path is specified as a full path to a file that does not exist.
+     * Test creating an engine with an underlying Chronicle Map store where the base path is specified
+     * as a full path to a file that does not exist.
      *
      * @throws Exception
      */
     @Test
     public void testChronicleMapCreationFileBasePath() throws Exception
     {
-        String basePath = "C:\\LocalFolder\\temp\\Chronicle\\nonExistingFileOrFolder";
+        String basePath =  Jvm.TMP + "nonExistingFileOrFolder";
 
         testMultipleMapsWithUnderlyingChronicleMap(basePath);
     }

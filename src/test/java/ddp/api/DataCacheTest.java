@@ -464,11 +464,11 @@ public class DataCacheTest {
 
                         while (keepRunning) {
                             ChronicleMap<String, String> otherStatelessClient =
-                                    ChronicleMapStatelessClientBuilder.<String, String>of(new
+                                    ChronicleMapStatelessClientBuilder.<String, String>createClientOf(new
                                             InetSocketAddress(_dataCacheHostname,
-                                            _dataCachePortString))
-                                            .putReturnsNull(true)
-                                            .removeReturnsNull(true).create();
+                                            _dataCachePortString));
+                                            //.putReturnsNull(true)
+                                            //.removeReturnsNull(true).create();
 
                             String valueFromMap = otherStatelessClient.get(testKey + 1);
 

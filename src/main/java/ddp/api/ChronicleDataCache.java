@@ -85,9 +85,10 @@ final class ChronicleDataCache<K, V> implements DataCache<K, V>
             _logger.info("Attemting to connect to Data Cache '{}'", dataCacheConfiguration);
 
             //TODO DS create stateless client
-            _chronicleMap = ChronicleMapStatelessClientBuilder.<K, V>of(new InetSocketAddress
-                    (dataCacheConfiguration.getHostname(), dataCacheConfiguration.getPort()))
-                    .putReturnsNull(true).removeReturnsNull(true).create();
+            _chronicleMap = ChronicleMapStatelessClientBuilder.<K, V>createClientOf(new InetSocketAddress
+                    (dataCacheConfiguration.getHostname(), dataCacheConfiguration.getPort()));
+                    //.putReturnsNull(true).removeReturnsNull(true)
+                    //.create();
 
             _logger.info("Successfully connected to Data Cache '{}'", dataCacheConfiguration);
 

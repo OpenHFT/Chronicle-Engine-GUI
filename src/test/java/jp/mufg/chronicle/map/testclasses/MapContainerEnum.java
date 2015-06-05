@@ -2,7 +2,7 @@ package jp.mufg.chronicle.map.testclasses;
 
 import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
-import net.openhft.chronicle.map.MapKeyContext;
+import net.openhft.chronicle.map.WriteContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,7 +80,7 @@ public class MapContainerEnum implements AutoCloseable
         _marketDataKey.setSupplier(supplier);
         _marketDataKey.setId(id);
 
-        try (MapKeyContext<MarketDataKeyEnum, MarketDataValue> context = marketDataCache.acquireContext(_marketDataKey, _marketDataValue))
+        try (WriteContext<MarketDataKeyEnum, MarketDataValue> context = marketDataCache.acquireUsingLocked(_marketDataKey, _marketDataValue))
         {
             _marketDataValue.setAsk(ask);
         }

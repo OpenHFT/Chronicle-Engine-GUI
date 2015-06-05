@@ -3,7 +3,7 @@ package jp.mufg.chronicle.map.testclasses;
 import net.openhft.chronicle.hash.replication.TcpTransportAndNetworkConfig;
 import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
-import net.openhft.chronicle.map.MapKeyContext;
+import net.openhft.chronicle.map.WriteContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +57,7 @@ public class MapContainer implements AutoCloseable
         _marketDataKey.setSource(source);
         _marketDataKey.setSupplier(supplier);
 
-        try (MapKeyContext<MarketDataKey, MarketDataValue> c = marketDataCache.acquireContext(_marketDataKey, _marketDataValue))
+        try (WriteContext<MarketDataKey, MarketDataValue> c = marketDataCache.acquireUsingLocked(_marketDataKey, _marketDataValue))
         {
             consumer.accept(_marketDataValue);
         }
@@ -84,7 +84,7 @@ public class MapContainer implements AutoCloseable
         _marketDataKey.setSupplier(supplier);
         _marketDataKey.setId(id);
 
-        try (MapKeyContext<MarketDataKey, MarketDataValue> context = marketDataCache.acquireContext(_marketDataKey, _marketDataValue))
+        try (WriteContext<MarketDataKey, MarketDataValue> context = marketDataCache.acquireUsingLocked(_marketDataKey, _marketDataValue))
         {
             _marketDataValue.setAsk(ask);
         }
