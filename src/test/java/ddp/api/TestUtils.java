@@ -1,5 +1,7 @@
 package ddp.api;
 
+import org.junit.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -9,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.*;
+import java.util.stream.*;
 
 public class TestUtils
 {
@@ -24,7 +28,8 @@ public class TestUtils
         return calculateAndPrintRuntime(startTimeInNanoseconds, 1);
     }
 
-    public static long calculateAndPrintRuntime(long startTimeInNanoseconds, int count) {
+    public static long calculateAndPrintRuntime(long startTimeInNanoseconds, int count)
+    {
         long endNanoTime = System.nanoTime();
 
         long runtimeNanoSeconds = endNanoTime - startTimeInNanoseconds;
@@ -37,6 +42,25 @@ public class TestUtils
                 count, runtimeNanoSeconds / count, runtimeMilliseconds / count, runtimeSeconds / count, count > 1 ? " average" : "");
 
         return runtimeNanoSeconds / count;
+    }
+
+    /**
+     * Run the test code the configured number of times and verify that the average runtime is less than or equal
+     * to the given max runtime.
+     *
+     * @param testToRun Test code to run configured number of times.
+     * @param noOfRuns Runs.
+     * @param maxRuntimeInNanos Max runtime.
+     */
+    public static void runMultipleTimesAndVerifyAvgRuntime(Runnable testToRun, int noOfRuns, long maxRuntimeInNanos)
+    {
+        long startTime = System.nanoTime();
+
+        IntStream.range(0, noOfRuns).forEach(e -> testToRun.run());
+
+        long runtimeInNanos = calculateAndPrintRuntime(startTime, noOfRuns);
+
+        Assert.assertTrue(runtimeInNanos <= maxRuntimeInNanos);
     }
 
     /**
@@ -135,5 +159,25 @@ public class TestUtils
                 System.out.println("DIR created");
             }
         }
+    }
+
+    /**
+     * @param mapName Name of map
+     * @param counter Counter to be used for key
+     * @return Generated value based on map name and counter
+     */
+    public static String getValue(String mapName, int counter)
+    {
+        return String.format("Val-%s-%s", mapName, counter);
+    }
+
+    /**
+     * @param mapName Name of map
+     * @param counter Counter to be used for key
+     * @return Generated key based on map name and counter
+     */
+    public static String getKey(String mapName, int counter)
+    {
+        return String.format("%s-%s", mapName, counter);
     }
 }
