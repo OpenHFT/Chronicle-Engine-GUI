@@ -1,5 +1,6 @@
 package musiverification;
 
+import ddp.api.*;
 import net.openhft.chronicle.engine2.*;
 import net.openhft.chronicle.engine2.api.*;
 import net.openhft.chronicle.engine2.api.map.*;
@@ -202,31 +203,11 @@ public class ManyMapsTests
 
             for (int j = 1; j <= _noOfKvps; j++)
             {
-                map.put(getKey(mapName, j), getValue(mapName, j));
+                map.put(TestUtils.getKey(mapName, j), TestUtils.getValue(mapName, j));
             }
 
             _maps.put(mapName, map);
         }
-    }
-
-    /**
-     * @param mapName Name of map
-     * @param counter Counter to be used for key
-     * @return Generated key based on map name and counter
-     */
-    private String getKey(String mapName, int counter)
-    {
-        return String.format("%s-%s", mapName, counter);
-    }
-
-    /**
-     * @param mapName Name of map
-     * @param counter Counter to be used for key
-     * @return Generated value based on map name and counter
-     */
-    private String getValue(String mapName, int counter)
-    {
-        return String.format("Val-%s-%s", mapName, counter);
     }
 
     /**
@@ -254,10 +235,10 @@ public class ManyMapsTests
             int eventNo = _noOfEvents.incrementAndGet();
 
             //Test that the key matches the expected
-            Assert.assertEquals(getKey(_mapName, eventNo), key);
+            Assert.assertEquals(TestUtils.getKey(_mapName, eventNo), key);
 
             //Test that the value matches the expected
-            Assert.assertEquals(getValue(_mapName, eventNo), value);
+            Assert.assertEquals(TestUtils.getValue(_mapName, eventNo), value);
         }
     }
 }
