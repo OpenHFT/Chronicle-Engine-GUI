@@ -4,6 +4,8 @@ import ddp.api.*;
 import net.openhft.chronicle.engine.*;
 import net.openhft.chronicle.engine.api.*;
 import net.openhft.chronicle.engine.api.map.*;
+import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
+import net.openhft.lang.Jvm;
 import org.junit.*;
 
 import java.io.*;
@@ -18,7 +20,7 @@ public class SubscriptionModelPerformanceTests
     //TODO DS 50 updates / second when we have a large number of maps
     //TODO DS test having the server side on another machine
     private static final int _noOfPuts = 50;
-    private static final int _noOfRunsToAverage = 1_000;
+    private static final int _noOfRunsToAverage = 10;
     private static final long _secondInNanos = 1_000_000_000;
     private static String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
@@ -38,9 +40,18 @@ public class SubscriptionModelPerformanceTests
     {
         Chassis.resetChassis();
 
-        //TODO DS this should use an underlying Chronicle map!
+        Chassis.viewTypeLayersOn(MapView.class, "map directly to KeyValueStore", KeyValueStore.class);
+
+        Chassis.registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) ->
+                new ChronicleMapKeyValueStore(context.basePath(Jvm.TMP).entries(50).averageValueSize(2 << 20), asset));
         _testMap = Chassis.acquireMap(_mapName, String.class, String.class);
+
         _testMap.clear();
+    }
+
+    @After
+    public void tearDown() throws IOException {
+        ((Closeable)((MapView)_testMap).underlying()).close();
     }
 
     /**
@@ -57,6 +68,7 @@ public class SubscriptionModelPerformanceTests
         //Create subscriber and register
         TestChronicleKeyEventSubscriber keyEventSubscriber = new TestChronicleKeyEventSubscriber(_twoMbTestStringLength);
 
+        //todo This ends up getting a SubAsset not an asset
         Chassis.registerSubscriber(_mapName + "/" + key + "?bootstrap=false", String.class, keyEventSubscriber);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
