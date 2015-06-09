@@ -45,7 +45,6 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
 
         enableTranslatingValuesToBytesStore();
 
-        viewTypeLayersOn(StringMarshallableKeyValueStore.class, "string -> marshallable", KeyValueStore.class);
         Chassis.registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) ->
                 new FilePerKeyValueStore(context.basePath(Jvm.TMP + "/fpk"), asset));
         _testMap = Chassis.acquireMap(_mapName, String.class, String.class);

@@ -23,7 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static net.openhft.chronicle.engine.Chassis.*;
+import static net.openhft.chronicle.engine.Chassis.defaultSession;
+import static net.openhft.chronicle.engine.Chassis.resetChassis;
 
 /**
  * Created by daniels on 31/03/2015.

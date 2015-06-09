@@ -1,18 +1,22 @@
 package musiverification;
 
-import ddp.api.*;
-import junit.framework.*;
-import net.openhft.chronicle.engine.*;
-import net.openhft.chronicle.engine.api.*;
-import net.openhft.chronicle.engine.api.map.*;
-import org.easymock.*;
+import ddp.api.TestUtils;
+import junit.framework.TestCase;
+import net.openhft.chronicle.engine.Chassis;
+import net.openhft.chronicle.engine.api.AssetTree;
+import net.openhft.chronicle.engine.api.InvalidSubscriberException;
+import net.openhft.chronicle.engine.api.Subscriber;
+import net.openhft.chronicle.engine.api.TopicSubscriber;
+import net.openhft.chronicle.engine.api.map.KeySubscriber;
+import net.openhft.chronicle.engine.api.map.MapEvent;
+import net.openhft.chronicle.engine.api.map.MapEventListener;
+import org.easymock.EasyMock;
 import org.junit.*;
-import org.junit.Assert;
-import org.junit.Test;
 
-import java.util.*;
-import java.util.function.*;
-import java.util.stream.*;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.IntStream;
 
 public class SubscriptionModelTest
 {
