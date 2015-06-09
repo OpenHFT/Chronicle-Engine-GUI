@@ -8,10 +8,7 @@ import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
 import net.openhft.lang.Jvm;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -130,13 +127,15 @@ public class ManyMapsTest {
     }
 
     @Test
+    @Ignore("todo")
     public void testConnectToMultipleMapsUsingTheSamePort() throws Exception {
-        //TODO DS test that we can connect and interact with a large number of maps on the same port
+        throw new UnsupportedOperationException("DS test that we can connect and interact with a large number of maps on the same port");
     }
 
     @Test
+    @Ignore("todo")
     public void testMapReplication() throws Exception {
-        //TODO DS test that maps are automatically replicated on one or more failover servers, with each map on a server being uniquely associated with given name
+        throw new UnsupportedOperationException("DS test that maps are automatically replicated on one or more failover servers, with each map on a server being uniquely associated with given name");
     }
 
     /**
