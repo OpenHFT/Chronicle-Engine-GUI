@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
 import static net.openhft.chronicle.engine.Chassis.enableTranslatingValuesToBytesStore;
 import static net.openhft.chronicle.engine.Chassis.viewTypeLayersOn;
 
-public class SubscriptionModelFilePerKeyPerformanceTests {
+public class SubscriptionModelFilePerKeyPerformanceTest {
     //TODO DS 50 updates / second when we have a large number of maps
     //TODO DS test having the server side on another machine
     private static final int _noOfPuts = 50;
