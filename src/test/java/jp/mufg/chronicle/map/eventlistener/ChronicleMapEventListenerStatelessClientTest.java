@@ -6,14 +6,16 @@ import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.AssetTree;
 import net.openhft.chronicle.engine.api.TopicSubscriber;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
-import net.openhft.chronicle.engine.api.map.StringMarshallableKeyValueStore;
+import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
-import net.openhft.chronicle.engine.map.VanillaStringMarshallableKeyValueStore;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.lang.Jvm;
 import org.junit.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -50,9 +52,13 @@ public class ChronicleMapEventListenerStatelessClientTest {
     public static void beforeClass() throws IOException {
         resetChassis();
         Function<Bytes, Wire> writeType = TextWire::new;
-        registerFactory("", StringMarshallableKeyValueStore.class, VanillaStringMarshallableKeyValueStore::new);
-        registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) -> new ChronicleMapKeyValueStore(
-                context.averageValueSize(2 << 20).entries(50).wireType(writeType), asset));
+
+        Files.deleteIfExists(Paths.get(Jvm.TMP, "chronicleMapString"));
+        Chassis.viewTypeLayersOn(MapView.class, "map directly to KeyValueStore", KeyValueStore.class);
+        Chassis.registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) ->
+                new ChronicleMapKeyValueStore(context.basePath(Jvm.TMP).entries(50).averageValueSize(2 << 20), asset));
+
+
         _noOfEventsTriggered.set(0);
 
         _StringStringMap = Chassis.acquireMap("chronicleMapString?putReturnsNull=true", String.class, String.class);
