@@ -10,6 +10,8 @@ import org.junit.*;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
@@ -38,6 +40,7 @@ public class SubscriptionModelPerformanceTests
     @Before
     public void setUp() throws Exception
     {
+        Files.deleteIfExists(Paths.get(Jvm.TMP, _mapName));
         Chassis.resetChassis();
 
         Chassis.viewTypeLayersOn(MapView.class, "map directly to KeyValueStore", KeyValueStore.class);
