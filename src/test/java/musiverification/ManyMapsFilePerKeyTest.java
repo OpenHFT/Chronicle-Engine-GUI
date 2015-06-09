@@ -5,15 +5,11 @@ import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.TopicSubscriber;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
-import net.openhft.chronicle.engine.api.map.MapView;
-import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
 import net.openhft.lang.Jvm;
 import org.junit.*;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,6 +17,10 @@ import java.util.stream.IntStream;
 
 import static net.openhft.chronicle.engine.Chassis.enableTranslatingValuesToBytesStore;
 
+/* On linux.
+fs.inotify.max_user_watches = 1500000
+fs.inotify.max_user_instances = 2000
+ */
 @Ignore
 public class ManyMapsFilePerKeyTest {
     private static Map<String, Map<String, String>> _maps;
@@ -61,7 +61,7 @@ public class ManyMapsFilePerKeyTest {
 
     @Before
     public void initTest() throws Exception {
-        createAndFillMaps();
+//        createAndFillMaps();
     }
 
     /**
@@ -77,7 +77,7 @@ public class ManyMapsFilePerKeyTest {
         //Test that the number of maps created exist
         Assert.assertEquals(_noOfMaps, _maps.size());
 
-        for (Map.Entry<String, Map<String, String>> mapEntry : _maps.entrySet()) {
+        _maps.entrySet().parallelStream().forEach((Map.Entry<String, Map<String, String>> mapEntry) -> {
             Map<String, String> map = mapEntry.getValue();
 
             //Test that the number of key-value-pairs in the map matches the expected.
@@ -88,7 +88,7 @@ public class ManyMapsFilePerKeyTest {
 
             //Test that all the values in this map contains the map name (ie. no other map's values overlap).
             Assert.assertFalse(map.values().stream().anyMatch(v -> !v.contains(mapEntry.getKey())));
-        }
+        });
     }
 
     /**
@@ -101,24 +101,24 @@ public class ManyMapsFilePerKeyTest {
     public void testManyMapsManyTopicListeners() throws Exception {
         Map<String, EventsForMapSubscriber> eventsForMapSubscriberMap = new HashMap<>();
 
-        for (String key : _maps.keySet()) {
+        _maps.keySet().parallelStream().forEach((String key) -> {
             EventsForMapSubscriber eventsForMapSubscriber = new EventsForMapSubscriber(key);
             eventsForMapSubscriberMap.put(key, eventsForMapSubscriber);
 
             Chassis.registerTopicSubscriber(key + "?bootstrap=false", String.class, String.class, eventsForMapSubscriber);
-        }
+        });
 
         //This gets all of the maps an re-puts all values
         _maps = new HashMap<>();
         createAndFillMaps();
 
-        for (String key : _maps.keySet()) {
+        _maps.keySet().parallelStream().forEach((String key) -> {
             EventsForMapSubscriber eventsForMapSubscriber = eventsForMapSubscriberMap.get(key);
 
             Assert.assertEquals(_noOfKvps, eventsForMapSubscriber.getNoOfEvents());
 
             Chassis.unregisterTopicSubscriber(key, String.class, String.class, eventsForMapSubscriber);
-        }
+        });
     }
 
     @Test
@@ -226,13 +226,17 @@ public class ManyMapsFilePerKeyTest {
      */
     private void createAndFillMaps() {
 
-
-        _maps.entrySet().forEach(e -> {
+        System.out.println("Filling maps");
+        AtomicInteger count = new AtomicInteger();
+        _maps.entrySet().parallelStream().forEach(e -> {
             e.getValue().clear();
             for (int j = 1; j <= _noOfKvps; j++) {
                 e.getValue().put(TestUtils.getKey(e.getKey(), j), TestUtils.getValue(e.getKey(), j));
             }
+            if (count.incrementAndGet() % 25 == 0)
+                System.out.println("... " + count);
         });
+        System.out.println("... " + _maps.size() + " done.");
 
 
     }
