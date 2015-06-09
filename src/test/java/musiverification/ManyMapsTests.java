@@ -24,6 +24,7 @@ public class ManyMapsTests
     @BeforeClass
     public static void setUp()throws IOException{
         String basePath = Jvm.TMP + "/ManyMapTests";
+        Files.createDirectories(Paths.get(basePath));
 
         Files.walk(Paths.get(basePath)).filter(p -> !Files.isDirectory(p)).forEach(p -> {
             try {
