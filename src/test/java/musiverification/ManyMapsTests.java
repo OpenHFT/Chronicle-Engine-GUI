@@ -8,8 +8,8 @@ import net.openhft.chronicle.engine.map.*;
 import net.openhft.lang.Jvm;
 import org.junit.*;
 
-import java.io.Closeable;
-import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 
@@ -23,6 +23,19 @@ public class ManyMapsTests
     @Before
     public void setUp() throws Exception
     {
+        String basePath = Jvm.TMP + "/ManyMapTests";
+
+        Files.walk(Paths.get(basePath)).filter(p -> !Files.isDirectory(p)).forEach(p -> {
+            try {
+                Files.deleteIfExists(p);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        Chassis.viewTypeLayersOn(MapView.class, "map directly to KeyValueStore", KeyValueStore.class);
+        Chassis.registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) ->
+                new ChronicleMapKeyValueStore(context.basePath(basePath).entries(1200), asset));
         _maps = new HashMap<>();
 
         createAndFillMaps();
@@ -123,7 +136,6 @@ public class ManyMapsTests
      *
      * @throws Exception
      */
-    @Ignore
     @Test
     public void testChronicleMapCreationFileBasePath() throws Exception
     {
@@ -139,15 +151,12 @@ public class ManyMapsTests
      */
     private void testMultipleMapsWithUnderlyingChronicleMap(String basePath)
     {
-        System.out.println(basePath);
         String map1Name = "MyMap1";
         String map2Name = "MyMap2";
 
+
         Chassis.resetChassis();
 
-        Chassis.viewTypeLayersOn(MapView.class, "map directly to KeyValueStore", KeyValueStore.class);
-        Chassis.registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) ->
-                new ChronicleMapKeyValueStore(context.basePath(basePath).entries(1200), asset));
 
         //Get map1 - expect 1 file to be created
         Map<String, String> map1 = Chassis.acquireMap(map1Name, String.class, String.class);
