@@ -8,6 +8,7 @@ import net.openhft.chronicle.engine.map.*;
 import net.openhft.lang.Jvm;
 import org.junit.*;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -20,9 +21,8 @@ public class ManyMapsTests
     private static int _noOfMaps = 1_100;
     private static int _noOfKvps = 1_000;
 
-    @Before
-    public void setUp() throws Exception
-    {
+    @BeforeClass
+    public static void setUp()throws IOException{
         String basePath = Jvm.TMP + "/ManyMapTests";
 
         Files.walk(Paths.get(basePath)).filter(p -> !Files.isDirectory(p)).forEach(p -> {
@@ -38,6 +38,25 @@ public class ManyMapsTests
                 new ChronicleMapKeyValueStore(context.basePath(basePath).entries(1200), asset));
         _maps = new HashMap<>();
 
+        for (int i = 1; i <= _noOfMaps; i++)
+        {
+            String mapName = _mapBaseName + i;
+
+            Map<String, String> map = Chassis.acquireMap(mapName, String.class, String.class);
+
+            for (int j = 1; j <= _noOfKvps; j++)
+            {
+                map.put(TestUtils.getKey(mapName, j), TestUtils.getValue(mapName, j));
+            }
+
+            _maps.put(mapName, map);
+        }
+    }
+
+
+    @Before
+    public void initTest() throws Exception
+    {
         createAndFillMaps();
     }
 
@@ -212,20 +231,16 @@ public class ManyMapsTests
      */
     private void createAndFillMaps()
     {
-        for (int i = 1; i <= _noOfMaps; i++)
-        {
-            String mapName = _mapBaseName + i;
 
-            //TODO this should be Chronicle (persisted) maps
-            Map<String, String> map = Chassis.acquireMap(mapName, String.class, String.class);
 
-            for (int j = 1; j <= _noOfKvps; j++)
-            {
-                map.put(TestUtils.getKey(mapName, j), TestUtils.getValue(mapName, j));
+        _maps.entrySet().forEach(e -> {
+            e.getValue().clear();
+            for (int j = 1; j <= _noOfKvps; j++) {
+                e.getValue().put(TestUtils.getKey(e.getKey(), j), TestUtils.getValue(e.getKey(), j));
             }
+        });
 
-            _maps.put(mapName, map);
-        }
+
     }
 
     /**
