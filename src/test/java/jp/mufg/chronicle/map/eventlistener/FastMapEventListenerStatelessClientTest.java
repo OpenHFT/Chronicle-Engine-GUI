@@ -6,9 +6,7 @@ import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.AssetTree;
 import net.openhft.chronicle.engine.api.TopicSubscriber;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
-import net.openhft.chronicle.engine.api.map.StringStringKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
-import net.openhft.chronicle.engine.map.VanillaStringStringKeyValueStore;
 import org.junit.*;
 
 import java.io.IOException;
@@ -43,8 +41,9 @@ public class FastMapEventListenerStatelessClientTest {
     public static void beforeClass() throws IOException {
         resetChassis();
 
-        registerFactory("", StringStringKeyValueStore.class, VanillaStringStringKeyValueStore::new);
-        registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) -> new FilePerKeyValueStore(context.basePath(_mapBasePath), asset));
+        Chassis.enableTranslatingValuesToBytesStore();
+        addLeafRule(KeyValueStore.class, "use File Per Key",
+                (context, asset) -> new FilePerKeyValueStore(context.basePath(_mapBasePath), asset));
     }
 
     @Before

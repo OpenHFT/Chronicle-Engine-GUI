@@ -6,6 +6,7 @@ import net.openhft.chronicle.engine.api.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.TopicSubscriber;
 import net.openhft.chronicle.engine.api.map.*;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
+import net.openhft.chronicle.engine.map.VanillaMapView;
 import net.openhft.lang.Jvm;
 import org.junit.*;
 
@@ -19,6 +20,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+
+import static net.openhft.chronicle.engine.Chassis.addLeafRule;
+import static net.openhft.chronicle.engine.Chassis.addWrappingRule;
 
 public class SubscriptionModelPerformanceTest
 {
@@ -46,9 +50,8 @@ public class SubscriptionModelPerformanceTest
         Files.deleteIfExists(Paths.get(Jvm.TMP, _mapName));
         Chassis.resetChassis();
 
-        Chassis.viewTypeLayersOn(MapView.class, "map directly to KeyValueStore", KeyValueStore.class);
-
-        Chassis.registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) ->
+        addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
+        addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(Jvm.TMP).entries(50).averageValueSize(2 << 20), asset));
         _testMap = Chassis.acquireMap(_mapName, String.class, String.class);
 

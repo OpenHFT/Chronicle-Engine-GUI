@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
+import static net.openhft.chronicle.engine.Chassis.addLeafRule;
 import static net.openhft.chronicle.engine.Chassis.enableTranslatingValuesToBytesStore;
 
 /* On linux.
@@ -36,8 +37,8 @@ public class ManyMapsFilePerKeyTest {
 
         enableTranslatingValuesToBytesStore();
 
-        Chassis.registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) ->
-                new FilePerKeyValueStore(context.basePath(Jvm.TMP + "/fpk"), asset));
+        addLeafRule(KeyValueStore.class, "FilePer Key",
+                (context, asset) -> new FilePerKeyValueStore(context.basePath(Jvm.TMP + "/fpk"), asset));
         _maps = new HashMap<>();
 
         System.out.println("Creating maps.");

@@ -7,6 +7,7 @@ import net.openhft.chronicle.engine.api.TopicSubscriber;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
+import net.openhft.chronicle.engine.map.VanillaMapView;
 import net.openhft.lang.Jvm;
 import org.junit.*;
 
@@ -17,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
+
+import static net.openhft.chronicle.engine.Chassis.addWrappingRule;
 
 public class ManyMapsTest {
     private static Map<String, Map<String, String>> _maps;
@@ -40,8 +43,8 @@ public class ManyMapsTest {
             }
         });
 
-        Chassis.viewTypeLayersOn(MapView.class, "map directly to KeyValueStore", KeyValueStore.class);
-        Chassis.registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) ->
+        addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
+        Chassis.addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(basePath).entries(1200), asset));
         _maps = new HashMap<>();
 
@@ -230,8 +233,6 @@ public class ManyMapsTest {
      * Creates configured number of maps and fills them with configured number of key/value pairs
      */
     private void createAndFillMaps() {
-
-
         _maps.entrySet().forEach(e -> {
             e.getValue().clear();
             for (int j = 1; j <= _noOfKvps; j++) {

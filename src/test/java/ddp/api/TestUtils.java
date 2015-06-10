@@ -1,6 +1,6 @@
 package ddp.api;
 
-import org.junit.*;
+import org.junit.Assert;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,11 +11,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.*;
-import java.util.stream.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.IntStream;
 
-public class TestUtils
-{
+public class TestUtils {
     /**
      * Calculates the runtime in nanoseconds from the given start time in nanoseconds.
      * Prints the runtime in nanos, millis and seconds.
@@ -23,17 +22,16 @@ public class TestUtils
      * @param startTimeInNanoseconds Start time in nanos.
      * @return Runtime in nanos.
      */
-    public static long calculateAndPrintRuntime(long startTimeInNanoseconds)
-    {
+    public static long calculateAndPrintRuntime(long startTimeInNanoseconds) {
         return calculateAndPrintRuntime(startTimeInNanoseconds, 1);
     }
 
-    public static long calculateAndPrintRuntime(long startTimeInNanoseconds, int count)
-    {
+    public static long calculateAndPrintRuntime(long startTimeInNanoseconds, int count) {
         long endNanoTime = System.nanoTime();
+        return printRuntime(endNanoTime - startTimeInNanoseconds, count);
+    }
 
-        long runtimeNanoSeconds = endNanoTime - startTimeInNanoseconds;
-
+    public static long printRuntime(long runtimeNanoSeconds, int count) {
         double runtimeMilliseconds = (double) runtimeNanoSeconds / 1000000.0;
 
         double runtimeSeconds = runtimeMilliseconds / 1000.0;
@@ -48,19 +46,30 @@ public class TestUtils
      * Run the test code the configured number of times and verify that the average runtime is less than or equal
      * to the given max runtime.
      *
-     * @param testToRun Test code to run configured number of times.
-     * @param noOfRuns Runs.
+     * @param testToRun         Test code to run configured number of times.
+     * @param noOfRuns          Runs.
      * @param maxRuntimeInNanos Max runtime.
      */
-    public static void runMultipleTimesAndVerifyAvgRuntime(Runnable testToRun, int noOfRuns, long maxRuntimeInNanos)
-    {
-        long startTime = System.nanoTime();
+    public static void runMultipleTimesAndVerifyAvgRuntime(Runnable testToRun, int noOfRuns, long maxRuntimeInNanos) {
+        runMultipleTimesAndVerifyAvgRuntime(() -> {
+        }, testToRun, noOfRuns, maxRuntimeInNanos);
+    }
 
-        IntStream.range(0, noOfRuns).forEach(e -> testToRun.run());
+    public static void runMultipleTimesAndVerifyAvgRuntime(Runnable setup, Runnable testToRun, int noOfRuns, long maxRuntimeInNanos) {
+        AtomicLong totalTime = new AtomicLong();
 
-        long runtimeInNanos = calculateAndPrintRuntime(startTime, noOfRuns);
+        IntStream.range(0, noOfRuns).forEach(e -> {
+            setup.run();
+            long start = System.nanoTime();
+            testToRun.run();
+            long delta = System.nanoTime() - start;
+//            System.out.println(delta/1e9+" secs");
+            totalTime.addAndGet(delta);
+        });
 
-        Assert.assertTrue(runtimeInNanos <= maxRuntimeInNanos);
+        long runtimeInNanos = printRuntime(totalTime.get(), noOfRuns);
+
+        Assert.assertTrue(runtimeInNanos + " > " + maxRuntimeInNanos, runtimeInNanos <= maxRuntimeInNanos);
     }
 
     /**
@@ -70,8 +79,7 @@ public class TestUtils
      * @return String value of the text file.
      * @throws java.io.IOException
      */
-    public static String loadSystemResourceFileToString(String fileName) throws IOException, URISyntaxException
-    {
+    public static String loadSystemResourceFileToString(String fileName) throws IOException, URISyntaxException {
         URL testFileUrl = ClassLoader.getSystemResource(fileName);
         URI testFileUri = testFileUrl.toURI();
 
@@ -90,8 +98,7 @@ public class TestUtils
      * @throws IOException
      * @throws URISyntaxException
      */
-    public static Map<String, Double> loadSystemResourceKeyValueCsvFileToMap(String resourcePath) throws IOException, URISyntaxException
-    {
+    public static Map<String, Double> loadSystemResourceKeyValueCsvFileToMap(String resourcePath) throws IOException, URISyntaxException {
         URL testFileUrl = ClassLoader.getSystemResource(resourcePath);
         URI testFileUri = testFileUrl.toURI();
 
@@ -111,51 +118,39 @@ public class TestUtils
      * @param stringToWrite
      * @throws IOException
      */
-    public static void saveTestFileToDisk(String extension, String stringToWrite) throws IOException
-    {
+    public static void saveTestFileToDisk(String extension, String stringToWrite) throws IOException {
         Files.write(Paths.get("./test" + extension), stringToWrite.getBytes());
     }
 
-    public static void deleteTestFile(String extension) throws IOException
-    {
+    public static void deleteTestFile(String extension) throws IOException {
         deleteFile(Paths.get("./test" + extension).toString());
     }
 
-    public static void deleteFile(String path) throws IOException
-    {
-        try
-        {
+    public static void deleteFile(String path) throws IOException {
+        try {
             Files.deleteIfExists(Paths.get(path));
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.err.println(String.format("Failed to delete file '%s'. Exception: %s", path, e));
         }
     }
 
-    public static void createDirectoryIfNotExists(String directoryName)
-    {
+    public static void createDirectoryIfNotExists(String directoryName) {
         File directory = new File(directoryName);
 
-        if (!directory.exists())
-        {
+        if (!directory.exists()) {
 
             System.out.println("Creating directory: " + directoryName);
 
             boolean result = false;
 
-            try
-            {
+            try {
                 directory.mkdir();
                 result = true;
-            }
-            catch (SecurityException se)
-            {
+            } catch (SecurityException se) {
                 System.out.println("Could not create directory '%s'.");
             }
 
-            if (result)
-            {
+            if (result) {
                 System.out.println("DIR created");
             }
         }
@@ -166,8 +161,7 @@ public class TestUtils
      * @param counter Counter to be used for key
      * @return Generated value based on map name and counter
      */
-    public static String getValue(String mapName, int counter)
-    {
+    public static String getValue(String mapName, int counter) {
         return String.format("Val-%s-%s", mapName, counter);
     }
 
@@ -176,8 +170,7 @@ public class TestUtils
      * @param counter Counter to be used for key
      * @return Generated key based on map name and counter
      */
-    public static String getKey(String mapName, int counter)
-    {
+    public static String getKey(String mapName, int counter) {
         return String.format("%s-%s", mapName, counter);
     }
 }

@@ -8,6 +8,7 @@ import net.openhft.chronicle.engine.api.TopicSubscriber;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
+import net.openhft.chronicle.engine.map.VanillaMapView;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.lang.Jvm;
@@ -23,8 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static net.openhft.chronicle.engine.Chassis.defaultSession;
-import static net.openhft.chronicle.engine.Chassis.resetChassis;
+import static net.openhft.chronicle.engine.Chassis.*;
 
 /**
  * Created by daniels on 31/03/2015.
@@ -55,8 +55,8 @@ public class ChronicleMapEventListenerStatelessClientTest {
         Function<Bytes, Wire> writeType = TextWire::new;
 
         Files.deleteIfExists(Paths.get(Jvm.TMP, "chronicleMapString"));
-        Chassis.viewTypeLayersOn(MapView.class, "map directly to KeyValueStore", KeyValueStore.class);
-        Chassis.registerFactory("", KeyValueStore.class, (context, asset, underlyingSupplier) ->
+        addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
+        Chassis.addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(Jvm.TMP).entries(50).averageValueSize(2 << 20), asset));
 
 
