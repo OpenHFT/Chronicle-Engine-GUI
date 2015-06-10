@@ -66,7 +66,7 @@ public class ManyMapsTest {
 
     @Before
     public void initTest() throws Exception {
-        createAndFillMaps();
+//        createAndFillMaps();
     }
 
     /**

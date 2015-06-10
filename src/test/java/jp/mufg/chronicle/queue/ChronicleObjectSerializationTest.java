@@ -7,6 +7,7 @@ import net.openhft.chronicle.Chronicle;
 import net.openhft.chronicle.ChronicleQueueBuilder;
 import net.openhft.chronicle.ExcerptAppender;
 import net.openhft.chronicle.ExcerptTailer;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.tools.ChronicleTools;
 import net.openhft.lang.model.DataValueClasses;
 import org.junit.*;
@@ -14,20 +15,25 @@ import org.junit.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChronicleObjectSerializationTest
 {
-    String chronicleQueueBase = "C:\\LocalFolder\\Chronicle\\data";
+    String chronicleQueueBase = OS.TMP + "/Chronicle/data";
     Chronicle chronicle;
     EnumTestInterface writer;
     FromChronicle<EnumTestInterfaceImpl> reader;
 
+    // TODO Fix test so files are deleted on Windows.
+    static final AtomicInteger counter = new AtomicInteger();
+
     @Before
     public void setUp() throws Exception
     {
-        ChronicleTools.deleteDirOnExit(chronicleQueueBase);
+        String path = chronicleQueueBase + "/" + counter.getAndIncrement();
+        ChronicleTools.deleteDirOnExit(path);
 
-        chronicle = ChronicleQueueBuilder.vanilla(chronicleQueueBase).build();
+        chronicle = ChronicleQueueBuilder.vanilla(path).build();
 
         EnumTestInterfaceImpl enumTestImpl = new EnumTestInterfaceImpl();
 
@@ -38,6 +44,7 @@ public class ChronicleObjectSerializationTest
     @After
     public void tearDown() throws Exception
     {
+        chronicle.close();
         ChronicleTools.deleteDirOnExit(chronicleQueueBase);
     }
 
