@@ -126,7 +126,6 @@ public class SubscriptionModelTest
 
         EasyMock.replay(testChronicleKeyEventSubscriber);
 
-
         //Setting bootstrap = false otherwise we would get an initial event with null
         _clientAssetTree.registerSubscriber(_mapName + "/" + testKey + "?bootstrap=false", String.class, testChronicleKeyEventSubscriber); //TODO DS do a test with boot strapping
 
@@ -190,7 +189,6 @@ public class SubscriptionModelTest
         testChronicleKeyEventSubscriber.onMessage(testKey5);
 
         EasyMock.replay(testChronicleKeyEventSubscriber);
-
 
         //Register as subscriber on map to get keys
         _clientAssetTree.registerSubscriber(_mapName, String.class, testChronicleKeyEventSubscriber);

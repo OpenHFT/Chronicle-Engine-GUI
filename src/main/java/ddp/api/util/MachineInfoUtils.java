@@ -37,6 +37,5 @@ public class MachineInfoUtils {
         } catch (UnknownHostException e) {
             return "localhost";
         }
-
     }
 }

@@ -55,7 +55,6 @@ public class FastMapEventListenerStatelessClientTest {
 
         _chronicleTestEventListener = new ChronicleTestEventListener();
 
-
         // TODO change this to be a remote session.
         AssetTree clientAssetTree = defaultSession();
         _StringStringMapClient = clientAssetTree.acquireMap("chronicleMapString", String.class, BytesStore.class);

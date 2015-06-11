@@ -59,13 +59,11 @@ public class ChronicleMapEventListenerStatelessClientTest {
         Chassis.addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(Jvm.TMP).entries(50).averageValueSize(2 << 20), asset));
 
-
         _noOfEventsTriggered.set(0);
 
         _StringStringMap = Chassis.acquireMap("chronicleMapString?putReturnsNull=true", String.class, String.class);
 
         _chronicleTestEventListener = new ChronicleTestEventListener();
-
 
         // TODO change this to be a remote session.
         AssetTree clientAssetTree = defaultSession();

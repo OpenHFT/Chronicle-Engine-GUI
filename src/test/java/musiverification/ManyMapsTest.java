@@ -66,7 +66,6 @@ public class ManyMapsTest {
         System.out.println("... " + _noOfMaps + " Done.");
     }
 
-
     @Before
     public void initTest() throws Exception {
 //        createAndFillMaps();
@@ -151,7 +150,6 @@ public class ManyMapsTest {
     public void testChronicleMapCreationFolderBasePath() throws Exception {
         String basePath = Jvm.TMP;
 
-
         testMultipleMapsWithUnderlyingChronicleMap(basePath);
     }
 
@@ -177,9 +175,7 @@ public class ManyMapsTest {
         String map1Name = "MyMap1";
         String map2Name = "MyMap2";
 
-
         Chassis.resetChassis();
-
 
         //Get map1 - expect 1 file to be created
         Map<String, String> map1 = Chassis.acquireMap(map1Name, String.class, String.class);
@@ -190,7 +186,6 @@ public class ManyMapsTest {
         map1.put(key1, value1);
 
         Assert.assertEquals(value1, map1.get(key1));
-
 
         //Get map2 - expect a second file to be created
         Map<String, String> map2 = Chassis.acquireMap(map2Name, String.class, String.class);
@@ -239,7 +234,6 @@ public class ManyMapsTest {
                 e.getValue().put(TestUtils.getKey(e.getKey(), j), TestUtils.getValue(e.getKey(), j));
             }
         });
-
 
     }
 
