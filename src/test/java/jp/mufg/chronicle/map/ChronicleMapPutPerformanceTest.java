@@ -5,9 +5,9 @@ import jp.mufg.chronicle.map.testclasses.MarketDataField;
 import jp.mufg.chronicle.map.testclasses.MarketDataSource;
 import jp.mufg.chronicle.map.testclasses.MarketDataSupplier;
 import jp.mufg.chronicle.map.testclasses.QuoteMapKey;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
 import net.openhft.chronicle.tools.ChronicleTools;
-import net.openhft.lang.Jvm;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,7 +24,7 @@ import java.util.stream.IntStream;
 // TODO need to add expected performance measures.
 public class ChronicleMapPutPerformanceTest {
     private static final long RUN_TIME = (long) 5e9;
-    private String chronicleMapFile = Jvm.TMP + "/chroniclemap";
+    private String chronicleMapFile = OS.TARGET + "/chroniclemap";
     private File file;
     private int noOfPuts = 10_000_000;
     private Map<QuoteMapKey, Double> marketDataCache;

@@ -3,7 +3,7 @@ package jp.mufg.chronicle.map;
 import ddp.api.TestUtils;
 import jp.mufg.chronicle.map.testclasses.MapContainer;
 import jp.mufg.chronicle.map.testclasses.QuoteMapKey;
-import net.openhft.lang.Jvm;
+import net.openhft.chronicle.core.OS;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 
 // TODO add expected performance measures.
 public class ChronicleMapPutPerformanceTestUpdated {
-    private String chronicleMapFile = Jvm.TMP + "/chroniclemap2";
+    private String chronicleMapFile = OS.TARGET + "/chroniclemap2";
     private File file;
     private int noOfPuts = 10000000;
     private MapContainer marketDataCache;
