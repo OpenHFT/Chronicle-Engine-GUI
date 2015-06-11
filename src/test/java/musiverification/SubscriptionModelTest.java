@@ -2,21 +2,25 @@ package musiverification;
 
 import ddp.api.TestUtils;
 import junit.framework.TestCase;
-import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.AssetTree;
 import net.openhft.chronicle.engine.api.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.Subscriber;
 import net.openhft.chronicle.engine.api.TopicSubscriber;
+import net.openhft.chronicle.engine.api.map.ChangeEvent;
 import net.openhft.chronicle.engine.api.map.KeySubscriber;
-import net.openhft.chronicle.engine.api.map.MapEvent;
 import net.openhft.chronicle.engine.api.map.MapEventListener;
 import org.easymock.EasyMock;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+
+import static net.openhft.chronicle.engine.Chassis.*;
 
 public class SubscriptionModelTest
 {
@@ -31,18 +35,18 @@ public class SubscriptionModelTest
     @Before
     public void setUp() throws Exception
     {
-        Chassis.resetChassis();
+        resetChassis();
 
-        _stringStringMap = Chassis.acquireMap(String.format("%s?%s", _mapName, _mapArgs), String.class, String.class);
+        _stringStringMap = acquireMap(String.format("%s?%s", _mapName, _mapArgs), String.class, String.class);
         _stringStringMap.clear();
 
-        _clientAssetTree = Chassis.defaultSession();
+        _clientAssetTree = defaultSession();
     }
 
     @After
     public void tearDown() throws Exception
     {
-        Chassis.defaultSession().close();
+        defaultSession().close();
     }
 
     /**
@@ -56,7 +60,7 @@ public class SubscriptionModelTest
     public void testSubscriptionMapEventOnAllKeys() throws Exception
     {
         MapEventListener<String, String> mapEventListener = EasyMock.createStrictMock(MapEventListener.class);
-        _clientAssetTree.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
+        _clientAssetTree.registerSubscriber(_mapName, ChangeEvent.class, e -> e.apply(mapEventListener));
 
         int noOfKeys = 5;
         int noOfValues = 5;
@@ -268,14 +272,14 @@ public class SubscriptionModelTest
      *
      * @throws Exception
      */
-    @Ignore //todo (https://higherfrequencytrading.atlassian.net/browse/CHENT-45)
     @Test
     public void testMapAddedKeyListener() throws Exception
     {
         //TODO DS test that we can be notified when maps are added
-        Chassis.resetChassis();
+        resetChassis();
 
-        String mapBaseUri = "mapbase/maps/";
+        String parentUri = "mapbase/";
+        String mapBaseUri = parentUri + "maps/";
 
         String mapName1 = "TestMap1";
         String mapName2 = "TestMap2";
@@ -283,14 +287,23 @@ public class SubscriptionModelTest
         String mapUri1 = mapBaseUri + mapName1;
         String mapUri2 = mapBaseUri + mapName2;
 
-        AssetTree clientAssetTree = Chassis.defaultSession();
+        TopicSubscriber<String, String> assetTreeSubscriber = EasyMock.createStrictMock(TopicSubscriber.class);
+        registerTopicSubscriber(parentUri, String.class, String.class, assetTreeSubscriber);
+
+        // when added
+        assetTreeSubscriber.onMessage("maps", mapName1);
+        assetTreeSubscriber.onMessage("maps", mapName2);
+
+        // and when removed
+        assetTreeSubscriber.onMessage("maps", mapName1);
+        assetTreeSubscriber.onMessage("maps", mapName2);
 
         Subscriber<String> mapEventKeySubscriber = EasyMock.createStrictMock(Subscriber.class);
-        clientAssetTree.registerSubscriber(mapBaseUri, String.class, mapEventKeySubscriber);
+        registerSubscriber(mapBaseUri, String.class, mapEventKeySubscriber);
 
         //TODO DS how do we subscribe to get insert, update, remove events for maps (not map entities)?
 
-        //First the two maps will be added
+        //First the two maps will be inserted into
         mapEventKeySubscriber.onMessage(mapName1);
         mapEventKeySubscriber.onMessage(mapName2);
 
@@ -301,8 +314,8 @@ public class SubscriptionModelTest
         EasyMock.replay(mapEventKeySubscriber);
 
         //Create the two maps
-        Map<String, String> map1 = Chassis.acquireMap(mapUri1, String.class, String.class);
-        Map<String, String> map2 = Chassis.acquireMap(mapUri2, String.class, String.class);
+        Map<String, String> map1 = acquireMap(mapUri1, String.class, String.class);
+        Map<String, String> map2 = acquireMap(mapUri2, String.class, String.class);
 
         //Perform some actions on the maps - should not trigger events
         String keyMap1 = "KeyMap1";
@@ -318,6 +331,12 @@ public class SubscriptionModelTest
 
         Assert.assertEquals(valueMap2, map2.get(keyMap2));
         Assert.assertNull(map2.get(keyMap1));
+
+        map1.remove(keyMap1);
+        map2.remove(keyMap2);
+
+        getAsset(mapBaseUri).removeChild(mapName1);
+        getAsset(mapBaseUri).removeChild(mapName2);
 
         EasyMock.verify(mapEventKeySubscriber);
     }

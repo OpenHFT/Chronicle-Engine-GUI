@@ -2,6 +2,7 @@ package jp.mufg.chronicle.map.eventlistener;
 
 import ddp.api.TestUtils;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.AssetTree;
 import net.openhft.chronicle.engine.api.TopicSubscriber;
@@ -11,7 +12,6 @@ import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
 import net.openhft.chronicle.engine.map.VanillaMapView;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
-import net.openhft.lang.Jvm;
 import org.junit.*;
 
 import java.io.IOException;
@@ -54,10 +54,10 @@ public class ChronicleMapEventListenerStatelessClientTest {
         resetChassis();
         Function<Bytes, Wire> writeType = TextWire::new;
 
-        Files.deleteIfExists(Paths.get(Jvm.TMP, "chronicleMapString"));
+        Files.deleteIfExists(Paths.get(OS.TARGET, "chronicleMapString"));
         addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         Chassis.addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
-                new ChronicleMapKeyValueStore(context.basePath(Jvm.TMP).entries(50).averageValueSize(2 << 20), asset));
+                new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(50).averageValueSize(2 << 20), asset));
 
         _noOfEventsTriggered.set(0);
 

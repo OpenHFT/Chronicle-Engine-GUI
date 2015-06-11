@@ -1,12 +1,12 @@
 package musiverification;
 
 import ddp.api.TestUtils;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.TopicSubscriber;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
-import net.openhft.lang.Jvm;
 import org.junit.*;
 
 import java.io.IOException;
@@ -22,7 +22,7 @@ import static net.openhft.chronicle.engine.Chassis.enableTranslatingValuesToByte
 fs.inotify.max_user_watches = 1500000
 fs.inotify.max_user_instances = 2000
  */
-@Ignore
+@Ignore("Only run as required")
 public class ManyMapsFilePerKeyTest {
     private static Map<String, Map<String, String>> _maps;
     private static String _mapBaseName = "Test-Map-";
@@ -38,7 +38,7 @@ public class ManyMapsFilePerKeyTest {
         enableTranslatingValuesToBytesStore();
 
         addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
-                (context, asset) -> new FilePerKeyValueStore(context.basePath(Jvm.TMP + "/fpk"), asset));
+                (context, asset) -> new FilePerKeyValueStore(context.basePath(OS.TARGET + "/fpk"), asset));
         _maps = new HashMap<>();
 
         System.out.println("Creating maps.");
@@ -141,7 +141,7 @@ public class ManyMapsFilePerKeyTest {
      */
     @Test
     public void testChronicleMapCreationFolderBasePath() throws Exception {
-        String basePath = Jvm.TMP;
+        String basePath = OS.TARGET;
 
         testMultipleMapsWithUnderlyingChronicleMap(basePath);
     }
@@ -154,7 +154,7 @@ public class ManyMapsFilePerKeyTest {
      */
     @Test
     public void testChronicleMapCreationFileBasePath() throws Exception {
-        String basePath = Jvm.TMP + "nonExistingFileOrFolder";
+        String basePath = OS.TARGET + "/nonExistingFileOrFolder";
 
         testMultipleMapsWithUnderlyingChronicleMap(basePath);
     }

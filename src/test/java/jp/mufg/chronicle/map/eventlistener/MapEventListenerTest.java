@@ -1,8 +1,12 @@
 package jp.mufg.chronicle.map.eventlistener;
 
 import ddp.api.TestUtils;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.map.ChronicleMap;
-import net.openhft.lang.Jvm;
+import net.openhft.chronicle.map.ChronicleMapBuilder;
+import net.openhft.chronicle.map.MapEventListener;
+import net.openhft.chronicle.map.WriteContext;
+import net.openhft.chronicle.tools.ChronicleTools;
 import net.openhft.lang.values.StringValue;
 import org.junit.*;
 
@@ -13,13 +17,12 @@ import java.util.function.Consumer;
 /**
  * Created by daniels on 31/03/2015.
  */
-@Ignore("Event listeners not supported yet")
 public class MapEventListenerTest
 {
-    private static final String _chronicleMapStringFilePath = Jvm.TMP + "/chronicleMapStringListenerTest";
+    private static final String _chronicleMapStringFilePath = OS.TARGET + "/chronicleMapStringListenerTest";
     private static File _chronicleStringMapFile;
 
-    private static final String _chronicleMapStringValueFilePath = Jvm.TMP + "/chronicleMapStringValueListenerTest";
+    private static final String _chronicleMapStringValueFilePath = OS.TARGET + "/chronicleMapStringValueListenerTest";
     private static File _chronicleStringValueMapFile;
 
 //    private ChronicleTestEventListener _chronicleTestEventListener;
@@ -44,12 +47,12 @@ public class MapEventListenerTest
     @Before
     public void setUp() throws Exception
     {
-/*        _noOfEventsTriggered = 0;
+        _noOfEventsTriggered = 0;
 
         ChronicleTools.deleteDirOnExit(_chronicleMapStringFilePath);
         ChronicleTools.deleteDirOnExit(_chronicleMapStringValueFilePath);
 
-        _chronicleTestEventListener = new ChronicleTestEventListener();
+        ChronicleTestEventListener _chronicleTestEventListener = new ChronicleTestEventListener();
 
         _chronicleMapString = ChronicleMapBuilder
                 .of(String.class, String.class)
@@ -59,7 +62,7 @@ public class MapEventListenerTest
         _chronicleMapStringValue = ChronicleMapBuilder
                 .of(String.class, StringValue.class)
                 .eventListener(_chronicleTestEventListener)
-                .createPersistedTo(_chronicleStringValueMapFile);*/
+                .createPersistedTo(_chronicleStringValueMapFile);
     }
 
     /**
@@ -107,6 +110,7 @@ public class MapEventListenerTest
      * @throws Exception
      */
     @Test
+    @Ignore("TODO")
     public void testMapEvenListenerAcquireUsingLocked() throws Exception
     {
         StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
@@ -114,7 +118,7 @@ public class MapEventListenerTest
         String testKey = "TestKeyAcquireUsingLocked";
         int noOfIterations = 50;
 
-/*        Consumer<String> consumer = (x) -> {
+        Consumer<String> consumer = (x) -> {
             try (WriteContext<String, StringValue> writeContext = _chronicleMapStringValue.acquireUsingLocked(testKey, valueInstance))
             {
                 valueInstance.setValue(x);
@@ -124,7 +128,7 @@ public class MapEventListenerTest
         testIterateAndAlternate(
                 consumer,
                 consumer,
-                noOfIterations);*/
+                noOfIterations);
     }
 
     /**
@@ -133,6 +137,7 @@ public class MapEventListenerTest
      * @throws Exception
      */
     @Test
+    @Ignore("TODO")
     public void testMapEvenListenerAcquireUsing() throws Exception
     {
         StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
@@ -157,6 +162,7 @@ public class MapEventListenerTest
      * @throws Exception
      */
     @Test
+    @Ignore("TODO")
     public void testMapEvenListenerGetUsing() throws Exception
     {
         StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
@@ -204,11 +210,11 @@ public class MapEventListenerTest
         double runtime = TestUtils.calculateAndPrintRuntime(startTime);
 
         //Test that 50 updates takes less than 1 second
-//        Assert.assertTrue(runtime < 1000000000);
+        Assert.assertTrue(runtime < 1000000000);
 
         Assert.assertEquals(noOfIterations, _noOfEventsTriggered);
     }
-/*
+
     private class ChronicleTestEventListener extends MapEventListener
     {
         @Override
@@ -216,5 +222,5 @@ public class MapEventListenerTest
         {
             _noOfEventsTriggered++;
         }
-    }*/
+    }
 }

@@ -6,7 +6,6 @@ import jp.mufg.chronicle.map.testclasses.QuoteMapKey;
 import net.openhft.lang.Jvm;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -57,7 +56,6 @@ public class ChronicleMapPutPerformanceTestUpdated {
 //        System.out.println("Diff chronicle replace - hash put: " + (replaceChronicleRuntime - putHashMapRuntime));
 //    }
 
-    @Ignore("todo fix - causes  A fatal error has been detected by the Java Runtime Environment")
     @Test
     public void testChronicleMapPuts() throws IOException {
         putConfiguredNumberOfKeyValues();

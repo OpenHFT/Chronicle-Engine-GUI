@@ -1,8 +1,8 @@
 package jp.mufg.chronicle.map.size;
 
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
-import net.openhft.lang.Jvm;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,7 +91,7 @@ public class FillLargeMaps {
     }
 
     private static File getFile(String fileName) {
-        File file = new File(Jvm.TMP + "/" + fileName);
+        File file = new File(OS.TARGET + "/" + fileName);
         file.delete();
         return file;
     }

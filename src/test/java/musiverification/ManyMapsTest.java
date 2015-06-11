@@ -1,6 +1,7 @@
 package musiverification;
 
 import ddp.api.TestUtils;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.TopicSubscriber;
@@ -8,7 +9,6 @@ import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
 import net.openhft.chronicle.engine.map.VanillaMapView;
-import net.openhft.lang.Jvm;
 import org.junit.*;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class ManyMapsTest {
 
     @BeforeClass
     public static void setUp() throws IOException {
-        String basePath = Jvm.TMP + "/ManyMapTests";
+        String basePath = OS.TARGET + "/ManyMapTests";
         Files.createDirectories(Paths.get(basePath));
 
         Files.walk(Paths.get(basePath)).filter(p -> !Files.isDirectory(p)).forEach(p -> {
@@ -148,7 +148,7 @@ public class ManyMapsTest {
      */
     @Test
     public void testChronicleMapCreationFolderBasePath() throws Exception {
-        String basePath = Jvm.TMP;
+        String basePath = OS.TARGET;
 
         testMultipleMapsWithUnderlyingChronicleMap(basePath);
     }
@@ -161,7 +161,7 @@ public class ManyMapsTest {
      */
     @Test
     public void testChronicleMapCreationFileBasePath() throws Exception {
-        String basePath = Jvm.TMP + "nonExistingFileOrFolder";
+        String basePath = OS.TARGET + "nonExistingFileOrFolder";
 
         testMultipleMapsWithUnderlyingChronicleMap(basePath);
     }

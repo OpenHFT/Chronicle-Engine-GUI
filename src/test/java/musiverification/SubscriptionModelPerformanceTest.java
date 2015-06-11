@@ -1,13 +1,13 @@
 package musiverification;
 
 import ddp.api.TestUtils;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.TopicSubscriber;
 import net.openhft.chronicle.engine.api.map.*;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
 import net.openhft.chronicle.engine.map.VanillaMapView;
-import net.openhft.lang.Jvm;
 import org.junit.*;
 
 import java.io.Closeable;
@@ -47,12 +47,12 @@ public class SubscriptionModelPerformanceTest
     @Before
     public void setUp() throws Exception
     {
-        Files.deleteIfExists(Paths.get(Jvm.TMP, _mapName));
+        Files.deleteIfExists(Paths.get(OS.TARGET, _mapName));
         Chassis.resetChassis();
 
         addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
-                new ChronicleMapKeyValueStore(context.basePath(Jvm.TMP).entries(50).averageValueSize(2 << 20), asset));
+                new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(50).averageValueSize(2 << 20), asset));
         _testMap = Chassis.acquireMap(_mapName, String.class, String.class);
 
         _testMap.clear();
@@ -131,7 +131,7 @@ public class SubscriptionModelPerformanceTest
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
-        Chassis.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
+        Chassis.registerSubscriber(_mapName, ChangeEvent.class, e -> e.apply(mapEventListener));
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
@@ -170,7 +170,7 @@ public class SubscriptionModelPerformanceTest
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
-        Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
+        Chassis.registerSubscriber(_mapName + "?bootstrap=false", ChangeEvent.class, e -> e.apply(mapEventListener));
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
@@ -201,7 +201,7 @@ public class SubscriptionModelPerformanceTest
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
-        Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
+        Chassis.registerSubscriber(_mapName + "?bootstrap=false", ChangeEvent.class, e -> e.apply(mapEventListener));
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         long runtimeInNanos = 0;
