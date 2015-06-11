@@ -4,7 +4,11 @@ import ddp.api.TestUtils;
 import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.TopicSubscriber;
-import net.openhft.chronicle.engine.api.map.*;
+import net.openhft.chronicle.engine.api.map.KeySubscriber;
+import net.openhft.chronicle.engine.api.map.MapEvent;
+import net.openhft.chronicle.engine.api.map.MapEventListener;
+import net.openhft.chronicle.engine.api.map.MapView;
+import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
 import net.openhft.lang.Jvm;
 import org.junit.*;
@@ -49,7 +53,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
 
         enableTranslatingValuesToBytesStore();
 
-        addLeafRule(KeyValueStore.class, "FilePer Key",
+        addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(Jvm.TMP + "/fpk/" + counter.getAndIncrement()), asset));
         _testMap = Chassis.acquireMap(_mapName, String.class, String.class);
 

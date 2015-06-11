@@ -4,7 +4,7 @@ import ddp.api.TestUtils;
 import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.TopicSubscriber;
-import net.openhft.chronicle.engine.api.map.KeyValueStore;
+import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
 import net.openhft.lang.Jvm;
 import org.junit.*;
@@ -37,7 +37,7 @@ public class ManyMapsFilePerKeyTest {
 
         enableTranslatingValuesToBytesStore();
 
-        addLeafRule(KeyValueStore.class, "FilePer Key",
+        addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(Jvm.TMP + "/fpk"), asset));
         _maps = new HashMap<>();
 

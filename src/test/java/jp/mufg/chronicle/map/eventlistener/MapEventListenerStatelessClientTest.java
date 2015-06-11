@@ -4,7 +4,7 @@ import ddp.api.TestUtils;
 import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.AssetTree;
 import net.openhft.chronicle.engine.api.TopicSubscriber;
-import net.openhft.chronicle.engine.api.map.KeyValueStore;
+import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
 import org.junit.*;
 
@@ -44,7 +44,7 @@ public class MapEventListenerStatelessClientTest {
         resetChassis();
 
         Chassis.enableTranslatingValuesToBytesStore();
-        addLeafRule(KeyValueStore.class, "use File Per Key",
+        addLeafRule(AuthenticatedKeyValueStore.class, "use File Per Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(_mapBasePath), asset));
     }
 
