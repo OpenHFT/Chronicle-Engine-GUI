@@ -54,8 +54,10 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
 
         enableTranslatingValuesToBytesStore();
 
+        String basePath = OS.TARGET + "/fpk/" + counter.getAndIncrement();
+        System.out.println("Writing to " + basePath);
         addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
-                (context, asset) -> new FilePerKeyValueStore(context.basePath(OS.TMP + "/fpk/" + counter.getAndIncrement()), asset));
+                (context, asset) -> new FilePerKeyValueStore(context.basePath(basePath), asset));
         _testMap = Chassis.acquireMap(_mapName, String.class, String.class);
 
         _testMap.clear();

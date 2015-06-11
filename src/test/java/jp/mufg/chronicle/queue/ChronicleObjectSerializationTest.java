@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChronicleObjectSerializationTest
 {
-    String chronicleQueueBase = OS.TMP + "/Chronicle/data";
+    String chronicleQueueBase = OS.TARGET + "/Chronicle/data";
     Chronicle chronicle;
     EnumTestInterface writer;
     FromChronicle<EnumTestInterfaceImpl> reader;

@@ -31,7 +31,7 @@ import static net.openhft.chronicle.engine.Chassis.*;
  */
 
 public class ChronicleMapEventListenerStatelessClientTest {
-    private static final String _mapBasePath = "Chronicle"; //OS.TMP + "/Chronicle";
+    private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
 
     private static ChronicleTestEventListener _chronicleTestEventListener;
 

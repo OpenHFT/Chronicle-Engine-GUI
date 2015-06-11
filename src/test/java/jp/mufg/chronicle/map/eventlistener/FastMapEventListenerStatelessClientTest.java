@@ -23,7 +23,7 @@ import static net.openhft.chronicle.engine.Chassis.*;
  */
 @Ignore("todo fix")
 public class FastMapEventListenerStatelessClientTest {
-    private static final String _mapBasePath = "Chronicle"; //OS.TMP + "/Chronicle";
+    private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
 
     private ChronicleTestEventListener _chronicleTestEventListener;
 
