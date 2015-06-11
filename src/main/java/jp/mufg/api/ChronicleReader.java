@@ -6,6 +6,8 @@ import net.openhft.chronicle.ChronicleQueueBuilder;
 
 import java.io.IOException;
 
+import static net.openhft.chronicle.core.Jvm.pause;
+
 public class ChronicleReader {
     static final String CHRONICLE_BASE = System.getProperty("chronicle", "engine-input");
 
@@ -15,7 +17,7 @@ public class ChronicleReader {
                 PrintAll.of(DataMart.class), chronicle.createTailer());
         while (!Thread.interrupted()) {
             if (!tailer.readOne())
-                Thread.sleep(50);
+                pause(50);
         }
         chronicle.close();
     }

@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static net.openhft.chronicle.core.Jvm.pause;
+
 @Ignore("todo fix")
 public class DataCacheTest {
     public static final int MAX_RUNTIME = 2000000000;
@@ -457,7 +459,7 @@ public class DataCacheTest {
         Thread t = new Thread(
                 () -> {
                     try {
-                        Thread.sleep(1000);
+                        pause(1000);
 
                         boolean keepRunning = true;
                         boolean isValuePutAndGet = false;
@@ -483,7 +485,7 @@ public class DataCacheTest {
                         }
 
                         Assert.assertTrue(isValuePutAndGet);
-                    } catch (IOException | InterruptedException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 });
@@ -493,7 +495,7 @@ public class DataCacheTest {
         _dataCacheString.putAll(memoryMap);
 
         while (t.isAlive()) {
-            Thread.sleep(200);
+            pause(200);
         }
 
         String finalCacheResult = _dataCacheString.get(keyToCheck);

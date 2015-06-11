@@ -1,6 +1,8 @@
 package musiverification;
 
 import ddp.api.TestUtils;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.TopicSubscriber;
@@ -10,7 +12,6 @@ import net.openhft.chronicle.engine.api.map.MapEventListener;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
-import net.openhft.lang.Jvm;
 import org.junit.*;
 
 import java.io.Closeable;
@@ -54,7 +55,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         enableTranslatingValuesToBytesStore();
 
         addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
-                (context, asset) -> new FilePerKeyValueStore(context.basePath(Jvm.TMP + "/fpk/" + counter.getAndIncrement()), asset));
+                (context, asset) -> new FilePerKeyValueStore(context.basePath(OS.TMP + "/fpk/" + counter.getAndIncrement()), asset));
         _testMap = Chassis.acquireMap(_mapName, String.class, String.class);
 
         _testMap.clear();
@@ -129,7 +130,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
             _testMap.clear();
-            pause(500);
+            Jvm.pause(500);
             mapEventListener.resetCounters();
         }, () -> {
             IntStream.range(0, _noOfPuts).forEach(i ->
@@ -140,7 +141,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
 
             //Test that the correct number of events were triggered on event listener
             if (_noOfPuts != mapEventListener.getNoOfInsertEvents().get())
-                pause(50);
+                Jvm.pause(50);
             assertEquals(_noOfPuts, mapEventListener.getNoOfInsertEvents().get());
             assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
             assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
@@ -168,7 +169,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
-            pause(200);
+            Jvm.pause(200);
             mapEventListener.resetCounters();
         }, () -> {
             IntStream.range(0, _noOfPuts).forEach(i ->
@@ -233,14 +234,6 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         Assert.assertTrue((runtimeInNanos / (_noOfPuts * _noOfRunsToAverage)) <= _secondInNanos);
     }
 
-    private void pause(int millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            throw new AssertionError(e);
-        }
-    }
-
     /**
      * Checks that all updates triggered are for the key specified in the constructor and increments the number of
      * updates.
@@ -267,9 +260,9 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
             for (int i = 1; i <= 30; i++) {
                 if (events * (1 - error / 2) <= getNoOfEvents().get())
                     break;
-                pause(i * i);
+                Jvm.pause(i * i);
             }
-            pause(100);
+            Jvm.pause(100);
             assertEquals(events * (1 - error / 2), getNoOfEvents().get(), error / 2 * events);
         }
     }
@@ -310,9 +303,9 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
             for (int i = 1; i <= 30; i++) {
                 if (events * (1 - error / 2) <= getNoOfEvents().get())
                     break;
-                pause(i * i);
+                Jvm.pause(i * i);
             }
-            pause(100);
+            Jvm.pause(100);
             assertEquals(events * (1 - error / 2), getNoOfEvents().get(), error / 2 * events);
         }
     }
@@ -381,7 +374,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
             for (int i = 1; i <= 40; i++) {
                 if (mapsUpdated.size() >= noOfMaps)
                     break;
-                pause(i * i);
+                Jvm.pause(i * i);
             }
             assertEquals(toString(), noOfMaps, mapsUpdated.size());
         }

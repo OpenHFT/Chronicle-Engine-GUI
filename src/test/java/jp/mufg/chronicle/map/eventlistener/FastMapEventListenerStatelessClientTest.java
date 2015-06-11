@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import static net.openhft.chronicle.core.Jvm.pause;
 import static net.openhft.chronicle.engine.Chassis.*;
 
 /**
@@ -214,12 +215,8 @@ public class FastMapEventListenerStatelessClientTest {
 //        Assert.assertTrue(runtime < 1000000000);
 
         for (int i = 0; i < 100; i++) {
-            try {
-                Thread.sleep(20);
+            pause(20);
                 if (_noOfEventsTriggered.get() >= noOfIterations * count) break;
-            } catch (InterruptedException e) {
-                throw new AssertionError(e);
-            }
         }
         Assert.assertEquals(noOfIterations * count, _noOfEventsTriggered.get(), count);
     }

@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static net.openhft.chronicle.core.Jvm.pause;
+
 public class DataMartEngine {
     final static long started = System.nanoTime();
     final ExecutorService executor = Executors.newCachedThreadPool();
@@ -32,7 +34,7 @@ public class DataMartEngine {
                         if (count <= 0)
                             Thread.yield();
                         else
-                            Thread.sleep(Math.min(20, count));
+                            pause(Math.min(20, count));
                         count++;
                     }
                 }

@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static jp.mufg.api.ChronicleDataMartWrapperTest.createChronicle;
 import static jp.mufg.api.Util.newQuote;
 import static jp.mufg.api.Util.newSubscription;
+import static net.openhft.chronicle.core.Jvm.pause;
 import static net.openhft.lang.model.DataValueClasses.newInstance;
 import static org.easymock.EasyMock.*;
 
@@ -66,8 +67,8 @@ public class DataMartEngineTest {
         writer.onUpdate(newQuote(update, "source", "exchange", "instrument2", 13, 22, 10, 20));
         writer.onUpdate(newQuote(update, "source", "exchangeX", "instrument3", 16, 23, 10, 20));
 
-        for (int i = 0; i < 20; i++) {
-            Thread.sleep(100);
+        for (int i = 1; i <= 20; i++) {
+            pause(i * i);
             try {
                 verify(calculator);
                 verify(calculator2);

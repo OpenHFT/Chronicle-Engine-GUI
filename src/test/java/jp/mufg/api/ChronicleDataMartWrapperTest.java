@@ -15,6 +15,7 @@ import java.util.Map;
 
 import static jp.mufg.api.Util.newQuote;
 import static jp.mufg.api.Util.newSubscription;
+import static net.openhft.chronicle.core.Jvm.pause;
 import static net.openhft.lang.model.DataValueClasses.newInstance;
 import static org.easymock.EasyMock.*;
 
@@ -64,7 +65,7 @@ public class ChronicleDataMartWrapperTest {
                     chronicleDataMart2.runOnce()*/) {
             }
             if (!dataMartWrapper.onIdle())
-                Thread.sleep(10);
+                pause(10);
 //            chronicleDataMart2.onIdle();
         }
         verify(calculator);
