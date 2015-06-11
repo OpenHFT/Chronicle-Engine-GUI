@@ -4,12 +4,12 @@ import ddp.api.TestUtils;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.engine.Chassis;
-import net.openhft.chronicle.engine.api.InvalidSubscriberException;
-import net.openhft.chronicle.engine.api.TopicSubscriber;
-import net.openhft.chronicle.engine.api.map.ChangeEvent;
-import net.openhft.chronicle.engine.api.map.KeySubscriber;
+import net.openhft.chronicle.engine.api.map.MapEvent;
 import net.openhft.chronicle.engine.api.map.MapEventListener;
 import net.openhft.chronicle.engine.api.map.MapView;
+import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
+import net.openhft.chronicle.engine.api.pubsub.Subscriber;
+import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
 import org.junit.*;
@@ -127,7 +127,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
     public void testSubscriptionMapEventListenerInsertPerformance() {
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
-        Chassis.registerSubscriber(_mapName, ChangeEvent.class, e -> e.apply(mapEventListener));
+        Chassis.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
@@ -167,7 +167,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
-        Chassis.registerSubscriber(_mapName + "?bootstrap=false", ChangeEvent.class, e -> e.apply(mapEventListener));
+        Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
@@ -199,7 +199,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
-        Chassis.registerSubscriber(_mapName + "?bootstrap=false", ChangeEvent.class, e -> e.apply(mapEventListener));
+        Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         long runtimeInNanos = 0;
@@ -240,7 +240,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
      * Checks that all updates triggered are for the key specified in the constructor and increments the number of
      * updates.
      */
-    class TestChronicleKeyEventSubscriber implements KeySubscriber<String> {
+    class TestChronicleKeyEventSubscriber implements Subscriber<String> {
         private int _stringLength;
         private AtomicInteger _noOfEvents = new AtomicInteger(0);
 

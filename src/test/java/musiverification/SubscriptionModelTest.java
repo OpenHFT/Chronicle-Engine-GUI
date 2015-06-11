@@ -2,13 +2,15 @@ package musiverification;
 
 import ddp.api.TestUtils;
 import junit.framework.TestCase;
-import net.openhft.chronicle.engine.api.AssetTree;
-import net.openhft.chronicle.engine.api.InvalidSubscriberException;
-import net.openhft.chronicle.engine.api.Subscriber;
-import net.openhft.chronicle.engine.api.TopicSubscriber;
-import net.openhft.chronicle.engine.api.map.ChangeEvent;
-import net.openhft.chronicle.engine.api.map.KeySubscriber;
+import net.openhft.chronicle.engine.api.map.MapEvent;
 import net.openhft.chronicle.engine.api.map.MapEventListener;
+import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
+import net.openhft.chronicle.engine.api.pubsub.Subscriber;
+import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
+import net.openhft.chronicle.engine.api.tree.AssetTree;
+import net.openhft.chronicle.engine.tree.AddedAssetEvent;
+import net.openhft.chronicle.engine.tree.RemovedAssetEvent;
+import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Assert;
@@ -21,6 +23,7 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import static net.openhft.chronicle.engine.Chassis.*;
+import static org.easymock.EasyMock.createStrictMock;
 
 public class SubscriptionModelTest
 {
@@ -59,8 +62,8 @@ public class SubscriptionModelTest
     @Test
     public void testSubscriptionMapEventOnAllKeys() throws Exception
     {
-        MapEventListener<String, String> mapEventListener = EasyMock.createStrictMock(MapEventListener.class);
-        _clientAssetTree.registerSubscriber(_mapName, ChangeEvent.class, e -> e.apply(mapEventListener));
+        MapEventListener<String, String> mapEventListener = createStrictMock(MapEventListener.class);
+        _clientAssetTree.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
 
         int noOfKeys = 5;
         int noOfValues = 5;
@@ -112,7 +115,7 @@ public class SubscriptionModelTest
         //TODO DS refactor to use mock (strict)
         String testKey = "Key-sub-1";
 
-        KeySubscriber<String> testChronicleKeyEventSubscriber = EasyMock.createStrictMock(KeySubscriber.class);
+        Subscriber<String> testChronicleKeyEventSubscriber = createStrictMock(Subscriber.class);
 
         //Set up teh mock
         String update1 = "Update1";
@@ -169,7 +172,7 @@ public class SubscriptionModelTest
         String testKey4 = "Key-sub-4";
         String testKey5 = "Key-sub-5";
 
-        KeySubscriber<String> testChronicleKeyEventSubscriber = EasyMock.createStrictMock(KeySubscriber.class);
+        Subscriber<String> testChronicleKeyEventSubscriber = createStrictMock(Subscriber.class);
 
         String update1 = "Update1";
         String update2 = "Update2";
@@ -230,7 +233,7 @@ public class SubscriptionModelTest
         //TODO DS connecting to a server based Java component using the client API can be notified by callback methods for all updates in map
 
         //Using a strict mock as we want to verify that events come in in the right order
-        TopicSubscriber<String, String> topicSubscriberMock = EasyMock.createStrictMock(TopicSubscriber.class);
+        TopicSubscriber<String, String> topicSubscriberMock = createStrictMock(TopicSubscriber.class);
         _clientAssetTree.registerTopicSubscriber(_mapName, String.class, String.class, topicSubscriberMock);
 
         int noOfKeys = 5;
@@ -278,16 +281,16 @@ public class SubscriptionModelTest
         //TODO DS test that we can be notified when maps are added
         resetChassis();
 
-        String parentUri = "mapbase/";
-        String mapBaseUri = parentUri + "maps/";
+        String parentUri = "/mapbase/";
+        String mapBaseUri = parentUri + "maps";
 
         String mapName1 = "TestMap1";
         String mapName2 = "TestMap2";
 
-        String mapUri1 = mapBaseUri + mapName1;
-        String mapUri2 = mapBaseUri + mapName2;
+        String mapUri1 = mapBaseUri + '/' + mapName1;
+        String mapUri2 = mapBaseUri + '/' + mapName2;
 
-        TopicSubscriber<String, String> assetTreeSubscriber = EasyMock.createStrictMock(TopicSubscriber.class);
+        TopicSubscriber<String, String> assetTreeSubscriber = createStrictMock("assetTreeSubscriber", TopicSubscriber.class);
         registerTopicSubscriber(parentUri, String.class, String.class, assetTreeSubscriber);
 
         // when added
@@ -298,18 +301,18 @@ public class SubscriptionModelTest
         assetTreeSubscriber.onMessage("maps", mapName1);
         assetTreeSubscriber.onMessage("maps", mapName2);
 
-        Subscriber<String> mapEventKeySubscriber = EasyMock.createStrictMock(Subscriber.class);
-        registerSubscriber(mapBaseUri, String.class, mapEventKeySubscriber);
+        Subscriber<TopologicalEvent> mapEventKeySubscriber = createStrictMock("mapEventKeySubscriber", Subscriber.class);
+        registerSubscriber(mapBaseUri, TopologicalEvent.class, mapEventKeySubscriber);
 
         //TODO DS how do we subscribe to get insert, update, remove events for maps (not map entities)?
 
         //First the two maps will be inserted into
-        mapEventKeySubscriber.onMessage(mapName1);
-        mapEventKeySubscriber.onMessage(mapName2);
+        mapEventKeySubscriber.onMessage(AddedAssetEvent.of(mapBaseUri, mapName1));
+        mapEventKeySubscriber.onMessage(AddedAssetEvent.of(mapBaseUri, mapName2));
 
         //Second the two maps are removed
-        mapEventKeySubscriber.onMessage(mapName1);
-        mapEventKeySubscriber.onMessage(mapName2);
+        mapEventKeySubscriber.onMessage(RemovedAssetEvent.of(mapBaseUri, mapName1));
+        mapEventKeySubscriber.onMessage(RemovedAssetEvent.of(mapBaseUri, mapName2));
 
         EasyMock.replay(mapEventKeySubscriber);
 
