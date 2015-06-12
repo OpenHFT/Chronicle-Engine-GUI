@@ -12,10 +12,7 @@ import net.openhft.chronicle.engine.tree.AddedAssetEvent;
 import net.openhft.chronicle.engine.tree.RemovedAssetEvent;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import org.easymock.EasyMock;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -108,6 +105,7 @@ public class SubscriptionModelTest
      * @throws Exception
      */
     @Test
+    @Ignore("TODO")
     public void testSubscriptionSpecificKey() throws Exception
     {
         //TODO DS connecting to a server based Java component using the clietn API can be notified by callback methods for specified key in a given map
