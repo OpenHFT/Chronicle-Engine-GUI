@@ -5,7 +5,6 @@ import net.openhft.chronicle.map.ChronicleMapStatelessClientBuilder;
 import net.openhft.chronicle.network.connection.RemoteCallTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -407,7 +406,7 @@ final class ChronicleDataCache<K, V> implements DataCache<K, V>
     public boolean addEventListener(DataCacheEventListener dataCacheEventListener)
     {
         //TODO DS execute with retry
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     //TODO DS implement - might need to be at build time in Chronicle.
@@ -415,7 +414,7 @@ final class ChronicleDataCache<K, V> implements DataCache<K, V>
     public boolean removeEventListener(DataCacheEventListener dataCacheEventListener)
     {
         //TODO DS execute with retry
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override

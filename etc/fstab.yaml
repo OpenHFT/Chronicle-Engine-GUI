@@ -1,0 +1,46 @@
+# mount points
+mounts: [
+  !FilePerKeyFS {
+    spec: Curves,
+    name: /Data/Published/Realtime/Curves,
+    valueType: !type String,
+    recurve: false
+  },
+  !FilePerKeyFS {
+    spec: DFCurves,
+    name: /Data/Published/Realtime/Curves/DFCurves,
+    valueType: !type String,
+    recurve: false
+  },
+  !FilePerKeyFS {
+    spec: DFCurves/Archives,
+    name: /Data/Published/Realtime/Curves/DFCurves/Archives,
+    valueType: !type String,
+    recurve: true
+  },
+  !FilePerKeyFS {
+    spec: OIS-DFCurves,
+    name: /Data/Published/Realtime/Curves/OIS/DFCurves,
+    valueType: !type String,
+    recurve: false
+  },
+  !FilePerKeyFS {
+    spec: OIS-DFCurves/Archives,
+    name: /Data/Published/Realtime/Curves/OIS/DFCurves/Archives,
+    valueType: !type String,
+    recurve: true
+  },
+  !FilePerKeyFS {
+    spec: London-InterestRate-Curves,
+    name: /Data/InterestRate/Curves/ValEnv_London/Server,
+    valueType: !type String,
+    recurve: false
+  },
+  !FilePerKeyFS {
+    spec: London-InterestRate-Curves/Archives,
+    name: /Data/InterestRate/Curves/ValEnv_London/Archives,
+    valueType: !type String,
+    recurve: true
+  }
+]
+    
