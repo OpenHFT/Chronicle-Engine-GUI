@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
+import static net.openhft.chronicle.engine.Chassis.addLeafRule;
 import static net.openhft.chronicle.engine.Chassis.addWrappingRule;
 
 public class ManyMapsTest {
@@ -44,7 +45,7 @@ public class ManyMapsTest {
         });
 
         addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
-        Chassis.addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
+        addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(basePath).entries(1200), asset));
         _maps = new HashMap<>();
 

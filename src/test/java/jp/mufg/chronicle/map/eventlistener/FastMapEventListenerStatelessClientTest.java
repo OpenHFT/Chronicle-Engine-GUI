@@ -2,11 +2,11 @@ package jp.mufg.chronicle.map.eventlistener;
 
 import ddp.api.TestUtils;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
-import net.openhft.chronicle.engine.api.tree.AssetTree;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
+import net.openhft.chronicle.engine.tree.VanillaAsset;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import org.junit.*;
 
 import java.io.IOException;
@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static net.openhft.chronicle.core.Jvm.pause;
-import static net.openhft.chronicle.engine.Chassis.*;
 
 /**
  * Created by daniels on 31/03/2015.
@@ -24,6 +23,9 @@ import static net.openhft.chronicle.engine.Chassis.*;
 @Ignore("todo fix")
 public class FastMapEventListenerStatelessClientTest {
     private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
+
+    private static final VanillaAssetTree clientAssetTree = new VanillaAssetTree().forRemoteAccess();
+    private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
 
     private ChronicleTestEventListener _chronicleTestEventListener;
 
@@ -40,10 +42,9 @@ public class FastMapEventListenerStatelessClientTest {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
-        resetChassis();
 
-        Chassis.enableTranslatingValuesToBytesStore();
-        addLeafRule(AuthenticatedKeyValueStore.class, "use File Per Key",
+        VanillaAsset root = (VanillaAsset) serverAssetTree.root();
+        root.addLeafRule(AuthenticatedKeyValueStore.class, "use File Per Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(_mapBasePath), asset));
     }
 
@@ -51,13 +52,12 @@ public class FastMapEventListenerStatelessClientTest {
     public void setUp() throws Exception {
         _noOfEventsTriggered.set(0);
 
-        _StringStringMap = Chassis.acquireMap("chronicleMapString?putReturnsNull=true", String.class, BytesStore.class);
+        _StringStringMap = serverAssetTree.acquireMap("chronicleMapString?putReturnsNull=true", String.class, BytesStore.class);
         _StringStringMap.clear();
 
         _chronicleTestEventListener = new ChronicleTestEventListener();
 
         // TODO change this to be a remote session.
-        AssetTree clientAssetTree = defaultSession();
         _StringStringMapClient = clientAssetTree.acquireMap("chronicleMapString", String.class, BytesStore.class);
         clientAssetTree.registerTopicSubscriber("chronicleMapString", String.class, BytesStore.class, _chronicleTestEventListener);
 
@@ -66,7 +66,8 @@ public class FastMapEventListenerStatelessClientTest {
     @After
     public void tearDown() throws Exception {
         _StringStringMap.clear();
-        Chassis.defaultSession().close();
+        clientAssetTree.close();
+        serverAssetTree.close();
     }
 
     /**
