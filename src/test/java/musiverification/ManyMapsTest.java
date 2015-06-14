@@ -14,6 +14,7 @@ import org.junit.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,7 +48,7 @@ public class ManyMapsTest {
         addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(basePath).entries(1200), asset));
-        _maps = new HashMap<>();
+        _maps = Collections.synchronizedMap(new HashMap<>());
 
         System.out.println("Creating maps.");
         AtomicInteger count = new AtomicInteger();
@@ -61,8 +62,8 @@ public class ManyMapsTest {
             }
 
             _maps.put(mapName, map);
-            if (count.incrementAndGet() % 25 == 0)
-                System.out.println("... " + count);
+            if (count.incrementAndGet() % 100 == 0)
+                System.out.print("... " + count);
         });
         System.out.println("... " + _noOfMaps + " Done.");
     }
