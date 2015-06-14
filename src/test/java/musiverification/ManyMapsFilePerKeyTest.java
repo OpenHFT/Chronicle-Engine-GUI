@@ -10,6 +10,7 @@ import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
 import org.junit.*;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,7 +40,7 @@ public class ManyMapsFilePerKeyTest {
 
         addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(OS.TARGET + "/fpk"), asset));
-        _maps = new HashMap<>();
+        _maps = Collections.synchronizedMap(new HashMap<>());
 
         System.out.println("Creating maps.");
         AtomicInteger count = new AtomicInteger();
@@ -53,8 +54,8 @@ public class ManyMapsFilePerKeyTest {
             }
 
             _maps.put(mapName, map);
-            if (count.incrementAndGet() % 25 == 0)
-                System.out.println("... " + count);
+            if (count.incrementAndGet() % 100 == 0)
+                System.out.print("... " + count);
         });
         System.out.println("... " + _noOfMaps + " Done.");
     }
