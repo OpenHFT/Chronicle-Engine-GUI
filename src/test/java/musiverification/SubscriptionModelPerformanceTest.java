@@ -28,29 +28,28 @@ import java.util.stream.IntStream;
 import static net.openhft.chronicle.engine.Chassis.addLeafRule;
 import static net.openhft.chronicle.engine.Chassis.addWrappingRule;
 
-public class SubscriptionModelPerformanceTest
-{
+public class SubscriptionModelPerformanceTest {
+    public static final boolean QUICK = Boolean.getBoolean("quick");
     //TODO DS 50 updates / second when we have a large number of maps
     //TODO DS test having the server side on another machine
     private static final int _noOfPuts = 50;
-    private static final int _noOfRunsToAverage = 10;
-    private static final long _secondInNanos = 1_000_000_000;
+    private static final int _noOfRunsToAverage = QUICK ? 2 : 10;
+    private static final long _secondInNanos = (QUICK ? 2 : 1) * 1_000_000_000;
+    private static final AtomicInteger counter = new AtomicInteger();
     private static String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
     private static int _twoMbTestStringLength;
     private static Map<String, String> _testMap;
-    private static String _mapName = "PerfTestMap";
+    private final String _mapName = "PerfTestMap" + counter.incrementAndGet();
 
     @BeforeClass
-    public static void setUpBeforeClass() throws Exception
-    {
+    public static void setUpBeforeClass() throws Exception {
         _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath);
         _twoMbTestStringLength = _twoMbTestString.length();
     }
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         Files.deleteIfExists(Paths.get(OS.TARGET, _mapName));
         Chassis.resetChassis();
 
@@ -64,7 +63,7 @@ public class SubscriptionModelPerformanceTest
 
     @After
     public void tearDown() throws IOException {
-        ((Closeable)((MapView)_testMap).underlying()).close();
+        ((Closeable) ((MapView) _testMap).underlying()).close();
     }
 
     /**
@@ -74,8 +73,7 @@ public class SubscriptionModelPerformanceTest
      * @throws URISyntaxException
      */
     @Test
-    public void testSubscriptionMapEventOnKeyPerformance()
-    {
+    public void testSubscriptionMapEventOnKeyPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 
         //Create subscriber and register
@@ -104,8 +102,7 @@ public class SubscriptionModelPerformanceTest
      * @throws URISyntaxException
      */
     @Test
-    public void testSubscriptionMapEventOnTopicPerformance()
-    {
+    public void testSubscriptionMapEventOnTopicPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 
         //Create subscriber and register
@@ -130,8 +127,7 @@ public class SubscriptionModelPerformanceTest
      * Expect it to handle at least 50 2 MB updates per second.
      */
     @Test
-    public void testSubscriptionMapEventListenerInsertPerformance()
-    {
+    public void testSubscriptionMapEventListenerInsertPerformance() {
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
@@ -161,8 +157,7 @@ public class SubscriptionModelPerformanceTest
      * Expect it to handle at least 50 2 MB updates per second.
      */
     @Test
-    public void testSubscriptionMapEventListenerUpdatePerformance()
-    {
+    public void testSubscriptionMapEventListenerUpdatePerformance() {
         //Put values before testing as we want to ignore the insert events
         Function<Integer, Object> putFunction = a -> _testMap.put(TestUtils.getKey(_mapName, a), _twoMbTestString);
 
@@ -198,8 +193,7 @@ public class SubscriptionModelPerformanceTest
      * Expect it to handle at least 50 2 MB updates per second.
      */
     @Test
-    public void testSubscriptionMapEventListenerRemovePerformance()
-    {
+    public void testSubscriptionMapEventListenerRemovePerformance() {
         //Put values before testing as we want to ignore the insert and update events
 
         //Create subscriber and register
@@ -210,8 +204,7 @@ public class SubscriptionModelPerformanceTest
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         long runtimeInNanos = 0;
 
-        for (int i = 0; i < _noOfRunsToAverage; i++)
-        {
+        for (int i = 0; i < _noOfRunsToAverage; i++) {
             //Put values before testing as we want to ignore the insert and update events
             IntStream.range(0, _noOfPuts).forEach(c ->
             {
@@ -242,24 +235,20 @@ public class SubscriptionModelPerformanceTest
      * Checks that all updates triggered are for the key specified in the constructor and increments the number of
      * updates.
      */
-    class TestChronicleKeyEventSubscriber implements Subscriber<String>
-    {
+    class TestChronicleKeyEventSubscriber implements Subscriber<String> {
         private int _stringLength;
         private AtomicInteger _noOfEvents = new AtomicInteger(0);
 
-        public TestChronicleKeyEventSubscriber(int stringLength)
-        {
+        public TestChronicleKeyEventSubscriber(int stringLength) {
             _stringLength = stringLength;
         }
 
-        public AtomicInteger getNoOfEvents()
-        {
+        public AtomicInteger getNoOfEvents() {
             return _noOfEvents;
         }
 
         @Override
-        public void onMessage(String newValue)
-        {
+        public void onMessage(String newValue) {
             Assert.assertEquals(_stringLength, newValue.length());
             _noOfEvents.incrementAndGet();
         }
@@ -270,14 +259,12 @@ public class SubscriptionModelPerformanceTest
      * value.
      * Increments event counter which can be checked at the end of the test.
      */
-    class TestChronicleTopicSubscriber implements TopicSubscriber<String, String>
-    {
+    class TestChronicleTopicSubscriber implements TopicSubscriber<String, String> {
         private String _keyName;
         private int _stringLength;
         private AtomicInteger _noOfEvents = new AtomicInteger(0);
 
-        public TestChronicleTopicSubscriber(String keyName, int stringLength)
-        {
+        public TestChronicleTopicSubscriber(String keyName, int stringLength) {
             _keyName = keyName;
             _stringLength = stringLength;
         }
@@ -288,16 +275,14 @@ public class SubscriptionModelPerformanceTest
          * @throws InvalidSubscriberException
          */
         @Override
-        public void onMessage(String topic, String message) throws InvalidSubscriberException
-        {
+        public void onMessage(String topic, String message) throws InvalidSubscriberException {
             Assert.assertEquals(_keyName, topic);
             Assert.assertEquals(_stringLength, message.length());
 
             _noOfEvents.incrementAndGet();
         }
 
-        public AtomicInteger getNoOfEvents()
-        {
+        public AtomicInteger getNoOfEvents() {
             return _noOfEvents;
         }
     }
@@ -307,8 +292,7 @@ public class SubscriptionModelPerformanceTest
      * as expected.
      * Increments event specific counters that can be used to check agains the expected number of events.
      */
-    class TestChronicleMapEventListener implements MapEventListener<String, String>
-    {
+    class TestChronicleMapEventListener implements MapEventListener<String, String> {
         private AtomicInteger _noOfInsertEvents = new AtomicInteger(0);
         private AtomicInteger _noOfUpdateEvents = new AtomicInteger(0);
         private AtomicInteger _noOfRemoveEvents = new AtomicInteger(0);
@@ -316,54 +300,45 @@ public class SubscriptionModelPerformanceTest
         private String _mapName;
         private int _stringLength;
 
-        public TestChronicleMapEventListener(String mapName, int stringLength)
-        {
+        public TestChronicleMapEventListener(String mapName, int stringLength) {
             _mapName = mapName;
             _stringLength = stringLength;
         }
 
         @Override
-        public void update(String key, String oldValue, String newValue)
-        {
+        public void update(String key, String oldValue, String newValue) {
             testKeyAndValue(key, newValue, _noOfUpdateEvents);
         }
 
         @Override
-        public void insert(String key, String value)
-        {
+        public void insert(String key, String value) {
             testKeyAndValue(key, value, _noOfInsertEvents);
         }
 
         @Override
-        public void remove(String key, String value)
-        {
+        public void remove(String key, String value) {
             testKeyAndValue(key, value, _noOfRemoveEvents);
         }
 
-        public AtomicInteger getNoOfInsertEvents()
-        {
+        public AtomicInteger getNoOfInsertEvents() {
             return _noOfInsertEvents;
         }
 
-        public AtomicInteger getNoOfUpdateEvents()
-        {
+        public AtomicInteger getNoOfUpdateEvents() {
             return _noOfUpdateEvents;
         }
 
-        public AtomicInteger getNoOfRemoveEvents()
-        {
+        public AtomicInteger getNoOfRemoveEvents() {
             return _noOfRemoveEvents;
         }
 
-        public void resetCounters()
-        {
+        public void resetCounters() {
             _noOfInsertEvents = new AtomicInteger(0);
             _noOfUpdateEvents = new AtomicInteger(0);
             _noOfRemoveEvents = new AtomicInteger(0);
         }
 
-        private void testKeyAndValue(String key, String value, AtomicInteger counterToIncrement)
-        {
+        private void testKeyAndValue(String key, String value, AtomicInteger counterToIncrement) {
             int counter = counterToIncrement.getAndIncrement();
             Assert.assertEquals(TestUtils.getKey(_mapName, counter), key);
             Assert.assertEquals(_stringLength, value.length());

@@ -58,6 +58,7 @@ public class TestUtils {
     public static void runMultipleTimesAndVerifyAvgRuntime(Runnable setup, Runnable testToRun, int noOfRuns, long maxRuntimeInNanos) {
         AtomicLong totalTime = new AtomicLong();
 
+        // one warmup.
         IntStream.range(0, noOfRuns).forEach(e -> {
             setup.run();
             long start = System.nanoTime();

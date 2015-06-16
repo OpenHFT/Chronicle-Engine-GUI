@@ -118,7 +118,7 @@ public class ManyMapsFilePerKeyTest {
 
             Assert.assertEquals(_noOfKvps, eventsForMapSubscriber.getNoOfEvents());
 
-            Chassis.unregisterTopicSubscriber(key, String.class, String.class, eventsForMapSubscriber);
+            Chassis.unregisterTopicSubscriber(key, eventsForMapSubscriber);
         });
     }
 
