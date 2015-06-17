@@ -1,55 +1,54 @@
 # mount points
-mounts: [
-  !ChronicleMapGroupFS {
-     spec:  $TARGET/ChMaps,
+ChronMaps: !ChronicleMapGroupFS {
+     spec:  ChMaps,
      name: /ChMaps,
      cluster: cluster1,
      maxEntries: 10000,
      averageValueSize: 10000,
      putReturnsNull: true,
      removeReturnsNull: true
-  },
-  !FilePerKeyGroupFS {
+  }
+Curves: !FilePerKeyGroupFS {
     spec: Curves,
     name: /Data/Published/Realtime/Curves,
     valueType: !type String,
     recurse: false
-  },
-  !FilePerKeyGroupFS {
+  }
+DFCurves: !FilePerKeyGroupFS {
     spec: DFCurves,
     name: /Data/Published/Realtime/Curves/DFCurves,
     valueType: !type String,
     recurse: false
-  },
-  !FilePerKeyGroupFS {
+  }
+DFCurves-Archives: !FilePerKeyGroupFS {
     spec: DFCurves/Archives,
     name: /Data/Published/Realtime/Curves/DFCurves/Archives,
     valueType: !type String,
     recurse: true
-  },
-  !FilePerKeyGroupFS {
+  }
+OIS-DFCurves: !FilePerKeyGroupFS {
     spec: OIS-DFCurves,
     name: /Data/Published/Realtime/Curves/OIS/DFCurves,
     valueType: !type String,
     recurse: false
-  },
-  !FilePerKeyGroupFS {
+  }
+OIS-DFCurves-Archives: !FilePerKeyGroupFS {
     spec: OIS-DFCurves/Archives,
     name: /Data/Published/Realtime/Curves/OIS/DFCurves/Archives,
     valueType: !type String,
     recurse: true
-  },
-  !FilePerKeyGroupFS {
+  }
+London-InterestRate-Curves: !FilePerKeyGroupFS {
     spec: London-InterestRate-Curves,
     name: /Data/InterestRate/Curves/ValEnv_London/Server,
     valueType: !type String,
     recurse: false
-  },
-  !FilePerKeyGroupFS {
+  }
+London-InterestRate-Curves/Archives: !FilePerKeyGroupFS {
     spec: London-InterestRate-Curves/Archives,
     name: /Data/InterestRate/Curves/ValEnv_London/Archives,
     valueType: !type String,
     recurse: true
   }
-]
+
     
