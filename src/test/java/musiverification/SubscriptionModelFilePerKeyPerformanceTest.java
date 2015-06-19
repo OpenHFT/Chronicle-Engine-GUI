@@ -34,7 +34,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
 
     private static final int _noOfPuts = 50;
     private static final int _noOfRunsToAverage = 10;
-    private static final long _secondInNanos = 10_000_000_000L;
+    private static final long _secondInNanos = 1_000_000_000L;
     private static String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
     private static int _twoMbTestStringLength;
@@ -71,23 +71,23 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
      * Test that listening to events for a given key can handle 50 updates per second of 2 MB string values.
      */
     @Test
-    @Ignore("number of events is unreliable for FilePerKey")
     public void testSubscriptionMapEventOnKeyPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 
         //Create subscriber and register
         TestChronicleKeyEventSubscriber keyEventSubscriber = new TestChronicleKeyEventSubscriber(_twoMbTestStringLength);
 
-        Chassis.registerSubscriber(_mapName + "/" + key + "?bootstrap=false", String.class, keyEventSubscriber);
+        Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, me -> keyEventSubscriber.onMessage((String) me.value()));
 
+        AtomicInteger counter = new AtomicInteger();
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(
-                () -> IntStream.range(0, _noOfPuts).parallel().forEach(
-                        i -> _testMap.put(key, i + _twoMbTestString)),
+                () -> IntStream.range(0, _noOfPuts).forEach(
+                        i -> _testMap.put(key + i, counter.incrementAndGet() + _twoMbTestString)),
                 _noOfRunsToAverage, _secondInNanos);
 
         //Test that the correct number of events was triggered on event listener
-        keyEventSubscriber.waitForEvents(_noOfPuts * _noOfRunsToAverage, 0.45);
+        keyEventSubscriber.waitForEvents(_noOfPuts * _noOfRunsToAverage, 0.3);
     }
 
     /**
@@ -95,7 +95,6 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
      * triggering events which contain both the key and value (topic).
      */
     @Test
-    @Ignore("number of events is unreliable for FilePerKey")
     public void testSubscriptionMapEventOnTopicPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 
@@ -113,7 +112,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         }, _noOfRunsToAverage, _secondInNanos);
 
         //Test that the correct number of events was triggered on event listener
-        topicSubscriber.waitForEvents(_noOfPuts * _noOfRunsToAverage, 0.2);
+        topicSubscriber.waitForEvents(_noOfPuts * _noOfRunsToAverage, 0.4);
     }
 
     /**
@@ -292,6 +291,10 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
          */
         @Override
         public void onMessage(String topic, String message) throws InvalidSubscriberException {
+            if (message == null) {
+                System.out.println("topic " + topic + " deleted?");
+                return;
+            }
             assertEquals(_keyName, topic);
             assertEquals(_stringLength + 2, message.length(), 1);
 
@@ -303,8 +306,8 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         }
 
         public void waitForEvents(int events, double error) {
-            for (int i = 1; i <= 30; i++) {
-                if (events * (1 - error / 2) <= getNoOfEvents().get())
+            for (int i = 1; i <= 20; i++) {
+                if (events * (1 - error) <= getNoOfEvents().get())
                     break;
                 Jvm.pause(i * i);
             }
