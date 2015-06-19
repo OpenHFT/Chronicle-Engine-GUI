@@ -33,7 +33,6 @@ import org.junit.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -95,9 +94,6 @@ public class RemoteSubscriptionModelPerformanceTest {
 
     /**
      * Test that listening to events for a given key can handle 50 updates per second of 2 MB string values.
-     *
-     * @throws IOException
-     * @throws URISyntaxException
      */
     @Test
     public void testSubscriptionMapEventOnKeyPerformance() {
@@ -127,9 +123,6 @@ public class RemoteSubscriptionModelPerformanceTest {
     /**
      * Test that listening to events for a given map can handle 50 updates per second of 2 MB string values and are
      * triggering events which contain both the key and value (topic).
-     *
-     * @throws IOException
-     * @throws URISyntaxException
      */
     @Test
     @Ignore("TODO CHENT-49")
