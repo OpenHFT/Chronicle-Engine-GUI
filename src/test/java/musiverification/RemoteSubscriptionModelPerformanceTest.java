@@ -27,6 +27,7 @@ import net.openhft.chronicle.engine.api.pubsub.Subscriber;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
 import net.openhft.chronicle.engine.map.VanillaMapView;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import org.junit.*;
 
@@ -54,6 +55,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     private static int _twoMbTestStringLength;
     private static Map<String, String> _testMap;
     private static VanillaAssetTree serverAssetTree, clientAssetTree;
+    private static ServerEndpoint serverEndpoint;
 
     private final String _mapName = "PerfTestMap" + counter.incrementAndGet();
 
@@ -66,8 +68,10 @@ public class RemoteSubscriptionModelPerformanceTest {
         serverAssetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(50).averageValueSize(2 << 20), asset));
+        serverEndpoint = new ServerEndpoint(serverAssetTree);
+        int port = serverEndpoint.getPort();
 
-        clientAssetTree = new VanillaAssetTree().forRemoteAccess();
+        clientAssetTree = new VanillaAssetTree().forRemoteAccess("localhost", port);
     }
 
     @Before
@@ -84,8 +88,9 @@ public class RemoteSubscriptionModelPerformanceTest {
     }
 
     @AfterClass
-    public static void tearDownAfterClass() {
+    public static void tearDownAfterClass() throws IOException {
         clientAssetTree.close();
+        serverEndpoint.close();
         serverAssetTree.close();
     }
 

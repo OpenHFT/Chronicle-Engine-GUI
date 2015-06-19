@@ -24,7 +24,7 @@ public class MapEventListenerStatelessClientTest {
     private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
 
     private ChronicleTestEventListener _chronicleTestEventListener;
-    private static final VanillaAssetTree clientAssetTree = new VanillaAssetTree().forRemoteAccess();
+    private static final VanillaAssetTree clientAssetTree = new VanillaAssetTree().forRemoteAccess("localhost", 0);
     private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
 
     private Map<String, String> _StringStringMap;
