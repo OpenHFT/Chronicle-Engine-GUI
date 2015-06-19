@@ -1,10 +1,11 @@
 package ddp.api.authentication;
 
-import ddp.api.identity.*;
+import ddp.api.identity.ClientIdentity;
 
 /**
  * Class providing functionality to authenticate a {@link ddp.api.identity.ClientIdentity}.
  */
+@FunctionalInterface
 public interface Authenticator
 {
     /**

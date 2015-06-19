@@ -30,7 +30,7 @@ import static net.openhft.chronicle.engine.Chassis.addWrappingRule;
 
 public class SubscriptionModelPerformanceTest {
     public static final boolean QUICK = Boolean.getBoolean("quick");
-    //TODO DS 50 updates / second when we have a large number of maps
+
     //TODO DS test having the server side on another machine
     private static final int _noOfPuts = 50;
     private static final int _noOfRunsToAverage = QUICK ? 2 : 10;

@@ -26,8 +26,7 @@ import static net.openhft.chronicle.engine.Chassis.addWrappingRule;
 public class ManyMapsTest {
     private static Map<String, Map<String, String>> _maps;
     private static String _mapBaseName = "Test-Map-";
-    //todo takes a long time to create 1100 maps slow for testing
-    //todo https://higherfrequencytrading.atlassian.net/browse/HCOLL-365
+
     private static int _noOfMaps = Boolean.getBoolean("quick") ? 100 : 1_100;
     //    private static int _noOfMaps = 300;
     private static int _noOfKvps = 1_000;

@@ -17,7 +17,6 @@ import org.junit.*;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -70,19 +69,15 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
 
     /**
      * Test that listening to events for a given key can handle 50 updates per second of 2 MB string values.
-     *
-     * @throws IOException
-     * @throws URISyntaxException
      */
     @Test
-    @Ignore("TODO number of events is unreliable")
+    @Ignore("number of events is unreliable for FilePerKey")
     public void testSubscriptionMapEventOnKeyPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 
         //Create subscriber and register
         TestChronicleKeyEventSubscriber keyEventSubscriber = new TestChronicleKeyEventSubscriber(_twoMbTestStringLength);
 
-        //todo This ends up getting a SubAsset not an asset
         Chassis.registerSubscriber(_mapName + "/" + key + "?bootstrap=false", String.class, keyEventSubscriber);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
@@ -101,7 +96,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
      */
 
     @Test
-    @Ignore("TODO number of events is unreliable")
+    @Ignore("number of events is unreliable for FilePerKey")
     public void testSubscriptionMapEventOnTopicPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 

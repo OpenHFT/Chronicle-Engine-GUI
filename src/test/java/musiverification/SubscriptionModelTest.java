@@ -9,10 +9,13 @@ import net.openhft.chronicle.engine.api.pubsub.Subscriber;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
 import net.openhft.chronicle.engine.tree.AddedAssetEvent;
+import net.openhft.chronicle.engine.tree.ExistingAssetEvent;
 import net.openhft.chronicle.engine.tree.RemovedAssetEvent;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
-import org.easymock.EasyMock;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -20,10 +23,9 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import static net.openhft.chronicle.engine.Chassis.*;
-import static org.easymock.EasyMock.createStrictMock;
+import static org.easymock.EasyMock.*;
 
-public class SubscriptionModelTest
-{
+public class SubscriptionModelTest {
     private static Map<String, String> _stringStringMap;
     private static String _mapName = "chronicleMapString";
     private static String _mapArgs = "putReturnsNull=true";
@@ -33,8 +35,7 @@ public class SubscriptionModelTest
     //TODO DS call back method must include map name (I don't think it does?), key name, value inserted - no longer necessary as you subscribe to a specific map
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         resetChassis();
 
         _stringStringMap = acquireMap(String.format("%s?%s", _mapName, _mapArgs), String.class, String.class);
@@ -44,8 +45,7 @@ public class SubscriptionModelTest
     }
 
     @After
-    public void tearDown() throws Exception
-    {
+    public void tearDown() throws Exception {
         defaultSession().close();
     }
 
@@ -57,8 +57,7 @@ public class SubscriptionModelTest
      * @throws Exception
      */
     @Test
-    public void testSubscriptionMapEventOnAllKeys() throws Exception
-    {
+    public void testSubscriptionMapEventOnAllKeys() throws Exception {
         MapEventListener<String, String> mapEventListener = createStrictMock(MapEventListener.class);
         _clientAssetTree.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
 
@@ -71,29 +70,27 @@ public class SubscriptionModelTest
         iterateAndExecuteConsumer((k, v) -> mapEventListener.insert(k, v), noOfKeys, _mapName, _mapName);
 
         //Setup update events for all keys
-        for (int i = 0; i < noOfKeys * noOfValues; i++)
-        {
+        for (int i = 0; i < noOfKeys * noOfValues; i++) {
             mapEventListener.update(TestUtils.getKey(_mapName, i % noOfKeys), TestUtils.getValue(_mapName, i), TestUtils.getValue(_mapName, i + noOfKeys));
         }
 
         //Setup remove events for all keys
         iterateAndExecuteConsumer((k, v) -> mapEventListener.remove(k, v), c -> c, c -> noOfKeys * noOfValues + c, noOfKeys, _mapName, _mapName);
 
-        EasyMock.replay(mapEventListener);
+        replay(mapEventListener);
 
         //Perform all initial puts (insert events)
         iterateAndExecuteConsumer((k, v) -> _stringStringMap.put(k, v), noOfKeys, _mapName, _mapName);
 
         //Perform all puts (update events)
-        for (int i = 0; i < noOfKeys * noOfValues; i++)
-        {
+        for (int i = 0; i < noOfKeys * noOfValues; i++) {
             _stringStringMap.put(TestUtils.getKey(_mapName, i % noOfKeys), TestUtils.getValue(_mapName, i + noOfKeys));
         }
 
         //Perform all remove (remove events)
         iterateAndExecuteConsumer((k, v) -> _stringStringMap.remove(k), noOfKeys, _mapName, _mapName);
 
-        EasyMock.verify(mapEventListener);
+        verify(mapEventListener);
     }
 
     /**
@@ -105,9 +102,7 @@ public class SubscriptionModelTest
      * @throws Exception
      */
     @Test
-    @Ignore("TODO")
-    public void testSubscriptionSpecificKey() throws Exception
-    {
+    public void testSubscriptionSpecificKey() throws Exception {
         //TODO DS connecting to a server based Java component using the clietn API can be notified by callback methods for specified key in a given map
 
         //TODO DS refactor to use mock (strict)
@@ -124,12 +119,12 @@ public class SubscriptionModelTest
 
         testChronicleKeyEventSubscriber.onMessage(update1);
         testChronicleKeyEventSubscriber.onMessage(update2);
-//        testChronicleKeyEventSubscriber.onMessage(update3); // TODO DS replace not yet supported
+        testChronicleKeyEventSubscriber.onMessage(update3);
         testChronicleKeyEventSubscriber.onMessage(update4);
         testChronicleKeyEventSubscriber.onMessage(update5);
         testChronicleKeyEventSubscriber.onMessage(null); //Key removed
 
-        EasyMock.replay(testChronicleKeyEventSubscriber);
+        replay(testChronicleKeyEventSubscriber);
 
         //Setting bootstrap = false otherwise we would get an initial event with null
         _clientAssetTree.registerSubscriber(_mapName + "/" + testKey + "?bootstrap=false", String.class, testChronicleKeyEventSubscriber); //TODO DS do a test with boot strapping
@@ -137,7 +132,7 @@ public class SubscriptionModelTest
         //Perform some puts and replace
         _stringStringMap.put(testKey, update1);
         _stringStringMap.put(testKey, update2);
-//        _stringStringMap.replace(testKey, update2, update3); //TODO DS not yet supported
+        _stringStringMap.replace(testKey, update2, update3);
         _stringStringMap.put(testKey, update4);
 
         //Perform one put on test key and a number of operations on another key and check number of updater
@@ -145,23 +140,28 @@ public class SubscriptionModelTest
         _stringStringMap.put(irrelevantTestKey, "RandomVal1");
         _stringStringMap.put(testKey, update5);
         _stringStringMap.put(irrelevantTestKey, "RandomVal2");
-//        _stringStringMap.replace(irrelevantTestKey, "RandomVal2", "RandomVal3"); //TODO DS not yet supported
+        _stringStringMap.replace(irrelevantTestKey, "RandomVal2", "RandomVal3");
         _stringStringMap.remove(irrelevantTestKey);
 
         //Remove the test key and test the number of updates
         _stringStringMap.remove(testKey);
 
-        EasyMock.verify(testChronicleKeyEventSubscriber);
+        verify(testChronicleKeyEventSubscriber);
+
+        // expect to be told when the tree is torn down.
+        reset(testChronicleKeyEventSubscriber);
+        testChronicleKeyEventSubscriber.onEndOfSubscription();
+        replay(testChronicleKeyEventSubscriber);
     }
 
     /**
      * Test that we get a key event for every insert, update, remove action performed on a key.
      * Test order of events.
+     *
      * @throws Exception
      */
     @Test
-    public void testSubscriptionKeyEvents() throws Exception
-    {
+    public void testSubscriptionKeyEvents() throws Exception {
         //TODO DS connecting to a server based Java component using the clietn API can be notified by callback methods for specified key in a given map
 
         String testKey1 = "Key-sub-1";
@@ -181,7 +181,7 @@ public class SubscriptionModelTest
         //Set up the mock
         testChronicleKeyEventSubscriber.onMessage(testKey1);
         testChronicleKeyEventSubscriber.onMessage(testKey2);
-//        testChronicleKeyEventSubscriber.onMessage(testKey3); // TODO DS replace not yet supported
+//        testChronicleKeyEventSubscriber.onMessage(testKey3); // no event as the key doesn't exist.
         testChronicleKeyEventSubscriber.onMessage(testKey4);
         testChronicleKeyEventSubscriber.onMessage(testKey5);
 
@@ -193,7 +193,7 @@ public class SubscriptionModelTest
         testChronicleKeyEventSubscriber.onMessage(testKey1);
         testChronicleKeyEventSubscriber.onMessage(testKey5);
 
-        EasyMock.replay(testChronicleKeyEventSubscriber);
+        replay(testChronicleKeyEventSubscriber);
 
         //Register as subscriber on map to get keys
         _clientAssetTree.registerSubscriber(_mapName, String.class, testChronicleKeyEventSubscriber);
@@ -201,7 +201,8 @@ public class SubscriptionModelTest
         //Perform some puts and replace
         _stringStringMap.put(testKey1, update1);
         _stringStringMap.put(testKey2, update2);
-//        _stringStringMap.replace(testKey3, update2, update3); //TODO DS not yet supported
+        // this key doesn't exist so it doesn't trigger an event.
+        _stringStringMap.replace(testKey3, update2, update3);
         _stringStringMap.put(testKey4, update4);
         _stringStringMap.put(testKey5, update5);
 
@@ -213,20 +214,24 @@ public class SubscriptionModelTest
         _stringStringMap.remove(testKey1);
         _stringStringMap.remove(testKey5);
 
-        EasyMock.verify(testChronicleKeyEventSubscriber);
+        verify(testChronicleKeyEventSubscriber);
+
+        // expect to be told when the tree is torn down.
+        reset(testChronicleKeyEventSubscriber);
+        testChronicleKeyEventSubscriber.onEndOfSubscription();
+        replay(testChronicleKeyEventSubscriber);
     }
 
     /**
      * Test that a number of updates for a number of keys (all intermingled) all trigger events on the topic
      * in the order in which the events take place.
-     * <p/>
+     * <p>
      * Test that removing all of the keys trigger ordered events where the value is null
      *
      * @throws Exception
      */
     @Test
-    public void testSubscriptionOnMap() throws Exception
-    {
+    public void testSubscriptionOnMap() throws Exception {
         //TODO DS the loops can be refactored by having a method which performs the loop and accepts a consumer
         //TODO DS connecting to a server based Java component using the client API can be notified by callback methods for all updates in map
 
@@ -239,23 +244,19 @@ public class SubscriptionModelTest
 
         //Setup the mock with the expected updates
         iterateAndExecuteConsumer((k, v) -> {
-            try
-            {
+            try {
                 topicSubscriberMock.onMessage(k, v);
-            }
-            catch (InvalidSubscriberException e)
-            {
+            } catch (InvalidSubscriberException e) {
                 TestCase.fail("Exception thrown");
             }
         }, c -> c % noOfKeys, c -> c, noOfKeys * noOfValues, _mapName, _mapName);
 
         //Setup the mock with the removes
-        for (int i = 0; i < noOfKeys; i++)
-        {
+        for (int i = 0; i < noOfKeys; i++) {
             topicSubscriberMock.onMessage(TestUtils.getKey(_mapName, i), null);
         }
 
-        EasyMock.replay(topicSubscriberMock);
+        replay(topicSubscriberMock);
 
         //Perform the updates
         iterateAndExecuteConsumer((k, v) -> _stringStringMap.put(k, v), c -> c % noOfKeys, c -> c, noOfKeys * noOfValues, _mapName, _mapName);
@@ -263,10 +264,14 @@ public class SubscriptionModelTest
         //Perform the removes
         iterateAndExecuteConsumer((k, v) -> _stringStringMap.remove(k), noOfKeys, _mapName, _mapName);
 
-        EasyMock.verify(topicSubscriberMock);
-    }
+        verify(topicSubscriberMock);
 
-    //TODO fix this - how to subscribe to map events (e.g. map added, map removed)?
+        // expect to be told when the tree is torn down.
+        reset(topicSubscriberMock);
+        topicSubscriberMock.onEndOfSubscription();
+        replay(topicSubscriberMock);
+
+    }
 
     /**
      * Test event listeners on maps inserted, updated, removed are triggered correctly when expected and in the correct order.
@@ -274,13 +279,12 @@ public class SubscriptionModelTest
      * @throws Exception
      */
     @Test
-    public void testMapAddedKeyListener() throws Exception
-    {
-        //TODO DS test that we can be notified when maps are added
+    public void testMapAddedKeyListener() throws Exception {
+        //DS test that we can be notified when maps are added
         resetChassis();
 
-        String parentUri = "/mapbase/";
-        String mapBaseUri = parentUri + "maps";
+        String parentUri = "/mapbase";
+        String mapBaseUri = parentUri + "/maps";
 
         String mapName1 = "TestMap1";
         String mapName2 = "TestMap2";
@@ -300,9 +304,12 @@ public class SubscriptionModelTest
         assetTreeSubscriber.onMessage("maps", mapName2);
 
         Subscriber<TopologicalEvent> mapEventKeySubscriber = createStrictMock("mapEventKeySubscriber", Subscriber.class);
+        // expect a bootstrap event
+        mapEventKeySubscriber.onMessage(ExistingAssetEvent.of(parentUri, "maps"));
+        replay(mapEventKeySubscriber);
         registerSubscriber(mapBaseUri, TopologicalEvent.class, mapEventKeySubscriber);
-
-        //TODO DS how do we subscribe to get insert, update, remove events for maps (not map entities)?
+        verify(mapEventKeySubscriber);
+        reset(mapEventKeySubscriber);
 
         //First the two maps will be inserted into
         mapEventKeySubscriber.onMessage(AddedAssetEvent.of(mapBaseUri, mapName1));
@@ -312,7 +319,7 @@ public class SubscriptionModelTest
         mapEventKeySubscriber.onMessage(RemovedAssetEvent.of(mapBaseUri, mapName1));
         mapEventKeySubscriber.onMessage(RemovedAssetEvent.of(mapBaseUri, mapName2));
 
-        EasyMock.replay(mapEventKeySubscriber);
+        replay(mapEventKeySubscriber);
 
         //Create the two maps
         Map<String, String> map1 = acquireMap(mapUri1, String.class, String.class);
@@ -339,7 +346,10 @@ public class SubscriptionModelTest
         getAsset(mapBaseUri).removeChild(mapName1);
         getAsset(mapBaseUri).removeChild(mapName2);
 
-        EasyMock.verify(mapEventKeySubscriber);
+        verify(mapEventKeySubscriber);
+        reset(mapEventKeySubscriber);
+        mapEventKeySubscriber.onEndOfSubscription();
+        replay(mapEventKeySubscriber);
     }
 
     /**
@@ -353,8 +363,7 @@ public class SubscriptionModelTest
      * @param keyBase           Base value for the key - typically the map name.
      * @param valueBase         Base value for the value - typically the map name.
      */
-    private void iterateAndExecuteConsumer(BiConsumer<String, String> methodToExecute, Function<Integer, Integer> keyManipulation, Function<Integer, Integer> valueManipulation, int noOfKeys, String keyBase, String valueBase)
-    {
+    private void iterateAndExecuteConsumer(BiConsumer<String, String> methodToExecute, Function<Integer, Integer> keyManipulation, Function<Integer, Integer> valueManipulation, int noOfKeys, String keyBase, String valueBase) {
         IntStream.range(0, noOfKeys).forEach((i) -> methodToExecute.accept(TestUtils.getKey(keyBase, keyManipulation.apply(i)), TestUtils.getValue(valueBase, valueManipulation.apply(i))));
     }
 
@@ -367,10 +376,9 @@ public class SubscriptionModelTest
      * @param keyBase         Base value for the key - typically the map name.
      * @param valueBase       Base value for the value - typically the map name.
      */
-    private void iterateAndExecuteConsumer(BiConsumer<String, String> methodToExecute, int noOfKeys, String keyBase, String valueBase)
-    {
+    private void iterateAndExecuteConsumer(BiConsumer<String, String> methodToExecute, int noOfKeys, String keyBase, String valueBase) {
         iterateAndExecuteConsumer(methodToExecute, c -> c, c -> c, noOfKeys, keyBase, valueBase);
     }
 
-    //TODO DS how do we remove maps? Add test.
+    //TODO DS how do we remove maps? Add test. - see testMapAddedKeyListener()
 }

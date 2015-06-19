@@ -27,8 +27,7 @@ fs.inotify.max_user_instances = 2000
 public class ManyMapsFilePerKeyTest {
     private static Map<String, Map<String, String>> _maps;
     private static String _mapBaseName = "Test-Map-";
-    //todo takes a long time to create 1100 maps slow for testing
-    //todo https://higherfrequencytrading.atlassian.net/browse/HCOLL-365
+
     private static int _noOfMaps = 1_100;
     //    private static int _noOfMaps = 300;
     private static int _noOfKvps = 1_000;

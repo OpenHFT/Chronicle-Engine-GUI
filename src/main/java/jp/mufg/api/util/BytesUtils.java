@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
+// TODO daniels do we need these as they are not called.
 public enum BytesUtils {
     ;
 
