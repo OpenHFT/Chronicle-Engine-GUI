@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-@Ignore("TODO CHENT-49")
 public class RemoteSubscriptionModelPerformanceTest {
     public static final boolean QUICK = Boolean.getBoolean("quick");
 
@@ -131,6 +130,7 @@ public class RemoteSubscriptionModelPerformanceTest {
      * @throws URISyntaxException
      */
     @Test
+    @Ignore("TODO CHENT-49")
     public void testSubscriptionMapEventOnTopicPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 
@@ -158,6 +158,7 @@ public class RemoteSubscriptionModelPerformanceTest {
      * Expect it to handle at least 50 2 MB updates per second.
      */
     @Test
+    @Ignore("TODO CHENT-49")
     public void testSubscriptionMapEventListenerInsertPerformance() {
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
@@ -190,6 +191,7 @@ public class RemoteSubscriptionModelPerformanceTest {
      * Expect it to handle at least 50 2 MB updates per second.
      */
     @Test
+    @Ignore("TODO CHENT-49")
     public void testSubscriptionMapEventListenerUpdatePerformance() {
         //Put values before testing as we want to ignore the insert events
         Function<Integer, Object> putFunction = a -> _testMap.put(TestUtils.getKey(_mapName, a), _twoMbTestString);
@@ -203,7 +205,7 @@ public class RemoteSubscriptionModelPerformanceTest {
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
         Subscriber<MapEvent> mapEventSubscriber = e -> e.apply(mapEventListener);
-        clientAssetTree.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, mapEventSubscriber);
+        clientAssetTree.registerSubscriber(_mapName, MapEvent.class, mapEventSubscriber);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
@@ -228,6 +230,7 @@ public class RemoteSubscriptionModelPerformanceTest {
      * Expect it to handle at least 50 2 MB updates per second.
      */
     @Test
+    @Ignore("TODO CHENT-49")
     public void testSubscriptionMapEventListenerRemovePerformance() {
         //Put values before testing as we want to ignore the insert and update events
 
@@ -235,7 +238,7 @@ public class RemoteSubscriptionModelPerformanceTest {
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
         Subscriber<MapEvent> mapEventSubscriber = e -> e.apply(mapEventListener);
-        clientAssetTree.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, mapEventSubscriber);
+        clientAssetTree.registerSubscriber(_mapName, MapEvent.class, mapEventSubscriber);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         long runtimeInNanos = 0;
