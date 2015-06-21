@@ -32,7 +32,7 @@ public interface Subscription extends BytesMarshallable {
 
     void setSubscriptionId(@MaxSize(64) String subscriptionId);
 
-    public boolean getRetransmit();
+    boolean getRetransmit();
 
-    public void setRetransmit(boolean retransmit);
+    void setRetransmit(boolean retransmit);
 }

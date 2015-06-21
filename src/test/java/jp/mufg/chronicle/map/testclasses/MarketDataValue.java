@@ -5,15 +5,15 @@ package jp.mufg.chronicle.map.testclasses;
  */
 public interface MarketDataValue
 {
-    public double getBid();
+    double getBid();
 
-    public void setBid(double bid);
+    void setBid(double bid);
 
-    public double getAsk();
+    double getAsk();
 
-    public void setAsk(double ask);
+    void setAsk(double ask);
 
-    public double getMid();
+    double getMid();
 
-    public void setMid(double mid);
+    void setMid(double mid);
 }

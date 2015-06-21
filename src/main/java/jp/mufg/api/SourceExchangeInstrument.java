@@ -5,17 +5,17 @@ import org.jetbrains.annotations.NotNull;
 
 public interface SourceExchangeInstrument {
     @NotNull
-    public String getSource();
+    String getSource();
 
-    public void setSource(@MaxSize(16) String source);
-
-    @NotNull
-    public String getExchange();
-
-    public void setExchange(@MaxSize(16) String exchange);
+    void setSource(@MaxSize(16) String source);
 
     @NotNull
-    public String getInstrument();
+    String getExchange();
 
-    public void setInstrument(@MaxSize(16) String instrument);
+    void setExchange(@MaxSize(16) String exchange);
+
+    @NotNull
+    String getInstrument();
+
+    void setInstrument(@MaxSize(16) String instrument);
 }

@@ -2,7 +2,7 @@ package jp.mufg.api;
 
 public interface DirectDataMart extends DataMart {
 
-    public boolean hasChanged();
+    boolean hasChanged();
 
-    public String getTarget();
+    String getTarget();
 }

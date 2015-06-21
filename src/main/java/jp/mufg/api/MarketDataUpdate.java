@@ -6,41 +6,41 @@ import org.jetbrains.annotations.NotNull;
 
 public interface MarketDataUpdate extends BytesMarshallable {
     @NotNull
-    public String getSource();
+    String getSource();
 
-    public void setSource(@MaxSize(16) String source);
-
-    @NotNull
-    public String getExchange();
-
-    public void setExchange(@MaxSize(16) String exchange);
+    void setSource(@MaxSize(16) String source);
 
     @NotNull
-    public String getInstrument();
+    String getExchange();
 
-    public void setInstrument(@MaxSize(16) String instrument);
+    void setExchange(@MaxSize(16) String exchange);
 
-    public double getBid();
+    @NotNull
+    String getInstrument();
 
-    public void setBid(double bid);
+    void setInstrument(@MaxSize(16) String instrument);
 
-    public double getAsk();
+    double getBid();
 
-    public void setAsk(double ask);
+    void setBid(double bid);
 
-    public double getBidq();
+    double getAsk();
 
-    public void setBidq(double bidq);
+    void setAsk(double ask);
 
-    public double getAskq();
+    double getBidq();
 
-    public void setAskq(double askq);
+    void setBidq(double bidq);
 
-    public boolean getRetransmit();
+    double getAskq();
 
-    public void setRetransmit(boolean retransmit);
+    void setAskq(double askq);
 
-    public long getMarketTimestamp();
+    boolean getRetransmit();
 
-    public void setMarketTimestamp(long marketTimestamp);
+    void setRetransmit(boolean retransmit);
+
+    long getMarketTimestamp();
+
+    void setMarketTimestamp(long marketTimestamp);
 }
