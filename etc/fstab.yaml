@@ -2,7 +2,7 @@
 ChronMaps: !ChronicleMapGroupFS {
      spec:  ChMaps,
      name: /ChMaps,
-     cluster: cluster1,
+     cluster: cluster,
      maxEntries: 10000,
      averageValueSize: 10000,
      putReturnsNull: true,
