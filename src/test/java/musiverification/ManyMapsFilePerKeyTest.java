@@ -28,8 +28,8 @@ public class ManyMapsFilePerKeyTest {
     private static Map<String, Map<String, String>> _maps;
     private static String _mapBaseName = "Test-Map-";
 
-    private static int _noOfMaps = 1_100;
-    //    private static int _noOfMaps = 300;
+    //    private static int _noOfMaps = 1_100;
+    private static int _noOfMaps = 100;
     private static int _noOfKvps = 1_000;
 
     @BeforeClass

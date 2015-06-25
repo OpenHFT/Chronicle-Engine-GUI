@@ -47,13 +47,13 @@
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle</artifactId>
-            <version>3.4.4-SNAPSHOT</version>
+            <version>3.4.4</version>
         </dependency>
 
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-engine</artifactId>
-            <version>1.4.0-alpha-SNAPSHOT</version>
+            <version>1.4.1-alpha-SNAPSHOT</version>
         </dependency>
 
         <dependency>
