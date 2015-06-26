@@ -20,24 +20,22 @@ import java.util.function.Consumer;
 public class MapEventListenerTest
 {
     private static final String _chronicleMapStringFilePath = OS.TARGET + "/chronicleMapStringListenerTest";
-    private static File _chronicleStringMapFile;
-
     private static final String _chronicleMapStringValueFilePath = OS.TARGET + "/chronicleMapStringValueListenerTest";
+    private static File _chronicleStringMapFile;
     private static File _chronicleStringValueMapFile;
 
 //    private ChronicleTestEventListener _chronicleTestEventListener;
-
-    private ChronicleMap<String, String> _chronicleMapString;
-    private ChronicleMap<String, StringValue> _chronicleMapStringValue;
-
+private static int _noOfEventsTriggered = 0;
     private final String _value1 = "TestValue1";
     private final String _value2 = "TestValue2";
-
-    private static int _noOfEventsTriggered = 0;
+    private ChronicleMap<String, String> _chronicleMapString;
+    private ChronicleMap<String, StringValue> _chronicleMapStringValue;
 
     @BeforeClass
     public static void beforeClass() throws IOException
     {
+        new File(OS.TARGET).mkdir();
+
         _chronicleStringMapFile = new File(_chronicleMapStringFilePath);
         _chronicleStringMapFile.delete();
         _chronicleStringValueMapFile = new File(_chronicleMapStringValueFilePath);

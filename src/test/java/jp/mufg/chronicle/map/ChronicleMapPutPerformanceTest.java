@@ -23,11 +23,6 @@ import java.util.stream.IntStream;
 
 // TODO need to add expected performance measures.
 public class ChronicleMapPutPerformanceTest {
-    private static final long RUN_TIME = (long) 5e9;
-    private String chronicleMapFile = OS.TARGET + "/chroniclemap";
-    private File file;
-    private int noOfPuts = 10_000_000;
-    private Map<QuoteMapKey, Double> marketDataCache;
     static final QuoteMapKey[] quoteMapKey = {
             generateExampleQuoteMapKey1(),
             generateExampleQuoteMapKey1b(),
@@ -37,12 +32,89 @@ public class ChronicleMapPutPerformanceTest {
             generateExampleQuoteMapKey3b(),
             generateExampleQuoteMapKey4(),
             generateExampleQuoteMapKey4b()};
-
+    private static final long RUN_TIME = (long) 5e9;
     @Rule
     public TestName name = new TestName();
+    private String chronicleMapFile = OS.TARGET + "/chroniclemap";
+    private File file;
+    private int noOfPuts = 10_000_000;
+    private Map<QuoteMapKey, Double> marketDataCache;
+
+    private static QuoteMapKey generateExampleQuoteMapKey1() {
+        MarketDataSupplier supplier = MarketDataSupplier.BROADWAY;
+        MarketDataSource source = MarketDataSource.BLOOMBERG;
+        String id = "Id1";
+        MarketDataField field = MarketDataField.ASK_PRICE;
+
+        return new QuoteMapKey(supplier, source, id, field);
+    }
+
+    private static QuoteMapKey generateExampleQuoteMapKey1b() {
+        MarketDataSupplier supplier = MarketDataSupplier.BROADWAY;
+        MarketDataSource source = MarketDataSource.BLOOMBERG;
+        String id = "Id1";
+        MarketDataField field = MarketDataField.BID_PRICE;
+
+        return new QuoteMapKey(supplier, source, id, field);
+    }
+
+    private static QuoteMapKey generateExampleQuoteMapKey2() {
+        MarketDataSupplier supplier = MarketDataSupplier.REUTERS;
+        MarketDataSource source = MarketDataSource.CME;
+        String id = "Id2";
+        MarketDataField field = MarketDataField.ASK_PRICE;
+
+        return new QuoteMapKey(supplier, source, id, field);
+    }
+
+    private static QuoteMapKey generateExampleQuoteMapKey2b() {
+        MarketDataSupplier supplier = MarketDataSupplier.REUTERS;
+        MarketDataSource source = MarketDataSource.CME;
+        String id = "Id2";
+        MarketDataField field = MarketDataField.BID_PRICE;
+
+        return new QuoteMapKey(supplier, source, id, field);
+    }
+
+    private static QuoteMapKey generateExampleQuoteMapKey3() {
+        MarketDataSupplier supplier = MarketDataSupplier.INTERNAL_MODEL;
+        MarketDataSource source = MarketDataSource.CME;
+        String id = "Id3";
+        MarketDataField field = MarketDataField.ASK_PRICE;
+
+        return new QuoteMapKey(supplier, source, id, field);
+    }
+
+    private static QuoteMapKey generateExampleQuoteMapKey3b() {
+        MarketDataSupplier supplier = MarketDataSupplier.INTERNAL_MODEL;
+        MarketDataSource source = MarketDataSource.CME;
+        String id = "Id3";
+        MarketDataField field = MarketDataField.BID_PRICE;
+
+        return new QuoteMapKey(supplier, source, id, field);
+    }
+
+    private static QuoteMapKey generateExampleQuoteMapKey4() {
+        MarketDataSupplier supplier = MarketDataSupplier.BLOOMBERG;
+        MarketDataSource source = MarketDataSource.BLOOMBERG;
+        String id = "Id4";
+        MarketDataField field = MarketDataField.ASK_PRICE;
+
+        return new QuoteMapKey(supplier, source, id, field);
+    }
+
+    private static QuoteMapKey generateExampleQuoteMapKey4b() {
+        MarketDataSupplier supplier = MarketDataSupplier.BLOOMBERG;
+        MarketDataSource source = MarketDataSource.BLOOMBERG;
+        String id = "Id4";
+        MarketDataField field = MarketDataField.BID_PRICE;
+
+        return new QuoteMapKey(supplier, source, id, field);
+    }
 
     @Before
     public void setUp() throws Exception {
+        new File(OS.TARGET).mkdir();
         System.out.print("Test " + name.getMethodName() + " - ");
         ChronicleTools.deleteDirOnExit(chronicleMapFile);
 
@@ -184,77 +256,5 @@ public class ChronicleMapPutPerformanceTest {
 
     private void setMarketDataMapToConcurrentHashMap() {
         marketDataCache = new ConcurrentHashMap<>();
-    }
-
-    private static QuoteMapKey generateExampleQuoteMapKey1() {
-        MarketDataSupplier supplier = MarketDataSupplier.BROADWAY;
-        MarketDataSource source = MarketDataSource.BLOOMBERG;
-        String id = "Id1";
-        MarketDataField field = MarketDataField.ASK_PRICE;
-
-        return new QuoteMapKey(supplier, source, id, field);
-    }
-
-    private static QuoteMapKey generateExampleQuoteMapKey1b() {
-        MarketDataSupplier supplier = MarketDataSupplier.BROADWAY;
-        MarketDataSource source = MarketDataSource.BLOOMBERG;
-        String id = "Id1";
-        MarketDataField field = MarketDataField.BID_PRICE;
-
-        return new QuoteMapKey(supplier, source, id, field);
-    }
-
-    private static QuoteMapKey generateExampleQuoteMapKey2() {
-        MarketDataSupplier supplier = MarketDataSupplier.REUTERS;
-        MarketDataSource source = MarketDataSource.CME;
-        String id = "Id2";
-        MarketDataField field = MarketDataField.ASK_PRICE;
-
-        return new QuoteMapKey(supplier, source, id, field);
-    }
-
-    private static QuoteMapKey generateExampleQuoteMapKey2b() {
-        MarketDataSupplier supplier = MarketDataSupplier.REUTERS;
-        MarketDataSource source = MarketDataSource.CME;
-        String id = "Id2";
-        MarketDataField field = MarketDataField.BID_PRICE;
-
-        return new QuoteMapKey(supplier, source, id, field);
-    }
-
-    private static QuoteMapKey generateExampleQuoteMapKey3() {
-        MarketDataSupplier supplier = MarketDataSupplier.INTERNAL_MODEL;
-        MarketDataSource source = MarketDataSource.CME;
-        String id = "Id3";
-        MarketDataField field = MarketDataField.ASK_PRICE;
-
-        return new QuoteMapKey(supplier, source, id, field);
-    }
-
-    private static QuoteMapKey generateExampleQuoteMapKey3b() {
-        MarketDataSupplier supplier = MarketDataSupplier.INTERNAL_MODEL;
-        MarketDataSource source = MarketDataSource.CME;
-        String id = "Id3";
-        MarketDataField field = MarketDataField.BID_PRICE;
-
-        return new QuoteMapKey(supplier, source, id, field);
-    }
-
-    private static QuoteMapKey generateExampleQuoteMapKey4() {
-        MarketDataSupplier supplier = MarketDataSupplier.BLOOMBERG;
-        MarketDataSource source = MarketDataSource.BLOOMBERG;
-        String id = "Id4";
-        MarketDataField field = MarketDataField.ASK_PRICE;
-
-        return new QuoteMapKey(supplier, source, id, field);
-    }
-
-    private static QuoteMapKey generateExampleQuoteMapKey4b() {
-        MarketDataSupplier supplier = MarketDataSupplier.BLOOMBERG;
-        MarketDataSource source = MarketDataSource.BLOOMBERG;
-        String id = "Id4";
-        MarketDataField field = MarketDataField.BID_PRICE;
-
-        return new QuoteMapKey(supplier, source, id, field);
     }
 }

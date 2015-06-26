@@ -23,6 +23,7 @@ import java.util.stream.IntStream;
 import static net.openhft.chronicle.engine.Chassis.addLeafRule;
 import static net.openhft.chronicle.engine.Chassis.addWrappingRule;
 
+@Ignore("Long running test")
 public class ManyMapsTest {
     private static Map<String, Map<String, String>> _maps;
     private static String _mapBaseName = "Test-Map-";
