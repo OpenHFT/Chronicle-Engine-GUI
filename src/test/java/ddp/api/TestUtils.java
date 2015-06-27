@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
 public class TestUtils {
@@ -51,16 +52,16 @@ public class TestUtils {
      * @param maxRuntimeInNanos Max runtime.
      */
     public static void runMultipleTimesAndVerifyAvgRuntime(Runnable testToRun, int noOfRuns, long maxRuntimeInNanos) {
-        runMultipleTimesAndVerifyAvgRuntime(() -> {
+        runMultipleTimesAndVerifyAvgRuntime(x -> {
         }, testToRun, noOfRuns, maxRuntimeInNanos);
     }
 
-    public static void runMultipleTimesAndVerifyAvgRuntime(Runnable setup, Runnable testToRun, int noOfRuns, long maxRuntimeInNanos) {
+    public static void runMultipleTimesAndVerifyAvgRuntime(IntConsumer setup, Runnable testToRun, int noOfRuns, long maxRuntimeInNanos) {
         AtomicLong totalTime = new AtomicLong();
 
         // one warmup.
         IntStream.range(0, noOfRuns).forEach(e -> {
-            setup.run();
+            setup.accept(e);
             long start = System.nanoTime();
             testToRun.run();
             long delta = System.nanoTime() - start;

@@ -47,16 +47,14 @@ import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
 
-
-@Ignore("TODO CHENT-49")
 public class RemoteSubscriptionModelPerformanceTest {
 
     //TODO DS test having the server side on another machine
     private static final int _noOfPuts = 50;
     private static final int _noOfRunsToAverage = 10;
-    private static final long _secondInNanos = 3_000_000_000L;
+    private static final long _secondInNanos = 1_000_000_000L;
     private static final AtomicInteger counter = new AtomicInteger();
-    private static String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
+    private static final String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
     private static int _twoMbTestStringLength;
     private static Map<String, String> _testMap;
@@ -70,13 +68,13 @@ public class RemoteSubscriptionModelPerformanceTest {
 //        YamlLogging.showServerReads = true;
 //        YamlLogging.clientReads = true;
 
-        _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath); //.substring(1, 2 << 20);
+        _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath); //.substring(1, 1 << 10);
         _twoMbTestStringLength = _twoMbTestString.length();
 
         serverAssetTree = new VanillaAssetTree(1).forTesting();
         serverAssetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
-                new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(50).averageValueSize(2 << 20), asset));
+                new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(_noOfPuts).averageValueSize(_twoMbTestStringLength), asset));
         serverEndpoint = new ServerEndpoint(serverAssetTree);
         int port = serverEndpoint.getPort();
 
@@ -160,12 +158,18 @@ public class RemoteSubscriptionModelPerformanceTest {
         assertEquals(1, subscription.topicSubscriberCount());
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
-        TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
-            IntStream.range(0, _noOfPuts).forEach(i ->
-            {
-                _testMap.put(key, _twoMbTestString);
-            });
-        }, _noOfRunsToAverage, _secondInNanos);
+        TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
+                    System.out.println("test");
+                    int events = _noOfPuts * i;
+                    waitFor(() -> events == topicSubscriber.getNoOfEvents().get());
+                    assertEquals(events, topicSubscriber.getNoOfEvents().get());
+                }, () -> {
+                    IntStream.range(0, _noOfPuts).forEach(i ->
+                    {
+                        _testMap.put(key, _twoMbTestString);
+                    });
+                }, _noOfRunsToAverage, _secondInNanos
+        );
 
         //Test that the correct number of events was triggered on event listener
         int events = _noOfPuts * _noOfRunsToAverage;
@@ -195,23 +199,25 @@ public class RemoteSubscriptionModelPerformanceTest {
         assertEquals(1, subscription.entrySubscriberCount());
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
-        TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
-            IntStream.range(0, _noOfPuts).forEach(i ->
-            {
-                _testMap.put(TestUtils.getKey(_mapName, i), _twoMbTestString);
-            });
+        TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
+                    if (i > 0) {
+                        waitFor(() -> mapEventListener.getNoOfInsertEvents().get() >= _noOfPuts);
+                        assertEquals(_noOfPuts, mapEventListener.getNoOfInsertEvents().get());
+                    }
+                    //Test that the correct number of events were triggered on event listener
+                    assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
+                    assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
 
-            waitFor(() -> mapEventListener.getNoOfInsertEvents().get() >= _noOfPuts);
-            //Test that the correct number of events were triggered on event listener
-            assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
-            assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
-            assertEquals(_noOfPuts, mapEventListener.getNoOfInsertEvents().get());
+                    _testMap.clear();
 
-            _testMap.clear();
-
-            mapEventListener.resetCounters();
-
-        }, _noOfRunsToAverage, _secondInNanos);
+                    mapEventListener.resetCounters();
+                }, () -> {
+                    IntStream.range(0, _noOfPuts).forEach(i ->
+                    {
+                        _testMap.put(TestUtils.getKey(_mapName, i), _twoMbTestString);
+                    });
+                }, _noOfRunsToAverage, _secondInNanos
+        );
 
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
 
@@ -246,21 +252,25 @@ public class RemoteSubscriptionModelPerformanceTest {
         assertEquals(1, subscription.entrySubscriberCount());
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
-        TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
-            IntStream.range(0, _noOfPuts).forEach(i ->
-            {
-                putFunction.apply(i);
-            });
-            waitFor(() -> mapEventListener.getNoOfUpdateEvents().get() >= _noOfPuts);
+        TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
+                    if (i > 0) {
+                        waitFor(() -> mapEventListener.getNoOfUpdateEvents().get() >= _noOfPuts);
 
-            //Test that the correct number of events were triggered on event listener
-            assertEquals(_noOfPuts, mapEventListener.getNoOfUpdateEvents().get());
-            assertEquals(0, mapEventListener.getNoOfInsertEvents().get());
-            assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
+                        //Test that the correct number of events were triggered on event listener
+                        assertEquals(_noOfPuts, mapEventListener.getNoOfUpdateEvents().get());
+                    }
+                    assertEquals(0, mapEventListener.getNoOfInsertEvents().get());
+                    assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
 
-            mapEventListener.resetCounters();
+                    mapEventListener.resetCounters();
 
-        }, _noOfRunsToAverage, _secondInNanos);
+                }, () -> {
+                    IntStream.range(0, _noOfPuts).forEach(i ->
+                    {
+                        putFunction.apply(i);
+                    });
+                }, _noOfRunsToAverage, _secondInNanos
+        );
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
 
         waitFor(() -> subscription.entrySubscriberCount() == 0);

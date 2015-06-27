@@ -126,7 +126,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         Chassis.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
-        TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
+        TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
             _testMap.clear();
             Jvm.pause(500);
             mapEventListener.resetCounters();
@@ -166,7 +166,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
-        TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
+        TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
             Jvm.pause(200);
             mapEventListener.resetCounters();
         }, () -> {
