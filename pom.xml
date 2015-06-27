@@ -47,6 +47,7 @@
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-engine</artifactId>
+            <version>1.4.2-alpha-SNAPSHOT</version>
         </dependency>
 
         <dependency>
