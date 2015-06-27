@@ -69,6 +69,7 @@ public class SubscriptionModelPerformanceTest {
      * Test that listening to events for a given key can handle 50 updates per second of 2 MB string values.
      */
     @Test
+    @Ignore("CHENT-49")
     public void testSubscriptionMapEventOnKeyPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 

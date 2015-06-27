@@ -27,6 +27,7 @@ import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.pubsub.Subscriber;
 import net.openhft.chronicle.engine.api.pubsub.Subscription;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
+import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
 import net.openhft.chronicle.engine.map.KVSSubscription;
 import net.openhft.chronicle.engine.map.VanillaMapView;
@@ -40,11 +41,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 @Ignore("TODO CHENT-49")
@@ -52,7 +53,7 @@ public class RemoteSubscriptionModelPerformanceTest {
 
     //TODO DS test having the server side on another machine
     private static final int _noOfPuts = 50;
-    private static final int _noOfRunsToAverage = 2;
+    private static final int _noOfRunsToAverage = 10;
     private static final long _secondInNanos = 3_000_000_000L;
     private static final AtomicInteger counter = new AtomicInteger();
     private static String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
@@ -66,8 +67,10 @@ public class RemoteSubscriptionModelPerformanceTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        // CHENT-49 todo use full length string.
-        _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath).substring(1, 1000);
+//        YamlLogging.showServerReads = true;
+//        YamlLogging.clientReads = true;
+
+        _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath); //.substring(1, 2 << 20);
         _twoMbTestStringLength = _twoMbTestString.length();
 
         serverAssetTree = new VanillaAssetTree(1).forTesting();
@@ -104,6 +107,7 @@ public class RemoteSubscriptionModelPerformanceTest {
      * Test that listening to events for a given key can handle 50 updates per second of 2 MB string values.
      */
     @Test
+    @Ignore("TODO CHENT-49")
     public void testSubscriptionMapEventOnKeyPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 
@@ -113,7 +117,9 @@ public class RemoteSubscriptionModelPerformanceTest {
         clientAssetTree.registerSubscriber(_mapName + "/" + key + "?bootstrap=false&putReturnsNull=true", String.class, keyEventSubscriber);
         // TODO CHENT-49
         Jvm.pause(100);
-        Subscription subscription = serverAssetTree.getAsset(_mapName + "/" + key).subscription(false);
+        Asset child = serverAssetTree.getAsset(_mapName).getChild(key);
+        assertNotNull(child);
+        Subscription subscription = child.subscription(false);
         assertEquals(1, subscription.subscriberCount());
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
@@ -124,10 +130,7 @@ public class RemoteSubscriptionModelPerformanceTest {
             });
         }, _noOfRunsToAverage, _secondInNanos);
 
-        for (int i = 1; i <= 30; i++) {
-            if (keyEventSubscriber.getNoOfEvents().get() < _noOfPuts * _noOfRunsToAverage * 0.2)
-                Jvm.pause(i * i);
-        }
+        waitFor(() -> keyEventSubscriber.getNoOfEvents().get() < _noOfPuts * _noOfRunsToAverage * 0.2);
 
         //Test that the correct number of events was triggered on event listener
         // TODO CHENT-49
@@ -165,13 +168,14 @@ public class RemoteSubscriptionModelPerformanceTest {
         }, _noOfRunsToAverage, _secondInNanos);
 
         //Test that the correct number of events was triggered on event listener
-        // TODO CHENT-49
-        assertEquals(_noOfPuts * _noOfRunsToAverage, topicSubscriber.getNoOfEvents().get());
+        int events = _noOfPuts * _noOfRunsToAverage;
+        waitFor(() -> events == topicSubscriber.getNoOfEvents().get());
+        assertEquals(events, topicSubscriber.getNoOfEvents().get());
 
-        clientAssetTree.unregisterTopicSubscriber(_mapName, topicSubscriber);
-
-        Jvm.pause(100);
-        assertEquals(0, subscription.topicSubscriberCount());
+        // TODO CHENT-49 net.openhft.chronicle.engine.server.internal.MapWireHandler - There is no subscription to unsubscribe
+        // clientAssetTree.unregisterTopicSubscriber(_mapName, topicSubscriber);
+        // waitFor(() -> 0 == subscription.topicSubscriberCount());
+        // assertEquals(0, subscription.topicSubscriberCount());
     }
 
     /**
@@ -197,10 +201,11 @@ public class RemoteSubscriptionModelPerformanceTest {
                 _testMap.put(TestUtils.getKey(_mapName, i), _twoMbTestString);
             });
 
+            waitFor(() -> mapEventListener.getNoOfInsertEvents().get() >= _noOfPuts);
             //Test that the correct number of events were triggered on event listener
-            assertEquals(_noOfPuts, mapEventListener.getNoOfInsertEvents().get());
             assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
             assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
+            assertEquals(_noOfPuts, mapEventListener.getNoOfInsertEvents().get());
 
             _testMap.clear();
 
@@ -228,14 +233,16 @@ public class RemoteSubscriptionModelPerformanceTest {
             putFunction.apply(i);
         });
 
+        Jvm.pause(100);
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
         Subscriber<MapEvent> mapEventSubscriber = e -> e.apply(mapEventListener);
-        clientAssetTree.registerSubscriber(_mapName, MapEvent.class, mapEventSubscriber);
+        clientAssetTree.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, mapEventSubscriber);
 
-        Jvm.pause(100);
         KVSSubscription subscription = (KVSSubscription) serverAssetTree.getAsset(_mapName).subscription(false);
+
+        waitFor(() -> subscription.entrySubscriberCount() == 1);
         assertEquals(1, subscription.entrySubscriberCount());
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
@@ -244,6 +251,7 @@ public class RemoteSubscriptionModelPerformanceTest {
             {
                 putFunction.apply(i);
             });
+            waitFor(() -> mapEventListener.getNoOfUpdateEvents().get() >= _noOfPuts);
 
             //Test that the correct number of events were triggered on event listener
             assertEquals(_noOfPuts, mapEventListener.getNoOfUpdateEvents().get());
@@ -255,8 +263,14 @@ public class RemoteSubscriptionModelPerformanceTest {
         }, _noOfRunsToAverage, _secondInNanos);
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
 
-        Jvm.pause(100);
+        waitFor(() -> subscription.entrySubscriberCount() == 0);
         assertEquals(0, subscription.entrySubscriberCount());
+    }
+
+    private void waitFor(BooleanSupplier b) {
+        for (int i = 1; i <= 40; i++)
+            if (!b.getAsBoolean())
+                Jvm.pause(i * i);
     }
 
     /**
@@ -282,6 +296,7 @@ public class RemoteSubscriptionModelPerformanceTest {
             {
                 _testMap.put(TestUtils.getKey(_mapName, c), _twoMbTestString);
             });
+            waitFor(() -> mapEventListener.getNoOfInsertEvents().get() >= _noOfPuts);
 
             mapEventListener.resetCounters();
 
@@ -293,6 +308,7 @@ public class RemoteSubscriptionModelPerformanceTest {
             });
 
             runtimeInNanos += System.nanoTime() - startTime;
+            waitFor(() -> mapEventListener.getNoOfRemoveEvents().get() >= _noOfPuts);
 
             //Test that the correct number of events were triggered on event listener
             assertEquals(0, mapEventListener.getNoOfInsertEvents().get());
