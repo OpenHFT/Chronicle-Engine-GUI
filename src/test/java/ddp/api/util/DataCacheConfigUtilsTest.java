@@ -1,27 +1,27 @@
 package ddp.api.util;
 
-import ddp.api.*;
-import org.junit.*;
+import ddp.api.ConfigurationException;
+import ddp.api.DataCacheConfiguration;
+import org.junit.Assert;
+import org.junit.Test;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DataCacheConfigUtilsTest
 {
     @Test(expected = ConfigurationException.class)
-    public void testGetNextIntRollConfigMapNull() throws Exception
-    {
+    public void testGetNextIntRollConfigMapNull() throws ConfigurationException {
         DataCacheConfigUtils.getNextConfigRoll(null, null);
     }
 
     @Test(expected = ConfigurationException.class)
-    public void testGetNextIntRollConfigMapEmpty() throws Exception
-    {
+    public void testGetNextIntRollConfigMapEmpty() throws ConfigurationException {
         DataCacheConfigUtils.getNextConfigRoll(new HashMap<>(), null);
     }
 
     @Test
-    public void testGetNextIntRollCurrentIndexNullOneConfig() throws Exception
-    {
+    public void testGetNextIntRollCurrentIndexNullOneConfig() throws ConfigurationException {
         Map<Integer, DataCacheConfiguration> dataCacheConfigurations = new HashMap<>();
         dataCacheConfigurations.put(1, new DataCacheConfiguration(null, null, (byte) 1, null));
 
@@ -31,8 +31,7 @@ public class DataCacheConfigUtilsTest
     }
 
     @Test
-    public void testGetNextIntRollCurrentIndexNullMultipleConfigsRoll() throws Exception
-    {
+    public void testGetNextIntRollCurrentIndexNullMultipleConfigsRoll() throws ConfigurationException {
         Map<Integer, DataCacheConfiguration> dataCacheConfigurations = new HashMap<>();
         dataCacheConfigurations.put(1, new DataCacheConfiguration(null, null, (byte) 1, null));
         dataCacheConfigurations.put(2, new DataCacheConfiguration(null, null, (byte) 2, null));
@@ -44,8 +43,7 @@ public class DataCacheConfigUtilsTest
     }
 
     @Test
-    public void testGetNextIntRollCurrentIndexMiddle() throws Exception
-    {
+    public void testGetNextIntRollCurrentIndexMiddle() throws ConfigurationException {
         Map<Integer, DataCacheConfiguration> dataCacheConfigurations = new HashMap<>();
         dataCacheConfigurations.put(1, new DataCacheConfiguration(null, null, (byte) 1, null));
         dataCacheConfigurations.put(2, new DataCacheConfiguration(null, null, (byte) 1, null));
@@ -57,8 +55,7 @@ public class DataCacheConfigUtilsTest
     }
 
     @Test
-    public void testGetNextIntRollCurrentIndexLastRoll() throws Exception
-    {
+    public void testGetNextIntRollCurrentIndexLastRoll() throws ConfigurationException {
         Map<Integer, DataCacheConfiguration> dataCacheConfigurations = new HashMap<>();
         dataCacheConfigurations.put(1, new DataCacheConfiguration(null, null, (byte) 1, null));
         dataCacheConfigurations.put(2, new DataCacheConfiguration(null, null, (byte) 1, null));

@@ -35,7 +35,7 @@ public class SubscriptionModelTest {
     //TODO DS call back method must include map name (I don't think it does?), key name, value inserted - no longer necessary as you subscribe to a specific map
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         resetChassis();
 
         _stringStringMap = acquireMap(String.format("%s?%s", _mapName, _mapArgs), String.class, String.class);
@@ -45,7 +45,7 @@ public class SubscriptionModelTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         defaultSession().close();
     }
 
@@ -54,10 +54,10 @@ public class SubscriptionModelTest {
      * Expect to receive events for insert, update and remove actions for all keys.
      * All events should be received in the order they are executed.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testSubscriptionMapEventOnAllKeys() throws Exception {
+    public void testSubscriptionMapEventOnAllKeys() {
         MapEventListener<String, String> mapEventListener = createStrictMock(MapEventListener.class);
         _clientAssetTree.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
 
@@ -99,10 +99,10 @@ public class SubscriptionModelTest {
      * Perform more puts (updates).
      * Remove the key.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testSubscriptionSpecificKey() throws Exception {
+    public void testSubscriptionSpecificKey() throws InvalidSubscriberException {
         //TODO DS connecting to a server based Java component using the clietn API can be notified by callback methods for specified key in a given map
 
         //TODO DS refactor to use mock (strict)
@@ -158,10 +158,10 @@ public class SubscriptionModelTest {
      * Test that we get a key event for every insert, update, remove action performed on a key.
      * Test order of events.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testSubscriptionKeyEvents() throws Exception {
+    public void testSubscriptionKeyEvents() throws InvalidSubscriberException {
         //TODO DS connecting to a server based Java component using the clietn API can be notified by callback methods for specified key in a given map
 
         String testKey1 = "Key-sub-1";
@@ -228,10 +228,10 @@ public class SubscriptionModelTest {
      * <p>
      * Test that removing all of the keys trigger ordered events where the value is null
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testSubscriptionOnMap() throws Exception {
+    public void testSubscriptionOnMap() throws InvalidSubscriberException {
         //TODO DS the loops can be refactored by having a method which performs the loop and accepts a consumer
         //TODO DS connecting to a server based Java component using the client API can be notified by callback methods for all updates in map
 
@@ -276,10 +276,10 @@ public class SubscriptionModelTest {
     /**
      * Test event listeners on maps inserted, updated, removed are triggered correctly when expected and in the correct order.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testMapAddedKeyListener() throws Exception {
+    public void testMapAddedKeyListener() throws InvalidSubscriberException {
         //DS test that we can be notified when maps are added
         resetChassis();
 

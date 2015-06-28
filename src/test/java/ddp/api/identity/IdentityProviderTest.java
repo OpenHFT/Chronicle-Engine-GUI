@@ -1,17 +1,18 @@
 package ddp.api.identity;
 
-import ddp.api.security.*;
-import ddp.api.util.*;
-import org.junit.*;
+import ddp.api.security.PasswordHasher;
+import ddp.api.util.MachineInfoUtils;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class IdentityProviderTest
 {
     /**
      * Test that all fields are set correctly.
-     * @throws Exception
+     * @
      */
     @Test
-    public void testGetUserIdentityAllFieldsSetCorrectly() throws Exception
+    public void testGetUserIdentityAllFieldsSetCorrectly()
     {
         String username = "TestUser";
         String password = "TestPassword";

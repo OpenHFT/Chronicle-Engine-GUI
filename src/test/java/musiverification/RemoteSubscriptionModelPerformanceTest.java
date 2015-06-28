@@ -37,6 +37,7 @@ import org.junit.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -64,7 +65,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     private final String _mapName = "PerfTestMap" + counter.incrementAndGet();
 
     @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
+    public static void setUpBeforeClass() throws IOException, URISyntaxException {
 //        YamlLogging.showServerReads = true;
 //        YamlLogging.clientReads = true;
 
@@ -82,7 +83,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws IOException {
         Files.deleteIfExists(Paths.get(OS.TARGET, _mapName));
 
         _testMap = clientAssetTree.acquireMap(_mapName, String.class, String.class);

@@ -4,12 +4,13 @@ import net.openhft.lang.values.LongValue;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
 public class CountersMapTest {
     @Test
-    public void testAcquireCounter() throws Exception {
+    public void testAcquireCounter() throws IOException {
         String file = "countersMap-" + System.nanoTime();
         new File(file).deleteOnExit();
         {

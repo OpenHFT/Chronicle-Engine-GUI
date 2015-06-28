@@ -1,10 +1,17 @@
 package ddp.api.authorisation;
 
-import ddp.api.identity.*;
-import ddp.api.security.*;
-import org.junit.*;
+import ddp.api.identity.ClientIdentity;
+import ddp.api.identity.IdentityProvider;
+import ddp.api.security.AdminAccessLevel;
+import ddp.api.security.DataAccessLevel;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class EntitlementsManagerTest
 {
@@ -17,7 +24,7 @@ public class EntitlementsManagerTest
     private static EntitlementsManager _entitlementsManager;
 
     @BeforeClass
-    public static void setUpBeforeClass() throws Exception
+    public static void setUpBeforeClass()
     {
         _testClientIdentityAll = IdentityProvider.getClientIdentity(_testUserIdAll, _testUserPwdAll, _testEntity);
 
@@ -29,10 +36,10 @@ public class EntitlementsManagerTest
     /**
      * Test that the user has all the set data and admin access.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testGetUserEntitlementsForDataCacheUserIsEntitled() throws Exception
+    public void testGetUserEntitlementsForDataCacheUserIsEntitled()
     {
         Entitlement userEntitlements = _entitlementsManager.getUserEntitlementsForDataCache(_testDataCacheName, _testClientIdentityAll);
 
@@ -56,10 +63,10 @@ public class EntitlementsManagerTest
      * Test that a {@link java.lang.SecurityException} is thrown when the user doesn't have any entitlements (user does not exist in
      * entitlements map).
      *
-     * @throws Exception
+     * @
      */
     @Test(expected = SecurityException.class)
-    public void testGetUserEntitlementsForDataCacheUserHasNoEntitlements() throws Exception
+    public void testGetUserEntitlementsForDataCacheUserHasNoEntitlements()
     {
         ClientIdentity testClientIdentity = IdentityProvider.getClientIdentity("NotEntitledUser", _testUserPwdAll, _testEntity);
 
@@ -70,10 +77,10 @@ public class EntitlementsManagerTest
      * Test that an {@link java.lang.SecurityException} is thrown when the user does not have any entitlements on the
      * given {@link ddp.api.DataCache}.
      *
-     * @throws Exception
+     * @
      */
     @Test(expected = SecurityException.class)
-    public void testGetUserEntitlementsForDataCacheUserHasNoEntitlementsForGivenMap() throws Exception
+    public void testGetUserEntitlementsForDataCacheUserHasNoEntitlementsForGivenMap()
     {
         _entitlementsManager.getUserEntitlementsForDataCache("RandomDataCache", _testClientIdentityAll);
     }

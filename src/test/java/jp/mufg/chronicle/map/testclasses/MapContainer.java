@@ -91,7 +91,7 @@ public class MapContainer implements AutoCloseable
     }
 
     @Override
-    public void close() throws Exception
+    public void close()
     {
         marketDataCache.close();
     }

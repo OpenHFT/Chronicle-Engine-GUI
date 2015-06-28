@@ -113,7 +113,7 @@ public class ChronicleMapPutPerformanceTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         new File(OS.TARGET).mkdir();
         System.out.print("Test " + name.getMethodName() + " - ");
         ChronicleTools.deleteDirOnExit(chronicleMapFile);
@@ -122,7 +122,7 @@ public class ChronicleMapPutPerformanceTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         ChronicleTools.deleteDirOnExit(chronicleMapFile);
     }
 

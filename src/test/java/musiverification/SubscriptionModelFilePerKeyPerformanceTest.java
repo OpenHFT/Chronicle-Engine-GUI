@@ -17,6 +17,7 @@ import org.junit.*;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -42,13 +43,13 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
     private static String _mapName = "PerfTestMap";
 
     @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
+    public static void setUpBeforeClass() throws IOException, URISyntaxException {
         _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath);
         _twoMbTestStringLength = _twoMbTestString.length();
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         Chassis.resetChassis();
 
         enableTranslatingValuesToBytesStore();

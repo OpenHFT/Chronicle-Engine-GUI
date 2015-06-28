@@ -11,10 +11,10 @@ public class ClientIdentityTest
      * Test whether check against actual password returns true.
      * Test whether a client identity which has password set to null always returns false.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testCheckPassword() throws Exception
+    public void testCheckPassword()
     {
         String clientId = "TestClient";
         String password = "s3cretPwd";

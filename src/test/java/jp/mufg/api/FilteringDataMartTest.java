@@ -1,6 +1,5 @@
 package jp.mufg.api;
 
-import net.openhft.lang.model.DataValueClasses;
 import org.junit.Test;
 
 import java.util.Map;
@@ -13,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 public class FilteringDataMartTest {
 
     @Test
-    public void testOnUpdate() throws Exception {
+    public void testOnUpdate() {
 
         MarketDataUpdate q1 = Util.newQuote("source", "exchange", "instrument2", 10, 20, 10, 20);
         MarketDataUpdate q2 = Util.newQuote("source2", "exchange2", "instrument2", 10, 20, 10, 20);

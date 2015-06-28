@@ -41,7 +41,7 @@ public class DataCacheTest {
     private static String _dataCacheIp = "127.0.0.1";
 
     @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
+    public static void setUpBeforeClass() throws IOException, ConfigurationException {
         TestUtils.createDirectoryIfNotExists(_testMapsDirectory);
 
         //Create local Chronicle map String, Double
@@ -86,7 +86,7 @@ public class DataCacheTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         if (_dataCacheDouble != null) {
             _dataCacheDouble.clear();
 //            _dataCacheDouble.close();
@@ -115,11 +115,11 @@ public class DataCacheTest {
      * Test that the onPut methods with the updated value and old value set are triggered.
      * Test that the onRemove methods are called upon removal.
      *
-     * @throws Exception
+     * @
      */
     @Test
     @Ignore("EventListener not yet implemented in chronicle map")
-    public void testEventListenerAddedBeforeAnyActionsAndTriggeredOnPutAndRemove() throws Exception {
+    public void testEventListenerAddedBeforeAnyActionsAndTriggeredOnPutAndRemove() {
         String key = "testKeyBeforeInitialPut";
         double value = 1.0;
         double valueUpdated = 2.0;
@@ -167,11 +167,11 @@ public class DataCacheTest {
      * Test that the onPut methods with the updated value and old value set are triggered, even when the event listener did not exist when the value was initially put.
      * Test that the onRemove methods are called upon removal.
      *
-     * @throws Exception
+     * @
      */
     @Ignore("EventListener not yet implemented in chronicle map")
     @Test
-    public void testEventListenerAddedAfterInitialPutAndTriggeredOnPutAndRemove() throws Exception {
+    public void testEventListenerAddedAfterInitialPutAndTriggeredOnPutAndRemove() {
         String key = "testKeyAfterInitialPut";
         double value = 1.0;
         double valueUpdated = 2.0;
@@ -210,11 +210,11 @@ public class DataCacheTest {
      * Test that the two onPut methods are called when a value is put initially (old value expected to be null).
      * Remove the event listener and confirm no methods are triggered.
      *
-     * @throws Exception
+     * @
      */
     @Test
     @Ignore("EventListener not yet implemented in chronicle map")
-    public void testEventListenerNoLongerTriggeredAfterRemoved() throws Exception {
+    public void testEventListenerNoLongerTriggeredAfterRemoved() {
         String key = "testKeyRemoval";
         double value = 1.0;
         double valueUpdated = 2.0;
@@ -245,10 +245,10 @@ public class DataCacheTest {
     /**
      * Test that events are triggered in the event listener in the order they are performed on the map.
      *
-     * @throws Exception
+     * @
      */
     //@Test
-    public void testEventListenerEventsAreTriggeredInCorrectOrder() throws Exception {
+    public void testEventListenerEventsAreTriggeredInCorrectOrder() {
         String key = "testKeyTriggerInOrder";
         double value = 0.0;
         int noOfPuts = 1000;
@@ -289,10 +289,10 @@ public class DataCacheTest {
      * all within 1 second.
      * This is currently running on the local computer, but should be tested between two computers.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testServerLiborCurveJpy() throws Exception {
+    public void testServerLiborCurveJpy() throws IOException, URISyntaxException {
         String resourcePath = "ServerLiborCurves" + File.separator + "JPYValEnv.xml";
         int noOfPutAndGets = 50;
         int maxRuntime = MAX_RUNTIME;
@@ -306,10 +306,10 @@ public class DataCacheTest {
      * all within 1 second.
      * This is currently running on the local computer, but should be tested between two computers.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testServerLiborCurveUsd() throws Exception {
+    public void testServerLiborCurveUsd() throws IOException, URISyntaxException {
         String resourcePath = "ServerLiborCurves" + File.separator + "USDValEnv.xml";
         int noOfPutAndGets = 50;
         int maxRuntime = MAX_RUNTIME;
@@ -321,10 +321,10 @@ public class DataCacheTest {
      * Test putting and getting the Discount Factors as a map (whole map updated at once).
      * It is rather small so we would expect it to take less than 0.1 seconds
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testServerLiborDfCsvAsMap() throws Exception {
+    public void testServerLiborDfCsvAsMap() throws IOException, URISyntaxException {
         {
             String resourcePath = "ServerLiborDf" + File.separator + "EURBasis.csv";
             int noOfPutAndGets = 50;
@@ -345,10 +345,10 @@ public class DataCacheTest {
      * Test putting and getting the Discount Factors as a map (whole map updated at once).
      * It is rather small so we would expect it to take less than 0.1 seconds
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testServerLiborDfCsvAsString() throws Exception {
+    public void testServerLiborDfCsvAsString() throws IOException, URISyntaxException {
         String resourcePath = "ServerLiborDf" + File.separator + "EURBasis.csv";
         int noOfPutAndGets = 50;
         int maxRuntime = 100000000;
@@ -357,7 +357,7 @@ public class DataCacheTest {
     }
 
     @Test
-    public void testServerLiborDfCsvAsStringPerformanceComparedToFile() throws Exception {
+    public void testServerLiborDfCsvAsStringPerformanceComparedToFile() throws IOException, URISyntaxException {
         String resourcePath = "ServerLiborDf" + File.separator + "EURBasis.csv";
         String testFileExtension = ".xml";
         int noOfPuts = 1;
@@ -371,10 +371,10 @@ public class DataCacheTest {
      * <p>
      * File size c. 2.4 MB.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testTraderIrCurveCollateral() throws Exception {
+    public void testTraderIrCurveCollateral() throws IOException, URISyntaxException {
         String resourcePath = "TraderIrCurves" + File.separator + "Collateral_valenvOIS.xml";
         int noOfPutAndGets = 1;
         int maxRuntime = MAX_RUNTIME;
@@ -387,10 +387,10 @@ public class DataCacheTest {
      * <p>
      * File size c. 2.4 MB.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testTraderIrCurveCollateralPerformanceComparedToFile() throws Exception {
+    public void testTraderIrCurveCollateralPerformanceComparedToFile() throws IOException, URISyntaxException {
         String resourcePath = "TraderIrCurves" + File.separator + "Collateral_valenvOIS.xml";
         String testFileExtension = ".xml";
         int noOfPuts = 1;
@@ -403,10 +403,10 @@ public class DataCacheTest {
      * <p>
      * File size c. 5MB
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testTraderIrCurveMxValEnv() throws Exception {
+    public void testTraderIrCurveMxValEnv() throws IOException, URISyntaxException {
         String resourcePath = "TraderIrCurves" + File.separator + "mxvalenv.xml";
         int noOfPutAndGets = 1;
         int maxRuntime = 100000000;
@@ -419,10 +419,10 @@ public class DataCacheTest {
      * <p>
      * File size c. 5MB
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testTraderIrCurveMxValEnvPerformanceComparedToFile() throws Exception {
+    public void testTraderIrCurveMxValEnvPerformanceComparedToFile() throws IOException, URISyntaxException {
         String resourcePath = "TraderIrCurves" + File.separator + "mxvalenv.xml";
         String testFileExtension = ".xml";
         int noOfPuts = 1;
@@ -434,11 +434,11 @@ public class DataCacheTest {
      * Test putting a collection of large strings using the putAll method while another thread is trying to update
      * one of the keys.
      *
-     * @throws Exception
+     * @
      */
     @Test
     @Ignore("TODO Fix test, resource is missing")
-    public void testPutAllRaceConditionWithOtherPuts() throws Exception {
+    public void testPutAllRaceConditionWithOtherPuts() throws IOException, URISyntaxException {
         String testKey = "BaseKey";
         String keyToCheck = testKey + 1;
 
@@ -521,10 +521,10 @@ public class DataCacheTest {
     /**
      * Test that a "snap" of the current state of the cache by updating a value in the cache while iterating the entry set.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testGetEntrySetSnap() throws Exception {
+    public void testGetEntrySetSnap() {
         Map<String, Double> populatedTestMap = getPopulatedTestMap();
 
         //Get first key from test map
@@ -632,9 +632,9 @@ public class DataCacheTest {
      * @param resourcePath  Path to file resource.
      * @param fileExtension File extension for file to write.
      * @param noOfPuts      Number of puts to perform for comparison.
-     * @throws Exception
+     * @
      */
-    private void compareFileSaveToPut(String resourcePath, String fileExtension, int noOfPuts) throws Exception {
+    private void compareFileSaveToPut(String resourcePath, String fileExtension, int noOfPuts) throws IOException, URISyntaxException {
         long timeToSaveFileToDiskInNanos = getTimeToSaveFileToDiskInNanos(resourcePath, fileExtension);
 
         String key = "BaseKey";
@@ -665,9 +665,9 @@ public class DataCacheTest {
      * @param resourcePath  Path to resource that is loaded as string.
      * @param fileExtension File extension use for file saved.
      * @return Time it takes to save string as a new file.
-     * @throws Exception
+     * @
      */
-    public long getTimeToSaveFileToDiskInNanos(String resourcePath, String fileExtension) throws Exception {
+    public long getTimeToSaveFileToDiskInNanos(String resourcePath, String fileExtension) throws IOException, URISyntaxException {
         String testString = TestUtils.loadSystemResourceFileToString(resourcePath);
 
         long startTime = System.nanoTime();

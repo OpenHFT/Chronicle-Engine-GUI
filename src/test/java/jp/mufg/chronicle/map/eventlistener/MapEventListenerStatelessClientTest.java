@@ -51,7 +51,7 @@ public class MapEventListenerStatelessClientTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         _noOfEventsTriggered.set(0);
 
         _StringStringMap = serverAssetTree.acquireMap("chronicleMapString?putReturnsNull=true", String.class, String.class);
@@ -66,7 +66,7 @@ public class MapEventListenerStatelessClientTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         _StringStringMap.clear();
         serverAssetTree.close();
         clientAssetTree.close();
@@ -75,10 +75,10 @@ public class MapEventListenerStatelessClientTest {
     /**
      * Test that event listener is triggered for every put.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testMapEvenListenerClientPut() throws Exception {
+    public void testMapEvenListenerClientPut() {
         String testKey = "TestKeyPut";
         int noOfIterations = 50;
 
@@ -91,10 +91,10 @@ public class MapEventListenerStatelessClientTest {
     /**
      * Test that event listener is triggered for every replace.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testMapEvenListenerReplace() throws Exception {
+    public void testMapEvenListenerReplace() {
         String testKey = "TestKeyGetReplace";
         int noOfIterations = 50;
 
@@ -111,11 +111,11 @@ public class MapEventListenerStatelessClientTest {
     /**
      * Test that event listener is triggered for every "acquireUsingLocked" value update.
      *
-     * @throws Exception
+     * @
      */
 /*
     @Test
-    public void testMapEvenListenerAcquireUsingLocked() throws Exception
+    public void testMapEvenListenerAcquireUsingLocked()
     {
         StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
 
@@ -139,11 +139,11 @@ public class MapEventListenerStatelessClientTest {
     /**
      * Test that event listener is triggered for every "acquireUsing" value update.
      *
-     * @throws Exception
+     * @
      */
 /*
     @Test
-    public void testMapEvenListenerAcquireUsing() throws Exception
+    public void testMapEvenListenerAcquireUsing()
     {
         StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
 
@@ -165,11 +165,11 @@ public class MapEventListenerStatelessClientTest {
     /**
      * Test that event listener is triggered for every "getUsing" value update.
      *
-     * @throws Exception
+     * @
      */
 /*
     @Test
-    public void testMapEvenListenerGetUsing() throws Exception
+    public void testMapEvenListenerGetUsing()
     {
         StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
 

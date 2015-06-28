@@ -69,7 +69,7 @@ public class ManyMapsTest {
     }
 
     @Before
-    public void initTest() throws Exception {
+    public void initTest() {
 //        createAndFillMaps();
     }
 
@@ -79,10 +79,10 @@ public class ManyMapsTest {
      * Test that all the keys in this map contains the map name (ie. no other map's keys overlap).
      * Test that all the values in this map contains the map name (ie. no other map's values overlap).
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testKeysAndValuesInEachMap() throws Exception {
+    public void testKeysAndValuesInEachMap() {
         //Test that the number of maps created exist
         Assert.assertEquals(_noOfMaps, _maps.size());
 
@@ -104,10 +104,10 @@ public class ManyMapsTest {
      * Test that having a large number of maps and TopicSubscriptions for each of them.
      * Test that subscribers only have events triggered for the given map that they subscribe to.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testManyMapsManyTopicListeners() throws Exception {
+    public void testManyMapsManyTopicListeners() {
         Map<String, EventsForMapSubscriber> eventsForMapSubscriberMap = new HashMap<>();
 
         for (String key : _maps.keySet()) {
@@ -132,13 +132,13 @@ public class ManyMapsTest {
 
     @Test
     @Ignore("todo")
-    public void testConnectToMultipleMapsUsingTheSamePort() throws Exception {
+    public void testConnectToMultipleMapsUsingTheSamePort() {
         throw new UnsupportedOperationException("DS test that we can connect and interact with a large number of maps on the same port");
     }
 
     @Test
     @Ignore("todo")
-    public void testMapReplication() throws Exception {
+    public void testMapReplication() {
         throw new UnsupportedOperationException("DS test that maps are automatically replicated on one or more failover servers, with each map on a server being uniquely associated with given name");
     }
 
@@ -146,10 +146,10 @@ public class ManyMapsTest {
      * Test creating an engine with an underlying Chronicle Map store where the base
      * path is specified as a folder that exist.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testChronicleMapCreationFolderBasePath() throws Exception {
+    public void testChronicleMapCreationFolderBasePath() {
         String basePath = OS.TARGET;
 
         testMultipleMapsWithUnderlyingChronicleMap(basePath);
@@ -159,10 +159,10 @@ public class ManyMapsTest {
      * Test creating an engine with an underlying Chronicle Map store where the base path is specified
      * as a full path to a file that does not exist.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testChronicleMapCreationFileBasePath() throws Exception {
+    public void testChronicleMapCreationFileBasePath() {
         String basePath = OS.TARGET + "nonExistingFileOrFolder";
 
         testMultipleMapsWithUnderlyingChronicleMap(basePath);
@@ -203,10 +203,10 @@ public class ManyMapsTest {
     /**
      * Test that we can put a map as value and get it back and get values from it.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testSupportForNestedMaps() throws Exception {
+    public void testSupportForNestedMaps() {
         String mapName = "MapOfMaps";
         String testKey = "TestKey";
         String testValue = "TestValue";

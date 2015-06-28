@@ -29,8 +29,7 @@ public class MapContainerEnum implements AutoCloseable
         _marketDataKey = marketDataCache.newKeyInstance();
     }
 
-    public static void main(String[] args) throws Exception
-    {
+    public static void main(String[] args) throws IOException {
         File file = File.createTempFile("chronicle", "chron");
         MapContainerEnum mapContainerEnum = new MapContainerEnum(file);
         mapContainerEnum.close();
@@ -87,7 +86,7 @@ public class MapContainerEnum implements AutoCloseable
     }
 
     @Override
-    public void close() throws Exception
+    public void close()
     {
         marketDataCache.close();
     }

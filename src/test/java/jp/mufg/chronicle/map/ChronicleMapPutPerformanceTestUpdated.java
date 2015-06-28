@@ -21,7 +21,7 @@ public class ChronicleMapPutPerformanceTestUpdated {
 //    private MapContainerEnum marketDataCache;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws IOException {
         file = new File(chronicleMapFile);
         file.delete();
         file.deleteOnExit();
@@ -31,7 +31,7 @@ public class ChronicleMapPutPerformanceTestUpdated {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         marketDataCache.close();
     }
 

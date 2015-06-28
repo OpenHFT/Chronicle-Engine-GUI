@@ -44,7 +44,7 @@ public class DataMartEngineTest {
 
     @Test
     @Ignore("TODO Clarify if this should work")
-    public void testAdd() throws Exception {
+    public void testAdd() throws IOException {
         DataMartEngine engine = new DataMartEngine();
 
         Chronicle chronicle = createChronicle("testAdd");
@@ -85,7 +85,7 @@ public class DataMartEngineTest {
     // TODO need to add an expected performance measure.
     @Test
     @Ignore("long running test")
-    public void testAddPerf() throws Exception {
+    public void testAddPerf() throws IOException {
         DataMartEngine engine = new DataMartEngine();
 
         Chronicle chronicle = createChronicle("testAdd");

@@ -43,8 +43,7 @@ private static int _noOfEventsTriggered = 0;
     }
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws IOException {
         _noOfEventsTriggered = 0;
 
         ChronicleTools.deleteDirOnExit(_chronicleMapStringFilePath);
@@ -66,10 +65,10 @@ private static int _noOfEventsTriggered = 0;
     /**
      * Test that event listener is triggered for every put.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testMapEvenListenerPut() throws Exception
+    public void testMapEvenListenerPut()
     {
         String testKey = "TestKeyPut";
         int noOfIterations = 50;
@@ -83,10 +82,10 @@ private static int _noOfEventsTriggered = 0;
     /**
      * Test that event listener is triggered for every replace.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testMapEvenListenerReplace() throws Exception
+    public void testMapEvenListenerReplace()
     {
         String testKey = "TestKeyGetReplace";
         int noOfIterations = 50;
@@ -105,11 +104,11 @@ private static int _noOfEventsTriggered = 0;
     /**
      * Test that event listener is triggered for every "acquireUsingLocked" value update.
      *
-     * @throws Exception
+     * @
      */
     @Test
     @Ignore("TODO")
-    public void testMapEvenListenerAcquireUsingLocked() throws Exception
+    public void testMapEvenListenerAcquireUsingLocked()
     {
         StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
 
@@ -132,11 +131,11 @@ private static int _noOfEventsTriggered = 0;
     /**
      * Test that event listener is triggered for every "acquireUsing" value update.
      *
-     * @throws Exception
+     * @
      */
     @Test
     @Ignore("TODO")
-    public void testMapEvenListenerAcquireUsing() throws Exception
+    public void testMapEvenListenerAcquireUsing()
     {
         StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
 
@@ -157,11 +156,11 @@ private static int _noOfEventsTriggered = 0;
     /**
      * Test that event listener is triggered for every "getUsing" value update.
      *
-     * @throws Exception
+     * @
      */
     @Test
     @Ignore("TODO")
-    public void testMapEvenListenerGetUsing() throws Exception
+    public void testMapEvenListenerGetUsing()
     {
         StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
 

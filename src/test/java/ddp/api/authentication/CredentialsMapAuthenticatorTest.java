@@ -1,9 +1,13 @@
 package ddp.api.authentication;
 
-import ddp.api.identity.*;
-import org.junit.*;
+import ddp.api.identity.ClientIdentity;
+import ddp.api.identity.IdentityProvider;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CredentialsMapAuthenticatorTest
 {
@@ -13,7 +17,7 @@ public class CredentialsMapAuthenticatorTest
     private static CredentialsMapAuthenticator _hashedUserPwdMapAuthManager;
 
     @BeforeClass
-    public static void setUpBeforeClass() throws Exception
+    public static void setUpBeforeClass()
     {
         _userPwdMap = new HashMap<>();
         _userPwdMap.put(_testUsername, _testUserPwd);
@@ -24,10 +28,10 @@ public class CredentialsMapAuthenticatorTest
     /**
      * Test that a valid username and pwd returns true.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testAuthenticateUserExistingUserAndPwd() throws Exception
+    public void testAuthenticateUserExistingUserAndPwd()
     {
         ClientIdentity clientIdentity = IdentityProvider.getClientIdentity(_testUsername, _testUserPwd, null);
 
@@ -39,10 +43,10 @@ public class CredentialsMapAuthenticatorTest
     /**
      * Test that false is returned when the user does not exist.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testAuthenticateUserNonExistingUser() throws Exception
+    public void testAuthenticateUserNonExistingUser()
     {
         ClientIdentity clientIdentity = IdentityProvider.getClientIdentity("NonExistingUser", _testUserPwd, null);
 
@@ -54,10 +58,10 @@ public class CredentialsMapAuthenticatorTest
     /**
      * Test that false is returned when the user is @null.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testAuthenticateUserNullUser() throws Exception
+    public void testAuthenticateUserNullUser()
     {
         ClientIdentity clientIdentity = IdentityProvider.getClientIdentity(null, _testUserPwd, null);
 
@@ -69,10 +73,10 @@ public class CredentialsMapAuthenticatorTest
     /**
      * Test that false is returned when the user is empty string.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testAuthenticateUserEmptyStringUser() throws Exception
+    public void testAuthenticateUserEmptyStringUser()
     {
         ClientIdentity clientIdentity = IdentityProvider.getClientIdentity("", _testUserPwd, null);
 
@@ -84,10 +88,10 @@ public class CredentialsMapAuthenticatorTest
     /**
      * Test that false is returned when the user exist, but the password is wrong.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testAuthenticateUserWrongPassword() throws Exception
+    public void testAuthenticateUserWrongPassword()
     {
         ClientIdentity clientIdentity = IdentityProvider.getClientIdentity(_testUsername, "WrongPassword", null);
 
@@ -99,10 +103,10 @@ public class CredentialsMapAuthenticatorTest
     /**
      * Test that false is returned when the user exist, but the password is null.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testAuthenticateUserNullPwd() throws Exception
+    public void testAuthenticateUserNullPwd()
     {
         ClientIdentity clientIdentity = IdentityProvider.getClientIdentity(_testUsername, null, null);
 
@@ -114,10 +118,10 @@ public class CredentialsMapAuthenticatorTest
     /**
      * Test that false is returned when the user exist, but the password is empty string.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testAuthenticateUserEmptyStringPwd() throws Exception
+    public void testAuthenticateUserEmptyStringPwd()
     {
         ClientIdentity clientIdentity = IdentityProvider.getClientIdentity(_testUsername, "", null);
 
@@ -129,10 +133,10 @@ public class CredentialsMapAuthenticatorTest
     /**
      * Test that false is returned when the user and password are both empty strings.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testAuthenticateUserEmptyStringUserAndPwd() throws Exception
+    public void testAuthenticateUserEmptyStringUserAndPwd()
     {
         ClientIdentity clientIdentity = IdentityProvider.getClientIdentity("", "", null);
 
@@ -144,10 +148,10 @@ public class CredentialsMapAuthenticatorTest
     /**
      * Test that false is returned when the user and password are both null.
      *
-     * @throws Exception
+     * @
      */
     @Test
-    public void testAuthenticateUserNullUserAndPwd() throws Exception
+    public void testAuthenticateUserNullUserAndPwd()
     {
         ClientIdentity clientIdentity = IdentityProvider.getClientIdentity(null, null, null);
 

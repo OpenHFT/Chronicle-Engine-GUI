@@ -28,8 +28,7 @@ public class ChronicleObjectSerializationTest
     static final AtomicInteger counter = new AtomicInteger();
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws IOException {
         String path = chronicleQueueBase + "/" + counter.getAndIncrement();
         ChronicleTools.deleteDirOnExit(path);
 
@@ -42,8 +41,7 @@ public class ChronicleObjectSerializationTest
     }
 
     @After
-    public void tearDown() throws Exception
-    {
+    public void tearDown() throws IOException {
         chronicle.close();
         ChronicleTools.deleteDirOnExit(chronicleQueueBase);
     }
