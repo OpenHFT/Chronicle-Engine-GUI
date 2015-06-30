@@ -17,6 +17,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -45,7 +46,7 @@ public class SubscriptionModelTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws IOException {
         defaultSession().close();
     }
 
