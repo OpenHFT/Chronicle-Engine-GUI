@@ -28,8 +28,11 @@ import static net.openhft.chronicle.engine.api.tree.RequestContext.requestContex
 public class ReplicationServerMain {
 
 
+    public static final String HOST = System.getProperty("remote.host");
+    public static final Integer HOST_ID = Integer.getInteger("hostId", 1);
+
     public static void main(String[] args) throws IOException {
-        final Integer host = Integer.getInteger("hostId", 1);
+        final Integer host = HOST_ID;
         final VanillaAssetTree tree = new VanillaAssetTree(host);
 
         Asset asset = tree.root().acquireAsset(requestContext(), "map1");
@@ -45,16 +48,16 @@ public class ReplicationServerMain {
         {
             final HostDetails value = new HostDetails();
             value.hostId = 1;
-            value.hostname = host == 1 ? "localhost" : System.getProperty("remote.host");
-            value.port = 5700;
+            value.hostname = host == 1 ? "localhost" : HOST;
+            value.port = 5701;
             value.timeoutMs = 1000;
             hostDetailsMap.put("host1", value);
         }
         {
             final HostDetails value = new HostDetails();
             value.hostId = 2;
-            value.hostname = host == 2 ? "localhost" : System.getProperty("remote.host");
-            value.port = 5700;
+            value.hostname = host == 2 ? "localhost" : HOST;
+            value.port = 5702;
             value.timeoutMs = 1000;
             hostDetailsMap.put("host2", value);
         }

@@ -36,14 +36,14 @@ public class ReplicationClientMain {
         BlockingQueue q1 = new ArrayBlockingQueue(1);
         BlockingQueue q2 = new ArrayBlockingQueue(1);
         {
-            String hostname = System.getProperty("host1", "");
-            int port = Integer.getInteger("port1", 5700);
+            String hostname = System.getProperty("host1", "localhost");
+            int port = Integer.getInteger("port1", 5701);
             map1 = create(tree, "map1", hostname, port, q1);
         }
 
         {
-            String hostname = System.getProperty("host2", "");
-            int port = Integer.getInteger("port2", 5700);
+            String hostname = System.getProperty("host2", "localhost");
+            int port = Integer.getInteger("port2", 5702);
             map2 = create(tree, "map1", hostname, port, q2);
         }
 
@@ -59,7 +59,9 @@ public class ReplicationClientMain {
     private static MapView<String, String, String> create(VanillaAssetTree tree, String nameName, String host, int port,
                                                           BlockingQueue<MapEvent> q) {
         final Asset asset = tree.root().acquireAsset(requestContext(), nameName);
-        asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(), asset));
+        asset.addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
+                VanillaKVSSubscription::new);
+        asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(""), asset));
 
         tree.root().addWrappingRule(MapView.class, "mapv view", VanillaMapView::new, AuthenticatedKeyValueStore.class);
         tree.root().addWrappingRule(TopicPublisher.class, " topic publisher", RemoteTopicPublisher::new, MapView.class);
