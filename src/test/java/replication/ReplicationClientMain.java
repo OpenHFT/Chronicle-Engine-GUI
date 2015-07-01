@@ -64,7 +64,6 @@ public class ReplicationClientMain {
 
         tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
                 VanillaKVSSubscription::new);
-        asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(""), asset));
 
         tree.root().addWrappingRule(MapView.class, "mapv view", VanillaMapView::new, AuthenticatedKeyValueStore.class);
         tree.root().addWrappingRule(TopicPublisher.class, " topic publisher", RemoteTopicPublisher::new, MapView.class);
@@ -73,6 +72,7 @@ public class ReplicationClientMain {
         EventGroup eventLoop = new EventGroup(true);
         SessionProvider sessionProvider = new VanillaSessionProvider();
         tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, host, port, eventLoop));
+        asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(""), asset));
 
         MapView<String, String, String> result = tree.acquireMap(nameName, String.class, String.class);
         tree.registerSubscriber("map", MapEvent.class, q::add);
