@@ -62,7 +62,7 @@ public class ReplicationClientMain {
         ThreadGroup threadGroup = new ThreadGroup("host=" + host);
         tree.root().addView(ThreadGroup.class, threadGroup);
 
-        asset.addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
+        tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
                 VanillaKVSSubscription::new);
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(""), asset));
 
