@@ -3,12 +3,14 @@ package replication;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.Publisher;
 import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
+import net.openhft.chronicle.engine.api.session.SessionProvider;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.fs.Clusters;
 import net.openhft.chronicle.engine.fs.HostDetails;
 import net.openhft.chronicle.engine.map.*;
 import net.openhft.chronicle.engine.pubsub.VanillaReference;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.session.VanillaSessionProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.threads.EventGroup;
 import net.openhft.chronicle.threads.api.EventLoop;
@@ -43,6 +45,8 @@ public class ReplicationServerMain {
         asset.addView(AuthenticatedKeyValueStore.class, new ChronicleMapKeyValueStore<>(requestContext(), asset));
 
 
+        tree.root().addView(SessionProvider.class, new VanillaSessionProvider());
+
         tree.root().addWrappingRule(MapView.class, "mapv view", VanillaMapView::new, AuthenticatedKeyValueStore.class);
         tree.root().addWrappingRule(TopicPublisher.class, " topic publisher", VanillaTopicPublisher::new, MapView.class);
         tree.root().addWrappingRule(Publisher.class, "publisher", VanillaReference::new, MapView.class);
@@ -71,7 +75,7 @@ public class ReplicationServerMain {
         tree.root().addView(Clusters.class, clusters);
 
 
-        new ServerEndpoint(5700, tree);
+        new ServerEndpoint(5700 + host, tree);
 
     }
 }
