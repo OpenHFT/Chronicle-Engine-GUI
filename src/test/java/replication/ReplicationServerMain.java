@@ -6,10 +6,7 @@ import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.fs.Clusters;
 import net.openhft.chronicle.engine.fs.HostDetails;
-import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
-import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
-import net.openhft.chronicle.engine.map.VanillaMapView;
-import net.openhft.chronicle.engine.map.VanillaTopicPublisher;
+import net.openhft.chronicle.engine.map.*;
 import net.openhft.chronicle.engine.pubsub.VanillaReference;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
@@ -35,7 +32,11 @@ public class ReplicationServerMain {
         final Integer host = HOST_ID;
         final VanillaAssetTree tree = new VanillaAssetTree(host);
 
+        tree.root().addView(EventLoop.class, new EventGroup(false));
         Asset asset = tree.root().acquireAsset(requestContext(), "map1");
+
+        asset.addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
+                VanillaKVSSubscription::new);
         asset.addView(AuthenticatedKeyValueStore.class, new ChronicleMapKeyValueStore<>(requestContext(), asset));
 
 
@@ -66,8 +67,6 @@ public class ReplicationServerMain {
         clusters.put("cluster", hostDetailsMap);
         tree.root().addView(Clusters.class, clusters);
 
-
-        tree.root().addView(EventLoop.class, new EventGroup(false));
 
         new ServerEndpoint(5700, tree);
 
