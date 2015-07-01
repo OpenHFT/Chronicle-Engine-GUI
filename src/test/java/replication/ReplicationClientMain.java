@@ -7,10 +7,12 @@ import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
 import net.openhft.chronicle.engine.api.session.SessionProvider;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.map.*;
+import net.openhft.chronicle.engine.server.WireType;
 import net.openhft.chronicle.engine.session.VanillaSessionProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.connection.TcpChannelHub;
 import net.openhft.chronicle.threads.EventGroup;
+import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,6 +32,11 @@ public class ReplicationClientMain {
 
     @Test
     public void test() throws InterruptedException {
+
+        YamlLogging.clientReads = true;
+        YamlLogging.clientWrites = true;
+        WireType.wire = WireType.TEXT;
+
         final Integer host = Integer.getInteger("hostId", 1);
         final VanillaAssetTree tree = new VanillaAssetTree(host);
 
@@ -63,7 +70,7 @@ public class ReplicationClientMain {
         tree.root().addView(ThreadGroup.class, threadGroup);
 
         tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
-                VanillaKVSSubscription::new);
+                RemoteKVSSubscription::new);
 
         tree.root().addWrappingRule(MapView.class, "mapv view", VanillaMapView::new, AuthenticatedKeyValueStore.class);
         tree.root().addWrappingRule(TopicPublisher.class, " topic publisher", RemoteTopicPublisher::new, MapView.class);
@@ -72,10 +79,10 @@ public class ReplicationClientMain {
         EventGroup eventLoop = new EventGroup(true);
         SessionProvider sessionProvider = new VanillaSessionProvider();
         tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, host, port, eventLoop));
-        asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(""), asset));
+        asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
         MapView<String, String, String> result = tree.acquireMap(nameName, String.class, String.class);
-        tree.registerSubscriber("map", MapEvent.class, q::add);
+        tree.registerSubscriber(nameName, MapEvent.class, q::add);
         return result;
     }
 }

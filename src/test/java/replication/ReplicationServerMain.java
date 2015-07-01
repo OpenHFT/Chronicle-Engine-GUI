@@ -10,6 +10,7 @@ import net.openhft.chronicle.engine.fs.HostDetails;
 import net.openhft.chronicle.engine.map.*;
 import net.openhft.chronicle.engine.pubsub.VanillaReference;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.server.WireType;
 import net.openhft.chronicle.engine.session.VanillaSessionProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.threads.EventGroup;
@@ -31,6 +32,7 @@ public class ReplicationServerMain {
     public static final Integer HOST_ID = Integer.getInteger("hostId", 1);
 
     public static void main(String[] args) throws IOException {
+        WireType.wire = WireType.TEXT;
         final Integer host = HOST_ID;
         final VanillaAssetTree tree = new VanillaAssetTree(host);
 
