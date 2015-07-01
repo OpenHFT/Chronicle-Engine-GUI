@@ -59,6 +59,9 @@ public class ReplicationClientMain {
     private static MapView<String, String, String> create(VanillaAssetTree tree, String nameName, String host, int port,
                                                           BlockingQueue<MapEvent> q) {
         final Asset asset = tree.root().acquireAsset(requestContext(), nameName);
+        ThreadGroup threadGroup = new ThreadGroup("host=" + host);
+        tree.root().addView(ThreadGroup.class, threadGroup);
+
         asset.addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
                 VanillaKVSSubscription::new);
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(""), asset));

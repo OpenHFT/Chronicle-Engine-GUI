@@ -32,6 +32,9 @@ public class ReplicationServerMain {
         final Integer host = HOST_ID;
         final VanillaAssetTree tree = new VanillaAssetTree(host);
 
+        ThreadGroup threadGroup = new ThreadGroup("");
+        tree.root().addView(ThreadGroup.class, threadGroup);
+
         tree.root().addView(EventLoop.class, new EventGroup(false));
         Asset asset = tree.root().acquireAsset(requestContext(), "map1");
 
