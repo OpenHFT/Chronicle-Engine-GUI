@@ -28,8 +28,6 @@ import static net.openhft.chronicle.engine.api.tree.RequestContext.requestContex
 public class ReplicationServerMain {
 
 
-    private static ServerEndpoint serverEndpoint11;
-
     public static void main(String[] args) throws IOException {
         final Integer host = Integer.getInteger("hostId", 1);
         final VanillaAssetTree tree = new VanillaAssetTree(host);
@@ -68,7 +66,7 @@ public class ReplicationServerMain {
 
         tree.root().addView(EventLoop.class, new EventGroup(false));
 
-        serverEndpoint11 = new ServerEndpoint(5700, tree);
+        new ServerEndpoint(5700, tree);
 
     }
 }
