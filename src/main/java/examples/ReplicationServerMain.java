@@ -34,6 +34,11 @@ public class ReplicationServerMain {
     public static void main(String[] args) throws IOException {
         WireType.wire = WireType.TEXT;
         final Integer host = HOST_ID;
+
+        System.out.println("using hostid=" + HOST_ID);
+        System.out.println("using host=" + HOST);
+
+
         final VanillaAssetTree tree = new VanillaAssetTree(host);
 
         ThreadGroup threadGroup = new ThreadGroup("");
