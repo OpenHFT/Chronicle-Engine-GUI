@@ -1,29 +1,31 @@
 package replication;
 
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.api.pubsub.*;
-import net.openhft.chronicle.engine.api.session.*;
-import net.openhft.chronicle.engine.api.tree.*;
+import net.openhft.chronicle.engine.api.map.MapEvent;
+import net.openhft.chronicle.engine.api.map.MapView;
+import net.openhft.chronicle.engine.api.pubsub.Publisher;
+import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
+import net.openhft.chronicle.engine.api.session.SessionProvider;
+import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.map.*;
 import net.openhft.chronicle.engine.server.WireType;
-import net.openhft.chronicle.engine.session.*;
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.network.connection.*;
-import net.openhft.chronicle.threads.*;
-import net.openhft.chronicle.wire.*;
-import org.junit.*;
+import net.openhft.chronicle.engine.session.VanillaSessionProvider;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.connection.TcpChannelHub;
+import net.openhft.chronicle.threads.EventGroup;
+import net.openhft.chronicle.wire.YamlLogging;
+import org.junit.Assert;
+import org.junit.Test;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
-import static net.openhft.chronicle.engine.api.tree.RequestContext.*;
+import static net.openhft.chronicle.engine.api.tree.RequestContext.requestContext;
 
 /**
  * Created by Rob Austin
  */
 
-public class ReplicationClientMultipleAssetsMain
-{
+public class ReplicationClientMultipleAssetsMain {
 
     private static MapView<String, String, String> map1;
     private static MapView<String, String, String> map2;
@@ -31,30 +33,33 @@ public class ReplicationClientMultipleAssetsMain
     @Test
     public void test() throws InterruptedException {
 
-//        YamlLogging.clientReads = true;
-//        YamlLogging.clientWrites = true;
+        YamlLogging.clientReads = true;
+        YamlLogging.clientWrites = true;
         WireType.wire = WireType.TEXT;
 
         final Integer hostId = Integer.getInteger("hostId", 1);
 
-        BlockingQueue q1 = new ArrayBlockingQueue(1);
+        BlockingQueue q1 = new ArrayBlockingQueue(2);
         BlockingQueue q2 = new ArrayBlockingQueue(1);
         {
             String hostname = System.getProperty("host1", "localhost");
             int port = Integer.getInteger("port1", 5701);
-            map1 = create("map1", hostId, hostname, port, q1);
+            map1 = create("map", hostId, hostname, port, q1);
         }
 
         {
             String hostname = System.getProperty("host2", "localhost");
             int port = Integer.getInteger("port2", 5702);
-            map2 = create("map1", hostId, hostname, port, q2);
+            map2 = create("map", hostId, hostname, port, q2);
         }
 
         map1.put("hello", "world");
 
-//        System.out.println(q1.take());
-//        System.out.println(q2.take());
+        System.out.println("q1" + q1.take());
+
+
+      System.out.println("q2" + q2.take());
+      //  System.out.println("q2" + q2.take());
 
         //Test map 1 content
         Assert.assertEquals(1, map1.size());

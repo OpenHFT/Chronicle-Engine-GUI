@@ -1,7 +1,9 @@
 package examples;
 
+import net.openhft.chronicle.engine.api.EngineReplication;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.Publisher;
+import net.openhft.chronicle.engine.api.pubsub.Replication;
 import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
 import net.openhft.chronicle.engine.api.session.SessionProvider;
 import net.openhft.chronicle.engine.api.tree.Asset;
@@ -13,8 +15,10 @@ import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.server.WireType;
 import net.openhft.chronicle.engine.session.VanillaSessionProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.engine.tree.VanillaReplication;
 import net.openhft.chronicle.threads.EventGroup;
 import net.openhft.chronicle.threads.api.EventLoop;
+import net.openhft.chronicle.wire.YamlLogging;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -32,7 +36,10 @@ public class ReplicationServerMain {
     public static final Integer HOST_ID = Integer.getInteger("hostId", 1);
 
     public static void main(String[] args) throws IOException {
-        WireType.wire = WireType.TEXT;
+        YamlLogging.clientReads = true;
+        YamlLogging.clientWrites = true;
+        WireType wireType = WireType.TEXT;
+        WireType.wire = wireType;
         final Integer host = HOST_ID;
 
         System.out.println("using hostid=" + HOST_ID);
@@ -45,18 +52,37 @@ public class ReplicationServerMain {
         tree.root().addView(ThreadGroup.class, threadGroup);
 
         tree.root().addView(EventLoop.class, new EventGroup(false));
-        Asset asset = tree.root().acquireAsset(requestContext(), "map1");
+        Asset asset = tree.root().acquireAsset(requestContext(), "map");
 
         tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
                 VanillaKVSSubscription::new);
-        asset.addView(AuthenticatedKeyValueStore.class, new ChronicleMapKeyValueStore<>(requestContext(), asset));
+
+        tree.root().addLeafRule(EngineReplication.class, "Engine replication holder",
+                CMap2EngineReplicator::new);
+
+        newCluster(host, tree);
+
+        ChronicleMapKeyValueStore<Object, Object, Object> v = new ChronicleMapKeyValueStore<>(requestContext(""), asset);
+        asset.addView(AuthenticatedKeyValueStore.class, v);
 
 
         tree.root().addView(SessionProvider.class, new VanillaSessionProvider());
-
+        tree.root().addWrappingRule(Replication.class, "replication", VanillaReplication::new, MapView.class);
         tree.root().addWrappingRule(MapView.class, "mapv view", VanillaMapView::new, AuthenticatedKeyValueStore.class);
         tree.root().addWrappingRule(TopicPublisher.class, " topic publisher", VanillaTopicPublisher::new, MapView.class);
         tree.root().addWrappingRule(Publisher.class, "publisher", VanillaReference::new, MapView.class);
+
+
+
+
+
+
+
+        new ServerEndpoint(5700 + host, tree);
+
+    }
+
+    private static void newCluster(Integer host, VanillaAssetTree tree) {
         Clusters clusters = new Clusters();
         HashMap<String, HostDetails> hostDetailsMap = new HashMap<String, HostDetails>();
 
@@ -80,10 +106,6 @@ public class ReplicationServerMain {
 
         clusters.put("cluster", hostDetailsMap);
         tree.root().addView(Clusters.class, clusters);
-
-
-        new ServerEndpoint(5700 + host, tree);
-
     }
 }
 
