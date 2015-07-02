@@ -1,4 +1,4 @@
-package replication;
+package examples;
 
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.Publisher;
