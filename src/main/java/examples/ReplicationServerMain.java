@@ -52,7 +52,7 @@ public class ReplicationServerMain {
         tree.root().addView(ThreadGroup.class, threadGroup);
 
         tree.root().addView(EventLoop.class, new EventGroup(false));
-        Asset asset = tree.root().acquireAsset(requestContext(), "map");
+        Asset asset = tree.root().acquireAsset("map");
 
         tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
                 VanillaKVSSubscription::new);

@@ -406,17 +406,17 @@ public class RemoteSubscriptionModelPerformanceTest {
         }
 
         @Override
-        public void update(String key, String oldValue, String newValue) {
+        public void update(String assetName, String key, String oldValue, String newValue) {
             testKeyAndValue(key, newValue, _noOfUpdateEvents);
         }
 
         @Override
-        public void insert(String key, String value) {
+        public void insert(String assetName, String key, String value) {
             testKeyAndValue(key, value, _noOfInsertEvents);
         }
 
         @Override
-        public void remove(String key, String value) {
+        public void remove(String assetName, String key, String value) {
             testKeyAndValue(key, value, _noOfRemoveEvents);
         }
 

@@ -65,7 +65,7 @@ public class ReplicationClientMain {
 
     private static MapView<String, String, String> create(VanillaAssetTree tree, String nameName, String host, int port,
                                                           BlockingQueue<MapEvent> q) {
-        final Asset asset = tree.root().acquireAsset(requestContext(), nameName);
+        final Asset asset = tree.root().acquireAsset(nameName);
         ThreadGroup threadGroup = new ThreadGroup("host=" + host);
         tree.root().addView(ThreadGroup.class, threadGroup);
 

@@ -74,7 +74,7 @@ public class ReplicationClientMultipleAssetsMain {
                                                           BlockingQueue<MapEvent> q) {
         final VanillaAssetTree tree = new VanillaAssetTree(hostId);
 
-        final Asset asset = tree.root().acquireAsset(requestContext(), nameName);
+        final Asset asset = tree.root().acquireAsset(nameName);
         ThreadGroup threadGroup = new ThreadGroup("host=" + hostName);
         tree.root().addView(ThreadGroup.class, threadGroup);
 

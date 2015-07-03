@@ -1,8 +1,8 @@
 package ddp.api;
 
+import net.openhft.chronicle.hash.RemoteCallTimeoutException;
 import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.chronicle.map.ChronicleMapStatelessClientBuilder;
-import net.openhft.chronicle.network.connection.RemoteCallTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
