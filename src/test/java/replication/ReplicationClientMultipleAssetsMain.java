@@ -39,7 +39,7 @@ public class ReplicationClientMultipleAssetsMain {
 
         final Integer hostId = Integer.getInteger("hostId", 1);
 
-        BlockingQueue q1 = new ArrayBlockingQueue(2);
+        BlockingQueue q1 = new ArrayBlockingQueue(1);
         BlockingQueue q2 = new ArrayBlockingQueue(1);
         {
             String hostname = System.getProperty("host1", "localhost");
@@ -53,13 +53,11 @@ public class ReplicationClientMultipleAssetsMain {
             map2 = create("map", hostId, hostname, port, q2);
         }
 
+
         map1.put("hello", "world");
 
-        System.out.println("q1" + q1.take());
-
-
-      System.out.println("q2" + q2.take());
-      //  System.out.println("q2" + q2.take());
+        Assert.assertEquals("InsertedEvent{assetName='/map', key=hello, value=world}", q1.take().toString());
+        Assert.assertEquals("InsertedEvent{assetName='/map', key=hello, value=world}", q2.take().toString());
 
         //Test map 1 content
         Assert.assertEquals(1, map1.size());
@@ -68,7 +66,11 @@ public class ReplicationClientMultipleAssetsMain {
         //Test map 1 content
         Assert.assertEquals(1, map2.size());
         Assert.assertEquals("world", map2.get("hello"));
+
+
+
     }
+
 
     private static MapView<String, String, String> create(String nameName, Integer hostId, String hostName, int port,
                                                           BlockingQueue<MapEvent> q) {
@@ -91,6 +93,8 @@ public class ReplicationClientMultipleAssetsMain {
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
         MapView<String, String, String> result = tree.acquireMap(nameName, String.class, String.class);
+
+        result.clear();
         tree.registerSubscriber(nameName, MapEvent.class, q::add);
         return result;
     }

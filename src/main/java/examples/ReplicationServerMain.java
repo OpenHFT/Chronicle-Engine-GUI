@@ -45,42 +45,32 @@ public class ReplicationServerMain {
         System.out.println("using hostid=" + HOST_ID);
         System.out.println("using host=" + HOST);
 
-
         final VanillaAssetTree tree = new VanillaAssetTree(host);
-
-        ThreadGroup threadGroup = new ThreadGroup("");
-        tree.root().addView(ThreadGroup.class, threadGroup);
-
-        tree.root().addView(EventLoop.class, new EventGroup(false));
-        Asset asset = tree.root().acquireAsset("map");
-
-        tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
-                VanillaKVSSubscription::new);
-
+        newCluster(host, tree);
         tree.root().addLeafRule(EngineReplication.class, "Engine replication holder",
                 CMap2EngineReplicator::new);
-
-        newCluster(host, tree);
-
-        ChronicleMapKeyValueStore<Object, Object, Object> v = new ChronicleMapKeyValueStore<>(requestContext(""), asset);
-        asset.addView(AuthenticatedKeyValueStore.class, v);
-
 
         tree.root().addView(SessionProvider.class, new VanillaSessionProvider());
         tree.root().addWrappingRule(Replication.class, "replication", VanillaReplication::new, MapView.class);
         tree.root().addWrappingRule(MapView.class, "mapv view", VanillaMapView::new, AuthenticatedKeyValueStore.class);
         tree.root().addWrappingRule(TopicPublisher.class, " topic publisher", VanillaTopicPublisher::new, MapView.class);
         tree.root().addWrappingRule(Publisher.class, "publisher", VanillaReference::new, MapView.class);
+        tree.root().addLeafRule(ObjectKVSSubscription.class, " vanilla", VanillaKVSSubscription::new);
 
+        ThreadGroup threadGroup = new ThreadGroup("my-named-thread-group");
+        tree.root().addView(ThreadGroup.class, threadGroup);
 
+        tree.root().addView(EventLoop.class, new EventGroup(false));
+        Asset asset = tree.root().acquireAsset(requestContext("map"), "map");
+        asset.addView(AuthenticatedKeyValueStore.class, new ChronicleMapKeyValueStore<>(requestContext("map"), asset));
 
-
-
-
+        tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
+                VanillaKVSSubscription::new);
 
         new ServerEndpoint(5700 + host, tree);
 
     }
+
 
     private static void newCluster(Integer host, VanillaAssetTree tree) {
         Clusters clusters = new Clusters();
