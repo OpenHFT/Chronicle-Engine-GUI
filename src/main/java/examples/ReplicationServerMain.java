@@ -61,7 +61,7 @@ public class ReplicationServerMain {
         tree.root().addView(ThreadGroup.class, threadGroup);
 
         tree.root().addView(EventLoop.class, new EventGroup(false));
-        Asset asset = tree.root().acquireAsset(requestContext("map"), "map");
+        Asset asset = tree.root().acquireAsset("map");
         asset.addView(AuthenticatedKeyValueStore.class, new ChronicleMapKeyValueStore<>(requestContext("map"), asset));
 
         tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
