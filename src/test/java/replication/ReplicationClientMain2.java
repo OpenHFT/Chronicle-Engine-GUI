@@ -1,20 +1,24 @@
 package replication;
 
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.api.pubsub.*;
-import net.openhft.chronicle.engine.api.session.*;
-import net.openhft.chronicle.engine.api.tree.*;
+import net.openhft.chronicle.engine.api.map.MapEvent;
+import net.openhft.chronicle.engine.api.map.MapView;
+import net.openhft.chronicle.engine.api.pubsub.Publisher;
+import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
+import net.openhft.chronicle.engine.api.session.SessionProvider;
+import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.server.*;
-import net.openhft.chronicle.engine.session.*;
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.network.connection.*;
-import net.openhft.chronicle.threads.*;
-import org.junit.*;
+import net.openhft.chronicle.engine.session.VanillaSessionProvider;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.connection.TcpChannelHub;
+import net.openhft.chronicle.threads.EventGroup;
+import net.openhft.chronicle.wire.WireType;
+import org.junit.Assert;
+import org.junit.Test;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
-import static net.openhft.chronicle.engine.api.tree.RequestContext.*;
+import static net.openhft.chronicle.engine.api.tree.RequestContext.requestContext;
 
 /**
  * Created by Rob Austin
@@ -31,7 +35,7 @@ public class ReplicationClientMain2
 
 //        YamlLogging.clientReads = true;
 //        YamlLogging.clientWrites = true;
-        WireType.wire = WireType.TEXT;
+//        WireType.wire = WireType.TEXT;
 
         final Integer hostId = Integer.getInteger("hostId", 2);
 
@@ -85,7 +89,7 @@ public class ReplicationClientMain2
 
         EventGroup eventLoop = new EventGroup(true);
         SessionProvider sessionProvider = new VanillaSessionProvider();
-        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, hostName, port, eventLoop));
+        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, hostName + ":" + port, eventLoop, WireType.TEXT));
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
         MapView<String, String, String> result = tree.acquireMap(nameName, String.class, String.class);
