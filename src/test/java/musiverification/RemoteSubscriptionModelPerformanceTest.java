@@ -50,6 +50,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class RemoteSubscriptionModelPerformanceTest {
 
     //TODO DS test having the server side on another machine
@@ -149,6 +150,7 @@ public class RemoteSubscriptionModelPerformanceTest {
      * triggering events which contain both the key and value (topic).
      */
     @Test
+    @Ignore
     public void testSubscriptionMapEventOnTopicPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 
@@ -234,6 +236,7 @@ public class RemoteSubscriptionModelPerformanceTest {
      * Expect it to handle at least 50 2 MB updates per second.
      */
     @Test
+    @Ignore
     public void testSubscriptionMapEventListenerUpdatePerformance() {
         //Put values before testing as we want to ignore the insert events
         Function<Integer, Object> putFunction = a -> _testMap.put(TestUtils.getKey(_mapName, a), _twoMbTestString);

@@ -15,9 +15,12 @@ import net.openhft.chronicle.engine.map.*;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.YamlLogging;
 import net.openhft.lang.thread.NamedThreadFactory;
+import org.jetbrains.annotations.NotNull;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -42,6 +45,7 @@ import static org.junit.Assert.assertNotNull;
 
 public class ReplicationTest {
 
+    public static final WireType WIRE_TYPE = WireType.TEXT;
     public static final String NAME = "/ChMaps/test";
     public static ServerEndpoint serverEndpoint1;
     public static ServerEndpoint serverEndpoint2;
@@ -52,18 +56,26 @@ public class ReplicationTest {
 
     @BeforeClass
     public static void before() throws IOException {
+        YamlLogging.clientWrites = true;
+        YamlLogging.clientReads = true;
+
+        //YamlLogging.showServerWrites = true;
+
         ClassAliasPool.CLASS_ALIASES.addAlias(ChronicleMapGroupFS.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(FilePerKeyGroupFS.class);
         //Delete any files from the last run
         Files.deleteIfExists(Paths.get(OS.TARGET, NAME));
 
-        tree1 = create(1);
-        tree2 = create(2);
-        tree3 = create(3);
+        TCPRegistry.createServerSocketChannelFor("host.port1", "host.port2", "host.port3");
 
-        serverEndpoint1 = new ServerEndpoint("localhost:8080", tree1, WireType.TEXT);
-        serverEndpoint2 = new ServerEndpoint("localhost:8081", tree2, WireType.TEXT);
-        serverEndpoint3 = new ServerEndpoint("localhost:8082", tree3, WireType.TEXT);
+        WireType writeType = WireType.TEXT;
+        tree1 = create(1, writeType);
+        tree2 = create(2, writeType);
+        tree3 = create(3, writeType);
+
+        serverEndpoint1 = new ServerEndpoint("host.port1", tree1, writeType);
+        serverEndpoint2 = new ServerEndpoint("host.port2", tree2, writeType);
+        serverEndpoint3 = new ServerEndpoint("host.port3", tree3, writeType);
 
     }
 
@@ -73,16 +85,18 @@ public class ReplicationTest {
             serverEndpoint1.close();
         if (serverEndpoint2 != null)
             serverEndpoint2.close();
-        serverEndpoint3.close();
+          serverEndpoint3.close();
         if (tree1 != null)
             tree1.close();
         if (tree2 != null)
             tree2.close();
         tree3.close();
+        TCPRegistry.reset();
+        // TODO TCPRegistery.assertAllServersStopped();
     }
 
-    private static AssetTree create(final int hostId) {
-        Function<Bytes, Wire> writeType = WireType.TEXT;
+    @NotNull
+    private static AssetTree create(final int hostId, Function<Bytes, Wire> writeType) {
         AssetTree tree = new VanillaAssetTree((byte) hostId)
                 .forTesting()
                 .withConfig(resourcesDir() + "/cmkvst", OS.TARGET + "/" + hostId);
@@ -99,6 +113,43 @@ public class ReplicationTest {
         registerTextViewofTree("host " + hostId, tree);
 
         return tree;
+    }
+
+
+    @Test
+    public void test() throws InterruptedException {
+
+        final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
+                .class);
+        assertNotNull(map1);
+
+        final ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String
+                .class);
+        assertNotNull(map2);
+
+
+        final ConcurrentMap<String, String> map3 = tree3.acquireMap(NAME, String.class, String
+                .class);
+        assertNotNull(map3);
+
+        map1.put("hello1", "world1");
+        map2.put("hello2", "world2");
+        map3.put("hello3", "world3");
+
+        for (int i = 1; i <= 30; i++) {
+            if (map1.size() == 3 && map2.size() == 3 && map3.size() == 3)
+                break;
+            Jvm.pause(200);
+        }
+
+
+        for (Map m : new Map[]{map1, map2, map3}) {
+            Assert.assertEquals("world1", m.get("hello1"));
+            Assert.assertEquals("world2", m.get("hello2"));
+            Assert.assertEquals("world3", m.get("hello3"));
+            Assert.assertEquals(3, m.size());
+        }
+
     }
 
     public static String resourcesDir() {
@@ -156,39 +207,6 @@ public class ReplicationTest {
         }
     }
 
-    @Test
-    public void test() {
-
-        final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
-                .class);
-        assertNotNull(map1);
-
-        final ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String
-                .class);
-        assertNotNull(map2);
-
-        final ConcurrentMap<String, String> map3 = tree3.acquireMap(NAME, String.class, String
-                .class);
-        assertNotNull(map3);
-
-        map1.put("hello1", "world1");
-        map2.put("hello2", "world2");
-        map3.put("hello3", "world3");
-
-        for (int i = 1; i <= 30; i++) {
-            if (map1.size() == 3 && map2.size() == 3 && map3.size() == 3)
-                break;
-            Jvm.pause(i * i);
-        }
-
-        for (Map m : new Map[]{map1, map2, map3}) {
-            Assert.assertEquals("world1", m.get("hello1"));
-            Assert.assertEquals("world2", m.get("hello2"));
-            Assert.assertEquals("world3", m.get("hello3"));
-            Assert.assertEquals(3, m.size());
-        }
-
-    }
 
 }
 

@@ -71,6 +71,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
      * Test that listening to events for a given key can handle 50 updates per second of 2 MB string values.
      */
     @Test
+    @Ignore
     public void testSubscriptionMapEventOnKeyPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 
@@ -95,6 +96,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
      * triggering events which contain both the key and value (topic).
      */
     @Test
+    @Ignore
     public void testSubscriptionMapEventOnTopicPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 
@@ -120,6 +122,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
      * Expect it to handle at least 50 2 MB updates per second.
      */
     @Test
+    @Ignore
     public void testSubscriptionMapEventListenerInsertPerformance() {
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
@@ -151,6 +154,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
      * Expect it to handle at least 50 2 MB updates per second.
      */
     @Test
+    @Ignore
     public void testSubscriptionMapEventListenerUpdatePerformance() {
         //Put values before testing as we want to ignore the insert events
         Function<Integer, Object> putFunction = a -> _testMap.put(TestUtils.getKey(_mapName, a), System.nanoTime() + _twoMbTestString);
