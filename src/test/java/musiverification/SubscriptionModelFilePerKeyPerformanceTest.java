@@ -12,6 +12,7 @@ import net.openhft.chronicle.engine.api.pubsub.Subscriber;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
+import net.openhft.chronicle.engine.tree.VanillaAsset;
 import org.junit.*;
 
 import java.io.Closeable;
@@ -26,8 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-import static net.openhft.chronicle.engine.Chassis.addLeafRule;
-import static net.openhft.chronicle.engine.Chassis.enableTranslatingValuesToBytesStore;
 import static org.junit.Assert.assertEquals;
 
 public class SubscriptionModelFilePerKeyPerformanceTest {
@@ -52,11 +51,11 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
     public void setUp() {
         Chassis.resetChassis();
 
-        enableTranslatingValuesToBytesStore();
+        ((VanillaAsset) Chassis.assetTree().root()).enableTranslatingValuesToBytesStore();
 
         String basePath = OS.TARGET + "/fpk/" + counter.getAndIncrement();
         System.out.println("Writing to " + basePath);
-        addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
+        Chassis.assetTree().root().addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(basePath), asset));
         _testMap = Chassis.acquireMap(_mapName, String.class, String.class);
 
@@ -337,17 +336,17 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         }
 
         @Override
-        public void update(String key, String oldValue, String newValue) {
+        public void update(String assetName, String key, String oldValue, String newValue) {
             testKeyAndValue(key, newValue, _noOfUpdateEvents);
         }
 
         @Override
-        public void insert(String key, String value) {
+        public void insert(String assetName, String key, String value) {
             testKeyAndValue(key, value, _noOfInsertEvents);
         }
 
         @Override
-        public void remove(String key, String value) {
+        public void remove(String assetName, String key, String value) {
             testKeyAndValue(key, value, _noOfRemoveEvents);
         }
 

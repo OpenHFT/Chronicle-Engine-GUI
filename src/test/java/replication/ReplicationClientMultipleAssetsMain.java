@@ -7,11 +7,11 @@ import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
 import net.openhft.chronicle.engine.api.session.SessionProvider;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.server.WireType;
 import net.openhft.chronicle.engine.session.VanillaSessionProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.connection.TcpChannelHub;
 import net.openhft.chronicle.threads.EventGroup;
+import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,7 +35,6 @@ public class ReplicationClientMultipleAssetsMain {
 
         YamlLogging.clientReads = true;
         YamlLogging.clientWrites = true;
-        WireType.wire = WireType.TEXT;
 
         final Integer hostId = Integer.getInteger("hostId", 1);
 
@@ -66,9 +65,6 @@ public class ReplicationClientMultipleAssetsMain {
         //Test map 1 content
         Assert.assertEquals(1, map2.size());
         Assert.assertEquals("world", map2.get("hello"));
-
-
-
     }
 
 
@@ -89,7 +85,7 @@ public class ReplicationClientMultipleAssetsMain {
 
         EventGroup eventLoop = new EventGroup(true);
         SessionProvider sessionProvider = new VanillaSessionProvider();
-        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, hostName, port, eventLoop));
+        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, hostName + ":" + port, eventLoop, WireType.TEXT));
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
         MapView<String, String, String> result = tree.acquireMap(nameName, String.class, String.class);

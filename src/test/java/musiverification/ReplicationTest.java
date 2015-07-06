@@ -61,9 +61,9 @@ public class ReplicationTest {
         tree2 = create(2);
         tree3 = create(3);
 
-        serverEndpoint1 = new ServerEndpoint(8080, tree1);
-        serverEndpoint2 = new ServerEndpoint(8081, tree2);
-        serverEndpoint3 = new ServerEndpoint(8082, tree3);
+        serverEndpoint1 = new ServerEndpoint("localhost:8080", tree1, WireType.TEXT);
+        serverEndpoint2 = new ServerEndpoint("localhost:8081", tree2, WireType.TEXT);
+        serverEndpoint3 = new ServerEndpoint("localhost:8082", tree3, WireType.TEXT);
 
     }
 

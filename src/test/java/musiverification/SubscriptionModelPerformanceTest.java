@@ -25,9 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-import static net.openhft.chronicle.engine.Chassis.addLeafRule;
-import static net.openhft.chronicle.engine.Chassis.addWrappingRule;
-
 public class SubscriptionModelPerformanceTest {
     public static final boolean QUICK = Boolean.getBoolean("quick");
 
@@ -53,8 +50,8 @@ public class SubscriptionModelPerformanceTest {
         Files.deleteIfExists(Paths.get(OS.TARGET, _mapName));
         Chassis.resetChassis();
 
-        addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
-        addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
+        Chassis.assetTree().root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
+        Chassis.assetTree().root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(50).averageValueSize(2 << 20), asset));
         _testMap = Chassis.acquireMap(_mapName, String.class, String.class);
 
@@ -301,17 +298,17 @@ public class SubscriptionModelPerformanceTest {
         }
 
         @Override
-        public void update(String key, String oldValue, String newValue) {
+        public void update(String assetName, String key, String oldValue, String newValue) {
             testKeyAndValue(key, newValue, _noOfUpdateEvents);
         }
 
         @Override
-        public void insert(String key, String value) {
+        public void insert(String assetName, String key, String value) {
             testKeyAndValue(key, value, _noOfInsertEvents);
         }
 
         @Override
-        public void remove(String key, String value) {
+        public void remove(String assetName, String key, String value) {
             testKeyAndValue(key, value, _noOfRemoveEvents);
         }
 

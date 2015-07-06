@@ -42,12 +42,12 @@ public class SubscriptionModelTest {
         _stringStringMap = acquireMap(String.format("%s?%s", _mapName, _mapArgs), String.class, String.class);
         _stringStringMap.clear();
 
-        _clientAssetTree = defaultSession();
+        _clientAssetTree = assetTree();
     }
 
     @After
     public void tearDown() throws IOException {
-        defaultSession().close();
+        assetTree().close();
     }
 
     /**
@@ -68,15 +68,15 @@ public class SubscriptionModelTest {
         //Setup all the expected events in the correct order
 
         //Setup insert events for all keys
-        iterateAndExecuteConsumer((k, v) -> mapEventListener.insert(k, v), noOfKeys, _mapName, _mapName);
+        iterateAndExecuteConsumer((k, v) -> mapEventListener.insert(_mapName, k, v), noOfKeys, _mapName, _mapName);
 
         //Setup update events for all keys
         for (int i = 0; i < noOfKeys * noOfValues; i++) {
-            mapEventListener.update(TestUtils.getKey(_mapName, i % noOfKeys), TestUtils.getValue(_mapName, i), TestUtils.getValue(_mapName, i + noOfKeys));
+            mapEventListener.update(_mapName, TestUtils.getKey(_mapName, i % noOfKeys), TestUtils.getValue(_mapName, i), TestUtils.getValue(_mapName, i + noOfKeys));
         }
 
         //Setup remove events for all keys
-        iterateAndExecuteConsumer((k, v) -> mapEventListener.remove(k, v), c -> c, c -> noOfKeys * noOfValues + c, noOfKeys, _mapName, _mapName);
+        iterateAndExecuteConsumer((k, v) -> mapEventListener.remove(_mapName, k, v), c -> c, c -> noOfKeys * noOfValues + c, noOfKeys, _mapName, _mapName);
 
         replay(mapEventListener);
 

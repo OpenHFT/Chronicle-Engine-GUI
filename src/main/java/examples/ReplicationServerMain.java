@@ -7,17 +7,18 @@ import net.openhft.chronicle.engine.api.pubsub.Replication;
 import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
 import net.openhft.chronicle.engine.api.session.SessionProvider;
 import net.openhft.chronicle.engine.api.tree.Asset;
+import net.openhft.chronicle.engine.fs.Cluster;
 import net.openhft.chronicle.engine.fs.Clusters;
 import net.openhft.chronicle.engine.fs.HostDetails;
 import net.openhft.chronicle.engine.map.*;
 import net.openhft.chronicle.engine.pubsub.VanillaReference;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
-import net.openhft.chronicle.engine.server.WireType;
 import net.openhft.chronicle.engine.session.VanillaSessionProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.engine.tree.VanillaReplication;
 import net.openhft.chronicle.threads.EventGroup;
 import net.openhft.chronicle.threads.api.EventLoop;
+import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 
 import java.io.IOException;
@@ -38,8 +39,6 @@ public class ReplicationServerMain {
     public static void main(String[] args) throws IOException {
         YamlLogging.clientReads = true;
         YamlLogging.clientWrites = true;
-        WireType wireType = WireType.TEXT;
-        WireType.wire = wireType;
         final Integer host = HOST_ID;
 
         System.out.println("using hostid=" + HOST_ID);
@@ -67,7 +66,7 @@ public class ReplicationServerMain {
         tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
                 VanillaKVSSubscription::new);
 
-        new ServerEndpoint(5700 + host, tree);
+        new ServerEndpoint("localhost:" + (5700 + host), tree, WireType.BINARY);
 
     }
 
@@ -79,22 +78,20 @@ public class ReplicationServerMain {
         {
             final HostDetails value = new HostDetails();
             value.hostId = 1;
-            value.hostname = host == 1 ? "localhost" : HOST;
-            value.port = 5701;
+            value.connectUri = (host == 1 ? "localhost" : HOST) + ":5701";
             value.timeoutMs = 1000;
             hostDetailsMap.put("host1", value);
         }
         {
             final HostDetails value = new HostDetails();
             value.hostId = 2;
-            value.hostname = host == 2 ? "localhost" : HOST;
-            value.port = 5702;
+            value.connectUri = (host == 2 ? "localhost" : HOST) + ":5702";
             value.timeoutMs = 1000;
             hostDetailsMap.put("host2", value);
         }
 
 
-        clusters.put("cluster", hostDetailsMap);
+        clusters.put("cluster", new Cluster("cluster", hostDetailsMap));
         tree.root().addView(Clusters.class, clusters);
     }
 }

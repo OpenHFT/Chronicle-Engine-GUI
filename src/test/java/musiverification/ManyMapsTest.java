@@ -20,9 +20,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-import static net.openhft.chronicle.engine.Chassis.addLeafRule;
-import static net.openhft.chronicle.engine.Chassis.addWrappingRule;
-
 @Ignore("Long running test")
 public class ManyMapsTest {
     private static Map<String, Map<String, String>> _maps;
@@ -45,8 +42,8 @@ public class ManyMapsTest {
             }
         });
 
-        addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
-        addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
+        Chassis.assetTree().root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
+        Chassis.assetTree().root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(basePath).entries(1200), asset));
         _maps = Collections.synchronizedMap(new HashMap<>());
 

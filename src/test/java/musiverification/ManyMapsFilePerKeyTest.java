@@ -7,6 +7,7 @@ import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
+import net.openhft.chronicle.engine.tree.VanillaAsset;
 import org.junit.*;
 
 import java.io.IOException;
@@ -15,9 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
-
-import static net.openhft.chronicle.engine.Chassis.addLeafRule;
-import static net.openhft.chronicle.engine.Chassis.enableTranslatingValuesToBytesStore;
 
 /* On linux.
 fs.inotify.max_user_watches = 1500000
@@ -35,9 +33,9 @@ public class ManyMapsFilePerKeyTest {
     @BeforeClass
     public static void setUp() throws IOException {
 
-        enableTranslatingValuesToBytesStore();
+        ((VanillaAsset) Chassis.assetTree().root()).enableTranslatingValuesToBytesStore();
 
-        addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
+        Chassis.assetTree().root().addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(OS.TARGET + "/fpk"), asset));
         _maps = Collections.synchronizedMap(new HashMap<>());
 

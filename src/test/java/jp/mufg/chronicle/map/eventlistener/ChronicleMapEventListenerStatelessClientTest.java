@@ -9,6 +9,7 @@ import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
 import net.openhft.chronicle.engine.map.VanillaMapView;
 import net.openhft.chronicle.engine.tree.VanillaAsset;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.wire.WireType;
 import org.junit.*;
 
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class ChronicleMapEventListenerStatelessClientTest {
     private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
 
     private static ChronicleTestEventListener _chronicleTestEventListener;
-    private static final VanillaAssetTree clientAssetTree = new VanillaAssetTree().forRemoteAccess("localhost", 0);
+    private static final VanillaAssetTree clientAssetTree = new VanillaAssetTree().forRemoteAccess("localhost:0", WireType.TEXT);
     private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
 
     private static Map<String, String> _StringStringMap;

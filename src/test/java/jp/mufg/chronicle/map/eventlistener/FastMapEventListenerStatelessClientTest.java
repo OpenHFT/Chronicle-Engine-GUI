@@ -7,6 +7,7 @@ import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
 import net.openhft.chronicle.engine.tree.VanillaAsset;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.wire.WireType;
 import org.junit.*;
 
 import java.io.IOException;
@@ -24,7 +25,7 @@ import static net.openhft.chronicle.core.Jvm.pause;
 public class FastMapEventListenerStatelessClientTest {
     private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
 
-    private static final VanillaAssetTree clientAssetTree = new VanillaAssetTree().forRemoteAccess("localhost", 0);
+    private static final VanillaAssetTree clientAssetTree = new VanillaAssetTree().forRemoteAccess("localhost:0", WireType.TEXT);
     private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
 
     private ChronicleTestEventListener _chronicleTestEventListener;

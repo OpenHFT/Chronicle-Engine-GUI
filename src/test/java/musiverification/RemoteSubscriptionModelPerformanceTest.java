@@ -33,6 +33,8 @@ import net.openhft.chronicle.engine.map.KVSSubscription;
 import net.openhft.chronicle.engine.map.VanillaMapView;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.TCPRegistry;
+import net.openhft.chronicle.wire.WireType;
 import org.junit.*;
 
 import java.io.File;
@@ -76,10 +78,10 @@ public class RemoteSubscriptionModelPerformanceTest {
         serverAssetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(_noOfPuts).averageValueSize(_twoMbTestStringLength), asset));
-        serverEndpoint = new ServerEndpoint(serverAssetTree);
-        int port = serverEndpoint.getPort();
+        TCPRegistry.createServerSocketChannelFor("RemoteSubscriptionModelPerformanceTest.port");
+        serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);
 
-        clientAssetTree = new VanillaAssetTree().forRemoteAccess("localhost", port);
+        clientAssetTree = new VanillaAssetTree().forRemoteAccess("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY);
     }
 
     @Before
@@ -100,6 +102,7 @@ public class RemoteSubscriptionModelPerformanceTest {
         clientAssetTree.close();
         serverEndpoint.close();
         serverAssetTree.close();
+        TCPRegistry.reset();
     }
 
     /**
