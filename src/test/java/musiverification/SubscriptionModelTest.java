@@ -25,7 +25,7 @@ import static org.easymock.EasyMock.*;
 
 public class SubscriptionModelTest {
     private static Map<String, String> _stringStringMap;
-    private static String _mapName = "chronicleMapString";
+    private static String _mapName = "/chronicleMapString";
     private static String _mapArgs = "putReturnsNull=true";
     private static AssetTree _clientAssetTree;
 
@@ -55,7 +55,6 @@ public class SubscriptionModelTest {
      * @
      */
     @Test
-    @Ignore
     public void testSubscriptionMapEventOnAllKeys() {
         MapEventListener<String, String> mapEventListener = createStrictMock(MapEventListener.class);
         _clientAssetTree.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
