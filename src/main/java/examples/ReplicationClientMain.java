@@ -24,7 +24,7 @@ public class ReplicationClientMain
     private static MapView<String, String, String> map1;
     private static MapView<String, String, String> map2;
 
-    public static void main(String[] args) throws InterruptedException
+    public static void main(String[] args) throws Exception
     {
         YamlLogging.clientReads = true;
         YamlLogging.clientWrites = true;
@@ -55,14 +55,14 @@ public class ReplicationClientMain
 
         if(!"InsertedEvent{assetName='/map', key=hello, value=world}".equals(q1.take().toString()))
         {
-            System.out.println("Doesn't match 1...");
+            throw new Exception("Doesn't match 1...");
         }
 
         System.out.println("Checking queue2...");
 
         if(!"InsertedEvent{assetName='/map', key=hello, value=world}".equals(q2.take().toString()))
         {
-            System.out.println("Doesn't match 2...");
+            throw new Exception("Doesn't match 2...");
         }
 
         System.out.println("Checking map1...");
@@ -70,12 +70,12 @@ public class ReplicationClientMain
         //Test map 1 content
         if(map1.size() != 1)
         {
-            System.out.println("Doesn't match 3...");
+            throw new Exception("Doesn't match 3...");
         }
 
         if(!"world".equals(map1.get("hello")))
         {
-            System.out.println("Doesn't match 4...");
+            throw new Exception("Doesn't match 4...");
         }
 
         System.out.println("Checking map2...");
@@ -83,12 +83,12 @@ public class ReplicationClientMain
         //Test map 2 content
         if(map2.size() != 1)
         {
-            System.out.println("Doesn't match 5...");
+            throw new Exception("Doesn't match 5...");
         }
 
         if(!"world".equals(map2.get("hello")))
         {
-            System.out.println("Doesn't match 6...");
+            throw new Exception("Doesn't match 6...");
         }
 
         System.out.println("Removing map2...");
@@ -99,26 +99,26 @@ public class ReplicationClientMain
 
         if(!"RemovedEvent{assetName='/map', key=hello, oldValue=world}".equals(q1.take().toString()))
         {
-            System.out.println("Doesn't match 7...");
+            throw new Exception("Doesn't match 7...");
         }
 
         if(!"RemovedEvent{assetName='/map', key=hello, oldValue=world}".equals(q2.take().toString()))
         {
-            System.out.println("Doesn't match 8...");
+            throw new Exception("Doesn't match 8...");
         }
 
         System.out.println("Checking map1 for null...");
 
         if(map1.get("hello") != null)
         {
-            System.out.println("Doesn't match 8...");
+            throw new Exception("Doesn't match 8...");
         }
 
         System.out.println("Checking map2 for null...");
 
         if(map2.get("hello") != null)
         {
-            System.out.println("Doesn't match 9...");
+            throw new Exception("Doesn't match 9...");
         }
 
         System.out.println("DONE!");
