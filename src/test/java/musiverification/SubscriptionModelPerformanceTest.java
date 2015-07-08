@@ -1,20 +1,22 @@
 package musiverification;
 
 import ddp.api.TestUtils;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapEvent;
 import net.openhft.chronicle.engine.api.map.MapEventListener;
-import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.pubsub.Subscriber;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
-import net.openhft.chronicle.engine.map.VanillaMapView;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.TCPRegistry;
+import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.*;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -22,22 +24,24 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
 public class SubscriptionModelPerformanceTest {
-    public static final boolean QUICK = Boolean.getBoolean("quick");
 
     //TODO DS test having the server side on another machine
     private static final int _noOfPuts = 50;
-    private static final int _noOfRunsToAverage = QUICK ? 2 : 10;
-    private static final long _secondInNanos = (QUICK ? 2 : 1) * 1_000_000_000;
-    private static final AtomicInteger counter = new AtomicInteger();
+    private static final int _noOfRunsToAverage = 2;
+    private static final long _secondInNanos = 10_000_000_000L;
     private static String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
     private static int _twoMbTestStringLength;
-    private static Map<String, String> _testMap;
-    private final String _mapName = "PerfTestMap" + counter.incrementAndGet();
+
+    private static VanillaAssetTree serverAssetTree;
+    private static VanillaAssetTree clientAssetTree;
+    private static ServerEndpoint serverEndpoint;
+    private String _mapName;
 
     @BeforeClass
     public static void setUpBeforeClass() throws IOException, URISyntaxException {
@@ -47,20 +51,35 @@ public class SubscriptionModelPerformanceTest {
 
     @Before
     public void setUp() throws IOException {
+//        YamlLogging.clientReads = YamlLogging.clientWrites= true;
+
+        String hostPortDescription = "SubscriptionModelPerformanceTest";
+        WireType wireType = WireType.TEXT;
+
+        _mapName = "PerfTestMap" + System.nanoTime();
         Files.deleteIfExists(Paths.get(OS.TARGET, _mapName));
-        Chassis.resetChassis();
 
-        Chassis.assetTree().root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
-        Chassis.assetTree().root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
+        TCPRegistry.createServerSocketChannelFor(hostPortDescription);
+        serverAssetTree = new VanillaAssetTree().forTesting();
+
+        serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(50).averageValueSize(2 << 20), asset));
-        _testMap = Chassis.acquireMap(_mapName, String.class, String.class);
-
-        _testMap.clear();
+        serverEndpoint = new ServerEndpoint(hostPortDescription, serverAssetTree, wireType);
+        clientAssetTree = new VanillaAssetTree().forRemoteAccess(hostPortDescription, wireType);
     }
 
     @After
     public void tearDown() throws IOException {
-        ((Closeable) ((MapView) _testMap).underlying()).close();
+        clientAssetTree.close();
+        serverEndpoint.close();
+        serverAssetTree.close();
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        YamlLogging.clientReads = YamlLogging.clientWrites = false;
+
+        TCPRegistry.reset();
     }
 
     /**
@@ -74,9 +93,8 @@ public class SubscriptionModelPerformanceTest {
         //Create subscriber and register
         TestChronicleKeyEventSubscriber keyEventSubscriber = new TestChronicleKeyEventSubscriber(_twoMbTestStringLength);
 
-        //todo This ends up getting a SubAsset not an asset
-        Chassis.registerSubscriber(_mapName + "/" + key + "?bootstrap=false", String.class, keyEventSubscriber);
-
+        Map<String, String> _testMap = clientAssetTree.acquireMap(_mapName, String.class, String.class);
+        clientAssetTree.registerSubscriber(_mapName + "/" + key + "?bootstrap=false", String.class, keyEventSubscriber);
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
             IntStream.range(0, _noOfPuts).forEach(i ->
@@ -100,7 +118,8 @@ public class SubscriptionModelPerformanceTest {
         //Create subscriber and register
         TestChronicleTopicSubscriber topicSubscriber = new TestChronicleTopicSubscriber(key, _twoMbTestStringLength);
 
-        Chassis.registerTopicSubscriber(_mapName, String.class, String.class, topicSubscriber);
+        Map<String, String> _testMap = clientAssetTree.acquireMap(_mapName, String.class, String.class);
+        clientAssetTree.registerTopicSubscriber(_mapName, String.class, String.class, topicSubscriber);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
@@ -111,6 +130,7 @@ public class SubscriptionModelPerformanceTest {
         }, _noOfRunsToAverage, _secondInNanos);
 
         //Test that the correct number of events was triggered on event listener
+        waitFor(() -> topicSubscriber.getNoOfEvents().get() >= _noOfPuts * _noOfRunsToAverage);
         Assert.assertEquals(_noOfPuts * _noOfRunsToAverage, topicSubscriber.getNoOfEvents().get());
     }
 
@@ -123,7 +143,8 @@ public class SubscriptionModelPerformanceTest {
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
-        Chassis.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
+        Map<String, String> _testMap = clientAssetTree.acquireMap(_mapName, String.class, String.class);
+        clientAssetTree.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
@@ -131,6 +152,7 @@ public class SubscriptionModelPerformanceTest {
             {
                 _testMap.put(TestUtils.getKey(_mapName, i), _twoMbTestString);
             });
+            waitFor(() -> mapEventListener.getNoOfInsertEvents().get() >= _noOfPuts);
 
             //Test that the correct number of events were triggered on event listener
             Assert.assertEquals(_noOfPuts, mapEventListener.getNoOfInsertEvents().get());
@@ -151,6 +173,7 @@ public class SubscriptionModelPerformanceTest {
     @Test
     public void testSubscriptionMapEventListenerUpdatePerformance() {
         //Put values before testing as we want to ignore the insert events
+        Map<String, String> _testMap = clientAssetTree.acquireMap(_mapName, String.class, String.class);
         Function<Integer, Object> putFunction = a -> _testMap.put(TestUtils.getKey(_mapName, a), _twoMbTestString);
 
         IntStream.range(0, _noOfPuts).forEach(i ->
@@ -161,7 +184,7 @@ public class SubscriptionModelPerformanceTest {
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
-        Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
+        clientAssetTree.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
@@ -170,6 +193,7 @@ public class SubscriptionModelPerformanceTest {
                 putFunction.apply(i);
             });
 
+            waitFor(() -> mapEventListener.getNoOfUpdateEvents().get() >= _noOfPuts);
             //Test that the correct number of events were triggered on event listener
             Assert.assertEquals(0, mapEventListener.getNoOfInsertEvents().get());
             Assert.assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
@@ -191,7 +215,8 @@ public class SubscriptionModelPerformanceTest {
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
-        Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
+        Map<String, String> _testMap = clientAssetTree.acquireMap(_mapName, String.class, String.class);
+        clientAssetTree.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         long runtimeInNanos = 0;
@@ -203,6 +228,7 @@ public class SubscriptionModelPerformanceTest {
                 _testMap.put(TestUtils.getKey(_mapName, c), _twoMbTestString);
             });
 
+            waitFor(() -> mapEventListener.getNoOfInsertEvents().get() >= _noOfPuts);
             mapEventListener.resetCounters();
 
             long startTime = System.nanoTime();
@@ -213,6 +239,8 @@ public class SubscriptionModelPerformanceTest {
             });
 
             runtimeInNanos += System.nanoTime() - startTime;
+
+            waitFor(() -> mapEventListener.getNoOfRemoveEvents().get() >= _noOfPuts);
 
             //Test that the correct number of events were triggered on event listener
             Assert.assertEquals(0, mapEventListener.getNoOfInsertEvents().get());
@@ -335,5 +363,11 @@ public class SubscriptionModelPerformanceTest {
             Assert.assertEquals(TestUtils.getKey(_mapName, counter), key);
             Assert.assertEquals(_stringLength, value.length());
         }
+    }
+
+    static void waitFor(BooleanSupplier b) {
+        for (int i = 1; i <= 40; i++)
+            if (!b.getAsBoolean())
+                Jvm.pause(i * i);
     }
 }
