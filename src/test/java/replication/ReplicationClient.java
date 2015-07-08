@@ -125,6 +125,8 @@ public class ReplicationClient {
         tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, connectUri, eventLoop, wireType));
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
+        asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(""), asset));
+
         MapView<String, String, String> result = tree.acquireMap(nameName, String.class, String.class);
 
         result.clear();
