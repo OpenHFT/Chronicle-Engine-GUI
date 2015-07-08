@@ -39,7 +39,7 @@ import static net.openhft.chronicle.engine.api.tree.RequestContext.requestContex
  * Created by Rob Austin
  */
 
-public class ReplicationClient {
+public class ReplicationClientTest {
 
 
     static Set<Closeable> closeables = new HashSet<>();
@@ -124,8 +124,6 @@ public class ReplicationClient {
 
         tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, connectUri, eventLoop, wireType));
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
-
-        asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(""), asset));
 
         MapView<String, String, String> result = tree.acquireMap(nameName, String.class, String.class);
 
