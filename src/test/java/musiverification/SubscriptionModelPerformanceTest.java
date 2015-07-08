@@ -28,12 +28,14 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import static junit.framework.TestCase.assertEquals;
+
 public class SubscriptionModelPerformanceTest {
 
     //TODO DS test having the server side on another machine
     private static final int _noOfPuts = 50;
-    private static final int _noOfRunsToAverage = 2;
-    private static final long _secondInNanos = 10_000_000_000L;
+    private static final int _noOfRunsToAverage = 10;
+    private static final long _secondInNanos = 4_000_000_000L;
     private static String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
     private static int _twoMbTestStringLength;
@@ -45,7 +47,7 @@ public class SubscriptionModelPerformanceTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws IOException, URISyntaxException {
-        _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath);
+        _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath); // .substring(0, 128);
         _twoMbTestStringLength = _twoMbTestString.length();
     }
 
@@ -54,7 +56,7 @@ public class SubscriptionModelPerformanceTest {
 //        YamlLogging.clientReads = YamlLogging.clientWrites= true;
 
         String hostPortDescription = "SubscriptionModelPerformanceTest";
-        WireType wireType = WireType.TEXT;
+        WireType wireType = WireType.BINARY;
 
         _mapName = "PerfTestMap" + System.nanoTime();
         Files.deleteIfExists(Paths.get(OS.TARGET, _mapName));
@@ -94,7 +96,8 @@ public class SubscriptionModelPerformanceTest {
         TestChronicleKeyEventSubscriber keyEventSubscriber = new TestChronicleKeyEventSubscriber(_twoMbTestStringLength);
 
         Map<String, String> _testMap = clientAssetTree.acquireMap(_mapName, String.class, String.class);
-        clientAssetTree.registerSubscriber(_mapName + "/" + key + "?bootstrap=false", String.class, keyEventSubscriber);
+        Map<String, String> _testMap2 = serverAssetTree.acquireMap(_mapName, String.class, String.class);
+        serverAssetTree.registerSubscriber(_mapName + "/" + key + "?bootstrap=false", String.class, keyEventSubscriber);
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
             IntStream.range(0, _noOfPuts).forEach(i ->
@@ -102,6 +105,11 @@ public class SubscriptionModelPerformanceTest {
                 _testMap.put(key, _twoMbTestString);
             });
         }, _noOfRunsToAverage, _secondInNanos);
+        waitFor(() -> _testMap2.containsKey(key));
+
+        assertEquals(_twoMbTestString, _testMap2.get(key));
+
+        waitFor(() -> keyEventSubscriber.getNoOfEvents().get() >= _noOfPuts * _noOfRunsToAverage);
 
         //Test that the correct number of events was triggered on event listener
         Assert.assertEquals(_noOfPuts * _noOfRunsToAverage, keyEventSubscriber.getNoOfEvents().get());
