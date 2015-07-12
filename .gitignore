@@ -23,3 +23,42 @@ hs_err_pid*
 target
 
 .attach_pid*
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Visual Studio
+*.user
+*.ncb
+*.suo
+*.tlb
+*.tlh
+[Oo]bj/
+[Bb]in
+[Dd]ebug*/
+[Rr]elease*/
+[Tt]est[Rr]esult*
+packages/
+[Pp]ublish/
+*.nupkg
