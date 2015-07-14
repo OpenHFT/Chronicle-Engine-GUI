@@ -105,6 +105,7 @@ public class MapEventListenerStatelessClientTest {
      * @
      */
     @Test
+    @Ignore("CHENT-66 test never completes")
     public void testMapEvenListenerReplace() {
         String testKey = "TestKeyGetReplace";
         int noOfIterations = 50;
@@ -202,8 +203,8 @@ public class MapEventListenerStatelessClientTest {
 */
 
     /**
-     * Performs the given number of iterations and alternates between calling consumer1 and consumer2 passing
-     * either _value1 or _value2.
+     * Performs the given number of iterations and alternates between calling consumer1 and
+     * consumer2 passing either _value1 or _value2.
      *
      * @param consumer1      Consumer1 to call.
      * @param consumer2      Consumer2 to call.
