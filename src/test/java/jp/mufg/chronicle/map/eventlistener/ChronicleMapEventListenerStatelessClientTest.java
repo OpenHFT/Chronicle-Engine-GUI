@@ -1,16 +1,22 @@
 package jp.mufg.chronicle.map.eventlistener;
 
 import ddp.api.TestUtils;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
 import net.openhft.chronicle.engine.map.VanillaMapView;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAsset;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,17 +25,17 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 /**
  * Created by daniels on 31/03/2015.
  */
-@Ignore("todo fix")
 public class ChronicleMapEventListenerStatelessClientTest {
     private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
 
     private static ChronicleTestEventListener _chronicleTestEventListener;
-    private static final VanillaAssetTree clientAssetTree = new VanillaAssetTree().forRemoteAccess("localhost:0", WireType.TEXT);
+    private static VanillaAssetTree clientAssetTree;
     private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
 
     private static Map<String, String> _StringStringMap;
@@ -39,6 +45,7 @@ public class ChronicleMapEventListenerStatelessClientTest {
     private final String _value2;
 
     private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
+    private static ServerEndpoint serverEndpoint;
 
     public ChronicleMapEventListenerStatelessClientTest() {
         char[] value = new char[2 << 20];
@@ -48,6 +55,12 @@ public class ChronicleMapEventListenerStatelessClientTest {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
+        TCPRegistry.createServerSocketChannelFor("ChronicleMapEventListenerStatelessClientTest");
+
+        clientAssetTree = new VanillaAssetTree().forRemoteAccess("ChronicleMapEventListenerStatelessClientTest", WireType.TEXT);
+
+        serverEndpoint = new ServerEndpoint("ChronicleMapEventListenerStatelessClientTest", serverAssetTree, WireType.TEXT);
+
         Files.deleteIfExists(Paths.get(OS.TARGET, "chronicleMapString"));
         VanillaAsset root = (VanillaAsset) serverAssetTree.root();
         root.addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
@@ -67,15 +80,11 @@ public class ChronicleMapEventListenerStatelessClientTest {
 
     }
 
-    @Before
-    public void setUp() {
-
-    }
-
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDown() {
 //        _StringStringMap.clear();
         clientAssetTree.close();
+        serverEndpoint.close();
         serverAssetTree.close();
     }
 
@@ -220,6 +229,9 @@ public class ChronicleMapEventListenerStatelessClientTest {
             count++;
         }
         TestUtils.calculateAndPrintRuntime(startTime, count);
+        final int finalCount = count;
+        waitFor(() -> _noOfEventsTriggered.get() >= (noOfIterations - 1) * finalCount);
+
         Assert.assertEquals(noOfIterations * count, _noOfEventsTriggered.get(), count);
         try {
             //Give it a chance to print the times.
@@ -227,6 +239,12 @@ public class ChronicleMapEventListenerStatelessClientTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private void waitFor(BooleanSupplier b) {
+        for (int i = 1; i <= 40; i++)
+            if (!b.getAsBoolean())
+                Jvm.pause(i * i);
     }
 
     static class ChronicleTestEventListener implements TopicSubscriber<String, String> {
