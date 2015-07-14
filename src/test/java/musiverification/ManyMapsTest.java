@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-@Ignore("https://higherfrequencytrading.atlassian.net/browse/CHENT-67")
 public class ManyMapsTest {
     private static Map<String, Map<String, String>> _maps;
     private static String _mapBaseName = "ManyMapsTest-";
