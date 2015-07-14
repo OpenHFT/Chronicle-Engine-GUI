@@ -56,7 +56,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     private static final int _noOfPuts = 50;
     private static final int _noOfRunsToAverage = 10;
     // TODO Fix so that it is 1 second. CHENT-49
-    private static final long _secondInNanos = 2_500_000_000L;
+    private static final long _secondInNanos = 4_500_000_000L;
     private static final AtomicInteger counter = new AtomicInteger();
     private static final String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
@@ -225,7 +225,7 @@ public class RemoteSubscriptionModelPerformanceTest {
 
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
 
-        Jvm.pause(100);
+        Jvm.pause(1000);
         assertEquals(0, subscription.entrySubscriberCount());
     }
 
