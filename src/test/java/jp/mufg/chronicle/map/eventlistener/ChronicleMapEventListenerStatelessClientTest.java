@@ -59,13 +59,14 @@ public class ChronicleMapEventListenerStatelessClientTest {
 
         clientAssetTree = new VanillaAssetTree().forRemoteAccess("ChronicleMapEventListenerStatelessClientTest", WireType.TEXT);
 
-        serverEndpoint = new ServerEndpoint("ChronicleMapEventListenerStatelessClientTest", serverAssetTree, WireType.TEXT);
 
         Files.deleteIfExists(Paths.get(OS.TARGET, "chronicleMapString"));
         VanillaAsset root = (VanillaAsset) serverAssetTree.root();
         root.addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(50).averageValueSize(2 << 20), asset));
+
+        serverEndpoint = new ServerEndpoint("ChronicleMapEventListenerStatelessClientTest", serverAssetTree, WireType.TEXT);
 
         _noOfEventsTriggered.set(0);
 
@@ -123,88 +124,6 @@ public class ChronicleMapEventListenerStatelessClientTest {
                 consumer,
                 noOfIterations);
     }
-
-    /**
-     * Test that event listener is triggered for every "acquireUsingLocked" value update.
-     *
-     * @
-     */
-/*
-    @Test
-    public void testMapEvenListenerAcquireUsingLocked()
-    {
-        StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
-
-        String testKey = "TestKeyAcquireUsingLocked";
-        int noOfIterations = 50;
-
-        Consumer<String> consumer = (x) -> {
-            try (WriteContext<String, StringValue> writeContext = _chronicleMapStringValue.acquireUsingLocked(testKey, valueInstance))
-            {
-                valueInstance.setValue(x);
-            }
-        };
-
-        testIterateAndAlternate(
-                consumer,
-                consumer,
-                noOfIterations);
-    }
-*/
-
-    /**
-     * Test that event listener is triggered for every "acquireUsing" value update.
-     *
-     * @
-     */
-/*
-    @Test
-    public void testMapEvenListenerAcquireUsing()
-    {
-        StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
-
-        String testKey = "TestKeyAcquireUsing";
-        int noOfIterations = 50;
-
-        Consumer<String> consumer = (x) -> {
-            StringValue stringValue = _chronicleMapStringValue.acquireUsing(testKey, valueInstance);
-            stringValue.setValue(x);
-        };
-
-        testIterateAndAlternate(
-                consumer,
-                consumer,
-                noOfIterations);
-    }
-*/
-
-    /**
-     * Test that event listener is triggered for every "getUsing" value update.
-     *
-     * @
-     */
-/*
-    @Test
-    public void testMapEvenListenerGetUsing()
-    {
-        StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
-
-        String testKey = "TestKeyGetUsing";
-        int noOfIterations = 50;
-
-        _chronicleMapStringValue.put(testKey, valueInstance);
-
-        Consumer<String> consumer = (x) -> {
-            StringValue using = _chronicleMapStringValue.getUsing(testKey, valueInstance);
-            using.setValue(x);
-        };
-
-        testIterateAndAlternate(
-                consumer,
-                consumer,
-                noOfIterations);
-    }
-*/
 
     /**
      * Performs the given number of iterations and alternates between calling consumer1 and consumer2 passing

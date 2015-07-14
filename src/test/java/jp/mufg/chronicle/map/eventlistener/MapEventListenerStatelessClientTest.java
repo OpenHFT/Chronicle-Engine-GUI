@@ -1,11 +1,14 @@
 package jp.mufg.chronicle.map.eventlistener;
 
 import ddp.api.TestUtils;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAsset;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
 import org.junit.*;
 
@@ -13,23 +16,24 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-
-import static net.openhft.chronicle.core.Jvm.pause;
 
 /**
  * Created by daniels on 31/03/2015.
  */
-@Ignore("todo fix")
 public class MapEventListenerStatelessClientTest {
     private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
 
-    private ChronicleTestEventListener _chronicleTestEventListener;
-    private static final VanillaAssetTree clientAssetTree = new VanillaAssetTree().forRemoteAccess("localhost:0", WireType.TEXT);
+    private static VanillaAssetTree clientAssetTree;
     private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
 
-    private Map<String, String> _StringStringMap;
-    private Map<String, String> _StringStringMapClient;
+    private static ChronicleTestEventListener _chronicleTestEventListener;
+
+    private static Map<String, String> _StringStringMap;
+    private static Map<String, String> _StringStringMapClient;
+
+    private static ServerEndpoint serverEndpoint;
 
     private final String _value1 = new String(new char[2 << 20]);//;"TestValue1";
     private final String _value2;
@@ -44,33 +48,39 @@ public class MapEventListenerStatelessClientTest {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
+        TCPRegistry.createServerSocketChannelFor("MapEventListenerStatelessClientTest");
+        clientAssetTree = new VanillaAssetTree().forRemoteAccess("MapEventListenerStatelessClientTest", WireType.TEXT);
 
         VanillaAsset root = (VanillaAsset) serverAssetTree.root();
         root.enableTranslatingValuesToBytesStore();
         root.addLeafRule(AuthenticatedKeyValueStore.class, "use File Per Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(_mapBasePath), asset));
+
+        serverEndpoint = new ServerEndpoint("MapEventListenerStatelessClientTest", serverAssetTree, WireType.TEXT);
+
+        _StringStringMap = serverAssetTree.acquireMap("chronicleMapString?putReturnsNull=true", String.class, String.class);
+
+        _chronicleTestEventListener = new ChronicleTestEventListener();
+
+        _StringStringMapClient = clientAssetTree.acquireMap("chronicleMapString", String.class, String.class);
+        clientAssetTree.registerTopicSubscriber("chronicleMapString", String.class, String.class, _chronicleTestEventListener);
     }
 
     @Before
     public void setUp() {
         _noOfEventsTriggered.set(0);
 
-        _StringStringMap = serverAssetTree.acquireMap("chronicleMapString?putReturnsNull=true", String.class, String.class);
         _StringStringMap.clear();
 
-        _chronicleTestEventListener = new ChronicleTestEventListener();
-
-        // TODO change this to be a remote session.
-        _StringStringMapClient = clientAssetTree.acquireMap("chronicleMapString", String.class, String.class);
-        clientAssetTree.registerTopicSubscriber("chronicleMapString", String.class, String.class, _chronicleTestEventListener);
 
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDown() {
         _StringStringMap.clear();
-        serverAssetTree.close();
         clientAssetTree.close();
+        serverEndpoint.close();
+        serverAssetTree.close();
     }
 
     /**
@@ -202,6 +212,7 @@ public class MapEventListenerStatelessClientTest {
     private void testIterateAndAlternate(Consumer<String> consumer1, Consumer<String> consumer2, int noOfIterations) {
         long startTime = System.nanoTime();
         int count = 0;
+        int events = 0;
         while (System.nanoTime() - startTime < 5e9) {
             for (int i = 0; i < noOfIterations; i++) {
                 if (i % 2 == 0) {
@@ -209,20 +220,25 @@ public class MapEventListenerStatelessClientTest {
                 } else {
                     consumer2.accept(_value2);
                 }
+                final int finalEvents = events;
+                waitFor(() -> _noOfEventsTriggered.get() >= finalEvents);
+                events++;
             }
             count++;
         }
 
         double runtime = TestUtils.calculateAndPrintRuntime(startTime, count);
+        final int finalCount = count;
+        waitFor(() -> _noOfEventsTriggered.get() >= noOfIterations * (finalCount - 1));
 
-        //Test that 50 updates takes less than 1 second
-//        Assert.assertTrue(runtime < 1000000000);
-
-        for (int i = 0; i < 100; i++) {
-            pause(20);
-                if (_noOfEventsTriggered.get() >= noOfIterations * count) break;
-        }
         Assert.assertEquals(noOfIterations * count, _noOfEventsTriggered.get(), count);
+    }
+
+
+    private void waitFor(BooleanSupplier b) {
+        for (int i = 1; i <= 40; i++)
+            if (!b.getAsBoolean())
+                Jvm.pause(i * i);
     }
 
     static class ChronicleTestEventListener implements TopicSubscriber<String, String> {
