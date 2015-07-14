@@ -1,5 +1,6 @@
 package examples;
 
+import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.engine.api.EngineReplication;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.Publisher;
@@ -12,6 +13,7 @@ import net.openhft.chronicle.engine.fs.Clusters;
 import net.openhft.chronicle.engine.fs.HostDetails;
 import net.openhft.chronicle.engine.map.*;
 import net.openhft.chronicle.engine.pubsub.VanillaReference;
+import net.openhft.chronicle.engine.pubsub.VanillaTopicPublisher;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.session.VanillaSessionProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
@@ -23,6 +25,8 @@ import net.openhft.chronicle.wire.YamlLogging;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import static net.openhft.chronicle.engine.api.tree.RequestContext.requestContext;
 
@@ -35,12 +39,23 @@ public class ReplicationServerMain {
 
     public static final String REMOTE_HOSTNAME = System.getProperty("remote.host");
     public static final Integer HOST_ID = Integer.getInteger("hostId", 1);
+    private static Set<Closeable> closeables = new HashSet<>();
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         final Integer hostId = HOST_ID;
         String remoteHostname = REMOTE_HOSTNAME;
         ReplicationServerMain replicationServerMain = new ReplicationServerMain();
         replicationServerMain.create(hostId, remoteHostname);
+
+        try {
+            for (; ; ) {
+                Thread.sleep(10000);
+            }
+        } finally {
+            closeables.forEach(Closeable::close);
+        }
+
+
     }
 
 
@@ -50,16 +65,18 @@ public class ReplicationServerMain {
      * @throws IOException
      */
 
-    public void create(int identifier, String remoteHostname) throws IOException {
+    public ServerEndpoint create(int identifier, String remoteHostname) throws IOException {
         if (identifier < 0 || identifier > Byte.MAX_VALUE)
             throw new IllegalStateException();
-        create((byte) identifier, remoteHostname);
+        return create((byte) identifier, remoteHostname);
     }
 
-    private void create(byte identifier, String remoteHostname) throws IOException {
+    private ServerEndpoint create(byte identifier, String remoteHostname) throws IOException {
 
         YamlLogging.clientReads = true;
         YamlLogging.clientWrites = true;
+        YamlLogging.showServerWrites = true;
+        YamlLogging.showServerReads = true;
         WireType wireType = WireType.TEXT;
 
         System.out.println("using local hostid=" + identifier);
@@ -78,16 +95,22 @@ public class ReplicationServerMain {
         tree.root().addLeafRule(ObjectKVSSubscription.class, " vanilla", VanillaKVSSubscription::new);
 
         ThreadGroup threadGroup = new ThreadGroup("my-named-thread-group");
+        threadGroup.setDaemon(true);
         tree.root().addView(ThreadGroup.class, threadGroup);
 
-        tree.root().addView(EventLoop.class, new EventGroup(false));
+        tree.root().addView(EventLoop.class, new EventGroup(true));
         Asset asset = tree.root().acquireAsset("map");
         asset.addView(AuthenticatedKeyValueStore.class, new ChronicleMapKeyValueStore<>(requestContext("map"), asset));
 
         tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
                 VanillaKVSSubscription::new);
 
+
+        closeables.add(tree);
         ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + (5700 + identifier), tree, wireType);
+        closeables.add(serverEndpoint);
+
+        return serverEndpoint;
     }
 
 
@@ -115,3 +138,4 @@ public class ReplicationServerMain {
         tree.root().addView(Clusters.class, clusters);
     }
 }
+
