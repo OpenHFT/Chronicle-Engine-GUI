@@ -21,12 +21,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
+@Ignore("https://higherfrequencytrading.atlassian.net/browse/CHENT-67")
 public class ManyMapsTest {
     private static Map<String, Map<String, String>> _maps;
     private static String _mapBaseName = "ManyMapsTest-";
 
-//    private static int _noOfMaps = Boolean.getBoolean("quick") ? 100 : 1_100;
-        private static int _noOfMaps = 100;
+    //    private static int _noOfMaps = Boolean.getBoolean("quick") ? 100 : 1_100;
+    private static int _noOfMaps = 100;
     private static int _noOfKvps = 1_000;
     private static AssetTree assetTree = new VanillaAssetTree().forTesting();
 
@@ -45,7 +46,7 @@ public class ManyMapsTest {
 
         assetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         assetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
-                new ChronicleMapKeyValueStore(context.basePath(basePath+"/"+asset.name()).entries(1200), asset));
+                new ChronicleMapKeyValueStore(context.basePath(basePath + "/" + asset.name()).entries(1200), asset));
         _maps = Collections.synchronizedMap(new HashMap<>());
 
         System.out.println("Creating maps.");
@@ -75,12 +76,12 @@ public class ManyMapsTest {
     public static void tearDown() {
         assetTree.close();
     }
+
     /**
-     * Test that the number of maps created exist.
-     * Test that the number of key-value-pairs in the map matches the expected.
-     * Test that all the keys in this map contains the map name (ie. no other map's keys overlap).
-     * Test that all the values in this map contains the map name (ie. no other map's values overlap).
-     *
+     * Test that the number of maps created exist. Test that the number of key-value-pairs in the
+     * map matches the expected. Test that all the keys in this map contains the map name (ie. no
+     * other map's keys overlap). Test that all the values in this map contains the map name (ie. no
+     * other map's values overlap).
      */
     @Test
     public void testKeysAndValuesInEachMap() {
@@ -102,8 +103,8 @@ public class ManyMapsTest {
     }
 
     /**
-     * Test that having a large number of maps and TopicSubscriptions for each of them.
-     * Test that subscribers only have events triggered for the given map that they subscribe to.
+     * Test that having a large number of maps and TopicSubscriptions for each of them. Test that
+     * subscribers only have events triggered for the given map that they subscribe to.
      *
      * @
      */
@@ -144,8 +145,8 @@ public class ManyMapsTest {
     }
 
     /**
-     * Test creating an engine with an underlying Chronicle Map store where the base
-     * path is specified as a folder that exist.
+     * Test creating an engine with an underlying Chronicle Map store where the base path is
+     * specified as a folder that exist.
      *
      * @
      */
@@ -157,8 +158,8 @@ public class ManyMapsTest {
     }
 
     /**
-     * Test creating an engine with an underlying Chronicle Map store where the base path is specified
-     * as a full path to a file that does not exist.
+     * Test creating an engine with an underlying Chronicle Map store where the base path is
+     * specified as a full path to a file that does not exist.
      *
      * @
      */
@@ -170,7 +171,8 @@ public class ManyMapsTest {
     }
 
     /**
-     * Create an engine using a ChronicleMapKeyValueStore as underlying. Get two maps and put values into them.
+     * Create an engine using a ChronicleMapKeyValueStore as underlying. Get two maps and put values
+     * into them.
      *
      * @param basePath for key value store
      */
@@ -239,8 +241,8 @@ public class ManyMapsTest {
     }
 
     /**
-     * Checks that all updates triggered are for the map specified in the constructor and increments the number of
-     * updates.
+     * Checks that all updates triggered are for the map specified in the constructor and increments
+     * the number of updates.
      */
     class EventsForMapSubscriber implements TopicSubscriber<String, String> {
         private String _mapName;
