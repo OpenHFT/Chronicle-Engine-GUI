@@ -2,13 +2,14 @@ package musiverification;
 
 import ddp.api.TestUtils;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
+import net.openhft.chronicle.engine.api.tree.AssetTree;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
 import net.openhft.chronicle.engine.map.VanillaMapView;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import org.junit.*;
 
 import java.io.IOException;
@@ -20,14 +21,14 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-@Ignore("Long running test")
 public class ManyMapsTest {
     private static Map<String, Map<String, String>> _maps;
-    private static String _mapBaseName = "Test-Map-";
+    private static String _mapBaseName = "ManyMapsTest-";
 
-    private static int _noOfMaps = Boolean.getBoolean("quick") ? 100 : 1_100;
-    //    private static int _noOfMaps = 300;
+//    private static int _noOfMaps = Boolean.getBoolean("quick") ? 100 : 1_100;
+        private static int _noOfMaps = 100;
     private static int _noOfKvps = 1_000;
+    private static AssetTree assetTree = new VanillaAssetTree().forTesting();
 
     @BeforeClass
     public static void setUp() throws IOException {
@@ -42,9 +43,9 @@ public class ManyMapsTest {
             }
         });
 
-        Chassis.assetTree().root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
-        Chassis.assetTree().root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
-                new ChronicleMapKeyValueStore(context.basePath(basePath).entries(1200), asset));
+        assetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
+        assetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
+                new ChronicleMapKeyValueStore(context.basePath(basePath+"/"+asset.name()).entries(1200), asset));
         _maps = Collections.synchronizedMap(new HashMap<>());
 
         System.out.println("Creating maps.");
@@ -52,7 +53,7 @@ public class ManyMapsTest {
         IntStream.rangeClosed(1, _noOfMaps).parallel().forEach(i -> {
             String mapName = _mapBaseName + i;
 
-            Map<String, String> map = Chassis.acquireMap(mapName, String.class, String.class);
+            Map<String, String> map = assetTree.acquireMap(mapName, String.class, String.class);
 
             for (int j = 1; j <= _noOfKvps; j++) {
                 map.put(TestUtils.getKey(mapName, j), TestUtils.getValue(mapName, j));
@@ -70,13 +71,16 @@ public class ManyMapsTest {
 //        createAndFillMaps();
     }
 
+    @AfterClass
+    public static void tearDown() {
+        assetTree.close();
+    }
     /**
      * Test that the number of maps created exist.
      * Test that the number of key-value-pairs in the map matches the expected.
      * Test that all the keys in this map contains the map name (ie. no other map's keys overlap).
      * Test that all the values in this map contains the map name (ie. no other map's values overlap).
      *
-     * @
      */
     @Test
     public void testKeysAndValuesInEachMap() {
@@ -111,7 +115,7 @@ public class ManyMapsTest {
             EventsForMapSubscriber eventsForMapSubscriber = new EventsForMapSubscriber(key);
             eventsForMapSubscriberMap.put(key, eventsForMapSubscriber);
 
-            Chassis.registerTopicSubscriber(key + "?bootstrap=false", String.class, String.class, eventsForMapSubscriber);
+            assetTree.registerTopicSubscriber(key + "?bootstrap=false", String.class, String.class, eventsForMapSubscriber);
         }
 
         //This gets all of the maps an re-puts all values
@@ -123,7 +127,7 @@ public class ManyMapsTest {
 
             Assert.assertEquals(_noOfKvps, eventsForMapSubscriber.getNoOfEvents());
 
-            Chassis.unregisterTopicSubscriber(key, eventsForMapSubscriber);
+            assetTree.unregisterTopicSubscriber(key, eventsForMapSubscriber);
         }
     }
 
@@ -174,10 +178,8 @@ public class ManyMapsTest {
         String map1Name = "MyMap1";
         String map2Name = "MyMap2";
 
-        Chassis.resetChassis();
-
         //Get map1 - expect 1 file to be created
-        Map<String, String> map1 = Chassis.acquireMap(map1Name, String.class, String.class);
+        Map<String, String> map1 = assetTree.acquireMap(map1Name, String.class, String.class);
 
         String key1 = "KeyMap1";
         String value1 = "ValueMap1";
@@ -187,7 +189,7 @@ public class ManyMapsTest {
         Assert.assertEquals(value1, map1.get(key1));
 
         //Get map2 - expect a second file to be created
-        Map<String, String> map2 = Chassis.acquireMap(map2Name, String.class, String.class);
+        Map<String, String> map2 = assetTree.acquireMap(map2Name, String.class, String.class);
 
         String key2 = "KeyMap2";
         String value2 = "ValueMap2";
@@ -208,14 +210,14 @@ public class ManyMapsTest {
         String testKey = "TestKey";
         String testValue = "TestValue";
 
-        Map<String, Map> map = Chassis.acquireMap(mapName, String.class, Map.class);
+        Map<String, Map> map = assetTree.acquireMap(mapName, String.class, Map.class);
 
         Map<String, String> mapInMap = new HashMap<>();
         mapInMap.put(testKey, testValue);
 
         map.put(testKey, mapInMap);
 
-        Map<String, Map> newMapRef = Chassis.acquireMap(mapName, String.class, Map.class);
+        Map<String, Map> newMapRef = assetTree.acquireMap(mapName, String.class, Map.class);
 
         Map<String, String> newMapInMapRef = newMapRef.get(testKey);
         String valueFromMap = newMapInMapRef.get(testKey);
