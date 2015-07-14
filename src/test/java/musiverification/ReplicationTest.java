@@ -93,6 +93,8 @@ public class ReplicationTest {
         tree3.close();
         TCPRegistry.reset();
         // TODO TCPRegistery.assertAllServersStopped();
+        YamlLogging.clientWrites = false;
+        YamlLogging.clientReads = false;
     }
 
     @NotNull
