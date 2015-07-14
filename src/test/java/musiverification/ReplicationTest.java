@@ -21,7 +21,10 @@ import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 import net.openhft.lang.thread.NamedThreadFactory;
 import org.jetbrains.annotations.NotNull;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -115,7 +118,7 @@ public class ReplicationTest {
     }
 
 
-    @Ignore("CE-109 still fails sometimes")
+    //    @Ignore("CE-109 still fails sometimes")
     @Test
     public void test() throws InterruptedException {
 
