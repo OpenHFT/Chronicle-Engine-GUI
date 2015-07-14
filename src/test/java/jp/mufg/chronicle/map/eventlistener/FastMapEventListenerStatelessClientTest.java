@@ -23,7 +23,7 @@ import static net.openhft.chronicle.core.Jvm.pause;
 /**
  * Created by Peter Lawrey
  */
-@Ignore("CHENT-49")
+@Ignore("CHENT-49 attempts to use optimisations which are not ready")
 public class FastMapEventListenerStatelessClientTest {
     private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
 
