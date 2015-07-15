@@ -93,6 +93,8 @@ public class ReplicationTest {
         tree3.close();
         TCPRegistry.reset();
         // TODO TCPRegistery.assertAllServersStopped();
+        YamlLogging.clientWrites = false;
+        YamlLogging.clientReads = false;
     }
 
     @NotNull
@@ -116,6 +118,7 @@ public class ReplicationTest {
     }
 
 
+    //    @Ignore("CE-109 still fails sometimes")
     @Test
     public void test() throws InterruptedException {
 
@@ -136,7 +139,7 @@ public class ReplicationTest {
         map2.put("hello2", "world2");
         map3.put("hello3", "world3");
 
-        for (int i = 1; i <= 30; i++) {
+        for (int i = 1; i <= 50; i++) {
             if (map1.size() == 3 && map2.size() == 3 && map3.size() == 3)
                 break;
             Jvm.pause(200);

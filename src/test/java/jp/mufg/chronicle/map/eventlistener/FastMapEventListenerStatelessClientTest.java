@@ -5,8 +5,10 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAsset;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
 import org.junit.*;
 
@@ -19,19 +21,21 @@ import java.util.function.Consumer;
 import static net.openhft.chronicle.core.Jvm.pause;
 
 /**
- * Created by daniels on 31/03/2015.
+ * Created by Peter Lawrey
  */
-@Ignore("todo fix")
+@Ignore("CHENT-49 attempts to use optimisations which are not ready")
 public class FastMapEventListenerStatelessClientTest {
     private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
 
-    private static final VanillaAssetTree clientAssetTree = new VanillaAssetTree().forRemoteAccess("localhost:0", WireType.TEXT);
+    private static VanillaAssetTree clientAssetTree;
     private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
 
-    private ChronicleTestEventListener _chronicleTestEventListener;
+    private static ChronicleTestEventListener _chronicleTestEventListener;
 
-    private Map<String, BytesStore> _StringStringMap;
-    private Map<String, BytesStore> _StringStringMapClient;
+    private static Map<String, BytesStore> _StringStringMap;
+    private static Map<String, BytesStore> _StringStringMapClient;
+
+    private static ServerEndpoint serverEndpoint;
 
     private final BytesStore _value1 = BytesStore.wrap(ByteBuffer.allocateDirect(2 << 20));//;"TestValue1";
     private final BytesStore _value2 = BytesStore.wrap(ByteBuffer.allocateDirect(2_000_000));//;"TestValue2";
@@ -43,31 +47,36 @@ public class FastMapEventListenerStatelessClientTest {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
-
-        VanillaAsset root = (VanillaAsset) serverAssetTree.root();
+        TCPRegistry.createServerSocketChannelFor("FastMapEventListenerStatelessClientTest");
+        clientAssetTree = new VanillaAssetTree().forRemoteAccess("FastMapEventListenerStatelessClientTest", WireType.TEXT);
+        VanillaAsset root = serverAssetTree.root();
+        root.enableTranslatingValuesToBytesStore();
         root.addLeafRule(AuthenticatedKeyValueStore.class, "use File Per Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(_mapBasePath), asset));
-    }
 
-    @Before
-    public void setUp() {
-        _noOfEventsTriggered.set(0);
+        serverEndpoint = new ServerEndpoint("FastMapEventListenerStatelessClientTest", serverAssetTree, WireType.TEXT);
+
 
         _StringStringMap = serverAssetTree.acquireMap("chronicleMapString?putReturnsNull=true", String.class, BytesStore.class);
-        _StringStringMap.clear();
 
         _chronicleTestEventListener = new ChronicleTestEventListener();
 
-        // TODO change this to be a remote session.
         _StringStringMapClient = clientAssetTree.acquireMap("chronicleMapString", String.class, BytesStore.class);
         clientAssetTree.registerTopicSubscriber("chronicleMapString", String.class, BytesStore.class, _chronicleTestEventListener);
 
     }
 
-    @After
-    public void tearDown() {
+    @Before
+    public void setUp() {
+        _noOfEventsTriggered.set(0);
+        _StringStringMap.clear();
+    }
+
+    @AfterClass
+    public static void tearDown() {
         _StringStringMap.clear();
         clientAssetTree.close();
+        serverEndpoint.close();
         serverAssetTree.close();
     }
 
@@ -107,87 +116,6 @@ public class FastMapEventListenerStatelessClientTest {
                 noOfIterations);
     }
 
-    /**
-     * Test that event listener is triggered for every "acquireUsingLocked" value update.
-     *
-     * @
-     */
-/*
-    @Test
-    public void testMapEvenListenerAcquireUsingLocked()
-    {
-        StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
-
-        String testKey = "TestKeyAcquireUsingLocked";
-        int noOfIterations = 50;
-
-        Consumer<String> consumer = (x) -> {
-            try (WriteContext<String, StringValue> writeContext = _chronicleMapStringValue.acquireUsingLocked(testKey, valueInstance))
-            {
-                valueInstance.setValue(x);
-            }
-        };
-
-        testIterateAndAlternate(
-                consumer,
-                consumer,
-                noOfIterations);
-    }
-*/
-
-    /**
-     * Test that event listener is triggered for every "acquireUsing" value update.
-     *
-     * @
-     */
-/*
-    @Test
-    public void testMapEvenListenerAcquireUsing()
-    {
-        StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
-
-        String testKey = "TestKeyAcquireUsing";
-        int noOfIterations = 50;
-
-        Consumer<String> consumer = (x) -> {
-            StringValue stringValue = _chronicleMapStringValue.acquireUsing(testKey, valueInstance);
-            stringValue.setValue(x);
-        };
-
-        testIterateAndAlternate(
-                consumer,
-                consumer,
-                noOfIterations);
-    }
-*/
-
-    /**
-     * Test that event listener is triggered for every "getUsing" value update.
-     *
-     * @
-     */
-/*
-    @Test
-    public void testMapEvenListenerGetUsing()
-    {
-        StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
-
-        String testKey = "TestKeyGetUsing";
-        int noOfIterations = 50;
-
-        _chronicleMapStringValue.put(testKey, valueInstance);
-
-        Consumer<String> consumer = (x) -> {
-            StringValue using = _chronicleMapStringValue.getUsing(testKey, valueInstance);
-            using.setValue(x);
-        };
-
-        testIterateAndAlternate(
-                consumer,
-                consumer,
-                noOfIterations);
-    }
-*/
 
     /**
      * Performs the given number of iterations and alternates between calling consumer1 and consumer2 passing
@@ -218,7 +146,7 @@ public class FastMapEventListenerStatelessClientTest {
 
         for (int i = 0; i < 100; i++) {
             pause(20);
-                if (_noOfEventsTriggered.get() >= noOfIterations * count) break;
+            if (_noOfEventsTriggered.get() >= noOfIterations * count) break;
         }
         Assert.assertEquals(noOfIterations * count, _noOfEventsTriggered.get(), count);
     }

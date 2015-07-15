@@ -33,7 +33,7 @@ public class BinaryWireMain {
         int port = 8088;
 
         VanillaAssetTree assetTree = new VanillaAssetTree().forTesting(false);
-        final ServerEndpoint serverEndpoint = new ServerEndpoint("localhost:" + port, assetTree, WIRE_TYPE);
+        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree, WIRE_TYPE);
 
         if (args.length == 1 && args[0].compareTo("-debug") == 0)
         {

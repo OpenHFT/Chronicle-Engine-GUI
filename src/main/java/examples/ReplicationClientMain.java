@@ -1,21 +1,30 @@
 package examples;
 
-import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.api.pubsub.*;
-import net.openhft.chronicle.engine.api.session.*;
-import net.openhft.chronicle.engine.api.tree.*;
-import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.map.remote.*;
-import net.openhft.chronicle.engine.session.*;
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.network.connection.*;
-import net.openhft.chronicle.threads.*;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.engine.api.map.MapEvent;
+import net.openhft.chronicle.engine.api.map.MapView;
+import net.openhft.chronicle.engine.api.pubsub.Publisher;
+import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
+import net.openhft.chronicle.engine.api.session.SessionProvider;
+import net.openhft.chronicle.engine.api.tree.Asset;
+import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
+import net.openhft.chronicle.engine.map.ObjectKVSSubscription;
+import net.openhft.chronicle.engine.map.VanillaMapView;
+import net.openhft.chronicle.engine.map.remote.RemoteKVSSubscription;
+import net.openhft.chronicle.engine.map.remote.RemoteKeyValueStore;
+import net.openhft.chronicle.engine.pubsub.RemoteReference;
+import net.openhft.chronicle.engine.pubsub.RemoteTopicPublisher;
+import net.openhft.chronicle.engine.session.VanillaSessionProvider;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.connection.TcpChannelHub;
+import net.openhft.chronicle.threads.EventGroup;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.YamlLogging;
 
-import java.io.*;
-import java.util.concurrent.*;
-import java.util.function.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.function.Function;
 
 import static net.openhft.chronicle.engine.api.tree.RequestContext.requestContext;
 
@@ -125,8 +134,7 @@ public class ReplicationClientMain
     }
 
     private static MapView<String, String, String> create(String nameName, Integer hostId, String connectUri,
-                                                          BlockingQueue<MapEvent> q, Function<Bytes, Wire> wireType)
-    {
+                                                          BlockingQueue<MapEvent> q, Function<Bytes, Wire> wireType) {
         final VanillaAssetTree tree = new VanillaAssetTree(hostId);
 
         final Asset asset = tree.root().acquireAsset(nameName);
@@ -138,7 +146,7 @@ public class ReplicationClientMain
 
         tree.root().addWrappingRule(MapView.class, "mapv view", VanillaMapView::new, AuthenticatedKeyValueStore.class);
         tree.root().addWrappingRule(TopicPublisher.class, " topic publisher", RemoteTopicPublisher::new, MapView.class);
-        tree.root().addWrappingRule(Publisher.class, "publisher", RemotePublisher::new, MapView.class);
+        tree.root().addLeafRule(Publisher.class, "publisher", RemoteReference::new);
 
         EventGroup eventLoop = new EventGroup(true);
         SessionProvider sessionProvider = new VanillaSessionProvider();

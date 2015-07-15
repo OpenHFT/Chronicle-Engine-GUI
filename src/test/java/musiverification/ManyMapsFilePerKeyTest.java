@@ -2,13 +2,15 @@ package musiverification;
 
 import ddp.api.TestUtils;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.engine.Chassis;
 import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
-import net.openhft.chronicle.engine.tree.VanillaAsset;
-import org.junit.*;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -21,21 +23,21 @@ import java.util.stream.IntStream;
 fs.inotify.max_user_watches = 1500000
 fs.inotify.max_user_instances = 2000
  */
-@Ignore("Only run as required")
 public class ManyMapsFilePerKeyTest {
     private static Map<String, Map<String, String>> _maps;
-    private static String _mapBaseName = "Test-Map-";
+    private static String _mapBaseName = "ManyMapsFilePerKeyTest-";
 
     //    private static int _noOfMaps = 1_100;
     private static int _noOfMaps = 100;
     private static int _noOfKvps = 1_000;
 
+    private static VanillaAssetTree assetTree = new VanillaAssetTree().forTesting();
+
     @BeforeClass
     public static void setUp() throws IOException {
+        assetTree.root().enableTranslatingValuesToBytesStore();
 
-        ((VanillaAsset) Chassis.assetTree().root()).enableTranslatingValuesToBytesStore();
-
-        Chassis.assetTree().root().addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
+        assetTree.root().addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(OS.TARGET + "/fpk"), asset));
         _maps = Collections.synchronizedMap(new HashMap<>());
 
@@ -44,7 +46,7 @@ public class ManyMapsFilePerKeyTest {
         IntStream.rangeClosed(1, _noOfMaps).forEach(i -> {
             String mapName = _mapBaseName + i;
 
-            Map<String, String> map = Chassis.acquireMap(mapName, String.class, String.class);
+            Map<String, String> map = assetTree.acquireMap(mapName, String.class, String.class);
 
             for (int j = 1; j <= _noOfKvps; j++) {
                 map.put(TestUtils.getKey(mapName, j), TestUtils.getValue(mapName, j));
@@ -57,9 +59,9 @@ public class ManyMapsFilePerKeyTest {
         System.out.println("... " + _noOfMaps + " Done.");
     }
 
-    @Before
-    public void initTest() {
-//        createAndFillMaps();
+    @AfterClass
+    public static void tearDown() {
+        assetTree.close();
     }
 
     /**
@@ -103,7 +105,7 @@ public class ManyMapsFilePerKeyTest {
             EventsForMapSubscriber eventsForMapSubscriber = new EventsForMapSubscriber(key);
             eventsForMapSubscriberMap.put(key, eventsForMapSubscriber);
 
-            Chassis.registerTopicSubscriber(key + "?bootstrap=false", String.class, String.class, eventsForMapSubscriber);
+            assetTree.registerTopicSubscriber(key + "?bootstrap=false", String.class, String.class, eventsForMapSubscriber);
         });
 
         //This gets all of the maps an re-puts all values
@@ -115,20 +117,8 @@ public class ManyMapsFilePerKeyTest {
 
             Assert.assertEquals(_noOfKvps, eventsForMapSubscriber.getNoOfEvents());
 
-            Chassis.unregisterTopicSubscriber(key, eventsForMapSubscriber);
+            assetTree.unregisterTopicSubscriber(key, eventsForMapSubscriber);
         });
-    }
-
-    @Test
-    @Ignore("todo")
-    public void testConnectToMultipleMapsUsingTheSamePort() {
-        throw new UnsupportedOperationException("DS test that we can connect and interact with a large number of maps on the same port");
-    }
-
-    @Test
-    @Ignore("todo")
-    public void testMapReplication() {
-        throw new UnsupportedOperationException("DS test that maps are automatically replicated on one or more failover servers, with each map on a server being uniquely associated with given name");
     }
 
     /**
@@ -166,10 +156,8 @@ public class ManyMapsFilePerKeyTest {
         String map1Name = "MyMap1";
         String map2Name = "MyMap2";
 
-        Chassis.resetChassis();
-
         //Get map1 - expect 1 file to be created
-        Map<String, String> map1 = Chassis.acquireMap(map1Name, String.class, String.class);
+        Map<String, String> map1 = assetTree.acquireMap(map1Name, String.class, String.class);
 
         String key1 = "KeyMap1";
         String value1 = "ValueMap1";
@@ -179,7 +167,7 @@ public class ManyMapsFilePerKeyTest {
         Assert.assertEquals(value1, map1.get(key1));
 
         //Get map2 - expect a second file to be created
-        Map<String, String> map2 = Chassis.acquireMap(map2Name, String.class, String.class);
+        Map<String, String> map2 = assetTree.acquireMap(map2Name, String.class, String.class);
 
         String key2 = "KeyMap2";
         String value2 = "ValueMap2";
@@ -189,31 +177,6 @@ public class ManyMapsFilePerKeyTest {
         Assert.assertEquals(value2, map2.get(key2));
     }
 
-    /**
-     * Test that we can put a map as value and get it back and get values from it.
-     *
-     * @
-     */
-    @Test
-    public void testSupportForNestedMaps() {
-        String mapName = "MapOfMaps";
-        String testKey = "TestKey";
-        String testValue = "TestValue";
-
-        Map<String, Map> map = Chassis.acquireMap(mapName, String.class, Map.class);
-
-        Map<String, String> mapInMap = new HashMap<>();
-        mapInMap.put(testKey, testValue);
-
-        map.put(testKey, mapInMap);
-
-        Map<String, Map> newMapRef = Chassis.acquireMap(mapName, String.class, Map.class);
-
-        Map<String, String> newMapInMapRef = newMapRef.get(testKey);
-        String valueFromMap = newMapInMapRef.get(testKey);
-
-        Assert.assertEquals(testValue, valueFromMap);
-    }
 
     /**
      * Creates configured number of maps and fills them with configured number of key/value pairs
