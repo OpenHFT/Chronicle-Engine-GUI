@@ -122,7 +122,8 @@ public class ReplicationClientTest {
         EventGroup eventLoop = new EventGroup(true);
         SessionProvider sessionProvider = new VanillaSessionProvider();
 
-        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, connectUri, eventLoop, wireType));
+        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, connectUri,
+                eventLoop, wireType, ""));
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
         MapView<String, String, String> result = tree.acquireMap(nameName, String.class, String.class);
