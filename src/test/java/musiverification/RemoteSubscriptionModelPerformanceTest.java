@@ -181,10 +181,9 @@ public class RemoteSubscriptionModelPerformanceTest {
         waitFor(() -> events == topicSubscriber.getNoOfEvents().get());
         assertEquals(events, topicSubscriber.getNoOfEvents().get());
 
-        // TODO CHENT-49 net.openhft.chronicle.engine.server.internal.MapWireHandler - There is no subscription to unsubscribe
-        // clientAssetTree.unregisterTopicSubscriber(_mapName, topicSubscriber);
-        // waitFor(() -> 0 == subscription.topicSubscriberCount());
-        // assertEquals(0, subscription.topicSubscriberCount());
+        clientAssetTree.unregisterTopicSubscriber(_mapName, topicSubscriber);
+        waitFor(() -> 0 == subscription.topicSubscriberCount());
+        assertEquals(0, subscription.topicSubscriberCount());
     }
 
     /**
