@@ -28,13 +28,11 @@ import java.util.function.Function;
 
 import static net.openhft.chronicle.engine.api.tree.RequestContext.requestContext;
 
-public class ReplicationClientMain
-{
+public class ReplicationClientMain {
     private static MapView<String, String, String> map1;
     private static MapView<String, String, String> map2;
 
-    public static void main(String[] args) throws Exception
-    {
+    public static void main(String[] args) throws Exception {
         YamlLogging.clientReads = true;
         YamlLogging.clientWrites = true;
         WireType wireType = WireType.TEXT;
@@ -62,41 +60,35 @@ public class ReplicationClientMain
 
         System.out.println("Checking queue1...");
 
-        if(!"InsertedEvent{assetName='/map', key=hello, value=world}".equals(q1.take().toString()))
-        {
+        if (!"InsertedEvent{assetName='/map', key=hello, value=world}".equals(q1.take().toString())) {
             throw new Exception("Doesn't match 1...");
         }
 
         System.out.println("Checking queue2...");
 
-        if(!"InsertedEvent{assetName='/map', key=hello, value=world}".equals(q2.take().toString()))
-        {
+        if (!"InsertedEvent{assetName='/map', key=hello, value=world}".equals(q2.take().toString())) {
             throw new Exception("Doesn't match 2...");
         }
 
         System.out.println("Checking map1...");
 
         //Test map 1 content
-        if(map1.size() != 1)
-        {
+        if (map1.size() != 1) {
             throw new Exception("Doesn't match 3...");
         }
 
-        if(!"world".equals(map1.get("hello")))
-        {
+        if (!"world".equals(map1.get("hello"))) {
             throw new Exception("Doesn't match 4...");
         }
 
         System.out.println("Checking map2...");
 
         //Test map 2 content
-        if(map2.size() != 1)
-        {
+        if (map2.size() != 1) {
             throw new Exception("Doesn't match 5...");
         }
 
-        if(!"world".equals(map2.get("hello")))
-        {
+        if (!"world".equals(map2.get("hello"))) {
             throw new Exception("Doesn't match 6...");
         }
 
@@ -106,27 +98,23 @@ public class ReplicationClientMain
 
         System.out.println("Checking queues again for remove event...");
 
-        if(!"RemovedEvent{assetName='/map', key=hello, oldValue=world}".equals(q1.take().toString()))
-        {
+        if (!"RemovedEvent{assetName='/map', key=hello, oldValue=world}".equals(q1.take().toString())) {
             throw new Exception("Doesn't match 7...");
         }
 
-        if(!"RemovedEvent{assetName='/map', key=hello, oldValue=world}".equals(q2.take().toString()))
-        {
+        if (!"RemovedEvent{assetName='/map', key=hello, oldValue=world}".equals(q2.take().toString())) {
             throw new Exception("Doesn't match 8...");
         }
 
         System.out.println("Checking map1 for null...");
 
-        if(map1.get("hello") != null)
-        {
+        if (map1.get("hello") != null) {
             throw new Exception("Doesn't match 8...");
         }
 
         System.out.println("Checking map2 for null...");
 
-        if(map2.get("hello") != null)
-        {
+        if (map2.get("hello") != null) {
             throw new Exception("Doesn't match 9...");
         }
 
@@ -151,7 +139,8 @@ public class ReplicationClientMain
         EventGroup eventLoop = new EventGroup(true);
         SessionProvider sessionProvider = new VanillaSessionProvider();
 
-        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, connectUri, eventLoop, wireType));
+        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, connectUri,
+                eventLoop, wireType, ""));
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
         MapView<String, String, String> result = tree.acquireMap(nameName, String.class, String.class);
