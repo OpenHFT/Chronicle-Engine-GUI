@@ -179,6 +179,8 @@ public class ManyMapsTest {
 //            SerializablePredicate<String> stringPredicate1 = v -> !v.contains(key);
 //            Assert.assertFalse(map.values().stream().anyMatch(stringPredicate1));
         }
+        clientAssetTree.close();
+        serverEndpoint.close();
     }
 
     @Test
