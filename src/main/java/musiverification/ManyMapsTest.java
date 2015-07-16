@@ -110,8 +110,6 @@ public class ManyMapsTest {
     /**
      * Test that having a large number of maps and TopicSubscriptions for each of them. Test that
      * subscribers only have events triggered for the given map that they subscribe to.
-     *
-     * @
      */
     @Test
     public void testManyMapsManyTopicListeners() {
@@ -192,8 +190,6 @@ public class ManyMapsTest {
     /**
      * Test creating an engine with an underlying Chronicle Map store where the base path is
      * specified as a folder that exist.
-     *
-     * @
      */
     @Test
     public void testChronicleMapCreationFolderBasePath() {
@@ -205,8 +201,6 @@ public class ManyMapsTest {
     /**
      * Test creating an engine with an underlying Chronicle Map store where the base path is
      * specified as a full path to a file that does not exist.
-     *
-     * @
      */
     @Test
     public void testChronicleMapCreationFileBasePath() {
@@ -248,8 +242,6 @@ public class ManyMapsTest {
 
     /**
      * Test that we can put a map as value and get it back and get values from it.
-     *
-     * @
      */
     @Test
     public void testSupportForNestedMaps() {

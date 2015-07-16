@@ -23,7 +23,7 @@ public class EntitlementsManager
 
     /**
      * Create manager with entitlements map.
-     * @param entitlementsCache Map of maps with entitlements. Map<UserId, Map<DataCacheName, Entitlement>>
+     * @param entitlementsCache Map of maps with entitlements.
      */
     public EntitlementsManager(Map<String, Map<String, Entitlement>> entitlementsCache)
     {

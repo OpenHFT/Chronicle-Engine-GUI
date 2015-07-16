@@ -69,8 +69,6 @@ public class ManyMapsFilePerKeyTest {
      * Test that the number of key-value-pairs in the map matches the expected.
      * Test that all the keys in this map contains the map name (ie. no other map's keys overlap).
      * Test that all the values in this map contains the map name (ie. no other map's values overlap).
-     *
-     * @
      */
     @Test
     public void testKeysAndValuesInEachMap() {
@@ -94,8 +92,6 @@ public class ManyMapsFilePerKeyTest {
     /**
      * Test that having a large number of maps and TopicSubscriptions for each of them.
      * Test that subscribers only have events triggered for the given map that they subscribe to.
-     *
-     * @
      */
     @Test
     public void testManyMapsManyTopicListeners() {
@@ -124,8 +120,6 @@ public class ManyMapsFilePerKeyTest {
     /**
      * Test creating an engine with an underlying Chronicle Map store where the base
      * path is specified as a folder that exist.
-     *
-     * @
      */
     @Test
     public void testChronicleMapCreationFolderBasePath() {
@@ -137,8 +131,6 @@ public class ManyMapsFilePerKeyTest {
     /**
      * Test creating an engine with an underlying Chronicle Map store where the base path is specified
      * as a full path to a file that does not exist.
-     *
-     * @
      */
     @Test
     public void testChronicleMapCreationFileBasePath() {

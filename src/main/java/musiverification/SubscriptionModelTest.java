@@ -95,8 +95,6 @@ public class SubscriptionModelTest {
     /**
      * Test subscribing to updates on a specific key. Perform initial puts (insert). Perform more
      * puts (updates). Remove the key.
-     *
-     * @
      */
     @Test
     public void testSubscriptionSpecificKey() throws InvalidSubscriberException {
@@ -154,8 +152,6 @@ public class SubscriptionModelTest {
     /**
      * Test that we get a key event for every insert, update, remove action performed on a key. Test
      * order of events.
-     *
-     * @
      */
     @Test
     public void testSubscriptionKeyEvents() throws InvalidSubscriberException {
@@ -223,8 +219,6 @@ public class SubscriptionModelTest {
      * Test that a number of updates for a number of keys (all intermingled) all trigger events on
      * the topic in the order in which the events take place. <p> Test that removing all of the keys
      * trigger ordered events where the value is null
-     *
-     * @
      */
     @Test
     public void testSubscriptionOnMap() throws InvalidSubscriberException {
@@ -272,8 +266,6 @@ public class SubscriptionModelTest {
     /**
      * Test event listeners on maps inserted, updated, removed are triggered correctly when expected
      * and in the correct order.
-     *
-     * @
      */
     @Test
     public void testMapAddedKeyListener() throws InvalidSubscriberException {
