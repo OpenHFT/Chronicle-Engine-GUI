@@ -28,7 +28,7 @@ public class ManyMapsFilePerKeyTest {
     private static String _mapBaseName = "ManyMapsFilePerKeyTest-";
 
     //    private static int _noOfMaps = 1_100;
-    private static int _noOfMaps = 100;
+    private static int _noOfMaps = Boolean.getBoolean("quick") ? 10 : 100;
     private static int _noOfKvps = 1_000;
 
     private static VanillaAssetTree assetTree = new VanillaAssetTree().forTesting();

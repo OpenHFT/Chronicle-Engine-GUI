@@ -34,7 +34,7 @@ public class SubscriptionModelPerformanceTest {
 
     //TODO DS test having the server side on another machine
     private static final int _noOfPuts = 50;
-    private static final int _noOfRunsToAverage = 10;
+    private static final int _noOfRunsToAverage = Boolean.getBoolean("quick") ? 2 : 10;
     // TODO CHENT-49
     private static final long _secondInNanos = 6_000_000_000L;
     private static String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";

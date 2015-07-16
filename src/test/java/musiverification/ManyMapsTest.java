@@ -2,7 +2,6 @@ package musiverification;
 
 import ddp.api.TestUtils;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.util.SerializablePredicate;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
@@ -17,14 +16,12 @@ import net.openhft.chronicle.wire.WireType;
 import org.junit.*;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 public class ManyMapsTest {
@@ -33,7 +30,7 @@ public class ManyMapsTest {
     private static String _mapBaseName = "ManyMapsTest-";
 
     //    private static int _noOfMaps = Boolean.getBoolean("quick") ? 100 : 1_100;
-    private static int _noOfMaps = 100;
+    private static int _noOfMaps = Boolean.getBoolean("quick") ? 10 : 100;
     private static int _noOfKvps = 1_000;
     private static AssetTree assetTree = new VanillaAssetTree().forTesting();
 

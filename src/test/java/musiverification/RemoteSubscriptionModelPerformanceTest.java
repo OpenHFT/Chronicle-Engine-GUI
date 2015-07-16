@@ -33,6 +33,7 @@ import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.*;
 
 import java.io.File;
@@ -52,7 +53,7 @@ public class RemoteSubscriptionModelPerformanceTest {
 
     //TODO DS test having the server side on another machine
     private static final int _noOfPuts = 50;
-    private static final int _noOfRunsToAverage = 10;
+    private static final int _noOfRunsToAverage = Boolean.getBoolean("quick") ? 2 : 10;
     // TODO Fix so that it is 1 second. CHENT-49
     private static final long _secondInNanos = 6_000_000_000L;
     private static final AtomicInteger counter = new AtomicInteger();
@@ -190,6 +191,8 @@ public class RemoteSubscriptionModelPerformanceTest {
      */
     @Test
     public void testSubscriptionMapEventListenerInsertPerformance() {
+        YamlLogging.showServerReads = YamlLogging.showServerWrites = true;
+        YamlLogging.clientWrites = true;
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
