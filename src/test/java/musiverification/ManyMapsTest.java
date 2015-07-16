@@ -26,7 +26,7 @@ public class ManyMapsTest {
     private static String _mapBaseName = "ManyMapsTest-";
 
     //    private static int _noOfMaps = Boolean.getBoolean("quick") ? 100 : 1_100;
-    private static int _noOfMaps = 100;
+    private static int _noOfMaps = Boolean.getBoolean("quick") ? 10 : 100;
     private static int _noOfKvps = 1_000;
     private static AssetTree assetTree = new VanillaAssetTree().forTesting();
 

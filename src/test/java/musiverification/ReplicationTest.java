@@ -112,13 +112,10 @@ public class ReplicationTest {
                 new ChronicleMapKeyValueStore(context.wireType(writeType),
                         asset));
 
-        registerTextViewofTree("host " + hostId, tree);
-
         return tree;
     }
 
 
-    //    @Ignore("CE-109 still fails sometimes")
     @Test
     public void test() throws InterruptedException {
 
