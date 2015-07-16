@@ -180,7 +180,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
             //Test that the correct number of events were triggered on event listener
             // todo make more reliable on windows.
             assertEquals(_noOfPuts, mapEventListener.getNoOfUpdateEvents().get()
-                    + mapEventListener.getNoOfInsertEvents().get(), _noOfPuts * 0.2);
+                    + mapEventListener.getNoOfInsertEvents().get(), _noOfPuts * 0.3);
             assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
 
         }, _noOfRunsToAverage, _secondInNanos);
