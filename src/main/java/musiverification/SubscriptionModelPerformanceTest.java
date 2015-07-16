@@ -64,12 +64,12 @@ public class SubscriptionModelPerformanceTest {
         Files.deleteIfExists(Paths.get(OS.TARGET, _mapName));
 
         TCPRegistry.createServerSocketChannelFor(hostPortDescription);
-        serverAssetTree = new VanillaAssetTree().forTesting();
+        serverAssetTree = new VanillaAssetTree(14).forTesting();
 
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(50).averageValueSize(2 << 20), asset));
         serverEndpoint = new ServerEndpoint(hostPortDescription, serverAssetTree, wireType);
-        clientAssetTree = new VanillaAssetTree().forRemoteAccess(hostPortDescription, wireType);
+        clientAssetTree = new VanillaAssetTree(15).forRemoteAccess(hostPortDescription, wireType);
     }
 
     @After
