@@ -20,6 +20,7 @@ public class AllTestMain {
             public void testFailure(Failure failure) throws Exception {
                 failures.add(failure);
                 System.err.println(failure);
+                failure.getException().printStackTrace();
             }
         });
         for (Class testClass : new Class[]{
@@ -42,6 +43,7 @@ public class AllTestMain {
         } else {
             for (Failure failure : failures) {
                 System.err.println(failure);
+                failure.getException().printStackTrace();
             }
             System.exit(-1);
         }
