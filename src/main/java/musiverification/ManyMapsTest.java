@@ -13,7 +13,6 @@ import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -93,13 +92,13 @@ public class ManyMapsTest {
     @Test
     public void testKeysAndValuesInEachMap() {
         //Test that the number of maps created exist
-        assertEquals(_noOfMaps, _maps.size());
+        Assert.assertEquals(_noOfMaps, _maps.size());
 
         for (Map.Entry<String, Map<String, String>> mapEntry : _maps.entrySet()) {
             Map<String, String> map = mapEntry.getValue();
 
             //Test that the number of key-value-pairs in the map matches the expected.
-            assertEquals(_noOfKvps, map.size());
+            Assert.assertEquals(_noOfKvps, map.size());
 
             //Test that all the keys in this map contains the map name (ie. no other map's keys overlap).
             Assert.assertFalse(map.keySet().stream().anyMatch(k -> !k.contains(mapEntry.getKey())));
@@ -133,7 +132,7 @@ public class ManyMapsTest {
         for (String key : _maps.keySet()) {
             EventsForMapSubscriber eventsForMapSubscriber = eventsForMapSubscriberMap.get(key);
 
-            assertEquals(_noOfKvps, eventsForMapSubscriber.getNoOfEvents());
+            Assert.assertEquals(_noOfKvps, eventsForMapSubscriber.getNoOfEvents());
 
             assetTree.unregisterTopicSubscriber(key, eventsForMapSubscriber);
         }
@@ -156,7 +155,7 @@ public class ManyMapsTest {
             for (int j = 1; j <= _noOfKvps; j++) {
                 map.put(TestUtils.getKey(mapName, j), TestUtils.getValue(mapName, j));
             }
-            assertEquals(_noOfKvps, map.size());
+            Assert.assertEquals(_noOfKvps, map.size());
 
             _clientMaps.put(mapName, map);
             if (count.incrementAndGet() % 100 == 0)
@@ -165,14 +164,14 @@ public class ManyMapsTest {
         System.out.println("...client maps " + _noOfMaps + " Done.");
 
         //Test that the number of maps created exist
-        assertEquals(_noOfMaps, _clientMaps.size());
+        Assert.assertEquals(_noOfMaps, _clientMaps.size());
 
         for (Map.Entry<String, Map<String, String>> mapEntry : _clientMaps.entrySet()) {
             System.out.println(mapEntry.getKey());
             Map<String, String> map = mapEntry.getValue();
 
             //Test that the number of key-value-pairs in the map matches the expected.
-            assertEquals(_noOfKvps, map.size());
+            Assert.assertEquals(_noOfKvps, map.size());
 
 //            //Test that all the keys in this map contains the map name (ie. no other map's keys overlap).
 //            String key = mapEntry.getKey();
@@ -235,7 +234,7 @@ public class ManyMapsTest {
 
         map1.put(key1, value1);
 
-        assertEquals(value1, map1.get(key1));
+        Assert.assertEquals(value1, map1.get(key1));
 
         //Get map2 - expect a second file to be created
         Map<String, String> map2 = assetTree.acquireMap(map2Name, String.class, String.class);
@@ -245,7 +244,7 @@ public class ManyMapsTest {
 
         map2.put(key2, value2);
 
-        assertEquals(value2, map2.get(key2));
+        Assert.assertEquals(value2, map2.get(key2));
     }
 
     /**
@@ -271,7 +270,7 @@ public class ManyMapsTest {
         Map<String, String> newMapInMapRef = newMapRef.get(testKey);
         String valueFromMap = newMapInMapRef.get(testKey);
 
-        assertEquals(testValue, valueFromMap);
+        Assert.assertEquals(testValue, valueFromMap);
     }
 
     /**
@@ -308,10 +307,10 @@ public class ManyMapsTest {
             int eventNo = _noOfEvents.incrementAndGet();
 
             //Test that the key matches the expected
-            assertEquals(TestUtils.getKey(_mapName, eventNo), key);
+            Assert.assertEquals(TestUtils.getKey(_mapName, eventNo), key);
 
             //Test that the value matches the expected
-            assertEquals(TestUtils.getValue(_mapName, eventNo), value);
+            Assert.assertEquals(TestUtils.getValue(_mapName, eventNo), value);
         }
     }
 }

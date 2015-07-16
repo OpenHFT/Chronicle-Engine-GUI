@@ -10,6 +10,6 @@ import static org.junit.Assert.fail;
 public class FailingTest {
     @Test
     public void failingTest() {
-        fail("Should fail");
+        Assert.fail("Should fail");
     }
 }

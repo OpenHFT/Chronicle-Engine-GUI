@@ -34,7 +34,6 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
-import org.junit.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -121,9 +120,9 @@ public class RemoteSubscriptionModelPerformanceTest {
         // TODO CHENT-49
         Jvm.pause(100);
         Asset child = serverAssetTree.getAsset(_mapName).getChild(key);
-        assertNotNull(child);
+        Assert.assertNotNull(child);
         Subscription subscription = child.subscription(false);
-        assertEquals(1, subscription.subscriberCount());
+        Assert.assertEquals(1, subscription.subscriberCount());
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
@@ -136,12 +135,12 @@ public class RemoteSubscriptionModelPerformanceTest {
         waitFor(() -> keyEventSubscriber.getNoOfEvents().get() < _noOfPuts * _noOfRunsToAverage * 0.2);
 
         //Test that the correct number of events was triggered on event listener
-        assertEquals(_noOfPuts * _noOfRunsToAverage, keyEventSubscriber.getNoOfEvents().get());
+        Assert.assertEquals(_noOfPuts * _noOfRunsToAverage, keyEventSubscriber.getNoOfEvents().get());
 
         clientAssetTree.unregisterSubscriber(_mapName + "/" + key, keyEventSubscriber);
 
         Jvm.pause(100);
-        assertEquals(0, subscription.subscriberCount());
+        Assert.assertEquals(0, subscription.subscriberCount());
     }
 
     /**
@@ -159,14 +158,14 @@ public class RemoteSubscriptionModelPerformanceTest {
 
         Jvm.pause(100);
         KVSSubscription subscription = (KVSSubscription) serverAssetTree.getAsset(_mapName).subscription(false);
-        assertEquals(1, subscription.topicSubscriberCount());
+        Assert.assertEquals(1, subscription.topicSubscriberCount());
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
                     System.out.println("test");
                     int events = _noOfPuts * i;
                     waitFor(() -> events == topicSubscriber.getNoOfEvents().get());
-                    assertEquals(events, topicSubscriber.getNoOfEvents().get());
+                    Assert.assertEquals(events, topicSubscriber.getNoOfEvents().get());
                 }, () -> {
                     IntStream.range(0, _noOfPuts).forEach(i ->
                     {
@@ -178,11 +177,11 @@ public class RemoteSubscriptionModelPerformanceTest {
         //Test that the correct number of events was triggered on event listener
         int events = _noOfPuts * _noOfRunsToAverage;
         waitFor(() -> events == topicSubscriber.getNoOfEvents().get());
-        assertEquals(events, topicSubscriber.getNoOfEvents().get());
+        Assert.assertEquals(events, topicSubscriber.getNoOfEvents().get());
 
         clientAssetTree.unregisterTopicSubscriber(_mapName, topicSubscriber);
         waitFor(() -> 0 == subscription.topicSubscriberCount());
-        assertEquals(0, subscription.topicSubscriberCount());
+        Assert.assertEquals(0, subscription.topicSubscriberCount());
     }
 
     /**
@@ -201,17 +200,17 @@ public class RemoteSubscriptionModelPerformanceTest {
 
         Jvm.pause(100);
         KVSSubscription subscription = (KVSSubscription) serverAssetTree.getAsset(_mapName).subscription(false);
-        assertEquals(1, subscription.entrySubscriberCount());
+        Assert.assertEquals(1, subscription.entrySubscriberCount());
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
                     if (i > 0) {
                         waitFor(() -> mapEventListener.getNoOfInsertEvents().get() >= _noOfPuts);
-                        assertEquals(_noOfPuts, mapEventListener.getNoOfInsertEvents().get());
+                        Assert.assertEquals(_noOfPuts, mapEventListener.getNoOfInsertEvents().get());
                     }
                     //Test that the correct number of events were triggered on event listener
-                    assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
-                    assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
+                    Assert.assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
+                    Assert.assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
 
                     _testMap.clear();
 
@@ -227,7 +226,7 @@ public class RemoteSubscriptionModelPerformanceTest {
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
 
         Jvm.pause(1000);
-        assertEquals(0, subscription.entrySubscriberCount());
+        Assert.assertEquals(0, subscription.entrySubscriberCount());
     }
 
     /**
@@ -254,7 +253,7 @@ public class RemoteSubscriptionModelPerformanceTest {
         KVSSubscription subscription = (KVSSubscription) serverAssetTree.getAsset(_mapName).subscription(false);
 
         waitFor(() -> subscription.entrySubscriberCount() == 1);
-        assertEquals(1, subscription.entrySubscriberCount());
+        Assert.assertEquals(1, subscription.entrySubscriberCount());
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
@@ -262,10 +261,10 @@ public class RemoteSubscriptionModelPerformanceTest {
                         waitFor(() -> mapEventListener.getNoOfUpdateEvents().get() >= _noOfPuts);
 
                         //Test that the correct number of events were triggered on event listener
-                        assertEquals(_noOfPuts, mapEventListener.getNoOfUpdateEvents().get());
+                        Assert.assertEquals(_noOfPuts, mapEventListener.getNoOfUpdateEvents().get());
                     }
-                    assertEquals(0, mapEventListener.getNoOfInsertEvents().get());
-                    assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
+                    Assert.assertEquals(0, mapEventListener.getNoOfInsertEvents().get());
+                    Assert.assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
 
                     mapEventListener.resetCounters();
 
@@ -279,7 +278,7 @@ public class RemoteSubscriptionModelPerformanceTest {
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
 
         waitFor(() -> subscription.entrySubscriberCount() == 0);
-        assertEquals(0, subscription.entrySubscriberCount());
+        Assert.assertEquals(0, subscription.entrySubscriberCount());
     }
 
     private void waitFor(BooleanSupplier b) {
@@ -326,12 +325,12 @@ public class RemoteSubscriptionModelPerformanceTest {
             waitFor(() -> mapEventListener.getNoOfRemoveEvents().get() >= _noOfPuts);
 
             //Test that the correct number of events were triggered on event listener
-            assertEquals(0, mapEventListener.getNoOfInsertEvents().get());
-            assertEquals(_noOfPuts, mapEventListener.getNoOfRemoveEvents().get());
-            assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
+            Assert.assertEquals(0, mapEventListener.getNoOfInsertEvents().get());
+            Assert.assertEquals(_noOfPuts, mapEventListener.getNoOfRemoveEvents().get());
+            Assert.assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
         }
 
-        assertTrue((runtimeInNanos / (_noOfPuts * _noOfRunsToAverage)) <= _secondInNanos);
+        Assert.assertTrue((runtimeInNanos / (_noOfPuts * _noOfRunsToAverage)) <= _secondInNanos);
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
     }
 
@@ -353,7 +352,7 @@ public class RemoteSubscriptionModelPerformanceTest {
 
         @Override
         public void onMessage(String newValue) {
-            assertEquals(_stringLength, newValue.length());
+            Assert.assertEquals(_stringLength, newValue.length());
             _noOfEvents.incrementAndGet();
         }
     }
@@ -380,8 +379,8 @@ public class RemoteSubscriptionModelPerformanceTest {
          */
         @Override
         public void onMessage(String topic, String message) throws InvalidSubscriberException {
-            assertEquals(_keyName, topic);
-            assertEquals(_stringLength, message.length());
+            Assert.assertEquals(_keyName, topic);
+            Assert.assertEquals(_stringLength, message.length());
 
             _noOfEvents.incrementAndGet();
         }
@@ -444,8 +443,8 @@ public class RemoteSubscriptionModelPerformanceTest {
 
         private void testKeyAndValue(String key, String value, AtomicInteger counterToIncrement) {
             int counter = counterToIncrement.getAndIncrement();
-            assertEquals(TestUtils.getKey(_mapName, counter), key);
-            assertEquals(_stringLength, value.length());
+            Assert.assertEquals(TestUtils.getKey(_mapName, counter), key);
+            Assert.assertEquals(_stringLength, value.length());
         }
     }
 }

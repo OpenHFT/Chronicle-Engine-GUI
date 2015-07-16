@@ -12,7 +12,6 @@ import net.openhft.chronicle.engine.tree.AddedAssetEvent;
 import net.openhft.chronicle.engine.tree.ExistingAssetEvent;
 import net.openhft.chronicle.engine.tree.RemovedAssetEvent;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
-import org.junit.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -56,7 +55,7 @@ public class SubscriptionModelTest {
      */
     @Test
     public void testSubscriptionMapEventOnAllKeys() {
-        MapEventListener<String, String> mapEventListener = createStrictMock(MapEventListener.class);
+        MapEventListener<String, String> mapEventListener = EasyMock.createStrictMock(MapEventListener.class);
         _clientAssetTree.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
 
         int noOfKeys = 5;
@@ -75,7 +74,7 @@ public class SubscriptionModelTest {
         //Setup remove events for all keys
         iterateAndExecuteConsumer((k, v) -> mapEventListener.remove(_mapName, k, v), c -> c, c -> noOfKeys * noOfValues + c, noOfKeys, _mapName, _mapName);
 
-        replay(mapEventListener);
+        EasyMock.replay(mapEventListener);
 
         //Perform all initial puts (insert events)
         iterateAndExecuteConsumer((k, v) -> _stringStringMap.put(k, v), noOfKeys, _mapName, _mapName);
@@ -88,7 +87,7 @@ public class SubscriptionModelTest {
         //Perform all remove (remove events)
         iterateAndExecuteConsumer((k, v) -> _stringStringMap.remove(k), noOfKeys, _mapName, _mapName);
 
-        verify(mapEventListener);
+        EasyMock.verify(mapEventListener);
     }
 
     /**
@@ -104,7 +103,7 @@ public class SubscriptionModelTest {
         //TODO DS refactor to use mock (strict)
         String testKey = "Key-sub-1";
 
-        Subscriber<String> testChronicleKeyEventSubscriber = createStrictMock(Subscriber.class);
+        Subscriber<String> testChronicleKeyEventSubscriber = EasyMock.createStrictMock(Subscriber.class);
 
         //Set up teh mock
         String update1 = "Update1";
@@ -120,7 +119,7 @@ public class SubscriptionModelTest {
         testChronicleKeyEventSubscriber.onMessage(update5);
         testChronicleKeyEventSubscriber.onMessage(null); //Key removed
 
-        replay(testChronicleKeyEventSubscriber);
+        EasyMock.replay(testChronicleKeyEventSubscriber);
 
         //Setting bootstrap = false otherwise we would get an initial event with null
         _clientAssetTree.registerSubscriber(_mapName + "/" + testKey + "?bootstrap=false", String.class, testChronicleKeyEventSubscriber); //TODO DS do a test with boot strapping
@@ -142,12 +141,12 @@ public class SubscriptionModelTest {
         //Remove the test key and test the number of updates
         _stringStringMap.remove(testKey);
 
-        verify(testChronicleKeyEventSubscriber);
+        EasyMock.verify(testChronicleKeyEventSubscriber);
 
         // expect to be told when the tree is torn down.
-        reset(testChronicleKeyEventSubscriber);
+        EasyMock.reset(testChronicleKeyEventSubscriber);
         testChronicleKeyEventSubscriber.onEndOfSubscription();
-        replay(testChronicleKeyEventSubscriber);
+        EasyMock.replay(testChronicleKeyEventSubscriber);
     }
 
     /**
@@ -166,7 +165,7 @@ public class SubscriptionModelTest {
         String testKey4 = "Key-sub-4";
         String testKey5 = "Key-sub-5";
 
-        Subscriber<String> testChronicleKeyEventSubscriber = createStrictMock(Subscriber.class);
+        Subscriber<String> testChronicleKeyEventSubscriber = EasyMock.createStrictMock(Subscriber.class);
 
         String update1 = "Update1";
         String update2 = "Update2";
@@ -189,7 +188,7 @@ public class SubscriptionModelTest {
         testChronicleKeyEventSubscriber.onMessage(testKey1);
         testChronicleKeyEventSubscriber.onMessage(testKey5);
 
-        replay(testChronicleKeyEventSubscriber);
+        EasyMock.replay(testChronicleKeyEventSubscriber);
 
         //Register as subscriber on map to get keys
         _clientAssetTree.registerSubscriber(_mapName, String.class, testChronicleKeyEventSubscriber);
@@ -210,12 +209,12 @@ public class SubscriptionModelTest {
         _stringStringMap.remove(testKey1);
         _stringStringMap.remove(testKey5);
 
-        verify(testChronicleKeyEventSubscriber);
+        EasyMock.verify(testChronicleKeyEventSubscriber);
 
         // expect to be told when the tree is torn down.
-        reset(testChronicleKeyEventSubscriber);
+        EasyMock.reset(testChronicleKeyEventSubscriber);
         testChronicleKeyEventSubscriber.onEndOfSubscription();
-        replay(testChronicleKeyEventSubscriber);
+        EasyMock.replay(testChronicleKeyEventSubscriber);
     }
 
     /**
@@ -231,7 +230,7 @@ public class SubscriptionModelTest {
         //TODO DS connecting to a server based Java component using the client API can be notified by callback methods for all updates in map
 
         //Using a strict mock as we want to verify that events come in in the right order
-        TopicSubscriber<String, String> topicSubscriberMock = createStrictMock(TopicSubscriber.class);
+        TopicSubscriber<String, String> topicSubscriberMock = EasyMock.createStrictMock(TopicSubscriber.class);
         _clientAssetTree.registerTopicSubscriber(_mapName, String.class, String.class, topicSubscriberMock);
 
         int noOfKeys = 5;
@@ -251,7 +250,7 @@ public class SubscriptionModelTest {
             topicSubscriberMock.onMessage(TestUtils.getKey(_mapName, i), null);
         }
 
-        replay(topicSubscriberMock);
+        EasyMock.replay(topicSubscriberMock);
 
         //Perform the updates
         iterateAndExecuteConsumer((k, v) -> _stringStringMap.put(k, v), c -> c % noOfKeys, c -> c, noOfKeys * noOfValues, _mapName, _mapName);
@@ -259,12 +258,12 @@ public class SubscriptionModelTest {
         //Perform the removes
         iterateAndExecuteConsumer((k, v) -> _stringStringMap.remove(k), noOfKeys, _mapName, _mapName);
 
-        verify(topicSubscriberMock);
+        EasyMock.verify(topicSubscriberMock);
 
         // expect to be told when the tree is torn down.
-        reset(topicSubscriberMock);
+        EasyMock.reset(topicSubscriberMock);
         topicSubscriberMock.onEndOfSubscription();
-        replay(topicSubscriberMock);
+        EasyMock.replay(topicSubscriberMock);
 
     }
 
@@ -288,7 +287,7 @@ public class SubscriptionModelTest {
         String mapUri1 = mapBaseUri + '/' + mapName1;
         String mapUri2 = mapBaseUri + '/' + mapName2;
 
-        TopicSubscriber<String, String> assetTreeSubscriber = createStrictMock("assetTreeSubscriber", TopicSubscriber.class);
+        TopicSubscriber<String, String> assetTreeSubscriber = EasyMock.createStrictMock("assetTreeSubscriber", TopicSubscriber.class);
         registerTopicSubscriber(parentUri, String.class, String.class, assetTreeSubscriber);
 
         // when added
@@ -299,13 +298,13 @@ public class SubscriptionModelTest {
         assetTreeSubscriber.onMessage("maps", mapName1);
         assetTreeSubscriber.onMessage("maps", mapName2);
 
-        Subscriber<TopologicalEvent> mapEventKeySubscriber = createStrictMock("mapEventKeySubscriber", Subscriber.class);
+        Subscriber<TopologicalEvent> mapEventKeySubscriber = EasyMock.createStrictMock("mapEventKeySubscriber", Subscriber.class);
         // expect a bootstrap event
         mapEventKeySubscriber.onMessage(ExistingAssetEvent.of(parentUri, "maps"));
-        replay(mapEventKeySubscriber);
+        EasyMock.replay(mapEventKeySubscriber);
         registerSubscriber(mapBaseUri, TopologicalEvent.class, mapEventKeySubscriber);
-        verify(mapEventKeySubscriber);
-        reset(mapEventKeySubscriber);
+        EasyMock.verify(mapEventKeySubscriber);
+        EasyMock.reset(mapEventKeySubscriber);
 
         //First the two maps will be inserted into
         mapEventKeySubscriber.onMessage(AddedAssetEvent.of(mapBaseUri, mapName1));
@@ -315,7 +314,7 @@ public class SubscriptionModelTest {
         mapEventKeySubscriber.onMessage(RemovedAssetEvent.of(mapBaseUri, mapName1));
         mapEventKeySubscriber.onMessage(RemovedAssetEvent.of(mapBaseUri, mapName2));
 
-        replay(mapEventKeySubscriber);
+        EasyMock.replay(mapEventKeySubscriber);
 
         //Create the two maps
         Map<String, String> map1 = acquireMap(mapUri1, String.class, String.class);
@@ -342,10 +341,10 @@ public class SubscriptionModelTest {
         getAsset(mapBaseUri).removeChild(mapName1);
         getAsset(mapBaseUri).removeChild(mapName2);
 
-        verify(mapEventKeySubscriber);
-        reset(mapEventKeySubscriber);
+        EasyMock.verify(mapEventKeySubscriber);
+        EasyMock.reset(mapEventKeySubscriber);
         mapEventKeySubscriber.onEndOfSubscription();
-        replay(mapEventKeySubscriber);
+        EasyMock.replay(mapEventKeySubscriber);
     }
 
     /**
