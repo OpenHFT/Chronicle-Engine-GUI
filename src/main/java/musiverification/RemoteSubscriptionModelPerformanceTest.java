@@ -80,7 +80,7 @@ public class RemoteSubscriptionModelPerformanceTest {
         TCPRegistry.createServerSocketChannelFor("RemoteSubscriptionModelPerformanceTest.port");
         serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);
 
-        clientAssetTree = new VanillaAssetTree().forRemoteAccess("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY);
+        clientAssetTree = new VanillaAssetTree(13).forRemoteAccess("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY);
     }
 
     @Before
