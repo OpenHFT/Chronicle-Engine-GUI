@@ -13,6 +13,7 @@ import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
 import net.openhft.chronicle.engine.tree.VanillaAsset;
+import org.junit.*;
 
 import java.io.Closeable;
 import java.io.File;
@@ -25,8 +26,6 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
-
-import static org.junit.Assert.assertEquals;
 
 public class SubscriptionModelFilePerKeyPerformanceTest {
     static final AtomicInteger counter = new AtomicInteger();

@@ -34,6 +34,7 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
+import org.junit.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,8 +46,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.IntStream;
-
-import static org.junit.Assert.*;
 
 public class RemoteSubscriptionModelPerformanceTest {
 

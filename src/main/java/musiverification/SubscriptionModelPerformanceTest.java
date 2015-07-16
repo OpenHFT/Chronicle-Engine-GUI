@@ -1,6 +1,7 @@
 package musiverification;
 
 import ddp.api.TestUtils;
+import junit.framework.TestCase;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
@@ -15,6 +16,7 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
+import org.junit.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.IntStream;
-
-import static junit.framework.TestCase.assertEquals;
 
 public class SubscriptionModelPerformanceTest {
 

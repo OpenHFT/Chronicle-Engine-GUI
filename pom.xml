@@ -27,7 +27,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -62,13 +61,14 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>runtime</scope>
+            <version>4.12</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
-            <scope>test</scope>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

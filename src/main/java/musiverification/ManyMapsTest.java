@@ -13,6 +13,7 @@ import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,8 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
-
-import static org.junit.Assert.assertEquals;
 
 public class ManyMapsTest {
     static {

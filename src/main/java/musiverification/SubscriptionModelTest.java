@@ -12,6 +12,11 @@ import net.openhft.chronicle.engine.tree.AddedAssetEvent;
 import net.openhft.chronicle.engine.tree.ExistingAssetEvent;
 import net.openhft.chronicle.engine.tree.RemovedAssetEvent;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
+import org.easymock.EasyMock;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Map;
@@ -20,7 +25,6 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import static net.openhft.chronicle.engine.Chassis.*;
-import static org.easymock.EasyMock.*;
 
 public class SubscriptionModelTest {
     private static Map<String, String> _stringStringMap;
@@ -50,8 +54,6 @@ public class SubscriptionModelTest {
      * Test subscribing to all MapEvents for a given map. Expect to receive events for insert,
      * update and remove actions for all keys. All events should be received in the order they are
      * executed.
-     *
-     * @
      */
     @Test
     public void testSubscriptionMapEventOnAllKeys() {
