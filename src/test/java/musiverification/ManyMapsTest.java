@@ -2,7 +2,6 @@ package musiverification;
 
 import ddp.api.TestUtils;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.util.SerializablePredicate;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
@@ -10,26 +9,20 @@ import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
 import net.openhft.chronicle.engine.map.VanillaMapView;
-import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
-import net.openhft.chronicle.network.TCPRegistry;
-import net.openhft.chronicle.wire.WireType;
 import org.junit.*;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 public class ManyMapsTest {
     private static Map<String, Map<String, String>> _maps;
-
     private static String _mapBaseName = "ManyMapsTest-";
 
     //    private static int _noOfMaps = Boolean.getBoolean("quick") ? 100 : 1_100;
@@ -57,23 +50,21 @@ public class ManyMapsTest {
 
         System.out.println("Creating maps.");
         AtomicInteger count = new AtomicInteger();
-//        IntStream.rangeClosed(1, _noOfMaps).parallel().forEach(i -> {
-//            String mapName = _mapBaseName + i;
-//
-//            Map<String, String> map = assetTree.acquireMap(mapName, String.class, String.class);
-//
-//            for (int j = 1; j <= _noOfKvps; j++) {
-//                map.put(TestUtils.getKey(mapName, j), TestUtils.getValue(mapName, j));
-//            }
-//
-//            _maps.put(mapName, map);
-//            if (count.incrementAndGet() % 100 == 0)
-//                System.out.print("... " + count);
-//        });
-        System.out.println("... " + _noOfMaps + " Done.");
+        IntStream.rangeClosed(1, _noOfMaps).parallel().forEach(i -> {
+            String mapName = _mapBaseName + i;
 
-        _maps = Collections.synchronizedMap(new HashMap<>());
-     }
+            Map<String, String> map = assetTree.acquireMap(mapName, String.class, String.class);
+
+            for (int j = 1; j <= _noOfKvps; j++) {
+                map.put(TestUtils.getKey(mapName, j), TestUtils.getValue(mapName, j));
+            }
+
+            _maps.put(mapName, map);
+            if (count.incrementAndGet() % 100 == 0)
+                System.out.print("... " + count);
+        });
+        System.out.println("... " + _noOfMaps + " Done.");
+    }
 
     @Before
     public void initTest() {
@@ -141,52 +132,9 @@ public class ManyMapsTest {
     }
 
     @Test
-    //@Ignore("todo")
-    public void testConnectToMultipleMapsUsingTheSamePort() throws IOException {
-       // _noOfMaps =10;
-        _noOfKvps = 500;
-        //throw new UnsupportedOperationException("DS test that we can connect and interact with a large number of maps on the same port");
-         Map<String, Map<String, String>> _clientMaps = new HashMap<>();
-        TCPRegistry.createServerSocketChannelFor("SubscriptionEventTest.host.port");
-        ServerEndpoint serverEndpoint = new ServerEndpoint("SubscriptionEventTest.host.port", assetTree, WireType.BINARY);
-
-        AssetTree clientAssetTree = new VanillaAssetTree().forRemoteAccess("SubscriptionEventTest.host.port", WireType.BINARY);
-        System.out.println("Creating maps.");
-        AtomicInteger count = new AtomicInteger();
-        IntStream.rangeClosed(1, _noOfMaps).forEach(i -> {
-            String mapName = _mapBaseName + i;
-
-            Map<String, String> map = clientAssetTree.acquireMap(mapName, String.class, String.class);
-
-            for (int j = 1; j <= _noOfKvps; j++) {
-                map.put(TestUtils.getKey(mapName, j), TestUtils.getValue(mapName, j));
-            }
-
-            _clientMaps.put(mapName, map);
-            if (count.incrementAndGet() % 100 == 0)
-                System.out.print("... " + count);
-        });
-        System.out.println("...client maps " + _noOfMaps + " Done.");
-
-        //Test that the number of maps created exist
-        Assert.assertEquals(_noOfMaps, _clientMaps.size());
-
-        for (Map.Entry<String, Map<String, String>> mapEntry : _clientMaps.entrySet()) {
-            System.out.println(mapEntry.getKey());
-            Map<String, String> map = mapEntry.getValue();
-
-            //Test that the number of key-value-pairs in the map matches the expected.
-            Assert.assertEquals(_noOfKvps, map.size());
-
-//            //Test that all the keys in this map contains the map name (ie. no other map's keys overlap).
-//            String key = mapEntry.getKey();
-//            SerializablePredicate<String> stringPredicate = k -> !k.contains(key);
-//            Assert.assertFalse(map.keySet().stream().anyMatch(stringPredicate));
-//
-//            //Test that all the values in this map contains the map name (ie. no other map's values overlap).
-//            SerializablePredicate<String> stringPredicate1 = v -> !v.contains(key);
-//            Assert.assertFalse(map.values().stream().anyMatch(stringPredicate1));
-        }
+    @Ignore("todo")
+    public void testConnectToMultipleMapsUsingTheSamePort() {
+        throw new UnsupportedOperationException("DS test that we can connect and interact with a large number of maps on the same port");
     }
 
     @Test
