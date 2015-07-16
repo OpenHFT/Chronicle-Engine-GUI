@@ -17,8 +17,6 @@ import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.*;
 
-
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -238,6 +236,9 @@ public class SubscriptionModelPerformanceTest {
             IntStream.range(0, _noOfPuts).forEach(c ->
             {
                 _testMap.put(TestUtils.getKey(_mapName, c), _twoMbTestString);
+
+                // todo shouldn't need this.
+                _testMap.size();
             });
 
             waitFor(() -> mapEventListener.getNoOfInsertEvents().get() >= _noOfPuts);
