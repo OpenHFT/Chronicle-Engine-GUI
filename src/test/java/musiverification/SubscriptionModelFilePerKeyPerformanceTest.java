@@ -34,7 +34,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
 
     private static final int _noOfPuts = 50;
     private static final int _noOfRunsToAverage = Boolean.getBoolean("quick") ? 2 : 10;
-    private static final long _secondInNanos = 1_500_000_000L;
+    private static final long _secondInNanos = 9_000_000_000L;
     private static String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
     private static int _twoMbTestStringLength;
@@ -109,11 +109,12 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
             IntStream.range(0, _noOfPuts).forEach(i ->
             {
                 _testMap.put(key, i + _twoMbTestString);
+                _testMap.size();
             });
         }, _noOfRunsToAverage, _secondInNanos);
 
         //Test that the correct number of events was triggered on event listener
-        topicSubscriber.waitForEvents(_noOfPuts * _noOfRunsToAverage, 0.4);
+        topicSubscriber.waitForEvents(_noOfPuts * _noOfRunsToAverage, 0.7);
     }
 
     /**
@@ -309,7 +310,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         }
 
         public void waitForEvents(int events, double error) {
-            for (int i = 1; i <= 20; i++) {
+            for (int i = 1; i <= 30; i++) {
                 if (events * (1 - error) <= getNoOfEvents().get())
                     break;
                 Jvm.pause(i * i);

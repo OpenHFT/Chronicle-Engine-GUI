@@ -236,6 +236,9 @@ public class SubscriptionModelPerformanceTest {
             IntStream.range(0, _noOfPuts).forEach(c ->
             {
                 _testMap.put(TestUtils.getKey(_mapName, c), _twoMbTestString);
+
+                // todo shouldn't need this.
+                _testMap.size();
             });
 
             waitFor(() -> mapEventListener.getNoOfInsertEvents().get() >= _noOfPuts);
