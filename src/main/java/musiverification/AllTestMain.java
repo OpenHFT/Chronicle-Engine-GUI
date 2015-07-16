@@ -42,6 +42,7 @@ public class AllTestMain {
         } else {
             for (Failure failure : failures) {
                 System.err.println(failure);
+                failure.getException().printStackTrace();
             }
             System.exit(-1);
         }
