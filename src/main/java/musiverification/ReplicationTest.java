@@ -37,8 +37,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertNotNull;
-
 /**
  * Created by Rob Austin
  */
@@ -81,16 +79,21 @@ public class ReplicationTest {
 
     @AfterClass
     public static void after() throws IOException {
-        if (serverEndpoint1 != null)
-            serverEndpoint1.close();
-        if (serverEndpoint2 != null)
-            serverEndpoint2.close();
-          serverEndpoint3.close();
+
         if (tree1 != null)
             tree1.close();
         if (tree2 != null)
             tree2.close();
-        tree3.close();
+        if (tree3 != null)
+            tree3.close();
+
+        if (serverEndpoint1 != null)
+            serverEndpoint1.close();
+        if (serverEndpoint2 != null)
+            serverEndpoint2.close();
+        if (serverEndpoint3 != null)
+            serverEndpoint3.close();
+
         TCPRegistry.reset();
         // TODO TCPRegistery.assertAllServersStopped();
         YamlLogging.clientWrites = false;
