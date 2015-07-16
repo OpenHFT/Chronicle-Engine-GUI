@@ -15,7 +15,6 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
-import org.junit.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -107,7 +106,7 @@ public class SubscriptionModelPerformanceTest {
         }, _noOfRunsToAverage, _secondInNanos);
         waitFor(() -> _testMap2.containsKey(key));
 
-        assertEquals(_twoMbTestString, _testMap2.get(key));
+        TestCase.assertEquals(_twoMbTestString, _testMap2.get(key));
 
         waitFor(() -> keyEventSubscriber.getNoOfEvents().get() >= _noOfPuts * _noOfRunsToAverage);
 
@@ -236,6 +235,9 @@ public class SubscriptionModelPerformanceTest {
             IntStream.range(0, _noOfPuts).forEach(c ->
             {
                 _testMap.put(TestUtils.getKey(_mapName, c), _twoMbTestString);
+
+                // todo shouldn't need this.
+                _testMap.size();
             });
 
             waitFor(() -> mapEventListener.getNoOfInsertEvents().get() >= _noOfPuts);

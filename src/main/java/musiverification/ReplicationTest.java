@@ -121,16 +121,16 @@ public class ReplicationTest {
 
         final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
                 .class);
-        assertNotNull(map1);
+        Assert.assertNotNull(map1);
 
         final ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String
                 .class);
-        assertNotNull(map2);
+        Assert.assertNotNull(map2);
 
 
         final ConcurrentMap<String, String> map3 = tree3.acquireMap(NAME, String.class, String
                 .class);
-        assertNotNull(map3);
+        Assert.assertNotNull(map3);
 
         map1.put("hello1", "world1");
         map2.put("hello2", "world2");
