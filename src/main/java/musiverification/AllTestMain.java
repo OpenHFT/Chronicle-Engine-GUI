@@ -6,6 +6,7 @@ import org.junit.runner.notification.RunListener;
 import org.junit.runner.notification.RunNotifier;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -13,19 +14,8 @@ import java.util.List;
  */
 public class AllTestMain {
     public static void main(String[] args) throws Throwable {
-/*
-        System.setOut(new PrintStream(System.out) {
-            @Override
-            public void println(String s) {
-                if (s.isEmpty()) {
-                    StringBuilder sb = new StringBuilder();
-                    Jvm.trimStackTrace(sb, Thread.currentThread().getStackTrace());
-                    System.err.println("println called from");
-                    System.err.println(sb);
-                }
-            }
-        });
-*/
+        System.out.println("Start tests on " + new Date());
+
         final List<Failure> failures = new ArrayList<>();
         RunNotifier runNotifier = new RunNotifier();
         runNotifier.addFirstListener(new RunListener() {
@@ -54,11 +44,17 @@ public class AllTestMain {
 //        if (failures.size() == 1) {
 //            System.out.println("Got the expected number of failures, 1");
 //        } else {
+        if (!failures.isEmpty()) {
+            System.out.println("\n***************************");
+            System.out.println("\tFAILED TESTS");
+            System.out.println("***************************");
+
             for (Failure failure : failures) {
                 System.err.println(failure);
                 failure.getException().printStackTrace();
             }
-//            System.exit(-1);
-//        }
+            System.exit(-1);
+        }
+        System.out.println("Finished tests on " + new Date());
     }
 }
