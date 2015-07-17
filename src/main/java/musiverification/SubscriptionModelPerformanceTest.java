@@ -68,7 +68,7 @@ public class SubscriptionModelPerformanceTest {
         YamlLogging.clientReads = YamlLogging.clientWrites = false;
 
 
-        String hostPortDescription = "SubscriptionModelPerformanceTest";
+        String hostPortDescription = "SubscriptionModelPerformanceTest-"+ System.nanoTime();
         WireType wireType = WireType.BINARY;
 
         _mapName = "PerfTestMap" + System.nanoTime();
@@ -234,7 +234,8 @@ public class SubscriptionModelPerformanceTest {
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
         Map<String, String> _testMap = clientAssetTree.acquireMap(_mapName, String.class, String.class);
-        clientAssetTree.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
+        Subscriber<MapEvent> mapEventSubscriber = e -> e.apply(mapEventListener);
+        clientAssetTree.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, mapEventSubscriber);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         long runtimeInNanos = 0;
@@ -269,7 +270,10 @@ public class SubscriptionModelPerformanceTest {
             Assert.assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
         }
 
+
         Assert.assertTrue((runtimeInNanos / (_noOfPuts * _noOfRunsToAverage)) <= _secondInNanos);
+        clientAssetTree.unregisterSubscriber(_mapName + "?bootstrap=false", mapEventSubscriber);
+
     }
 
     /**
