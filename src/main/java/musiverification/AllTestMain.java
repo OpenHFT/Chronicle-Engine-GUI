@@ -45,9 +45,10 @@ public class AllTestMain {
 //            System.out.println("Got the expected number of failures, 1");
 //        } else {
         if (!failures.isEmpty()) {
-            System.out.println("\n***************************");
-            System.out.println("\tFAILED TESTS");
-            System.out.println("***************************");
+            System.out.println("\n" +
+                    "***************************\n" +
+                    "\tFAILED TESTS\n" +
+                    "***************************");
 
             for (Failure failure : failures) {
                 System.err.println(failure);
