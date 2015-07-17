@@ -376,6 +376,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
             counterToIncrement.getAndIncrement();
             mapsUpdated.add(key);
             try {
+                if (value != null)
                 Assert.assertEquals(_stringLength + 8, value.length(), 8);
             } catch (Error e) {
                 throw e;
