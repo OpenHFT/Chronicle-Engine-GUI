@@ -31,7 +31,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.5.13-SNAPSHOT</version>
+                <version>1.5.14-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -39,7 +39,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-engine</artifactId>
-                <version>1.5.22-beta-SNAPSHOT</version>
+                <version>1.5.23-beta-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
