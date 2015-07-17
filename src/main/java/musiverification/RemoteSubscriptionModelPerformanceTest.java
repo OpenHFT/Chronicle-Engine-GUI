@@ -55,7 +55,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     private static final int _noOfPuts = 50;
     private static final int _noOfRunsToAverage = Boolean.getBoolean("quick") ? 2 : 10;
     // TODO Fix so that it is 1 second. CHENT-49
-    private static final long _secondInNanos = 6_000_000_000L;
+    private static final long _secondInNanos = 6_500_000_000L;
     private static final AtomicInteger counter = new AtomicInteger();
     private static final String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;

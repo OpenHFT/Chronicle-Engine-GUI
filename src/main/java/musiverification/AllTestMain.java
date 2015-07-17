@@ -13,6 +13,19 @@ import java.util.List;
  */
 public class AllTestMain {
     public static void main(String[] args) throws Throwable {
+/*
+        System.setOut(new PrintStream(System.out) {
+            @Override
+            public void println(String s) {
+                if (s.isEmpty()) {
+                    StringBuilder sb = new StringBuilder();
+                    Jvm.trimStackTrace(sb, Thread.currentThread().getStackTrace());
+                    System.err.println("println called from");
+                    System.err.println(sb);
+                }
+            }
+        });
+*/
         final List<Failure> failures = new ArrayList<>();
         RunNotifier runNotifier = new RunNotifier();
         runNotifier.addFirstListener(new RunListener() {
