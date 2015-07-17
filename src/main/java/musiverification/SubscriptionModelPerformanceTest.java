@@ -51,6 +51,17 @@ public class SubscriptionModelPerformanceTest {
         _twoMbTestStringLength = _twoMbTestString.length();
     }
 
+    @AfterClass
+    public static void tearDownClass() {
+        TCPRegistry.reset();
+    }
+
+    static void waitFor(BooleanSupplier b) {
+        for (int i = 1; i <= 40; i++)
+            if (!b.getAsBoolean())
+                Jvm.pause(i * i);
+    }
+
     @Before
     public void setUp() throws IOException {
 //        YamlLogging.clientReads = YamlLogging.clientWrites= true;
@@ -77,11 +88,6 @@ public class SubscriptionModelPerformanceTest {
         clientAssetTree.close();
         serverEndpoint.close();
         serverAssetTree.close();
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        TCPRegistry.reset();
     }
 
     /**
@@ -156,7 +162,14 @@ public class SubscriptionModelPerformanceTest {
         clientAssetTree.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
-        TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
+        TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
+            _testMap.clear();
+            // wait for events to clear.
+            Jvm.pause(200);
+
+            mapEventListener.resetCounters();
+
+        }, () -> {
             IntStream.range(0, _noOfPuts).forEach(i ->
             {
                 _testMap.put(TestUtils.getKey(_mapName, i), _twoMbTestString);
@@ -167,10 +180,6 @@ public class SubscriptionModelPerformanceTest {
             Assert.assertEquals(_noOfPuts, mapEventListener.getNoOfInsertEvents().get());
             Assert.assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
             Assert.assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
-
-            _testMap.clear();
-
-            mapEventListener.resetCounters();
 
         }, _noOfRunsToAverage, _secondInNanos);
     }
@@ -375,11 +384,5 @@ public class SubscriptionModelPerformanceTest {
 //            Assert.assertEquals(TestUtils.getKey(_mapName, counter), key);
             Assert.assertEquals(_stringLength, value.length());
         }
-    }
-
-    static void waitFor(BooleanSupplier b) {
-        for (int i = 1; i <= 40; i++)
-            if (!b.getAsBoolean())
-                Jvm.pause(i * i);
     }
 }
