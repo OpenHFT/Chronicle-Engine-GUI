@@ -39,7 +39,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-engine</artifactId>
-                <version>1.5.25-beta-SNAPSHOT</version>
+                <version>1.5.26-beta-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
