@@ -292,11 +292,16 @@ public class SubscriptionModelTest {
         assetTreeSubscriber.onMessage("maps", mapName1);
         assetTreeSubscriber.onMessage("maps", mapName2);
 
+        EasyMock.replay(assetTreeSubscriber);
+
         Subscriber<TopologicalEvent> mapEventKeySubscriber = EasyMock.createStrictMock("mapEventKeySubscriber", Subscriber.class);
         // expect a bootstrap event
         mapEventKeySubscriber.onMessage(ExistingAssetEvent.of(parentUri, "maps"));
+
         EasyMock.replay(mapEventKeySubscriber);
+
         registerSubscriber(mapBaseUri, TopologicalEvent.class, mapEventKeySubscriber);
+
         EasyMock.verify(mapEventKeySubscriber);
         EasyMock.reset(mapEventKeySubscriber);
 
@@ -335,9 +340,13 @@ public class SubscriptionModelTest {
         getAsset(mapBaseUri).removeChild(mapName1);
         getAsset(mapBaseUri).removeChild(mapName2);
 
+        EasyMock.verify(assetTreeSubscriber);
+
         EasyMock.verify(mapEventKeySubscriber);
         EasyMock.reset(mapEventKeySubscriber);
+
         mapEventKeySubscriber.onEndOfSubscription();
+
         EasyMock.replay(mapEventKeySubscriber);
     }
 
