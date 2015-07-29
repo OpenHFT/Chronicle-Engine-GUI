@@ -51,13 +51,13 @@ public class ReplicationServerMain {
      * @throws IOException
      */
 
-    public void create(int identifier, String remoteHostname) throws IOException {
+    public ServerEndpoint create(int identifier, String remoteHostname) throws IOException {
         if (identifier < 0 || identifier > Byte.MAX_VALUE)
             throw new IllegalStateException();
-        create((byte) identifier, remoteHostname);
+        return create((byte) identifier, remoteHostname);
     }
 
-    private void create(byte identifier, String remoteHostname) throws IOException {
+    private ServerEndpoint create(byte identifier, String remoteHostname) throws IOException {
 
         YamlLogging.clientReads = true;
         YamlLogging.clientWrites = true;
@@ -88,9 +88,9 @@ public class ReplicationServerMain {
         tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
                 VanillaKVSSubscription::new);
 
-        ReplicationClientTest.closeables.add(tree);
+
         ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + (5700 + identifier), tree, wireType);
-        ReplicationClientTest.closeables.add(serverEndpoint);
+        return serverEndpoint;
     }
 
 
