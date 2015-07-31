@@ -244,7 +244,7 @@ public class SubscriptionModelPerformanceTest {
             //Put values before testing as we want to ignore the insert and update events
             IntStream.range(0, _noOfPuts).forEach(c ->
             {
-                _testMap.put(TestUtils.getKey(_mapName, c), _twoMbTestString);
+                    _testMap.put(TestUtils.getKey(_mapName, c), _twoMbTestString);
 
                 // todo shouldn't need this.
                 _testMap.size();
@@ -268,6 +268,7 @@ public class SubscriptionModelPerformanceTest {
             Assert.assertEquals(0, mapEventListener.getNoOfInsertEvents().get());
             Assert.assertEquals(_noOfPuts, mapEventListener.getNoOfRemoveEvents().get());
             Assert.assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
+
         }
 
 
