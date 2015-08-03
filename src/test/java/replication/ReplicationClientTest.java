@@ -18,6 +18,7 @@ import net.openhft.chronicle.engine.pubsub.RemoteTopicPublisher;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.session.VanillaSessionProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.connection.SocketAddressSupplier;
 import net.openhft.chronicle.network.connection.TcpChannelHub;
 import net.openhft.chronicle.threads.EventGroup;
 import net.openhft.chronicle.wire.Wire;
@@ -45,8 +46,8 @@ public class ReplicationClientTest {
 
     static Set<Closeable> closeables = new HashSet<>();
 
-    private static MapView<String, String, String> map1;
-    private static MapView<String, String, String> map2;
+    private static MapView<String, String> map1;
+    private static MapView<String, String> map2;
     private static VanillaAssetTree tree;
     private ServerEndpoint server1;
     private ServerEndpoint server2;
@@ -110,7 +111,7 @@ public class ReplicationClientTest {
     }
 
 
-    private static MapView<String, String, String> create(String nameName, Integer hostId, String connectUri,
+    private static MapView<String, String> create(String nameName, Integer hostId, String connectUri,
                                                           BlockingQueue<MapEvent> q, Function<Bytes, Wire> wireType) {
         tree = new VanillaAssetTree(hostId);
 
@@ -128,11 +129,11 @@ public class ReplicationClientTest {
         EventGroup eventLoop = new EventGroup(true);
         SessionProvider sessionProvider = new VanillaSessionProvider();
 
-        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, connectUri,
-                eventLoop, wireType, ""));
+        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider,
+                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, "")));
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
-        MapView<String, String, String> result = tree.acquireMap(nameName, String.class, String.class);
+        MapView<String, String> result = tree.acquireMap(nameName, String.class, String.class);
 
         result.clear();
         tree.registerSubscriber(nameName, MapEvent.class, q::add);

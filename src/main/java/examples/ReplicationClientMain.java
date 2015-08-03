@@ -16,6 +16,7 @@ import net.openhft.chronicle.engine.pubsub.RemoteReference;
 import net.openhft.chronicle.engine.pubsub.RemoteTopicPublisher;
 import net.openhft.chronicle.engine.session.VanillaSessionProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.connection.SocketAddressSupplier;
 import net.openhft.chronicle.network.connection.TcpChannelHub;
 import net.openhft.chronicle.threads.EventGroup;
 import net.openhft.chronicle.wire.Wire;
@@ -29,8 +30,8 @@ import java.util.function.Function;
 import static net.openhft.chronicle.engine.api.tree.RequestContext.requestContext;
 
 public class ReplicationClientMain {
-    private static MapView<String, String, String> map1;
-    private static MapView<String, String, String> map2;
+    private static MapView<String, String> map1;
+    private static MapView<String, String> map2;
 
     public static void main(String[] args) throws Exception {
         YamlLogging.clientReads = true;
@@ -121,8 +122,8 @@ public class ReplicationClientMain {
         System.out.println("DONE!");
     }
 
-    private static MapView<String, String, String> create(String nameName, Integer hostId, String connectUri,
-                                                          BlockingQueue<MapEvent> q, Function<Bytes, Wire> wireType) {
+    private static MapView<String, String> create(String nameName, Integer hostId, String connectUri,
+                                                  BlockingQueue<MapEvent> q, Function<Bytes, Wire> wireType) {
         final VanillaAssetTree tree = new VanillaAssetTree(hostId);
 
         final Asset asset = tree.root().acquireAsset(nameName);
@@ -139,11 +140,11 @@ public class ReplicationClientMain {
         EventGroup eventLoop = new EventGroup(true);
         SessionProvider sessionProvider = new VanillaSessionProvider();
 
-        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider, connectUri,
-                eventLoop, wireType, ""));
+        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider,
+                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, "")));
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
-        MapView<String, String, String> result = tree.acquireMap(nameName, String.class, String.class);
+        MapView<String, String> result = tree.acquireMap(nameName, String.class, String.class);
 
         result.clear();
         tree.registerSubscriber(nameName, MapEvent.class, q::add);

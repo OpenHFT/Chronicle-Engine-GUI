@@ -30,7 +30,7 @@ public class MapEventListenerStatelessClientTest {
 
     private static ChronicleTestEventListener _chronicleTestEventListener;
 
-    private static MapView<String, String, String> _StringStringMap;
+    private static MapView<String, String> _StringStringMap;
 
     private static ServerEndpoint serverEndpoint;
 
