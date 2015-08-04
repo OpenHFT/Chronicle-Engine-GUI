@@ -12,6 +12,25 @@
         <relativePath/>
     </parent>
 
+    <!-- ************ NOTE : Please add the xml commented out xml below to your
+                                  /m2/settings.xml ( or your internal nexus server )   ************
+
+  <settings>
+       <servers>
+              <server>
+                  <id>chronicle-enterprise-release</id>
+                  <username>mufg</username>
+                  <password>CrA6AmKkBQCEWvTJJca67</password>
+              </server>
+              <server>
+                  <id>chronicle-enterprise-snapshots</id>
+                  <username>mufg</username>
+                  <password>CrA6AmKkBQCEWvTJJca67</password>
+              </server>
+        </servers>
+  <settings>   -->
+
+
     <groupId>jp.mufg</groupId>
     <artifactId>examples</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -31,7 +50,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.6.6</version>
+                <version>1.6.7</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -39,7 +58,36 @@
         </dependencies>
     </dependencyManagement>
 
+
+    <repositories>
+        <repository>
+            <id>chronicle-enterprise-release</id>
+            <name>Snapshot Repository</name>
+            <url>
+                http://teamcity.higherfrequencytrading.com:8081/nexus/content/repositories/snapshots
+            </url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>chronicle-enterprise-snapshots</id>
+            <url>
+                http://teamcity.higherfrequencytrading.com:8081/nexus/content/repositories/releases
+            </url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+
+    </repositories>
+
     <dependencies>
+
+        <dependency>
+            <groupId>software.chronicle</groupId>
+            <artifactId>chronicle-enterprise</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>net.openhft</groupId>
