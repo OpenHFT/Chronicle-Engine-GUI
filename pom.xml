@@ -5,13 +5,6 @@
     <modelVersion>4.0.0</modelVersion>
 
 
-    <parent>
-        <groupId>net.openhft</groupId>
-        <artifactId>java-parent-pom</artifactId>
-        <version>1.1.2</version>
-        <relativePath/>
-    </parent>
-
     <!-- ************ NOTE : Please add the xml commented out xml below to your
                                   /m2/settings.xml ( or your internal nexus server )   ************
 
@@ -79,7 +72,21 @@
                 <enabled>true</enabled>
             </releases>
         </repository>
-
+        <repository>
+            <id>Snapshot Repository</id>
+            <name>Snapshot Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>sonatype-nexus-staging</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
     </repositories>
 
     <dependencies>
