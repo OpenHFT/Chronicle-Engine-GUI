@@ -48,7 +48,6 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 
 public class RemoteSubscriptionModelPerformanceTest {
@@ -66,7 +65,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     private static VanillaAssetTree serverAssetTree, clientAssetTree;
     private static ServerEndpoint serverEndpoint;
 
-    private final String _mapName = "PerfTestMap" + counter.incrementAndGet();
+    private final String _mapName = "PerfTestMap" + System.nanoTime();
 
     @BeforeClass
     public static void setUpBeforeClass() throws IOException, URISyntaxException {
@@ -268,58 +267,6 @@ public class RemoteSubscriptionModelPerformanceTest {
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
 
         Jvm.pause(1000);
-        Assert.assertEquals(0, subscription.entrySubscriberCount());
-    }
-
-    /**
-     * Tests the performance of an event listener on the map for Update events of 2 MB strings.
-     * Expect it to handle at least 50 2 MB updates per second.
-     */
-    @Test
-    public void testSubscriptionMapEventListenerUpdatePerformance() {
-        //Put values before testing as we want to ignore the insert events
-        Function<Integer, Object> putFunction = a -> _testMap.put(TestUtils.getKey(_mapName, a), _twoMbTestString);
-
-        IntStream.range(0, _noOfPuts).forEach(i ->
-        {
-            putFunction.apply(i);
-        });
-
-        Jvm.pause(100);
-        //Create subscriber and register
-        TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
-
-        Subscriber<MapEvent> mapEventSubscriber = e -> e.apply(mapEventListener);
-        clientAssetTree.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, mapEventSubscriber);
-
-        KVSSubscription subscription = (KVSSubscription) serverAssetTree.getAsset(_mapName).subscription(false);
-
-        waitFor(() -> subscription.entrySubscriberCount() == 1);
-        Assert.assertEquals(1, subscription.entrySubscriberCount());
-
-        //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
-        TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
-                    if (i > 0) {
-                        waitFor(() -> mapEventListener.getNoOfUpdateEvents().get() >= _noOfPuts);
-
-                        //Test that the correct number of events were triggered on event listener
-                        Assert.assertEquals(_noOfPuts, mapEventListener.getNoOfUpdateEvents().get());
-                    }
-                    Assert.assertEquals(0, mapEventListener.getNoOfInsertEvents().get());
-                    Assert.assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
-
-                    mapEventListener.resetCounters();
-
-                }, () -> {
-                    IntStream.range(0, _noOfPuts).forEach(i ->
-                    {
-                        putFunction.apply(i);
-                    });
-                }, _noOfRunsToAverage, _secondInNanos
-        );
-        clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
-
-        waitFor(() -> subscription.entrySubscriberCount() == 0);
         Assert.assertEquals(0, subscription.entrySubscriberCount());
     }
 

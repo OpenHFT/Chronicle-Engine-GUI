@@ -27,14 +27,14 @@ public class AllTestMain {
             }
         });
         for (Class testClass : new Class[]{
-//                FailingTest.class,
                 ReplicationTest.class,
                 RemoteSubscriptionModelPerformanceTest.class,
+                RemoteSubscriptionModelPerformance2Test.class,
                 SubscriptionModelTest.class,
                 SubscriptionModelPerformanceTest.class,
                 SubscriptionModelFilePerKeyPerformanceTest.class,
-                ManyMapsTest.class,
-                ManyMapsFilePerKeyTest.class
+//                ManyMapsTest.class,
+//                ManyMapsFilePerKeyTest.class
         }) {
             System.out.println("\n=====================");
             System.out.println("\t" + testClass);
