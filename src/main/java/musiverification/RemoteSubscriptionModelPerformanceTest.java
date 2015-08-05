@@ -30,6 +30,7 @@ import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
 import net.openhft.chronicle.engine.map.KVSSubscription;
+import net.openhft.chronicle.engine.map.ObjectKeyValueStore;
 import net.openhft.chronicle.engine.map.VanillaMapView;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
@@ -37,6 +38,7 @@ import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.*;
+import software.chronicle.enteprise.kvstores.caching.CacheKVStore;
 
 import java.io.File;
 import java.io.IOException;
@@ -83,6 +85,13 @@ public class RemoteSubscriptionModelPerformanceTest {
         serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);
 
         clientAssetTree = new VanillaAssetTree(13).forRemoteAccess("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY);
+
+        clientAssetTree.root().addWrappingRule(MapView.class, "ENTERPRISE" + " cached -> sub",
+                VanillaMapView::new, software.chronicle.enteprise.kvstores.caching.CacheKVStore.class);
+        clientAssetTree.root().addWrappingRule(software.chronicle.enteprise.kvstores.caching
+                        .CacheKVStore.class, "ENTERPRISE" + " cached -> sub",
+                CacheKVStore::new, ObjectKeyValueStore.class);
+
     }
 
     @AfterClass
@@ -106,6 +115,25 @@ public class RemoteSubscriptionModelPerformanceTest {
     public void tearDown() throws IOException {
     }
 
+
+    /**
+     * Test that 50 updates per second of 2 MB string values completes in 1 second.
+     */
+    @Test
+    public void testGetPerformance() {
+
+        IntStream.range(0, _noOfPuts).forEach(i ->
+                _testMap.put(TestUtils.getKey(_mapName, i), _twoMbTestString));
+
+        //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
+        TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> _testMap.size(), () -> {
+            IntStream.range(0, _noOfPuts).forEach(i ->
+                    _testMap.get(TestUtils.getKey(_mapName, i)));
+        }, _noOfRunsToAverage, _secondInNanos);
+    }
+
+
+
     /**
      * Test that 50 updates per second of 2 MB string values completes in 1 second.
      */
@@ -116,10 +144,11 @@ public class RemoteSubscriptionModelPerformanceTest {
             IntStream.range(0, _noOfPuts).forEach(i ->
                     _testMap.put(TestUtils.getKey(_mapName, i), _twoMbTestString));
         }, _noOfRunsToAverage, _secondInNanos);
-}
+    }
 
     /**
-     * Test that listening to events for a given key can handle 50 updates per second of 2 MB string values.
+     * Test that listening to events for a given key can handle 50 updates per second of 2 MB string
+     * values.
      */
     @Test
     public void testSubscriptionMapEventOnKeyPerformance() {
@@ -157,8 +186,8 @@ public class RemoteSubscriptionModelPerformanceTest {
     }
 
     /**
-     * Test that listening to events for a given map can handle 50 updates per second of 2 MB string values and are
-     * triggering events which contain both the key and value (topic).
+     * Test that listening to events for a given map can handle 50 updates per second of 2 MB string
+     * values and are triggering events which contain both the key and value (topic).
      */
     @Test
     public void testSubscriptionMapEventOnTopicPerformance() {
@@ -347,117 +376,118 @@ public class RemoteSubscriptionModelPerformanceTest {
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
     }
 
-/**
- * Checks that all updates triggered are for the key specified in the constructor and increments the number of
- * updates.
- */
-class TestChronicleKeyEventSubscriber implements Subscriber<String> {
-    private int _stringLength;
-    private AtomicInteger _noOfEvents = new AtomicInteger(0);
+    /**
+     * Checks that all updates triggered are for the key specified in the constructor and increments
+     * the number of updates.
+     */
+    class TestChronicleKeyEventSubscriber implements Subscriber<String> {
+        private int _stringLength;
+        private AtomicInteger _noOfEvents = new AtomicInteger(0);
 
-    public TestChronicleKeyEventSubscriber(int stringLength) {
-        _stringLength = stringLength;
-    }
+        public TestChronicleKeyEventSubscriber(int stringLength) {
+            _stringLength = stringLength;
+        }
 
-    public AtomicInteger getNoOfEvents() {
-        return _noOfEvents;
-    }
+        public AtomicInteger getNoOfEvents() {
+            return _noOfEvents;
+        }
 
-    @Override
-    public void onMessage(String newValue) {
-        Assert.assertEquals(_stringLength, newValue.length());
-        _noOfEvents.incrementAndGet();
-    }
-}
-
-/**
- * Topic subscriber checking for each message that it is for the right key (in constructor) and the expected size
- * value.
- * Increments event counter which can be checked at the end of the test.
- */
-class TestChronicleTopicSubscriber implements TopicSubscriber<String, String> {
-    private String _keyName;
-    private int _stringLength;
-    private AtomicInteger _noOfEvents = new AtomicInteger(0);
-
-    public TestChronicleTopicSubscriber(String keyName, int stringLength) {
-        _keyName = keyName;
-        _stringLength = stringLength;
+        @Override
+        public void onMessage(String newValue) {
+            Assert.assertEquals(_stringLength, newValue.length());
+            _noOfEvents.incrementAndGet();
+        }
     }
 
     /**
-     * Test that the topic/key is the one specified in constructor and the message is the expected size.
-     *
-     * @throws InvalidSubscriberException
+     * Topic subscriber checking for each message that it is for the right key (in constructor) and
+     * the expected size value. Increments event counter which can be checked at the end of the
+     * test.
      */
-    @Override
-    public void onMessage(String topic, String message) throws InvalidSubscriberException {
-        Assert.assertEquals(_keyName, topic);
-        Assert.assertEquals(_stringLength, message.length());
+    class TestChronicleTopicSubscriber implements TopicSubscriber<String, String> {
+        private String _keyName;
+        private int _stringLength;
+        private AtomicInteger _noOfEvents = new AtomicInteger(0);
 
-        _noOfEvents.incrementAndGet();
+        public TestChronicleTopicSubscriber(String keyName, int stringLength) {
+            _keyName = keyName;
+            _stringLength = stringLength;
+        }
+
+        /**
+         * Test that the topic/key is the one specified in constructor and the message is the
+         * expected size.
+         *
+         * @throws InvalidSubscriberException
+         */
+        @Override
+        public void onMessage(String topic, String message) throws InvalidSubscriberException {
+            Assert.assertEquals(_keyName, topic);
+            Assert.assertEquals(_stringLength, message.length());
+
+            _noOfEvents.incrementAndGet();
+        }
+
+        public AtomicInteger getNoOfEvents() {
+            return _noOfEvents;
+        }
     }
 
-    public AtomicInteger getNoOfEvents() {
-        return _noOfEvents;
+    /**
+     * Map event listener for performance testing. Checks that the key is the one expected and the
+     * size of the value is as expected. Increments event specific counters that can be used to
+     * check agains the expected number of events.
+     */
+    class TestChronicleMapEventListener implements MapEventListener<String, String> {
+        private AtomicInteger _noOfInsertEvents = new AtomicInteger(0);
+        private AtomicInteger _noOfUpdateEvents = new AtomicInteger(0);
+        private AtomicInteger _noOfRemoveEvents = new AtomicInteger(0);
+
+        private String _mapName;
+        private int _stringLength;
+
+        public TestChronicleMapEventListener(String mapName, int stringLength) {
+            _mapName = mapName;
+            _stringLength = stringLength;
+        }
+
+        @Override
+        public void update(String assetName, String key, String oldValue, String newValue) {
+            testKeyAndValue(key, newValue, _noOfUpdateEvents);
+        }
+
+        @Override
+        public void insert(String assetName, String key, String value) {
+            testKeyAndValue(key, value, _noOfInsertEvents);
+        }
+
+        @Override
+        public void remove(String assetName, String key, String value) {
+            testKeyAndValue(key, value, _noOfRemoveEvents);
+        }
+
+        public AtomicInteger getNoOfInsertEvents() {
+            return _noOfInsertEvents;
+        }
+
+        public AtomicInteger getNoOfUpdateEvents() {
+            return _noOfUpdateEvents;
+        }
+
+        public AtomicInteger getNoOfRemoveEvents() {
+            return _noOfRemoveEvents;
+        }
+
+        public void resetCounters() {
+            _noOfInsertEvents = new AtomicInteger(0);
+            _noOfUpdateEvents = new AtomicInteger(0);
+            _noOfRemoveEvents = new AtomicInteger(0);
+        }
+
+        private void testKeyAndValue(String key, String value, AtomicInteger counterToIncrement) {
+            int counter = counterToIncrement.getAndIncrement();
+            Assert.assertEquals(TestUtils.getKey(_mapName, counter), key);
+            Assert.assertEquals(_stringLength, value.length());
+        }
     }
-}
-
-/**
- * Map event listener for performance testing. Checks that the key is the one expected and the size of the value is
- * as expected.
- * Increments event specific counters that can be used to check agains the expected number of events.
- */
-class TestChronicleMapEventListener implements MapEventListener<String, String> {
-    private AtomicInteger _noOfInsertEvents = new AtomicInteger(0);
-    private AtomicInteger _noOfUpdateEvents = new AtomicInteger(0);
-    private AtomicInteger _noOfRemoveEvents = new AtomicInteger(0);
-
-    private String _mapName;
-    private int _stringLength;
-
-    public TestChronicleMapEventListener(String mapName, int stringLength) {
-        _mapName = mapName;
-        _stringLength = stringLength;
-    }
-
-    @Override
-    public void update(String assetName, String key, String oldValue, String newValue) {
-        testKeyAndValue(key, newValue, _noOfUpdateEvents);
-    }
-
-    @Override
-    public void insert(String assetName, String key, String value) {
-        testKeyAndValue(key, value, _noOfInsertEvents);
-    }
-
-    @Override
-    public void remove(String assetName, String key, String value) {
-        testKeyAndValue(key, value, _noOfRemoveEvents);
-    }
-
-    public AtomicInteger getNoOfInsertEvents() {
-        return _noOfInsertEvents;
-    }
-
-    public AtomicInteger getNoOfUpdateEvents() {
-        return _noOfUpdateEvents;
-    }
-
-    public AtomicInteger getNoOfRemoveEvents() {
-        return _noOfRemoveEvents;
-    }
-
-    public void resetCounters() {
-        _noOfInsertEvents = new AtomicInteger(0);
-        _noOfUpdateEvents = new AtomicInteger(0);
-        _noOfRemoveEvents = new AtomicInteger(0);
-    }
-
-    private void testKeyAndValue(String key, String value, AtomicInteger counterToIncrement) {
-        int counter = counterToIncrement.getAndIncrement();
-        Assert.assertEquals(TestUtils.getKey(_mapName, counter), key);
-        Assert.assertEquals(_stringLength, value.length());
-    }
-}
 }
