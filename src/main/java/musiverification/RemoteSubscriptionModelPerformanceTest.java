@@ -57,7 +57,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     private static final int _noOfPuts = 50;
     private static final int _noOfRunsToAverage = Boolean.getBoolean("quick") ? 2 : 10;
     // TODO Fix so that it is 1 second. CHENT-49
-    private static final long _secondInNanos = 6_500_000_000L;
+    private static final long _secondInNanos = 5_000_000_000L;
     private static final AtomicInteger counter = new AtomicInteger();
     private static final String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
@@ -122,6 +122,7 @@ public class RemoteSubscriptionModelPerformanceTest {
      */
     @Test
     public void testGetPerformance() {
+        _testMap.clear();
 
         IntStream.range(0, _noOfPuts).forEach(i ->
                 _testMap.put(TestUtils.getKey(_mapName, i), _twoMbTestString));
@@ -140,6 +141,8 @@ public class RemoteSubscriptionModelPerformanceTest {
      */
     @Test
     public void testPutPerformance() {
+        _testMap.clear();
+
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> _testMap.size(), () -> {
             IntStream.range(0, _noOfPuts).forEach(i ->
@@ -153,6 +156,8 @@ public class RemoteSubscriptionModelPerformanceTest {
      */
     @Test
     public void testSubscriptionMapEventOnKeyPerformance() {
+        _testMap.clear();
+
         String key = TestUtils.getKey(_mapName, 0);
 
         //Create subscriber and register
@@ -195,6 +200,8 @@ public class RemoteSubscriptionModelPerformanceTest {
      */
     @Test
     public void testSubscriptionMapEventOnTopicPerformance() {
+        _testMap.clear();
+
         String key = TestUtils.getKey(_mapName, 0);
 
         //Create subscriber and register
@@ -236,6 +243,8 @@ public class RemoteSubscriptionModelPerformanceTest {
      */
     @Test
     public void testSubscriptionMapEventListenerInsertPerformance() {
+        _testMap.clear();
+
         YamlLogging.showServerReads = YamlLogging.showServerWrites = true;
         YamlLogging.clientWrites = true;
         //Create subscriber and register
@@ -281,6 +290,8 @@ public class RemoteSubscriptionModelPerformanceTest {
      */
     @Test
     public void testSubscriptionMapEventListenerUpdatePerformance() {
+        _testMap.clear();
+
         //Put values before testing as we want to ignore the insert events
         Function<Integer, Object> putFunction = a -> _testMap.put(TestUtils.getKey(_mapName, a), _twoMbTestString);
 
@@ -339,6 +350,7 @@ public class RemoteSubscriptionModelPerformanceTest {
      */
     @Test
     public void testSubscriptionMapEventListenerRemovePerformance() {
+        _testMap.clear();
         //Put values before testing as we want to ignore the insert and update events
 
         //Create subscriber and register
