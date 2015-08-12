@@ -81,6 +81,7 @@ public class RemoteSubscriptionModelPerformanceTest {
         serverAssetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(_noOfPuts).averageValueSize(_twoMbTestStringLength), asset));
+
         TCPRegistry.createServerSocketChannelFor("RemoteSubscriptionModelPerformanceTest.port");
         serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);
 
@@ -158,7 +159,7 @@ public class RemoteSubscriptionModelPerformanceTest {
         //Add 4 for the number of puts that is added to the string
         TestChronicleKeyEventSubscriber keyEventSubscriber = new TestChronicleKeyEventSubscriber(_twoMbTestStringLength + 4);
 
-        clientAssetTree.registerSubscriber(_mapName + "/" + key + "?bootstrap=false&putReturnsNull=true", String.class, keyEventSubscriber);
+        clientAssetTree.registerSubscriber(_mapName + "/" + key + "?putReturnsNull=true", String.class, keyEventSubscriber);
         // TODO CHENT-49
         Jvm.pause(100);
         Asset child = serverAssetTree.getAsset(_mapName).getChild(key);
@@ -166,15 +167,18 @@ public class RemoteSubscriptionModelPerformanceTest {
         Subscription subscription = child.subscription(false);
         Assert.assertEquals(1, subscription.subscriberCount());
 
+        long start = System.nanoTime();
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
             IntStream.range(0, _noOfPuts).forEach(i ->
             {
-                _testMap.put(key, _twoMbTestString + (i + 1000));
+                _testMap.put(key, new StringBuilder(_twoMbTestString.length() + 6).append(_twoMbTestString).append(i + 1000).toString());
             });
         }, _noOfRunsToAverage, _secondInNanos);
 
-        waitFor(() -> keyEventSubscriber.getNoOfEvents().get() < _noOfPuts * _noOfRunsToAverage * 0.2);
+        waitFor(() -> keyEventSubscriber.getNoOfEvents().get() >= _noOfPuts * _noOfRunsToAverage);
+        long time = System.nanoTime() - start;
+        System.out.printf("Took %.3f seconds to receive all events%n", time / 1e9);
 
         //Test that the correct number of events was triggered on event listener
         Assert.assertEquals(_noOfPuts * _noOfRunsToAverage, keyEventSubscriber.getNoOfEvents().get());
