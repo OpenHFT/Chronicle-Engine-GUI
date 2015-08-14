@@ -47,11 +47,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>net.openhft</groupId>
-                <artifactId>chronicle-engine</artifactId>
-                <version>1.6.8-beta-SNAPSHOT</version>
-            </dependency>
 
         </dependencies>
     </dependencyManagement>
