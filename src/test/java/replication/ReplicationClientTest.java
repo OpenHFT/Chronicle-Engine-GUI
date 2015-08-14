@@ -1,7 +1,6 @@
 package replication;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.engine.api.map.MapEvent;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.Publisher;
@@ -29,8 +28,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Function;
@@ -43,8 +40,6 @@ import static net.openhft.chronicle.engine.api.tree.RequestContext.requestContex
 
 public class ReplicationClientTest {
 
-
-    static Set<Closeable> closeables = new HashSet<>();
 
     private static MapView<String, String> map1;
     private static MapView<String, String> map2;
