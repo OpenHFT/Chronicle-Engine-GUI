@@ -62,7 +62,7 @@
             <id>chronicle-enterprise-release</id>
             <name>Snapshot Repository</name>
             <url>
-                http://teamcity.higherfrequencytrading.com:8081/nexus/content/repositories/snapshots
+                http://nexus.chronicle.software/content/repositories/snapshots
             </url>
             <snapshots>
                 <enabled>true</enabled>
@@ -71,7 +71,7 @@
         <repository>
             <id>chronicle-enterprise-snapshots</id>
             <url>
-                http://teamcity.higherfrequencytrading.com:8081/nexus/content/repositories/releases
+                http://nexus.chronicle.software/content/repositories/releases
             </url>
             <releases>
                 <enabled>true</enabled>
