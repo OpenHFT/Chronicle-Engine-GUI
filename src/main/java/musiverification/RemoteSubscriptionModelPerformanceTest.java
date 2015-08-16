@@ -38,7 +38,8 @@ import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.*;
-import software.chronicle.enteprise.kvstores.caching.CacheKVStore;
+import software.chronicle.enterprise.kvstores.chaching.CacheKVStore;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -88,9 +89,8 @@ public class RemoteSubscriptionModelPerformanceTest {
         clientAssetTree = new VanillaAssetTree(13).forRemoteAccess("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY);
 
         clientAssetTree.root().addWrappingRule(MapView.class, "ENTERPRISE" + " cached -> sub",
-                VanillaMapView::new, software.chronicle.enteprise.kvstores.caching.CacheKVStore.class);
-        clientAssetTree.root().addWrappingRule(software.chronicle.enteprise.kvstores.caching
-                        .CacheKVStore.class, "ENTERPRISE" + " cached -> sub",
+                VanillaMapView::new, CacheKVStore.class);
+        clientAssetTree.root().addWrappingRule(CacheKVStore.class, "ENTERPRISE" + " cached -> sub",
                 CacheKVStore::new, ObjectKeyValueStore.class);
 
     }
