@@ -16,6 +16,11 @@
 
 package main;
 
+import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.engine.api.map.KeyValueStore;
+import net.openhft.chronicle.engine.api.map.MapView;
+import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
+import net.openhft.chronicle.engine.map.VanillaMapView;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.wire.WireType;
@@ -28,11 +33,22 @@ import java.io.IOException;
 public class BinaryWireMain {
 
     public static final net.openhft.chronicle.wire.WireType WIRE_TYPE = WireType.BINARY;
+    public static final boolean PERSIST_TO_CHRONICLE = Boolean.getBoolean("persisted");
 
     public static void main(String[] args) throws IOException, InterruptedException {
         int port = 8088;
 
         VanillaAssetTree assetTree = new VanillaAssetTree().forTesting(false);
+
+        if(PERSIST_TO_CHRONICLE) {
+            assetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore",
+                    VanillaMapView::new, KeyValueStore.class);
+            assetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
+                    new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(50)
+                            .averageValueSize(1<<10), asset));
+        }
+
+
         final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree, WIRE_TYPE);
 
         if (args.length == 1 && args[0].compareTo("-debug") == 0)
