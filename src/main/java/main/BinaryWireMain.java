@@ -50,7 +50,7 @@ public class BinaryWireMain {
                                 && !context.name().startsWith("testSubscriptionMapEventOnAllKeys"))
                                 //.putReturnsNull(false)
                         .entries(50);
-                if(context.valueType() == String.class)
+                if(context.valueType() == String.class && !context.name().startsWith("ManyMapsTest"))
                     context.averageValueSize(2e6);
                 return new ChronicleMapKeyValueStore(context, asset);
             });
