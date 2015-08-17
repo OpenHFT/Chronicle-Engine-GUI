@@ -44,11 +44,16 @@ public class BinaryWireMain {
             System.out.println("Running with persistence");
             assetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore",
                     VanillaMapView::new, KeyValueStore.class);
-            assetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
-                    new ChronicleMapKeyValueStore(context.basePath(OS.TARGET)
-                            .putReturnsNull(!context.name().startsWith("subscribeConcurrent") && !context.name().startsWith("group"))
-                            //.putReturnsNull(false)
-                            .entries(50), asset));
+            assetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) -> {
+                context.basePath(OS.TARGET)
+                        .putReturnsNull(!context.name().startsWith("subscribeConcurrent") && !context.name().startsWith("group")
+                                && !context.name().startsWith("testSubscriptionMapEventOnAllKeys"))
+                                //.putReturnsNull(false)
+                        .entries(50);
+                if(context.valueType() == String.class)
+                    context.averageValueSize(2e6);
+                return new ChronicleMapKeyValueStore(context, asset);
+            });
         }
 
 
