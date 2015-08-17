@@ -5,7 +5,6 @@ import net.openhft.chronicle.engine.api.map.MapEvent;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.Publisher;
 import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
-import net.openhft.chronicle.engine.api.session.SessionProvider;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.ObjectKVSSubscription;
@@ -17,6 +16,7 @@ import net.openhft.chronicle.engine.pubsub.RemoteTopicPublisher;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.session.VanillaSessionProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.api.session.SessionProvider;
 import net.openhft.chronicle.network.connection.SocketAddressSupplier;
 import net.openhft.chronicle.network.connection.TcpChannelHub;
 import net.openhft.chronicle.threads.EventGroup;
@@ -46,6 +46,35 @@ public class ReplicationClientTest {
     private static VanillaAssetTree tree;
     private ServerEndpoint server1;
     private ServerEndpoint server2;
+
+    private static MapView<String, String> create(String nameName, Integer hostId, String connectUri,
+                                                  BlockingQueue<MapEvent> q, Function<Bytes, Wire> wireType) {
+        tree = new VanillaAssetTree(hostId);
+
+        final Asset asset = tree.root().acquireAsset(nameName);
+        ThreadGroup threadGroup = new ThreadGroup("host=" + connectUri);
+        tree.root().addView(ThreadGroup.class, threadGroup);
+
+        tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
+                RemoteKVSSubscription::new);
+
+        tree.root().addWrappingRule(MapView.class, "mapv view", VanillaMapView::new, AuthenticatedKeyValueStore.class);
+        tree.root().addWrappingRule(TopicPublisher.class, " topic publisher", RemoteTopicPublisher::new, MapView.class);
+        tree.root().addLeafRule(Publisher.class, "publisher", RemoteReference::new);
+
+        EventGroup eventLoop = new EventGroup(true);
+        SessionProvider sessionProvider = new VanillaSessionProvider();
+
+        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider,
+                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, "")));
+        asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
+
+        MapView<String, String> result = tree.acquireMap(nameName, String.class, String.class);
+
+        result.clear();
+        tree.registerSubscriber(nameName, MapEvent.class, q::add);
+        return result;
+    }
 
     @After
     public void after() throws Exception {
@@ -103,36 +132,6 @@ public class ReplicationClientTest {
 
         Assert.assertEquals("RemovedEvent{assetName='/map', key=hello, oldValue=world}", q1.take().toString());
         Assert.assertEquals("RemovedEvent{assetName='/map', key=hello, oldValue=world}", q2.take().toString());
-    }
-
-
-    private static MapView<String, String> create(String nameName, Integer hostId, String connectUri,
-                                                          BlockingQueue<MapEvent> q, Function<Bytes, Wire> wireType) {
-        tree = new VanillaAssetTree(hostId);
-
-        final Asset asset = tree.root().acquireAsset(nameName);
-        ThreadGroup threadGroup = new ThreadGroup("host=" + connectUri);
-        tree.root().addView(ThreadGroup.class, threadGroup);
-
-        tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
-                RemoteKVSSubscription::new);
-
-        tree.root().addWrappingRule(MapView.class, "mapv view", VanillaMapView::new, AuthenticatedKeyValueStore.class);
-        tree.root().addWrappingRule(TopicPublisher.class, " topic publisher", RemoteTopicPublisher::new, MapView.class);
-        tree.root().addLeafRule(Publisher.class, "publisher", RemoteReference::new);
-
-        EventGroup eventLoop = new EventGroup(true);
-        SessionProvider sessionProvider = new VanillaSessionProvider();
-
-        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider,
-                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, "")));
-        asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
-
-        MapView<String, String> result = tree.acquireMap(nameName, String.class, String.class);
-
-        result.clear();
-        tree.registerSubscriber(nameName, MapEvent.class, q::add);
-        return result;
     }
 }
 

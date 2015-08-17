@@ -13,16 +13,17 @@ import net.openhft.chronicle.engine.api.pubsub.Subscriber;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
-import net.openhft.chronicle.engine.map.ObjectKeyValueStore;
 import net.openhft.chronicle.engine.map.VanillaMapView;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
-import net.openhft.chronicle.engine.tree.*;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 import org.easymock.EasyMock;
-import org.junit.*;
-import software.chronicle.enterprise.kvstores.chaching.CacheKVStore;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Map;
@@ -30,13 +31,14 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-import static net.openhft.chronicle.engine.Chassis.*;
+import static net.openhft.chronicle.engine.Chassis.assetTree;
+import static net.openhft.chronicle.engine.Chassis.resetChassis;
 
 @Ignore
 public class RemoteSubscriptionModelTest {
     private static Map<String, String> _stringStringMap;
     private static String _mapName = "/chronicleMapString";
-    private static String _mapArgs = "putReturnsNull=true";
+    private static String _mapArgs = "putReturnsNull=false";
     private static AssetTree _clientAssetTree;
 
     @Before
@@ -45,9 +47,9 @@ public class RemoteSubscriptionModelTest {
 
         AssetTree serverAssetTree = new VanillaAssetTree(1).forTesting();
         //The following line doesn't add anything and breaks subscriptions
-//        serverAssetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
-//        serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
-//                new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(20).averageValueSize(10_000), asset));
+        serverAssetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
+        serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
+                new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(20).averageValueSize(10_000), asset));
 
         TCPRegistry.createServerSocketChannelFor("RemoteSubscriptionModelPerformanceTest.port");
         ServerEndpoint serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);
@@ -59,7 +61,7 @@ public class RemoteSubscriptionModelTest {
 //        _clientAssetTree.root().addWrappingRule(CacheKVStore.class, "ENTERPRISE" + " cached -> sub",
 //                CacheKVStore::new, ObjectKeyValueStore.class);
 
-        _stringStringMap = _clientAssetTree.acquireMap(String.format("%s?%s", _mapName, _mapArgs), String.class, String.class);
+        _stringStringMap = _clientAssetTree.acquireMap(_mapName + "?" + _mapArgs, String.class, String.class);
         _stringStringMap.clear();
     }
 
@@ -78,8 +80,8 @@ public class RemoteSubscriptionModelTest {
         MapEventListener<String, String> mapEventListener = EasyMock.createStrictMock(MapEventListener.class);
         _clientAssetTree.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
 
-        int noOfKeys = 5;
-        int noOfValues = 5;
+        int noOfKeys = 1;
+        int noOfValues = 1;
 
         //Setup all the expected events in the correct order
 

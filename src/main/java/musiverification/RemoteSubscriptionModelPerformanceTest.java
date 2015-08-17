@@ -40,7 +40,6 @@ import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.*;
 import software.chronicle.enterprise.kvstores.chaching.CacheKVStore;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -58,7 +57,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     private static final int _noOfPuts = 50;
     private static final int _noOfRunsToAverage = Boolean.getBoolean("quick") ? 2 : 10;
     // TODO Fix so that it is 1 second. CHENT-49
-    private static final long _secondInNanos = 5_000_000_000L;
+    private static final long _secondInNanos = 10_000_000_000L;
     private static final AtomicInteger counter = new AtomicInteger();
     private static final String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
@@ -107,7 +106,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     public void setUp() throws IOException {
         Files.deleteIfExists(Paths.get(OS.TARGET, _mapName));
 
-        _testMap = clientAssetTree.acquireMap(_mapName, String.class, String.class);
+        _testMap = clientAssetTree.acquireMap(_mapName + "?putReturnsNull=false", String.class, String.class);
 
         _testMap.clear();
     }
