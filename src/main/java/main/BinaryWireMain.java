@@ -41,11 +41,14 @@ public class BinaryWireMain {
         VanillaAssetTree assetTree = new VanillaAssetTree().forTesting(false);
 
         if(PERSIST_TO_CHRONICLE) {
+            System.out.println("Running with persistence");
             assetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore",
                     VanillaMapView::new, KeyValueStore.class);
             assetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
-                    new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(50)
-                            .averageValueSize(1<<10), asset));
+                    new ChronicleMapKeyValueStore(context.basePath(OS.TARGET)
+                            .putReturnsNull(!context.name().startsWith("subscribeConcurrent") && !context.name().startsWith("group"))
+                            //.putReturnsNull(false)
+                            .entries(50), asset));
         }
 
 
