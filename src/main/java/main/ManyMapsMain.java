@@ -31,6 +31,7 @@ import java.util.stream.IntStream;
  * Created by peter on 18/08/15.
  */
 public class ManyMapsMain {
+    static final String hostname = System.getProperty("hostname", "localhost");
     private static int _noOfMaps = 1_100;
     private static int _noOfKvps = 1_000;
     private static String _mapBaseName = "ManyMapsTest-";
