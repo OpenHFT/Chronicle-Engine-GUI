@@ -25,6 +25,7 @@ import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
+
 import java.io.IOException;
 
 /**
@@ -34,9 +35,10 @@ public class BinaryWireMain {
 
     public static final net.openhft.chronicle.wire.WireType WIRE_TYPE = WireType.BINARY;
     public static final boolean PERSIST_TO_CHRONICLE = Boolean.getBoolean("persisted");
+    public static final int PORT = 9088;
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        int port = 8088;
+        int port = PORT;
 
         VanillaAssetTree assetTree = new VanillaAssetTree().forTesting(false);
 
@@ -49,7 +51,7 @@ public class BinaryWireMain {
                         .putReturnsNull(!context.name().startsWith("subscribeConcurrent") && !context.name().startsWith("group")
                                 && !context.name().startsWith("testSubscriptionMapEventOnAllKeys"))
                                 //.putReturnsNull(false)
-                        .entries(50);
+                        .entries(1200);
                 if(context.valueType() == String.class && !context.name().startsWith("ManyMapsTest"))
                     context.averageValueSize(2e6);
                 return new ChronicleMapKeyValueStore(context, asset);
