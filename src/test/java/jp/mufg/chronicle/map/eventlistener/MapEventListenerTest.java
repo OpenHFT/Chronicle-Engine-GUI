@@ -215,7 +215,8 @@ private static int _noOfEventsTriggered = 0;
     private class ChronicleTestEventListener extends MapEventListener
     {
         @Override
-        public void onPut(Object key, Object newValue, Object replacedValue, boolean replicationEvent)
+        public void onPut(Object key, Object newValue, Object replacedValue, boolean
+                replicationEvent, boolean added)
         {
             _noOfEventsTriggered++;
         }
