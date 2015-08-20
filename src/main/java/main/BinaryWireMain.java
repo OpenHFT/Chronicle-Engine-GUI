@@ -51,7 +51,7 @@ public class BinaryWireMain {
                         .putReturnsNull(!context.name().startsWith("subscribeConcurrent") && !context.name().startsWith("group")
                                 && !context.name().startsWith("testSubscriptionMapEventOnAllKeys"))
                                 //.putReturnsNull(false)
-                        .entries(1200);
+                        .entries(50);
                 if(context.valueType() == String.class && !context.name().startsWith("ManyMapsTest"))
                     context.averageValueSize(2e6);
                 return new ChronicleMapKeyValueStore(context, asset);
