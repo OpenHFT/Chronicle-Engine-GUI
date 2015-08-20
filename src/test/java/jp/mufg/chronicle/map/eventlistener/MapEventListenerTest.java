@@ -8,6 +8,7 @@ import net.openhft.chronicle.map.MapEventListener;
 import net.openhft.chronicle.map.WriteContext;
 import net.openhft.chronicle.tools.ChronicleTools;
 import net.openhft.lang.values.StringValue;
+import org.jetbrains.annotations.Nullable;
 import org.junit.*;
 
 import java.io.File;
@@ -214,9 +215,9 @@ private static int _noOfEventsTriggered = 0;
 
     private class ChronicleTestEventListener extends MapEventListener
     {
+
         @Override
-        public void onPut(Object key, Object newValue, Object replacedValue, boolean replicationEvent)
-        {
+        public void onPut(Object key, Object newValue, @Nullable Object replacedValue, boolean replicationEvent, boolean added) {
             _noOfEventsTriggered++;
         }
     }
