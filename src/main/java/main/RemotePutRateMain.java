@@ -55,6 +55,8 @@ public class RemotePutRateMain {
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> _testMap.size(), () -> {
             IntStream.range(0, _noOfPuts).forEach(i ->
                     _testMap.put(TestUtils.getKey(_mapName, i), _twoMbTestString));
+            // wait for all the puts.
+            _testMap.size();
         }, _noOfRunsToAverage, _secondInNanos);
 
         clientAssetTree.close();
