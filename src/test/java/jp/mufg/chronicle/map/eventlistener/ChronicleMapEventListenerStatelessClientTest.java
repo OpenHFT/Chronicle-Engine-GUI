@@ -161,7 +161,7 @@ public class ChronicleMapEventListenerStatelessClientTest {
     }
 
     private void waitFor(BooleanSupplier b) {
-        for (int i = 1; i <= 40; i++)
+        for (int i = 1; i <= 50; i++)
             if (!b.getAsBoolean())
                 Jvm.pause(i * i);
     }
