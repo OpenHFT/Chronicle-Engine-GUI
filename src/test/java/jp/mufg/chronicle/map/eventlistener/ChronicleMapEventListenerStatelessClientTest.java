@@ -33,19 +33,15 @@ import java.util.function.Consumer;
  */
 public class ChronicleMapEventListenerStatelessClientTest {
     private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
-
+    private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
+    private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
     private static ChronicleTestEventListener _chronicleTestEventListener;
     private static VanillaAssetTree clientAssetTree;
-    private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
-
     private static Map<String, String> _StringStringMap;
     private static Map<String, String> _StringStringMapClient;
-
+    private static ServerEndpoint serverEndpoint;
     private final String _value1 = new String(new char[2 << 20]);//;"TestValue1";
     private final String _value2;
-
-    private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
-    private static ServerEndpoint serverEndpoint;
 
     public ChronicleMapEventListenerStatelessClientTest() {
         char[] value = new char[2 << 20];
@@ -144,14 +140,14 @@ public class ChronicleMapEventListenerStatelessClientTest {
                 } else {
                     consumer2.accept(_value2);
                 }
+                final int count2 = count;
+                waitFor(() -> _noOfEventsTriggered.get() >= count2);
+                count++;
             }
-            count++;
         }
-        TestUtils.calculateAndPrintRuntime(startTime, count);
-        final int finalCount = count;
-        waitFor(() -> _noOfEventsTriggered.get() >= (noOfIterations - 1) * finalCount);
+        TestUtils.calculateAndPrintRuntime(startTime, count / noOfIterations);
 
-        Assert.assertEquals(noOfIterations * count, _noOfEventsTriggered.get(), count);
+        Assert.assertEquals(count, _noOfEventsTriggered.get(), 1);
         try {
             //Give it a chance to print the times.
             TimeUnit.SECONDS.sleep(1);
