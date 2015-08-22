@@ -36,7 +36,6 @@ import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
-import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.*;
 import software.chronicle.enterprise.kvstores.chaching.CacheKVStore;
 
@@ -83,9 +82,10 @@ public class RemoteSubscriptionModelPerformanceTest {
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(_noOfPuts).averageValueSize(_twoMbTestStringLength), asset));
 
         TCPRegistry.createServerSocketChannelFor("RemoteSubscriptionModelPerformanceTest.port");
-        serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);
+        serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port",
+                serverAssetTree, WireType.TEXT);
 
-        clientAssetTree = new VanillaAssetTree(13).forRemoteAccess("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY);
+        clientAssetTree = new VanillaAssetTree(13).forRemoteAccess("RemoteSubscriptionModelPerformanceTest.port", WireType.TEXT);
 
         clientAssetTree.root().addWrappingRule(MapView.class, "ENTERPRISE" + " cached -> sub",
                 VanillaMapView::new, CacheKVStore.class);
@@ -244,8 +244,8 @@ public class RemoteSubscriptionModelPerformanceTest {
     public void testSubscriptionMapEventListenerInsertPerformance() {
         _testMap.clear();
 
-        YamlLogging.showServerReads = YamlLogging.showServerWrites = true;
-        YamlLogging.clientWrites = true;
+        //YamlLogging.showServerReads = YamlLogging.showServerWrites = true;
+        //  YamlLogging.clientWrites = true;
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
@@ -295,9 +295,7 @@ public class RemoteSubscriptionModelPerformanceTest {
         Function<Integer, Object> putFunction = a -> _testMap.put(TestUtils.getKey(_mapName, a), _twoMbTestString);
 
         IntStream.range(0, _noOfPuts).forEach(i ->
-        {
-            putFunction.apply(i);
-        });
+                putFunction.apply(i));
 
         Jvm.pause(100);
         //Create subscriber and register
