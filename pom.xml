@@ -53,7 +53,7 @@
 
     <repositories>
         <repository>
-            <id>chronicle-enterprise-release</id>
+            <id>chronicle-enterprise-snapshots</id>
             <name>Snapshot Repository</name>
             <url>
                 http://nexus.chronicle.software/content/repositories/snapshots
@@ -63,7 +63,7 @@
             </snapshots>
         </repository>
         <repository>
-            <id>chronicle-enterprise-snapshots</id>
+            <id>chronicle-enterprise-release</id>
             <url>
                 http://nexus.chronicle.software/content/repositories/releases
             </url>
