@@ -35,7 +35,7 @@ public class SubscriptionModelPerformanceTest {
     private static final int _noOfPuts = 50;
     private static final int _noOfRunsToAverage = Boolean.getBoolean("quick") ? 2 : 10;
     // TODO CHENT-49
-    private static final long _secondInNanos = 9_000_000_000L;
+    private static final long _secondInNanos = 1_000_000_000L;
     private static String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
     private static int _twoMbTestStringLength;
@@ -219,7 +219,7 @@ public class SubscriptionModelPerformanceTest {
 
             mapEventListener.resetCounters();
 
-        }, _noOfRunsToAverage, _secondInNanos);
+        }, _noOfRunsToAverage, 2 * _secondInNanos);
     }
 
     /**

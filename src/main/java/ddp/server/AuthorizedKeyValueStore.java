@@ -1,20 +1,26 @@
 package ddp.server;
 
-import net.openhft.chronicle.engine.api.*;
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.api.pubsub.*;
-import net.openhft.chronicle.engine.api.tree.*;
-import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.network.api.session.*;
-import org.jetbrains.annotations.*;
+import net.openhft.chronicle.engine.api.EngineReplication;
+import net.openhft.chronicle.engine.api.map.KeyValueStore;
+import net.openhft.chronicle.engine.api.map.MapEvent;
+import net.openhft.chronicle.engine.api.map.SubscriptionKeyValueStore;
+import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
+import net.openhft.chronicle.engine.api.pubsub.SubscriptionConsumer;
+import net.openhft.chronicle.engine.api.tree.Asset;
+import net.openhft.chronicle.engine.api.tree.AssetNotFoundException;
+import net.openhft.chronicle.engine.api.tree.RequestContext;
+import net.openhft.chronicle.engine.map.KVSSubscription;
+import net.openhft.chronicle.network.api.session.SessionDetails;
+import net.openhft.chronicle.network.api.session.SessionProvider;
+import org.jetbrains.annotations.Nullable;
 
 //TODO DS implement closeable?
 public class AuthorizedKeyValueStore<K, V> implements SubscriptionKeyValueStore<K, V>
 {
     private final SessionProvider sessionProvider;
     private final SubscriptionKeyValueStore<K, V> kvStore;
-    private RequestContext context;
     private final Asset asset;
+    private RequestContext context;
 
     public AuthorizedKeyValueStore(RequestContext context, Asset asset, SubscriptionKeyValueStore<K, V> kvStore) throws AssetNotFoundException
     {
@@ -34,13 +40,29 @@ public class AuthorizedKeyValueStore<K, V> implements SubscriptionKeyValueStore<
         return kvStore.subscription(createIfAbsent);
     }
 
+    @Override
+    public boolean put(K key, V value) {
+        System.out.println(this.getClass().getName() + ": put");
+
+        checkPermission("WRITE");
+        return kvStore.put(key, value);
+    }
+
+    @Override
+    public boolean remove(K key) {
+        System.out.println(this.getClass().getName() + ": remove");
+
+        checkPermission("WRITE");
+        return kvStore.remove(key);
+    }
+
     @Nullable
     @Override
     public V getAndPut(K key, V value)
     {
         System.out.println(this.getClass().getName() + ": getAndPut");
 
-        checkPermission("READ");
+        checkPermission("WRITE");
         return kvStore.getAndPut(key, value);
     }
 
@@ -50,7 +72,7 @@ public class AuthorizedKeyValueStore<K, V> implements SubscriptionKeyValueStore<
     {
         System.out.println(this.getClass().getName() + ": getAndRemove");
 
-        checkPermission("READ");
+        checkPermission("WRITE");
         return kvStore.getAndRemove(key);
     }
 
@@ -96,7 +118,7 @@ public class AuthorizedKeyValueStore<K, V> implements SubscriptionKeyValueStore<
     {
         System.out.println(this.getClass().getName() + ": clear");
 
-        checkPermission("READ");
+        checkPermission("WRITE");
         kvStore.clear();
     }
 
@@ -164,6 +186,7 @@ public class AuthorizedKeyValueStore<K, V> implements SubscriptionKeyValueStore<
 
         switch (accessLevelRequired)
         {
+            case "WRITE":
             case "READ":
                 isAccessGranted = true;
                 break;

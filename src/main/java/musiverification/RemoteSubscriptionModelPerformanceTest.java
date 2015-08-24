@@ -56,8 +56,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     //TODO DS test having the server side on another machine
     private static final int _noOfPuts = 50;
     private static final int _noOfRunsToAverage = Boolean.getBoolean("quick") ? 2 : 10;
-    // TODO Fix so that it is 1 second. CHENT-49
-    private static final long _secondInNanos = 10_000_000_000L;
+    private static final long _secondInNanos = 1_000_000_000L;
     private static final AtomicInteger counter = new AtomicInteger();
     private static final String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
@@ -106,7 +105,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     public void setUp() throws IOException {
         Files.deleteIfExists(Paths.get(OS.TARGET, _mapName));
 
-        _testMap = clientAssetTree.acquireMap(_mapName + "?putReturnsNull=false", String.class, String.class);
+        _testMap = clientAssetTree.acquireMap(_mapName + "?putReturnsNull=true", String.class, String.class);
 
         _testMap.clear();
     }
@@ -117,7 +116,7 @@ public class RemoteSubscriptionModelPerformanceTest {
 
 
     /**
-     * Test that 50 updates per second of 2 MB string values completes in 1 second.
+     * Test that listening to events for a given key can handle 50 updates per second of 2 MB string values.
      */
     @Test
     public void testGetPerformance() {
@@ -161,10 +160,9 @@ public class RemoteSubscriptionModelPerformanceTest {
 
         //Create subscriber and register
         //Add 4 for the number of puts that is added to the string
-        TestChronicleKeyEventSubscriber keyEventSubscriber = new TestChronicleKeyEventSubscriber(_twoMbTestStringLength + 4);
+        TestChronicleKeyEventSubscriber keyEventSubscriber = new TestChronicleKeyEventSubscriber(_twoMbTestStringLength);
 
         clientAssetTree.registerSubscriber(_mapName + "/" + key + "?putReturnsNull=true", String.class, keyEventSubscriber);
-        // TODO CHENT-49
         Jvm.pause(100);
         Asset child = serverAssetTree.getAsset(_mapName).getChild(key);
         Assert.assertNotNull(child);
@@ -176,9 +174,9 @@ public class RemoteSubscriptionModelPerformanceTest {
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
             IntStream.range(0, _noOfPuts).forEach(i ->
             {
-                _testMap.put(key, new StringBuilder(_twoMbTestString.length() + 6).append(_twoMbTestString).append(i + 1000).toString());
+                _testMap.put(key, _twoMbTestString);
             });
-        }, _noOfRunsToAverage, _secondInNanos);
+        }, _noOfRunsToAverage, 3 * _secondInNanos);
 
         waitFor(() -> keyEventSubscriber.getNoOfEvents().get() >= _noOfPuts * _noOfRunsToAverage);
         long time = System.nanoTime() - start;
@@ -223,7 +221,7 @@ public class RemoteSubscriptionModelPerformanceTest {
                     {
                         _testMap.put(key, _twoMbTestString);
                     });
-                }, _noOfRunsToAverage, _secondInNanos
+                }, _noOfRunsToAverage, 3 * _secondInNanos
         );
 
         //Test that the correct number of events was triggered on event listener
@@ -244,8 +242,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     public void testSubscriptionMapEventListenerInsertPerformance() {
         _testMap.clear();
 
-        YamlLogging.showServerReads = YamlLogging.showServerWrites = true;
-        YamlLogging.clientWrites = true;
+        YamlLogging.setAll(true);
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
@@ -274,7 +271,7 @@ public class RemoteSubscriptionModelPerformanceTest {
                     {
                         _testMap.put(TestUtils.getKey(_mapName, i), _twoMbTestString);
                     });
-                }, _noOfRunsToAverage, _secondInNanos
+                }, _noOfRunsToAverage, 2 * _secondInNanos
         );
 
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
@@ -329,7 +326,7 @@ public class RemoteSubscriptionModelPerformanceTest {
                     {
                         putFunction.apply(i);
                     });
-                }, _noOfRunsToAverage, _secondInNanos
+                }, _noOfRunsToAverage, 3 * _secondInNanos
         );
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
 
@@ -387,7 +384,7 @@ public class RemoteSubscriptionModelPerformanceTest {
             Assert.assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
         }
 
-        Assert.assertTrue((runtimeInNanos / (_noOfPuts * _noOfRunsToAverage)) <= _secondInNanos);
+        Assert.assertTrue((runtimeInNanos / (_noOfPuts * _noOfRunsToAverage)) <= 2 * _secondInNanos);
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
     }
 
@@ -409,8 +406,12 @@ public class RemoteSubscriptionModelPerformanceTest {
 
         @Override
         public void onMessage(String newValue) {
-            Assert.assertEquals(_stringLength, newValue.length());
-            _noOfEvents.incrementAndGet();
+            if (newValue == null) {
+                System.out.println("No value");
+            } else {
+                Assert.assertEquals(_stringLength, newValue.length());
+                _noOfEvents.incrementAndGet();
+            }
         }
     }
 

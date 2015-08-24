@@ -1,12 +1,19 @@
 package ddp.server;
 
-import net.openhft.chronicle.engine.api.*;
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.api.pubsub.*;
-import net.openhft.chronicle.engine.api.tree.*;
-import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.network.api.session.*;
-import org.jetbrains.annotations.*;
+import net.openhft.chronicle.engine.api.EngineReplication;
+import net.openhft.chronicle.engine.api.map.KeyValueStore;
+import net.openhft.chronicle.engine.api.map.MapEvent;
+import net.openhft.chronicle.engine.api.map.SubscriptionKeyValueStore;
+import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
+import net.openhft.chronicle.engine.api.pubsub.SubscriptionConsumer;
+import net.openhft.chronicle.engine.api.tree.Asset;
+import net.openhft.chronicle.engine.api.tree.AssetNotFoundException;
+import net.openhft.chronicle.engine.api.tree.RequestContext;
+import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
+import net.openhft.chronicle.engine.map.KVSSubscription;
+import net.openhft.chronicle.network.api.session.SessionDetails;
+import net.openhft.chronicle.network.api.session.SessionProvider;
+import org.jetbrains.annotations.Nullable;
 
 public class DdpAuthenticatedKeyValueStore<K, V> implements AuthenticatedKeyValueStore<K, V>
 {
@@ -31,6 +38,22 @@ public class DdpAuthenticatedKeyValueStore<K, V> implements AuthenticatedKeyValu
 
         isAuthenticated();
         return kvStore.subscription(createIfAbsent);
+    }
+
+    @Override
+    public boolean put(K key, V value) {
+        System.out.println(this.getClass().getName() + ": put");
+
+        isAuthenticated();
+        return kvStore.put(key, value);
+    }
+
+    @Override
+    public boolean remove(K key) {
+        System.out.println(this.getClass().getName() + ": remove");
+
+        isAuthenticated();
+        return kvStore.remove(key);
     }
 
     @Nullable
