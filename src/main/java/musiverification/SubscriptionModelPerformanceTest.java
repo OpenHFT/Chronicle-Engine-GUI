@@ -140,7 +140,7 @@ public class SubscriptionModelPerformanceTest {
             {
                 _testMap.put(key, _twoMbTestString);
             });
-        }, _noOfRunsToAverage, _secondInNanos);
+        }, _noOfRunsToAverage, _secondInNanos * 3 / 2);
 
         //Test that the correct number of events was triggered on event listener
         waitFor(() -> topicSubscriber.getNoOfEvents().get() >= _noOfPuts * _noOfRunsToAverage);
@@ -181,7 +181,7 @@ public class SubscriptionModelPerformanceTest {
             Assert.assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
             Assert.assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
 
-        }, _noOfRunsToAverage, _secondInNanos);
+        }, _noOfRunsToAverage, _secondInNanos * 2);
     }
 
     /**
@@ -219,7 +219,7 @@ public class SubscriptionModelPerformanceTest {
 
             mapEventListener.resetCounters();
 
-        }, _noOfRunsToAverage, 2 * _secondInNanos);
+        }, _noOfRunsToAverage, 3 * _secondInNanos);
     }
 
     /**

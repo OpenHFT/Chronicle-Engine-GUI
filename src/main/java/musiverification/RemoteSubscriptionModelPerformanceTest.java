@@ -72,7 +72,7 @@ public class RemoteSubscriptionModelPerformanceTest {
 //        YamlLogging.showServerReads = true;
 //        YamlLogging.clientReads = true;
 
-        _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath); //.substring(1, 1 << 10);
+        _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath)/*.substring(0, 56)*/;
         _twoMbTestStringLength = _twoMbTestString.length();
 
         serverAssetTree = new VanillaAssetTree(1).forTesting();
@@ -131,7 +131,6 @@ public class RemoteSubscriptionModelPerformanceTest {
                     _testMap.get(TestUtils.getKey(_mapName, i)));
         }, _noOfRunsToAverage, _secondInNanos);
     }
-
 
 
     /**
