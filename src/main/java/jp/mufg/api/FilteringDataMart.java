@@ -52,10 +52,6 @@ public class FilteringDataMart implements DirectDataMart {
     }
 
     @Override
-    public void startup(String target) {
-    }
-
-    @Override
     public void calculate(String target) {
         if (!this.target.equals(target))
             return;

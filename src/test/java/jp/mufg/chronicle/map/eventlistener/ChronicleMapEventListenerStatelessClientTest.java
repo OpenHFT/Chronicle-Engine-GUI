@@ -57,7 +57,7 @@ public class ChronicleMapEventListenerStatelessClientTest {
 
 
         Files.deleteIfExists(Paths.get(OS.TARGET, "chronicleMapString"));
-        VanillaAsset root = (VanillaAsset) serverAssetTree.root();
+        VanillaAsset root = serverAssetTree.root();
         root.addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(50).averageValueSize(2 << 20), asset));
