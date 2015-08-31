@@ -34,7 +34,7 @@ public class ManyFromChronicle<T> {
             return false;
         }
         MetaData.get().readMarshallable(tailer);
-        String methodName = tailer.readUTFΔ();
+        String methodName = tailer.readUtf8();
         Method m = findMethod(methodName);
         Object[] args = null;
         int len = (int) tailer.readStopBit();

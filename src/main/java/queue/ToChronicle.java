@@ -1,10 +1,14 @@
 package queue;
 
-import net.openhft.chronicle.*;
-import org.jetbrains.annotations.*;
+import net.openhft.chronicle.Chronicle;
+import net.openhft.chronicle.ExcerptAppender;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
-import java.lang.reflect.*;
+import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * Creates proxy objects that can be used to send events to a Chronicle.
@@ -70,7 +74,7 @@ public class ToChronicle implements InvocationHandler
             // Write the name of the method being invoked to Chronicle
 
             printDebuggingInfo("Method name: " + method.getName());
-            _appender.writeUTFΔ(method.getName());
+            _appender.writeUtf8(method.getName());
 
 
             // Write the arguments for the method being invoked
@@ -96,7 +100,7 @@ public class ToChronicle implements InvocationHandler
                     if (arg instanceof String)
                     {
                         _appender.writeChar('S');
-                        _appender.writeUTFΔ((String) arg);
+                        _appender.writeUtf8((String) arg);
 
                         printDebuggingInfo("String: " + arg);
                     }
