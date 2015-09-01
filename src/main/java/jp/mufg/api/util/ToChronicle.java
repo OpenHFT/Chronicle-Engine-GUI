@@ -33,7 +33,7 @@ public class ToChronicle implements InvocationHandler {
         ExcerptAppender appender = chronicle.createAppender();
         appender.startExcerpt();
         MetaData.get().writeMarshallable(appender);
-        appender.writeUtf8(method.getName());
+        appender.writeUTFΔ(method.getName());
         if (args == null) {
             appender.writeStopBit(0);
 

@@ -32,7 +32,7 @@ public class FromChronicle<T> {
             return false;
         }
         MetaData.get().readMarshallable(tailer);
-        String methodName = tailer.readUtf8();
+        String methodName = tailer.readUTFΔ();
         Method m = findMethod(methodName);
         Object[] args = null;
         int len = (int) tailer.readStopBit();

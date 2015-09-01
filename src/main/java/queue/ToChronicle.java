@@ -74,7 +74,7 @@ public class ToChronicle implements InvocationHandler
             // Write the name of the method being invoked to Chronicle
 
             printDebuggingInfo("Method name: " + method.getName());
-            _appender.writeUtf8(method.getName());
+            _appender.writeUTFΔ(method.getName());
 
 
             // Write the arguments for the method being invoked
@@ -100,7 +100,7 @@ public class ToChronicle implements InvocationHandler
                     if (arg instanceof String)
                     {
                         _appender.writeChar('S');
-                        _appender.writeUtf8((String) arg);
+                        _appender.writeUTFΔ((String) arg);
 
                         printDebuggingInfo("String: " + arg);
                     }

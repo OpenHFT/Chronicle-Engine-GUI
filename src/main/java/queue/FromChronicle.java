@@ -116,7 +116,7 @@ public class FromChronicle<T>
 
         // Get the name of the method and the meta data about the method
 
-        String methodName = _tailer.readUtf8();
+        String methodName = _tailer.readUTFΔ();
         printDebuggingInfo("Method name: " + methodName);
         Method m = findMethod(methodName);
 
@@ -142,7 +142,7 @@ public class FromChronicle<T>
                 switch (c)
                 {
                     case 'S':
-                        args[i] = _tailer.readUtf8();
+                        args[i] = _tailer.readUTFΔ();
                         printDebuggingInfo("String: " + args[i]);
                         break;
                 }
