@@ -1,39 +1,39 @@
 package ddp.server;
 
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.server.*;
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.network.*;
-import net.openhft.chronicle.network.api.session.*;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.engine.api.map.MapView;
+import net.openhft.chronicle.engine.api.map.SubscriptionKeyValueStore;
+import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
+import net.openhft.chronicle.engine.map.ObjectKVSSubscription;
+import net.openhft.chronicle.engine.map.VanillaKVSSubscription;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.VanillaAsset;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.VanillaSessionDetails;
+import net.openhft.chronicle.network.api.session.SessionProvider;
+import net.openhft.chronicle.wire.WireType;
 
-import java.io.*;
+import java.io.IOException;
 
-public class ServerMain
-{
+public class ServerMain {
     public static final WireType WIRE_TYPE = WireType.BINARY;
+    public static boolean _addValuesAndSubscriber = Boolean.getBoolean("add");
     private VanillaAssetTree _assetTree;
     private VanillaAsset _root;
     private String _mapName = "testMap";
+    private ServerEndpoint serverEndpoint;
 
-    public static boolean _addValuesAndSubscriber = Boolean.getBoolean("add");
-
-    public static void main(String[] args) throws IOException, InterruptedException
-    {
+    public static void main(String[] args) throws IOException, InterruptedException {
         ServerMain serverMain = new ServerMain();
         serverMain.start();
 
-        if (_addValuesAndSubscriber)
-        {
+        if (_addValuesAndSubscriber) {
             serverMain.addValuesAndSubscriber();
         }
 
         System.in.read();
     }
 
-    public void start()
-    {
+    public void start() {
         //TODO DS move to constructor
         int port = 8088;
 
@@ -41,16 +41,7 @@ public class ServerMain
 
         _root = _assetTree.root();
 
-        try
-        {
-            final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, _assetTree, WIRE_TYPE);
-        }
-        catch (IOException e)
-        {
-            //TODO DS log and change...
-//            new StartupException()?
-            e.printStackTrace();
-        }
+        serverEndpoint = new ServerEndpoint("*:" + port, _assetTree, WIRE_TYPE);
 
         _root.addWrappingRule(AuthorizedKeyValueStore.class, "authenticated kvs",
                 AuthorizedKeyValueStore::new, SubscriptionKeyValueStore.class);
@@ -66,8 +57,7 @@ public class ServerMain
         _root.addLeafRule(VanillaKVSSubscription.class, "DDP", VanillaKVSSubscription::new);
     }
 
-    public void addValuesAndSubscriber() throws InterruptedException
-    {
+    public void addValuesAndSubscriber() throws InterruptedException {
         SessionProvider sessionProvider = _root.findView(SessionProvider.class);
         sessionProvider.set(VanillaSessionDetails.of("java-daniels", "secretPwd"));
 

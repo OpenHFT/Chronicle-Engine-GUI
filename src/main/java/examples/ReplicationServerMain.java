@@ -41,7 +41,7 @@ public class ReplicationServerMain {
     public static final Integer HOST_ID = Integer.getInteger("hostId", 1);
     private static Set<Closeable> closeables = new HashSet<>();
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
         final Integer hostId = HOST_ID;
         String remoteHostname = REMOTE_HOSTNAME;
         ReplicationServerMain replicationServerMain = new ReplicationServerMain();
@@ -88,13 +88,13 @@ public class ReplicationServerMain {
      * @throws IOException
      */
 
-    public ServerEndpoint create(int identifier, String remoteHostname) throws IOException {
+    public ServerEndpoint create(int identifier, String remoteHostname) {
         if (identifier < 0 || identifier > Byte.MAX_VALUE)
             throw new IllegalStateException();
         return create((byte) identifier, remoteHostname);
     }
 
-    private ServerEndpoint create(byte identifier, String remoteHostname) throws IOException {
+    private ServerEndpoint create(byte identifier, String remoteHostname) {
 
         YamlLogging.clientReads = true;
         YamlLogging.clientWrites = true;

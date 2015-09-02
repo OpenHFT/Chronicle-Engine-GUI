@@ -2,7 +2,6 @@ package musiverification;
 
 import ddp.api.TestUtils;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
@@ -12,7 +11,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +32,7 @@ public class ManyMapsFilePerKeyTest {
     private static VanillaAssetTree assetTree = new VanillaAssetTree(10).forTesting();
 
     @BeforeClass
-    public static void setUp() throws IOException {
+    public static void setUp() {
         assetTree.root().enableTranslatingValuesToBytesStore();
 
         assetTree.root().addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
@@ -206,7 +204,7 @@ public class ManyMapsFilePerKeyTest {
         }
 
         @Override
-        public void onMessage(String key, String value) throws InvalidSubscriberException {
+        public void onMessage(String key, String value) {
             int eventNo = _noOfEvents.incrementAndGet();
 
             //Test that the key matches the expected

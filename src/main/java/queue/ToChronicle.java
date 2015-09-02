@@ -40,8 +40,7 @@ public class ToChronicle implements InvocationHandler
      * @throws IOException If there were any issues creating the proxy class.
      */
     @NotNull
-    public static <T> T of(@NotNull Class<T> interfaceType, Chronicle chronicle, boolean enableDebuggingLog, int sleepInMs) throws IOException
-    {
+    public static <T> T of(@NotNull Class<T> interfaceType, Chronicle chronicle, boolean enableDebuggingLog, int sleepInMs) {
         return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[]{interfaceType}, new ToChronicle(chronicle, enableDebuggingLog, sleepInMs));
     }
 

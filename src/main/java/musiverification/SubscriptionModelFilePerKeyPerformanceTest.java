@@ -292,7 +292,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
          * @throws InvalidSubscriberException
          */
         @Override
-        public void onMessage(String topic, String message) throws InvalidSubscriberException {
+        public void onMessage(String topic, String message) {
             if (message == null) {
                 System.out.println("topic " + topic + " deleted?");
                 return;

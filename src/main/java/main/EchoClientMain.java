@@ -78,7 +78,7 @@ public class EchoClientMain {
     public static final int TARGET_THROUGHPUT = Integer.getInteger("throughput", 20_000);
     public static final String hostnames = System.getProperty("hostname", "localhost");
 
-    public static void main(@NotNull String... args) throws IOException, InterruptedException {
+    public static void main(@NotNull String... args) throws IOException {
         String[] hostnames = EchoClientMain.hostnames.split(",");
 
         SocketChannel[] sockets = new SocketChannel[CLIENTS];
@@ -104,7 +104,7 @@ public class EchoClientMain {
             socket.close();
     }
 
-    private static void testThroughput(@NotNull SocketChannel... sockets) throws IOException, InterruptedException {
+    private static void testThroughput(@NotNull SocketChannel... sockets) throws IOException {
         System.out.println("Starting throughput test");
         int bufferSize = 32 * 1024;
         ByteBuffer bb = ByteBuffer.allocateDirect(bufferSize);

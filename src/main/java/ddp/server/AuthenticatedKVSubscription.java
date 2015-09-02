@@ -1,26 +1,29 @@
 package ddp.server;
 
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.api.pubsub.*;
-import net.openhft.chronicle.engine.api.tree.*;
-import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.query.*;
-import net.openhft.chronicle.network.api.session.*;
-import org.jetbrains.annotations.*;
+import net.openhft.chronicle.engine.api.map.KeyValueStore;
+import net.openhft.chronicle.engine.api.map.MapEvent;
+import net.openhft.chronicle.engine.api.pubsub.Subscriber;
+import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
+import net.openhft.chronicle.engine.api.tree.Asset;
+import net.openhft.chronicle.engine.api.tree.RequestContext;
+import net.openhft.chronicle.engine.map.EventConsumer;
+import net.openhft.chronicle.engine.map.ObjectKVSSubscription;
+import net.openhft.chronicle.engine.query.Filter;
+import net.openhft.chronicle.network.api.session.SessionDetails;
+import net.openhft.chronicle.network.api.session.SessionProvider;
+import org.jetbrains.annotations.NotNull;
 
-import java.time.*;
+import java.time.Instant;
 
 //TODO DS implement the rest of the functionality from VanillaKVSSubscription.
-public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<K, V>
-{
+public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<K, V> {
     private final SessionProvider sessionProvider;
     private Asset asset;
     private ObjectKVSSubscription underlying;
     private RequestContext requestContext;
 
     public AuthenticatedKVSubscription(RequestContext requestContext, Asset asset,
-                                       ObjectKVSSubscription underlying)
-    {
+                                       ObjectKVSSubscription underlying) {
         System.out.println(this.getClass().getName() + ": constructor");
         this.requestContext = requestContext;
         this.asset = asset;
@@ -29,8 +32,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
     }
 
     @Override
-    public void registerKeySubscriber(@NotNull RequestContext rc, @NotNull Subscriber subscriber, @NotNull Filter filter)
-    {
+    public void registerKeySubscriber(@NotNull RequestContext rc, @NotNull Subscriber subscriber, @NotNull Filter filter) {
         System.out.println(this.getClass().getName() + ": registerKeySubscriber");
 
         //TODO DS consider what to do with bootstrapping if anything
@@ -40,8 +42,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
 
 
     @Override
-    public void registerTopicSubscriber(RequestContext rc, TopicSubscriber subscriber)
-    {
+    public void registerTopicSubscriber(RequestContext rc, TopicSubscriber subscriber) {
         System.out.println(this.getClass().getName() + ": registerTopicSubscriber");
 
         //TODO DS consider what to do with bootstrapping if anything
@@ -51,8 +52,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
 
 
     @Override
-    public boolean needsPrevious()
-    {
+    public boolean needsPrevious() {
         System.out.println(this.getClass().getName() + ": needsPrevious");
 
         isAuthenticated();
@@ -60,8 +60,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
     }
 
     @Override
-    public void setKvStore(KeyValueStore store)
-    {
+    public void setKvStore(KeyValueStore store) {
         System.out.println(this.getClass().getName() + ": setKvStore");
 
         isAuthenticated();
@@ -69,8 +68,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
     }
 
     @Override
-    public void notifyEvent(MapEvent changeEvent)
-    {
+    public void notifyEvent(MapEvent changeEvent) {
         System.out.println(this.getClass().getName() + ": notifyEvent - " + changeEvent + "    -     " + Instant.now());
 
         isAuthenticated();
@@ -78,8 +76,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
     }
 
     @Override
-    public boolean hasSubscribers()
-    {
+    public boolean hasSubscribers() {
         System.out.println(this.getClass().getName() + ": hasSubscribers");
 
         isAuthenticated();
@@ -89,8 +86,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
     @Override
     public void registerSubscriber(@NotNull RequestContext rc,
                                    @NotNull Subscriber subscriber,
-                                   @NotNull Filter filter)
-    {
+                                   @NotNull Filter filter) {
         System.out.println(this.getClass().getName() + ": registerSubscriber");
 
         isAuthenticated();
@@ -98,8 +94,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
     }
 
     @Override
-    public void unregisterSubscriber(@NotNull Subscriber subscriber)
-    {
+    public void unregisterSubscriber(@NotNull Subscriber subscriber) {
         System.out.println(this.getClass().getName() + ": unregisterSubscriber");
 
         isAuthenticated();
@@ -107,8 +102,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
     }
 
     @Override
-    public void unregisterTopicSubscriber(@NotNull TopicSubscriber subscriber)
-    {
+    public void unregisterTopicSubscriber(@NotNull TopicSubscriber subscriber) {
         System.out.println(this.getClass().getName() + ": unregisterTopicSubscriber");
 
         isAuthenticated();
@@ -116,8 +110,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
     }
 
     @Override
-    public void registerDownstream(EventConsumer subscription)
-    {
+    public void registerDownstream(EventConsumer subscription) {
         System.out.println(this.getClass().getName() + ": registerDownstream");
 
         isAuthenticated();
@@ -125,8 +118,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
     }
 
     @Override
-    public int keySubscriberCount()
-    {
+    public int keySubscriberCount() {
         System.out.println(this.getClass().getName() + ": keySubscriberCount");
 
         isAuthenticated();
@@ -134,8 +126,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
     }
 
     @Override
-    public int entrySubscriberCount()
-    {
+    public int entrySubscriberCount() {
         System.out.println(this.getClass().getName() + ": entrySubscriberCount");
 
         isAuthenticated();
@@ -143,8 +134,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
     }
 
     @Override
-    public int topicSubscriberCount()
-    {
+    public int topicSubscriberCount() {
         System.out.println(this.getClass().getName() + ": topicSubscriberCount");
 
         isAuthenticated();
@@ -153,8 +143,7 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
 
 
     @Override
-    public void close()
-    {
+    public void close() {
         System.out.println(this.getClass().getName() + ": close");
 
         isAuthenticated();
@@ -163,12 +152,12 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<
         underlying.close();
     }
 
-    private void isAuthenticated()
-    {
+    private void isAuthenticated() {
         SessionDetails sessionDetails = sessionProvider.get();
+        if (sessionDetails != null) {
+            String userId = sessionDetails.userId();
 
-        String userId = sessionDetails.userId();
-
-        System.out.println(this.getClass().getName() + ": Authenticating " + userId);
+            System.out.println(this.getClass().getName() + ": Authenticating " + userId);
+        }
     }
 }

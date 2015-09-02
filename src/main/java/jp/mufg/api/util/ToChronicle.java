@@ -5,7 +5,6 @@ import net.openhft.chronicle.ExcerptAppender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -18,7 +17,7 @@ public class ToChronicle implements InvocationHandler {
     }
 
     @NotNull
-    public static <T> T of(@NotNull Class<T> interfaceType, Chronicle chroncile) throws IOException {
+    public static <T> T of(@NotNull Class<T> interfaceType, Chronicle chroncile) {
         return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(),
                 new Class[]{interfaceType},
                 new ToChronicle(chroncile));

@@ -26,8 +26,6 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 
-import java.io.IOException;
-
 /**
  * Created by andre on 01/05/2015.
  */
@@ -37,7 +35,7 @@ public class BinaryWireMain {
     public static final boolean PERSIST_TO_CHRONICLE = Boolean.parseBoolean(System.getProperty("persisted", "true"));
     public static final int PORT = 9088;
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
         int port = PORT;
 
         VanillaAssetTree assetTree = new VanillaAssetTree().forTesting(false);

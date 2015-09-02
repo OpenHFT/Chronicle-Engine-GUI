@@ -4,7 +4,6 @@ import ddp.api.TestUtils;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapView;
-import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
@@ -25,16 +24,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 public class ManyMapsTest {
-    static {
-        System.setProperty("heartbeat.timeout", "100000");
-    }
     private static Map<String, Map<String, String>> _maps;
     private static String _mapBaseName = "ManyMapsTest-";
-
     //    private static int _noOfMaps = Boolean.getBoolean("quick") ? 100 : 1_100;
     private static int _noOfMaps = Boolean.getBoolean("quick") ? 10 : 1100;
     private static int _noOfKvps = 1_000;
     private static AssetTree assetTree = new VanillaAssetTree(12).forTesting();
+
+    static {
+        System.setProperty("heartbeat.timeout", "100000");
+    }
 
     @BeforeClass
     public static void setUp() throws IOException {
@@ -72,14 +71,14 @@ public class ManyMapsTest {
         System.out.println("... " + _noOfMaps + " Done.");
     }
 
-    @Before
-    public void initTest() {
-//        createAndFillMaps();
-    }
-
     @AfterClass
     public static void tearDown() {
         assetTree.close();
+    }
+
+    @Before
+    public void initTest() {
+//        createAndFillMaps();
     }
 
     /**
@@ -296,7 +295,7 @@ public class ManyMapsTest {
         }
 
         @Override
-        public void onMessage(String key, String value) throws InvalidSubscriberException {
+        public void onMessage(String key, String value) {
             int eventNo = _noOfEvents.incrementAndGet();
 
             //Test that the key matches the expected

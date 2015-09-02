@@ -21,14 +21,13 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 
-import java.io.IOException;
-
 /**
  * Created by andre on 01/05/2015.
  */
 public class TextWireMain {
     public static final WireType WIRE_TYPE = WireType.TEXT;
-    public static void main(String[] args) throws IOException, InterruptedException {
+
+    public static void main(String[] args) {
 
 
         YamlLogging.showServerReads = true;

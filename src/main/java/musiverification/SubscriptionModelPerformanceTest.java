@@ -84,7 +84,7 @@ public class SubscriptionModelPerformanceTest {
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() {
         clientAssetTree.close();
         serverEndpoint.close();
         serverAssetTree.close();
@@ -321,7 +321,7 @@ public class SubscriptionModelPerformanceTest {
          * @throws InvalidSubscriberException
          */
         @Override
-        public void onMessage(String topic, String message) throws InvalidSubscriberException {
+        public void onMessage(String topic, String message) {
             Assert.assertEquals(_keyName, topic);
             Assert.assertEquals(_stringLength, message.length());
 

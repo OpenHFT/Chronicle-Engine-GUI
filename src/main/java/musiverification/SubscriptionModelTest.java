@@ -13,7 +13,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -41,7 +40,7 @@ public class SubscriptionModelTest {
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() {
         assetTree().close();
     }
 

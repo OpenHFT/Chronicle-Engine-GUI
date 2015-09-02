@@ -13,7 +13,7 @@ public class ChronicleDataMartWrapper implements DataMartWrapper {
     private ChronicleDataMartReader reader;
 
     public ChronicleDataMartWrapper(Chronicle chronicle,
-                                    DirectDataMart dataMart) throws IOException {
+                                    DirectDataMart dataMart) {
         this.chronicle = chronicle;
         writer = new ChronicleDataMartWriter(chronicle);
         this.dataMart = dataMart;

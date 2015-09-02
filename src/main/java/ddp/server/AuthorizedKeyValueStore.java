@@ -177,6 +177,8 @@ public class AuthorizedKeyValueStore<K, V> implements SubscriptionKeyValueStore<
     private void checkPermission(String accessLevelRequired)
     {
         SessionDetails sessionDetails = sessionProvider.get();
+        if (sessionDetails == null)
+            throw new IllegalStateException("No SessionDetails");
 
         String userId = sessionDetails.userId();
 

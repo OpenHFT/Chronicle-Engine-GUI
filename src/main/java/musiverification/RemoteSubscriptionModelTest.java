@@ -66,7 +66,7 @@ public class RemoteSubscriptionModelTest {
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() {
         assetTree().close();
     }
 

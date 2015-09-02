@@ -11,7 +11,7 @@ import static net.openhft.chronicle.core.Jvm.pause;
 public class ChronicleReader {
     static final String CHRONICLE_BASE = System.getProperty("chronicle", "engine-input");
 
-    public static void main(String... ignored) throws IOException, InterruptedException {
+    public static void main(String... ignored) throws IOException {
         Chronicle chronicle = ChronicleQueueBuilder.vanilla(CHRONICLE_BASE).build();
         ChronicleDataMartReader tailer = ChronicleDataMartReader.of(
                 PrintAll.of(DataMart.class), chronicle.createTailer());

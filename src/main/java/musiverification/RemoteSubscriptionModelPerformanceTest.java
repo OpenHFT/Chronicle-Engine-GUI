@@ -94,7 +94,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     }
 
     @AfterClass
-    public static void tearDownAfterClass() throws IOException {
+    public static void tearDownAfterClass() {
         clientAssetTree.close();
         serverEndpoint.close();
         serverAssetTree.close();
@@ -111,7 +111,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() {
     }
 
 
@@ -436,7 +436,7 @@ public class RemoteSubscriptionModelPerformanceTest {
          * @throws InvalidSubscriberException
          */
         @Override
-        public void onMessage(String topic, String message) throws InvalidSubscriberException {
+        public void onMessage(String topic, String message) {
             Assert.assertEquals(_keyName, topic);
             Assert.assertEquals(_stringLength, message.length());
 
