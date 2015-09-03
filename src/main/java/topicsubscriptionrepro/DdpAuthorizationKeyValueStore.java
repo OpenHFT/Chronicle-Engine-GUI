@@ -13,6 +13,8 @@ public class DdpAuthorizationKeyValueStore<K, V> implements SubscriptionKeyValue
 {
     private static final Logger _logger = LoggerFactory.getLogger(DdpAuthorizationKeyValueStore.class);
 
+    private final String _throwInConstructorMapName = "/throw/in/constructor/map";
+
     private final String _assetName;
     private final SessionProvider _sessionProvider;
     private final Asset _asset;
@@ -30,6 +32,8 @@ public class DdpAuthorizationKeyValueStore<K, V> implements SubscriptionKeyValue
         _keyValueStore = keyValueStore;
 
         System.out.println(context.name());
+
+        checkPermissions("CREATE");
     }
 
     //TODO DS figure out where this is used. I think we need to adjust the required permissions.
@@ -224,6 +228,14 @@ public class DdpAuthorizationKeyValueStore<K, V> implements SubscriptionKeyValue
 
         System.out.println("Checking permissions {" + permissionRequired + "} for user " + userId);
 
-        //Everyone is authorized
+        if("CREATE".equals(permissionRequired) || _throwInConstructorMapName.equals(_assetName))
+        {
+            String errorMessage = "CREATE permission denied on map " + _throwInConstructorMapName;
+
+            System.out.println(errorMessage);
+
+            throw new PermissionDeniedException(errorMessage);
+        }
+
     }
 }
