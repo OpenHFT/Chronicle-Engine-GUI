@@ -5,7 +5,6 @@ import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.Publisher;
 import net.openhft.chronicle.engine.api.pubsub.Replication;
 import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
-import net.openhft.chronicle.engine.api.session.SessionProvider;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.fs.Cluster;
 import net.openhft.chronicle.engine.fs.Clusters;
@@ -17,6 +16,7 @@ import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.session.VanillaSessionProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.engine.tree.VanillaReplication;
+import net.openhft.chronicle.network.api.session.SessionProvider;
 import net.openhft.chronicle.threads.EventGroup;
 import net.openhft.chronicle.threads.api.EventLoop;
 import net.openhft.chronicle.wire.WireType;
@@ -44,6 +44,29 @@ public class ReplicationServerMain {
         replicationServerMain.create(hostId, remoteHostname);
     }
 
+    private static void newCluster(byte host, VanillaAssetTree tree, String remoteHostname) {
+        Clusters clusters = new Clusters();
+        HashMap<String, HostDetails> hostDetailsMap = new HashMap<String, HostDetails>();
+
+        {
+            final HostDetails value = new HostDetails();
+            value.hostId = 1;
+            value.connectUri = (host == 1 ? "*" : remoteHostname) + ":" + 5701;
+            value.timeoutMs = 1000;
+            hostDetailsMap.put("host1", value);
+        }
+        {
+            final HostDetails value = new HostDetails();
+            value.hostId = 2;
+            value.connectUri = (host == 2 ? "*" : remoteHostname) + ":" + 5702;
+            value.timeoutMs = 1000;
+            hostDetailsMap.put("host2", value);
+        }
+
+
+        clusters.put("cluster", new Cluster("hosts", hostDetailsMap));
+        tree.root().addView(Clusters.class, clusters);
+    }
 
     /**
      * @param identifier     the local host identifier
@@ -91,31 +114,6 @@ public class ReplicationServerMain {
 
         ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + (5700 + identifier), tree, wireType);
         return serverEndpoint;
-    }
-
-
-    private static void newCluster(byte host, VanillaAssetTree tree, String remoteHostname) {
-        Clusters clusters = new Clusters();
-        HashMap<String, HostDetails> hostDetailsMap = new HashMap<String, HostDetails>();
-
-        {
-            final HostDetails value = new HostDetails();
-            value.hostId = 1;
-            value.connectUri = (host == 1 ? "*" : remoteHostname) + ":" + 5701;
-            value.timeoutMs = 1000;
-            hostDetailsMap.put("host1", value);
-        }
-        {
-            final HostDetails value = new HostDetails();
-            value.hostId = 2;
-            value.connectUri = (host == 2 ? "*" : remoteHostname) + ":" + 5702;
-            value.timeoutMs = 1000;
-            hostDetailsMap.put("host2", value);
-        }
-
-
-        clusters.put("cluster", new Cluster("hosts", hostDetailsMap));
-        tree.root().addView(Clusters.class, clusters);
     }
 }
 

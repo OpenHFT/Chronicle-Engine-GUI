@@ -41,9 +41,7 @@ public class AllTestMain {
             System.out.println("=====================");
             new JUnit4Builder().runnerForClass(testClass).run(runNotifier);
         }
-//        if (failures.size() == 1) {
-//            System.out.println("Got the expected number of failures, 1");
-//        } else {
+
         if (!failures.isEmpty()) {
             System.out.println("\n" +
                     "***************************\n" +

@@ -35,7 +35,7 @@ public class SubscriptionModelPerformanceTest {
     private static final int _noOfPuts = 50;
     private static final int _noOfRunsToAverage = Boolean.getBoolean("quick") ? 2 : 10;
     // TODO CHENT-49
-    private static final long _secondInNanos = 9_000_000_000L;
+    private static final long _secondInNanos = 1_000_000_000L;
     private static String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
     private static int _twoMbTestStringLength;
@@ -84,7 +84,7 @@ public class SubscriptionModelPerformanceTest {
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() {
         clientAssetTree.close();
         serverEndpoint.close();
         serverAssetTree.close();
@@ -140,7 +140,7 @@ public class SubscriptionModelPerformanceTest {
             {
                 _testMap.put(key, _twoMbTestString);
             });
-        }, _noOfRunsToAverage, _secondInNanos);
+        }, _noOfRunsToAverage, _secondInNanos * 3 / 2);
 
         //Test that the correct number of events was triggered on event listener
         waitFor(() -> topicSubscriber.getNoOfEvents().get() >= _noOfPuts * _noOfRunsToAverage);
@@ -181,7 +181,7 @@ public class SubscriptionModelPerformanceTest {
             Assert.assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
             Assert.assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
 
-        }, _noOfRunsToAverage, _secondInNanos);
+        }, _noOfRunsToAverage, _secondInNanos * 2);
     }
 
     /**
@@ -219,7 +219,7 @@ public class SubscriptionModelPerformanceTest {
 
             mapEventListener.resetCounters();
 
-        }, _noOfRunsToAverage, _secondInNanos);
+        }, _noOfRunsToAverage, 3 * _secondInNanos);
     }
 
     /**
@@ -321,7 +321,7 @@ public class SubscriptionModelPerformanceTest {
          * @throws InvalidSubscriberException
          */
         @Override
-        public void onMessage(String topic, String message) throws InvalidSubscriberException {
+        public void onMessage(String topic, String message) {
             Assert.assertEquals(_keyName, topic);
             Assert.assertEquals(_stringLength, message.length());
 

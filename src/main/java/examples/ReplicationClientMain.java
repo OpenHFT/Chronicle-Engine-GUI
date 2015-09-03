@@ -5,7 +5,6 @@ import net.openhft.chronicle.engine.api.map.MapEvent;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.Publisher;
 import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
-import net.openhft.chronicle.engine.api.session.SessionProvider;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.ObjectKVSSubscription;
@@ -16,6 +15,7 @@ import net.openhft.chronicle.engine.pubsub.RemoteReference;
 import net.openhft.chronicle.engine.pubsub.RemoteTopicPublisher;
 import net.openhft.chronicle.engine.session.VanillaSessionProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.api.session.SessionProvider;
 import net.openhft.chronicle.network.connection.SocketAddressSupplier;
 import net.openhft.chronicle.network.connection.TcpChannelHub;
 import net.openhft.chronicle.threads.EventGroup;
@@ -141,7 +141,7 @@ public class ReplicationClientMain {
         SessionProvider sessionProvider = new VanillaSessionProvider();
 
         tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider,
-                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, "")));
+                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, ""), true));
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
         MapView<String, String> result = tree.acquireMap(nameName, String.class, String.class);

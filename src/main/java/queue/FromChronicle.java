@@ -1,10 +1,12 @@
 package queue;
 
-import net.openhft.chronicle.*;
-import org.jetbrains.annotations.*;
+import net.openhft.chronicle.ExcerptTailer;
+import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Used to read method invocations for a specified interface that are stored in a Chronicle and invoke these methods on a provided object that implements the interface.
@@ -18,10 +20,9 @@ public class FromChronicle<T>
     @NotNull
     private final T _instance;
     private final ExcerptTailer _tailer;
-    private int _sleepInMs;
     private final Map<String, Method> methodMap = new HashMap<>();
     private final Map<String, Object[]> argumentArrays = new HashMap<>(); // A map of re-usable Object arrays for each argument.
-
+    private int _sleepInMs;
     private boolean _isDebuggingEnabled = true;
 
     /**

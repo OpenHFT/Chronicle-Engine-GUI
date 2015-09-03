@@ -8,14 +8,11 @@ import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.pubsub.Subscriber;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
-import net.openhft.chronicle.engine.tree.AddedAssetEvent;
-import net.openhft.chronicle.engine.tree.ExistingAssetEvent;
-import net.openhft.chronicle.engine.tree.RemovedAssetEvent;
-import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import org.easymock.EasyMock;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -43,7 +40,7 @@ public class SubscriptionModelTest {
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() {
         assetTree().close();
     }
 
@@ -265,7 +262,6 @@ public class SubscriptionModelTest {
      * and in the correct order.
      */
     @Test
-    @Ignore("You can't use TopicPublisher to alter a tree, nor can TopicSubscriber hear these changes")
     public void testMapAddedKeyListener() throws InvalidSubscriberException {
         //DS test that we can be notified when maps are added
         resetChassis();

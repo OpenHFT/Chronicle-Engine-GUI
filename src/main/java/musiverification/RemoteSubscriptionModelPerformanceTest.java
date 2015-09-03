@@ -38,7 +38,7 @@ import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.*;
-import software.chronicle.enteprise.kvstores.caching.CacheKVStore;
+import software.chronicle.enterprise.kvstores.chaching.CacheKVStore;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,8 +55,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     //TODO DS test having the server side on another machine
     private static final int _noOfPuts = 50;
     private static final int _noOfRunsToAverage = Boolean.getBoolean("quick") ? 2 : 10;
-    // TODO Fix so that it is 1 second. CHENT-49
-    private static final long _secondInNanos = 6_500_000_000L;
+    private static final long _secondInNanos = 1_000_000_000L;
     private static final AtomicInteger counter = new AtomicInteger();
     private static final String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
@@ -72,7 +71,7 @@ public class RemoteSubscriptionModelPerformanceTest {
 //        YamlLogging.showServerReads = true;
 //        YamlLogging.clientReads = true;
 
-        _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath); //.substring(1, 1 << 10);
+        _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath)/*.substring(0, 56)*/;
         _twoMbTestStringLength = _twoMbTestString.length();
 
         serverAssetTree = new VanillaAssetTree(1).forTesting();
@@ -80,21 +79,21 @@ public class RemoteSubscriptionModelPerformanceTest {
         serverAssetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(_noOfPuts).averageValueSize(_twoMbTestStringLength), asset));
+
         TCPRegistry.createServerSocketChannelFor("RemoteSubscriptionModelPerformanceTest.port");
         serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);
 
         clientAssetTree = new VanillaAssetTree(13).forRemoteAccess("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY);
 
         clientAssetTree.root().addWrappingRule(MapView.class, "ENTERPRISE" + " cached -> sub",
-                VanillaMapView::new, software.chronicle.enteprise.kvstores.caching.CacheKVStore.class);
-        clientAssetTree.root().addWrappingRule(software.chronicle.enteprise.kvstores.caching
-                        .CacheKVStore.class, "ENTERPRISE" + " cached -> sub",
+                VanillaMapView::new, CacheKVStore.class);
+        clientAssetTree.root().addWrappingRule(CacheKVStore.class, "ENTERPRISE" + " cached -> sub",
                 CacheKVStore::new, ObjectKeyValueStore.class);
 
     }
 
     @AfterClass
-    public static void tearDownAfterClass() throws IOException {
+    public static void tearDownAfterClass() {
         clientAssetTree.close();
         serverEndpoint.close();
         serverAssetTree.close();
@@ -105,21 +104,22 @@ public class RemoteSubscriptionModelPerformanceTest {
     public void setUp() throws IOException {
         Files.deleteIfExists(Paths.get(OS.TARGET, _mapName));
 
-        _testMap = clientAssetTree.acquireMap(_mapName, String.class, String.class);
+        _testMap = clientAssetTree.acquireMap(_mapName + "?putReturnsNull=true", String.class, String.class);
 
         _testMap.clear();
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() {
     }
 
 
     /**
-     * Test that 50 updates per second of 2 MB string values completes in 1 second.
+     * Test that listening to events for a given key can handle 50 updates per second of 2 MB string values.
      */
     @Test
     public void testGetPerformance() {
+        _testMap.clear();
 
         IntStream.range(0, _noOfPuts).forEach(i ->
                 _testMap.put(TestUtils.getKey(_mapName, i), _twoMbTestString));
@@ -132,12 +132,13 @@ public class RemoteSubscriptionModelPerformanceTest {
     }
 
 
-
     /**
      * Test that 50 updates per second of 2 MB string values completes in 1 second.
      */
     @Test
     public void testPutPerformance() {
+        _testMap.clear();
+
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> _testMap.size(), () -> {
             IntStream.range(0, _noOfPuts).forEach(i ->
@@ -151,29 +152,33 @@ public class RemoteSubscriptionModelPerformanceTest {
      */
     @Test
     public void testSubscriptionMapEventOnKeyPerformance() {
+        _testMap.clear();
+
         String key = TestUtils.getKey(_mapName, 0);
 
         //Create subscriber and register
         //Add 4 for the number of puts that is added to the string
-        TestChronicleKeyEventSubscriber keyEventSubscriber = new TestChronicleKeyEventSubscriber(_twoMbTestStringLength + 4);
+        TestChronicleKeyEventSubscriber keyEventSubscriber = new TestChronicleKeyEventSubscriber(_twoMbTestStringLength);
 
-        clientAssetTree.registerSubscriber(_mapName + "/" + key + "?bootstrap=false&putReturnsNull=true", String.class, keyEventSubscriber);
-        // TODO CHENT-49
+        clientAssetTree.registerSubscriber(_mapName + "/" + key + "?putReturnsNull=true", String.class, keyEventSubscriber);
         Jvm.pause(100);
         Asset child = serverAssetTree.getAsset(_mapName).getChild(key);
         Assert.assertNotNull(child);
         Subscription subscription = child.subscription(false);
         Assert.assertEquals(1, subscription.subscriberCount());
 
+        long start = System.nanoTime();
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
             IntStream.range(0, _noOfPuts).forEach(i ->
             {
-                _testMap.put(key, _twoMbTestString + (i + 1000));
+                _testMap.put(key, _twoMbTestString);
             });
-        }, _noOfRunsToAverage, _secondInNanos);
+        }, _noOfRunsToAverage, 3 * _secondInNanos);
 
-        waitFor(() -> keyEventSubscriber.getNoOfEvents().get() < _noOfPuts * _noOfRunsToAverage * 0.2);
+        waitFor(() -> keyEventSubscriber.getNoOfEvents().get() >= _noOfPuts * _noOfRunsToAverage);
+        long time = System.nanoTime() - start;
+        System.out.printf("Took %.3f seconds to receive all events%n", time / 1e9);
 
         //Test that the correct number of events was triggered on event listener
         Assert.assertEquals(_noOfPuts * _noOfRunsToAverage, keyEventSubscriber.getNoOfEvents().get());
@@ -190,6 +195,8 @@ public class RemoteSubscriptionModelPerformanceTest {
      */
     @Test
     public void testSubscriptionMapEventOnTopicPerformance() {
+        _testMap.clear();
+
         String key = TestUtils.getKey(_mapName, 0);
 
         //Create subscriber and register
@@ -212,7 +219,7 @@ public class RemoteSubscriptionModelPerformanceTest {
                     {
                         _testMap.put(key, _twoMbTestString);
                     });
-                }, _noOfRunsToAverage, _secondInNanos
+                }, _noOfRunsToAverage, 3 * _secondInNanos
         );
 
         //Test that the correct number of events was triggered on event listener
@@ -231,8 +238,9 @@ public class RemoteSubscriptionModelPerformanceTest {
      */
     @Test
     public void testSubscriptionMapEventListenerInsertPerformance() {
-        YamlLogging.showServerReads = YamlLogging.showServerWrites = true;
-        YamlLogging.clientWrites = true;
+        _testMap.clear();
+
+        YamlLogging.setAll(true);
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
@@ -261,12 +269,66 @@ public class RemoteSubscriptionModelPerformanceTest {
                     {
                         _testMap.put(TestUtils.getKey(_mapName, i), _twoMbTestString);
                     });
-                }, _noOfRunsToAverage, _secondInNanos
+                }, _noOfRunsToAverage, 2 * _secondInNanos
         );
 
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
 
         Jvm.pause(1000);
+        Assert.assertEquals(0, subscription.entrySubscriberCount());
+    }
+
+    /**
+     * Tests the performance of an event listener on the map for Update events of 2 MB strings.
+     * Expect it to handle at least 50 2 MB updates per second.
+     */
+    @Test
+    public void testSubscriptionMapEventListenerUpdatePerformance() {
+        _testMap.clear();
+
+        //Put values before testing as we want to ignore the insert events
+        Function<Integer, Object> putFunction = a -> _testMap.put(TestUtils.getKey(_mapName, a), _twoMbTestString);
+
+        IntStream.range(0, _noOfPuts).forEach(i ->
+        {
+            putFunction.apply(i);
+        });
+
+        Jvm.pause(100);
+        //Create subscriber and register
+        TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
+
+        Subscriber<MapEvent> mapEventSubscriber = e -> e.apply(mapEventListener);
+        clientAssetTree.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, mapEventSubscriber);
+
+        KVSSubscription subscription = (KVSSubscription) serverAssetTree.getAsset(_mapName).subscription(false);
+
+        waitFor(() -> subscription.entrySubscriberCount() == 1);
+        Assert.assertEquals(1, subscription.entrySubscriberCount());
+
+        //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
+        TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
+                    if (i > 0) {
+                        waitFor(() -> mapEventListener.getNoOfUpdateEvents().get() >= _noOfPuts);
+
+                        //Test that the correct number of events were triggered on event listener
+                        Assert.assertEquals(_noOfPuts, mapEventListener.getNoOfUpdateEvents().get());
+                    }
+                    Assert.assertEquals(0, mapEventListener.getNoOfInsertEvents().get());
+                    Assert.assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
+
+                    mapEventListener.resetCounters();
+
+                }, () -> {
+                    IntStream.range(0, _noOfPuts).forEach(i ->
+                    {
+                        putFunction.apply(i);
+                    });
+                }, _noOfRunsToAverage, 3 * _secondInNanos
+        );
+        clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
+
+        waitFor(() -> subscription.entrySubscriberCount() == 0);
         Assert.assertEquals(0, subscription.entrySubscriberCount());
     }
 
@@ -282,6 +344,7 @@ public class RemoteSubscriptionModelPerformanceTest {
      */
     @Test
     public void testSubscriptionMapEventListenerRemovePerformance() {
+        _testMap.clear();
         //Put values before testing as we want to ignore the insert and update events
 
         //Create subscriber and register
@@ -319,7 +382,7 @@ public class RemoteSubscriptionModelPerformanceTest {
             Assert.assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
         }
 
-        Assert.assertTrue((runtimeInNanos / (_noOfPuts * _noOfRunsToAverage)) <= _secondInNanos);
+        Assert.assertTrue((runtimeInNanos / (_noOfPuts * _noOfRunsToAverage)) <= 2 * _secondInNanos);
         clientAssetTree.unregisterSubscriber(_mapName, mapEventSubscriber);
     }
 
@@ -341,8 +404,12 @@ public class RemoteSubscriptionModelPerformanceTest {
 
         @Override
         public void onMessage(String newValue) {
-            Assert.assertEquals(_stringLength, newValue.length());
-            _noOfEvents.incrementAndGet();
+            if (newValue == null) {
+                System.out.println("No value");
+            } else {
+                Assert.assertEquals(_stringLength, newValue.length());
+                _noOfEvents.incrementAndGet();
+            }
         }
     }
 
@@ -368,7 +435,7 @@ public class RemoteSubscriptionModelPerformanceTest {
          * @throws InvalidSubscriberException
          */
         @Override
-        public void onMessage(String topic, String message) throws InvalidSubscriberException {
+        public void onMessage(String topic, String message) {
             Assert.assertEquals(_keyName, topic);
             Assert.assertEquals(_stringLength, message.length());
 

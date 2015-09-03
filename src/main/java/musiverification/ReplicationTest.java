@@ -45,6 +45,8 @@ public class ReplicationTest {
 
     public static final WireType WIRE_TYPE = WireType.TEXT;
     public static final String NAME = "/ChMaps/test";
+    static final ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor(
+            new NamedThreadFactory("all-trees-watcher", true));
     public static ServerEndpoint serverEndpoint1;
     public static ServerEndpoint serverEndpoint2;
     public static ServerEndpoint serverEndpoint3;
@@ -78,7 +80,7 @@ public class ReplicationTest {
     }
 
     @AfterClass
-    public static void after() throws IOException {
+    public static void after() {
 
         if (tree1 != null)
             tree1.close();
@@ -118,52 +120,12 @@ public class ReplicationTest {
         return tree;
     }
 
-
-    @Test
-    public void test() throws InterruptedException {
-
-        final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
-                .class);
-        Assert.assertNotNull(map1);
-
-        final ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String
-                .class);
-        Assert.assertNotNull(map2);
-
-
-        final ConcurrentMap<String, String> map3 = tree3.acquireMap(NAME, String.class, String
-                .class);
-        Assert.assertNotNull(map3);
-
-        map1.put("hello1", "world1");
-        map2.put("hello2", "world2");
-        map3.put("hello3", "world3");
-
-        for (int i = 1; i <= 50; i++) {
-            if (map1.size() == 3 && map2.size() == 3 && map3.size() == 3)
-                break;
-            Jvm.pause(200);
-        }
-
-
-        for (Map m : new Map[]{map1, map2, map3}) {
-            Assert.assertEquals("world1", m.get("hello1"));
-            Assert.assertEquals("world2", m.get("hello2"));
-            Assert.assertEquals("world3", m.get("hello3"));
-            Assert.assertEquals(3, m.size());
-        }
-
-    }
-
     public static String resourcesDir() {
         String path = ReplicationTest.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         if (path == null)
             return ".";
         return new File(path).getParentFile().getParentFile() + "/src/test/resources";
     }
-
-    static final ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor(
-            new NamedThreadFactory("all-trees-watcher", true));
 
     public static void registerTextViewofTree(String desc, AssetTree tree) {
         tree.registerSubscriber("", TopologicalEvent.class, e ->
@@ -208,6 +170,42 @@ public class ReplicationTest {
         } catch (Throwable t) {
             t.printStackTrace();
         }
+    }
+
+    @Test
+    public void test() throws InterruptedException {
+
+        final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
+                .class);
+        Assert.assertNotNull(map1);
+
+        final ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String
+                .class);
+        Assert.assertNotNull(map2);
+
+
+        final ConcurrentMap<String, String> map3 = tree3.acquireMap(NAME, String.class, String
+                .class);
+        Assert.assertNotNull(map3);
+
+        map1.put("hello1", "world1");
+        map2.put("hello2", "world2");
+        map3.put("hello3", "world3");
+
+        for (int i = 1; i <= 50; i++) {
+            if (map1.size() == 3 && map2.size() == 3 && map3.size() == 3)
+                break;
+            Jvm.pause(200);
+        }
+
+
+        for (Map m : new Map[]{map1, map2, map3}) {
+            Assert.assertEquals("world1", m.get("hello1"));
+            Assert.assertEquals("world2", m.get("hello2"));
+            Assert.assertEquals("world3", m.get("hello3"));
+            Assert.assertEquals(3, m.size());
+        }
+
     }
 
 

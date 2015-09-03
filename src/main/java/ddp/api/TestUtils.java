@@ -124,11 +124,11 @@ public class TestUtils {
         Files.write(Paths.get("./test" + extension), stringToWrite.getBytes());
     }
 
-    public static void deleteTestFile(String extension) throws IOException {
+    public static void deleteTestFile(String extension) {
         deleteFile(Paths.get("./test" + extension).toString());
     }
 
-    public static void deleteFile(String path) throws IOException {
+    public static void deleteFile(String path) {
         try {
             Files.deleteIfExists(Paths.get(path));
         } catch (Exception e) {

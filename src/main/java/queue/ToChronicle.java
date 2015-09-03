@@ -1,10 +1,14 @@
 package queue;
 
-import net.openhft.chronicle.*;
-import org.jetbrains.annotations.*;
+import net.openhft.chronicle.Chronicle;
+import net.openhft.chronicle.ExcerptAppender;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
-import java.lang.reflect.*;
+import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * Creates proxy objects that can be used to send events to a Chronicle.
@@ -36,8 +40,7 @@ public class ToChronicle implements InvocationHandler
      * @throws IOException If there were any issues creating the proxy class.
      */
     @NotNull
-    public static <T> T of(@NotNull Class<T> interfaceType, Chronicle chronicle, boolean enableDebuggingLog, int sleepInMs) throws IOException
-    {
+    public static <T> T of(@NotNull Class<T> interfaceType, Chronicle chronicle, boolean enableDebuggingLog, int sleepInMs) {
         return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[]{interfaceType}, new ToChronicle(chronicle, enableDebuggingLog, sleepInMs));
     }
 

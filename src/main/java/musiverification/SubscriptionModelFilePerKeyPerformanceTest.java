@@ -32,7 +32,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
 
     private static final int _noOfPuts = 50;
     private static final int _noOfRunsToAverage = Boolean.getBoolean("quick") ? 2 : 10;
-    private static final long _secondInNanos = 9_000_000_000L;
+    private static final long _secondInNanos = 1_000_000_000L;
     private static String _testStringFilePath = "Vols" + File.separator + "USDVolValEnvOIS-BO.xml";
     private static String _twoMbTestString;
     private static int _twoMbTestStringLength;
@@ -75,7 +75,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         //Create subscriber and register
         TestChronicleKeyEventSubscriber keyEventSubscriber = new TestChronicleKeyEventSubscriber(_twoMbTestStringLength);
 
-        Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, me -> keyEventSubscriber.onMessage((String) me.value()));
+        Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, me -> keyEventSubscriber.onMessage((String) me.getValue()));
 
         AtomicInteger counter = new AtomicInteger();
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
@@ -83,7 +83,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
                         keyEventSubscriber.waitForEvents(_noOfPuts * i, 0.1),
                 () -> IntStream.range(0, _noOfPuts).forEach(
                         i -> _testMap.put(key + i, counter.incrementAndGet() + _twoMbTestString)),
-                _noOfRunsToAverage, _secondInNanos);
+                _noOfRunsToAverage, 3 * _secondInNanos);
 
         //Test that the correct number of events was triggered on event listener
         keyEventSubscriber.waitForEvents(_noOfPuts * _noOfRunsToAverage, 0.3);
@@ -109,7 +109,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
                 _testMap.put(key, i + _twoMbTestString);
                 _testMap.size();
             });
-        }, _noOfRunsToAverage, _secondInNanos);
+        }, _noOfRunsToAverage, 3 * _secondInNanos);
 
         //Test that the correct number of events was triggered on event listener
         topicSubscriber.waitForEvents(_noOfPuts * _noOfRunsToAverage, 0.7);
@@ -143,7 +143,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
             Assert.assertEquals(_noOfPuts, mapEventListener.getNoOfInsertEvents().get());
             Assert.assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
             Assert.assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
-        }, _noOfRunsToAverage, _secondInNanos);
+        }, _noOfRunsToAverage, 3 * _secondInNanos);
     }
 
     /**
@@ -182,7 +182,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
                     + mapEventListener.getNoOfInsertEvents().get(), _noOfPuts * 0.4);
             Assert.assertEquals(0, mapEventListener.getNoOfRemoveEvents().get());
 
-        }, _noOfRunsToAverage, _secondInNanos);
+        }, _noOfRunsToAverage, 3 * _secondInNanos);
     }
 
     /**
@@ -292,7 +292,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
          * @throws InvalidSubscriberException
          */
         @Override
-        public void onMessage(String topic, String message) throws InvalidSubscriberException {
+        public void onMessage(String topic, String message) {
             if (message == null) {
                 System.out.println("topic " + topic + " deleted?");
                 return;
