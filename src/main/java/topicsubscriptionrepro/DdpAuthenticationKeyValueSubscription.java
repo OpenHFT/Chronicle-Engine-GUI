@@ -34,7 +34,7 @@ public class DdpAuthenticationKeyValueSubscription<K, V> implements ObjectKVSSub
     @Override
     public void registerKeySubscriber(@NotNull RequestContext rc, @NotNull Subscriber subscriber, @NotNull Filter filter)
     {
-        System.out.println(this.getClass().getName() + ": registerKeySubscriber");
+        System.out.println(this.getClass().getName() + ": registerKeySubscriber - hashcode " + hashCode());
 
         isAuthenticated();
         _underlying.registerKeySubscriber(rc, subscriber, filter);
@@ -44,7 +44,7 @@ public class DdpAuthenticationKeyValueSubscription<K, V> implements ObjectKVSSub
     @Override
     public void registerTopicSubscriber(RequestContext rc, TopicSubscriber subscriber)
     {
-        System.out.println(this.getClass().getName() + ": registerTopicSubscriber");
+        System.out.println(this.getClass().getName() + ": registerTopicSubscriber - hashcode " + hashCode());
 
         isAuthenticated();
         _underlying.registerTopicSubscriber(rc, subscriber);
@@ -92,7 +92,7 @@ public class DdpAuthenticationKeyValueSubscription<K, V> implements ObjectKVSSub
                                    @NotNull Subscriber subscriber,
                                    @NotNull Filter filter)
     {
-        System.out.println(this.getClass().getName() + ": registerSubscriber");
+        System.out.println(this.getClass().getName() + ": registerSubscriber - hashcode " + hashCode());
 
         isAuthenticated();
         _underlying.registerSubscriber(rc, subscriber, filter);

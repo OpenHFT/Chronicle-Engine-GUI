@@ -28,6 +28,8 @@ public class ClientMain
         //This works
         _assetTree.registerSubscriber(_mapUri, String.class, message -> System.out.println("Subscriber 2: " + message));
 
+        Thread.sleep(500);
+
         //FIXME this doesn't work
         _assetTree.registerTopicSubscriber(_mapUri, String.class, String.class,
                 (topic, message) -> System.out.println("TopicSubscriber 1: " + topic + " - " + message));

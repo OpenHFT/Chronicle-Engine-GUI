@@ -43,7 +43,7 @@ public class DdpAuthorizationKeyValueSubscription<K, V> implements ObjectKVSSubs
     @Override
     public void registerKeySubscriber(@NotNull RequestContext rc, @NotNull Subscriber subscriber, @NotNull Filter filter)
     {
-        System.out.println(this.getClass().getName() + ": registerKeySubscriber");
+        System.out.println(this.getClass().getName() + ": registerKeySubscriber - hashcode " + hashCode());
 
         //TODO DS consider what to do with bootstrapping if anything
         checkPermissions("SUBSCRIBE", true);
@@ -55,7 +55,7 @@ public class DdpAuthorizationKeyValueSubscription<K, V> implements ObjectKVSSubs
     @Override
     public void registerTopicSubscriber(RequestContext rc, TopicSubscriber subscriber)
     {
-        System.out.println(this.getClass().getName() + ": registerTopicSubscriber");
+        System.out.println(this.getClass().getName() + ": registerTopicSubscriber - hashcode " + hashCode());
 
         //TODO DS consider what to do with bootstrapping if anything
         checkPermissions("SUBSCRIBE", true);
@@ -113,7 +113,7 @@ public class DdpAuthorizationKeyValueSubscription<K, V> implements ObjectKVSSubs
                                    @NotNull Subscriber subscriber,
                                    @NotNull Filter filter)
     {
-        System.out.println(this.getClass().getName() + ": registerSubscriber");
+        System.out.println(this.getClass().getName() + ": registerSubscriber - hashcode " + hashCode());
 
         checkPermissions("SUBSCRIBE", true);
 
