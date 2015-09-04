@@ -17,6 +17,7 @@ public class ConstructorExceptionClient
 
     public static void main(String[] args) throws IOException, InterruptedException
     {
+        YamlLogging.setAll(true);
         _assetTree = new VanillaAssetTree();
 
         _assetTree.root().forRemoteAccess(
@@ -56,7 +57,7 @@ public class ConstructorExceptionClient
         catch (Exception e)
         {
             //TODO expect exception!
-
+            e.printStackTrace();
             System.out.println("Exception as expected.");
 
             System.exit(-1);
