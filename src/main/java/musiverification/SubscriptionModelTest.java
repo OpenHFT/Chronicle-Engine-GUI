@@ -8,8 +8,13 @@ import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.pubsub.Subscriber;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
+import net.openhft.chronicle.engine.tree.AddedAssetEvent;
+import net.openhft.chronicle.engine.tree.ExistingAssetEvent;
+import net.openhft.chronicle.engine.tree.RemovedAssetEvent;
+import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import org.easymock.EasyMock;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
