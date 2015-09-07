@@ -26,6 +26,8 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 
+import java.io.IOException;
+
 /**
  * Created by andre on 01/05/2015.
  */
@@ -57,7 +59,11 @@ public class BinaryWireMain {
         }
 
 
-        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree, WIRE_TYPE);
+        try {
+            final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree, WIRE_TYPE);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
 
         if (args.length == 1 && args[0].compareTo("-debug") == 0)
         {
