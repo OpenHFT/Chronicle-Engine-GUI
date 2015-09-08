@@ -8,8 +8,13 @@ import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.pubsub.Subscriber;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
+import net.openhft.chronicle.engine.tree.AddedAssetEvent;
+import net.openhft.chronicle.engine.tree.ExistingAssetEvent;
+import net.openhft.chronicle.engine.tree.RemovedAssetEvent;
+import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import org.easymock.EasyMock;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -255,6 +260,93 @@ public class SubscriptionModelTest {
         topicSubscriberMock.onEndOfSubscription();
         EasyMock.replay(topicSubscriberMock);
 
+    }
+
+    /**
+     * Test event listeners on maps inserted, updated, removed are triggered correctly when expected
+     * and in the correct order.
+     */
+    @Test
+    public void testMapAddedKeyListener() throws InvalidSubscriberException {
+        //DS test that we can be notified when maps are added
+        resetChassis();
+
+        String parentUri = "/mapbase";
+        String mapBaseUri = parentUri + "/maps";
+
+        String mapName1 = "TestMap1";
+        String mapName2 = "TestMap2";
+
+        String mapUri1 = mapBaseUri + '/' + mapName1;
+        String mapUri2 = mapBaseUri + '/' + mapName2;
+
+        TopicSubscriber<String, String> assetTreeSubscriber = EasyMock.createStrictMock("assetTreeSubscriber", TopicSubscriber.class);
+        registerTopicSubscriber(parentUri, String.class, String.class, assetTreeSubscriber);
+
+        // when added
+        assetTreeSubscriber.onMessage("maps", mapName1);
+        assetTreeSubscriber.onMessage("maps", mapName2);
+
+        // and when removed
+        assetTreeSubscriber.onMessage("maps", mapName1);
+        assetTreeSubscriber.onMessage("maps", mapName2);
+
+        EasyMock.replay(assetTreeSubscriber);
+
+        Subscriber<TopologicalEvent> mapEventKeySubscriber = EasyMock.createStrictMock("mapEventKeySubscriber", Subscriber.class);
+        // expect a bootstrap event
+        mapEventKeySubscriber.onMessage(ExistingAssetEvent.of(parentUri, "maps"));
+
+        EasyMock.replay(mapEventKeySubscriber);
+
+        registerSubscriber(mapBaseUri, TopologicalEvent.class, mapEventKeySubscriber);
+
+        EasyMock.verify(mapEventKeySubscriber);
+        EasyMock.reset(mapEventKeySubscriber);
+
+        //First the two maps will be inserted into
+        mapEventKeySubscriber.onMessage(AddedAssetEvent.of(mapBaseUri, mapName1));
+        mapEventKeySubscriber.onMessage(AddedAssetEvent.of(mapBaseUri, mapName2));
+
+        //Second the two maps are removed
+        mapEventKeySubscriber.onMessage(RemovedAssetEvent.of(mapBaseUri, mapName1));
+        mapEventKeySubscriber.onMessage(RemovedAssetEvent.of(mapBaseUri, mapName2));
+
+        EasyMock.replay(mapEventKeySubscriber);
+
+        //Create the two maps
+        Map<String, String> map1 = acquireMap(mapUri1, String.class, String.class);
+        Map<String, String> map2 = acquireMap(mapUri2, String.class, String.class);
+
+        //Perform some actions on the maps - should not trigger events
+        String keyMap1 = "KeyMap1";
+        String keyMap2 = "KeyMap2";
+        String valueMap1 = "ValueMap1";
+        String valueMap2 = "ValueMap1";
+
+        map1.put(keyMap1, valueMap1);
+        map2.put(keyMap2, valueMap2);
+
+        Assert.assertEquals(valueMap1, map1.get(keyMap1));
+        Assert.assertNull(map1.get(keyMap2));
+
+        Assert.assertEquals(valueMap2, map2.get(keyMap2));
+        Assert.assertNull(map2.get(keyMap1));
+
+        map1.remove(keyMap1);
+        map2.remove(keyMap2);
+
+        getAsset(mapBaseUri).removeChild(mapName1);
+        getAsset(mapBaseUri).removeChild(mapName2);
+
+        EasyMock.verify(assetTreeSubscriber);
+
+        EasyMock.verify(mapEventKeySubscriber);
+        EasyMock.reset(mapEventKeySubscriber);
+
+        mapEventKeySubscriber.onEndOfSubscription();
+
+        EasyMock.replay(mapEventKeySubscriber);
     }
 
     /**

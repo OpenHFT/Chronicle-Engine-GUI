@@ -141,7 +141,7 @@ public class ReplicationClientMain {
         SessionProvider sessionProvider = new VanillaSessionProvider();
 
         tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider,
-                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, ""), true));
+                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, "")/*, true*/));
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
         MapView<String, String> result = tree.acquireMap(nameName, String.class, String.class);
