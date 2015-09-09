@@ -41,11 +41,7 @@ public class ServerMain {
 
         _root = _assetTree.root();
 
-        try {
-            serverEndpoint = new ServerEndpoint("*:" + port, _assetTree, WIRE_TYPE);
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+        serverEndpoint = new ServerEndpoint("*:" + port, _assetTree, WIRE_TYPE);
 
         _root.addWrappingRule(AuthorizedKeyValueStore.class, "authenticated kvs",
                 AuthorizedKeyValueStore::new, SubscriptionKeyValueStore.class);

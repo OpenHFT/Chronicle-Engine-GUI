@@ -36,11 +36,8 @@ public class TextWireMain {
         // the default is BinaryWire
         int port = 8088;
         VanillaAssetTree assetTree = new VanillaAssetTree().forTesting(false);
-        try {
-            final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree, WIRE_TYPE);
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+
+        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree, WIRE_TYPE);
 
         if (args.length == 1 && args[0].compareTo("-debug") == 0)
         {

@@ -13,10 +13,7 @@ import net.openhft.chronicle.engine.tree.ExistingAssetEvent;
 import net.openhft.chronicle.engine.tree.RemovedAssetEvent;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import org.easymock.EasyMock;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -267,6 +264,7 @@ public class SubscriptionModelTest {
      * and in the correct order.
      */
     @Test
+    @Ignore //Not supported
     public void testMapAddedKeyListener() throws InvalidSubscriberException {
         //DS test that we can be notified when maps are added
         resetChassis();

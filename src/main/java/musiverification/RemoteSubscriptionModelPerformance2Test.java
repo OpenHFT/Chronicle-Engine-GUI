@@ -30,6 +30,7 @@ import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.*;
 
 import java.io.File;
@@ -62,9 +63,7 @@ public class RemoteSubscriptionModelPerformance2Test {
 
     @BeforeClass
     public static void setUpBeforeClass() throws IOException, URISyntaxException {
-//        YamlLogging.showServerReads = true;
-//        YamlLogging.clientReads = true;
-
+        YamlLogging.setAll(false);
         _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath); //.substring(1, 1 << 10);
         _twoMbTestStringLength = _twoMbTestString.length();
 
