@@ -228,7 +228,7 @@ public class DdpAuthorizationKeyValueStore<K, V> implements SubscriptionKeyValue
 
         System.out.println("Checking permissions {" + permissionRequired + "} for user " + userId);
 
-        if("CREATE".equals(permissionRequired) || _throwInConstructorMapName.equals(_assetName))
+        if("CREATE".equals(permissionRequired) && _throwInConstructorMapName.equals(_assetName))
         {
             String errorMessage = "CREATE permission denied on map " + _throwInConstructorMapName;
 
