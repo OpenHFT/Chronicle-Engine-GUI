@@ -1,9 +1,6 @@
 package musiverification;
 
-import net.openhft.chronicle.core.*;
-import net.openhft.chronicle.engine.api.map.*;
 import net.openhft.chronicle.engine.api.tree.*;
-import net.openhft.chronicle.engine.map.*;
 import net.openhft.chronicle.engine.server.*;
 import net.openhft.chronicle.engine.tree.*;
 import net.openhft.chronicle.network.*;
@@ -14,8 +11,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 
-import static net.openhft.chronicle.engine.Chassis.assetTree;
-import static net.openhft.chronicle.engine.Chassis.resetChassis;
+import static net.openhft.chronicle.engine.Chassis.*;
 
 public class KeySubscriberTest
 {
@@ -53,7 +49,8 @@ public class KeySubscriberTest
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+    {
         waitCounter = 0;
         assetTree().close();
     }
