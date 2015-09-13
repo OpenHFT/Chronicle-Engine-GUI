@@ -21,9 +21,9 @@
     <orderEntry type="library" name="Maven: net.openhft:chronicle-map:2.3.3" level="project" />
     <orderEntry type="library" name="Maven: net.openhft:compiler:2.2.0" level="project" />
     <orderEntry type="module-library">
-      <library name="Maven: com.sun.java:tools:1.8.0_40">
+      <library name="Maven: com.sun.java:tools:1.8.0_51">
         <CLASSES>
-          <root url="jar://C:/Program Files/Java/jdk1.8.0_25/lib/tools.jar!/" />
+          <root url="jar:///opt/jdk1.8.0_51/lib/tools.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
