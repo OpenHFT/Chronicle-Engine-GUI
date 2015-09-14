@@ -260,6 +260,60 @@ public class SubscriptionModelTest {
     }
 
     /**
+     * Test that TopicSubscriber does NOT bootstrap when configured not to do so
+     * @throws InvalidSubscriberException
+     */
+    @Test
+    public void testTopicSubscriptionBootstrappingFalse() throws InvalidSubscriberException {
+        //Using a strict mock as we want to verify that events come in in the right order
+        TopicSubscriber<String, String> topicSubscriberMock = EasyMock.createStrictMock(TopicSubscriber.class);
+        _clientAssetTree.registerTopicSubscriber(_mapName + "?bootstrap=false", String.class, String.class, topicSubscriberMock);
+
+        String key = "KeyBootstrappingFalse";
+        String value = "BootstrappingFalse";
+
+        //No events should be triggered on topic subscriber
+
+        EasyMock.replay(topicSubscriberMock);
+
+        _stringStringMap.put(key, value);
+
+        EasyMock.verify(topicSubscriberMock);
+
+        // expect to be told when the tree is torn down.
+        EasyMock.reset(topicSubscriberMock);
+        topicSubscriberMock.onEndOfSubscription();
+        EasyMock.replay(topicSubscriberMock);
+    }
+
+    /**
+     * Test that TopicSubscriber DOES bootstrap when configured TO DO so
+     * @throws InvalidSubscriberException
+     */
+    @Test
+    public void testTopicSubscriptionBootstrappingTrue() throws InvalidSubscriberException {
+        //Using a strict mock as we want to verify that events come in in the right order
+        TopicSubscriber<String, String> topicSubscriberMock = EasyMock.createStrictMock(TopicSubscriber.class);
+        _clientAssetTree.registerTopicSubscriber(_mapName + "?bootstrap=true", String.class, String.class, topicSubscriberMock);
+
+        String key = "KeyBootstrappingTrue";
+        String value = "BootstrappingTrue";
+
+        topicSubscriberMock.onMessage(key, value);
+
+        EasyMock.replay(topicSubscriberMock);
+
+        _stringStringMap.put(key, value);
+
+        EasyMock.verify(topicSubscriberMock);
+
+        // expect to be told when the tree is torn down.
+        EasyMock.reset(topicSubscriberMock);
+        topicSubscriberMock.onEndOfSubscription();
+        EasyMock.replay(topicSubscriberMock);
+    }
+
+    /**
      * Test event listeners on maps inserted, updated, removed are triggered correctly when expected
      * and in the correct order.
      */
