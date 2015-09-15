@@ -39,6 +39,8 @@ public class CheckSessionDetailsSubscription<K, V> implements ObjectKVSSubscript
         {
             throw new IllegalArgumentException("UserId is either null or empty!");
         }
+
+        System.out.println("######User Id Is Set#####: " + userId);
     }
 
     @Override

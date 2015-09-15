@@ -1,45 +1,37 @@
 package musiverification;
 
 import musiverification.helpers.*;
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.engine.api.EngineReplication;
-import net.openhft.chronicle.engine.api.map.KeyValueStore;
-import net.openhft.chronicle.engine.api.map.MapView;
+import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.pool.*;
+import net.openhft.chronicle.engine.api.*;
+import net.openhft.chronicle.engine.api.map.*;
 import net.openhft.chronicle.engine.api.pubsub.*;
-import net.openhft.chronicle.engine.api.tree.AssetTree;
-import net.openhft.chronicle.engine.fs.ChronicleMapGroupFS;
-import net.openhft.chronicle.engine.fs.FilePerKeyGroupFS;
+import net.openhft.chronicle.engine.api.tree.*;
+import net.openhft.chronicle.engine.fs.*;
 import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.server.ServerEndpoint;
-import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.engine.server.*;
+import net.openhft.chronicle.engine.tree.*;
 import net.openhft.chronicle.network.*;
 import net.openhft.chronicle.network.api.session.*;
-import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.WireType;
-import net.openhft.chronicle.wire.YamlLogging;
-import net.openhft.lang.thread.NamedThreadFactory;
+import net.openhft.chronicle.wire.*;
+import net.openhft.lang.thread.*;
 import org.easymock.*;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 import org.junit.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.Function;
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.*;
 
 /**
  * Created by Rob Austin
  */
 
-public class ReplicationTest {
+public class ReplicationTest
+{
 
     public static final WireType WIRE_TYPE = WireType.TEXT;
     public static final String NAME = "/ChMaps/test";
@@ -53,7 +45,13 @@ public class ReplicationTest {
     private static AssetTree tree2;
 
     @Before
-    public void before() throws IOException {
+    public void before() throws IOException
+    {
+        resetTrees(null);
+    }
+
+    private void resetTrees(Consumer<AssetTree> applyRulesToAllTrees) throws IOException
+    {
 //        YamlLogging.clientWrites = true;
 //        YamlLogging.clientReads = true;
 
@@ -67,32 +65,43 @@ public class ReplicationTest {
         TCPRegistry.createServerSocketChannelFor("host.port1", "host.port2", "host.port3");
 
         WireType writeType = WireType.TEXT;
-        tree1 = create(1, writeType);
-        tree2 = create(2, writeType);
-        tree3 = create(3, writeType);
+        tree1 = create(1, writeType, applyRulesToAllTrees);
+        tree2 = create(2, writeType,applyRulesToAllTrees);
+        tree3 = create(3, writeType, applyRulesToAllTrees);
 
         serverEndpoint1 = new ServerEndpoint("host.port1", tree1, writeType);
         serverEndpoint2 = new ServerEndpoint("host.port2", tree2, writeType);
         serverEndpoint3 = new ServerEndpoint("host.port3", tree3, writeType);
-
     }
 
     @After
-    public void after() {
-
+    public void after()
+    {
         if (tree1 != null)
+        {
             tree1.close();
+        }
         if (tree2 != null)
+        {
             tree2.close();
+        }
         if (tree3 != null)
+        {
             tree3.close();
+        }
 
         if (serverEndpoint1 != null)
+        {
             serverEndpoint1.close();
+        }
         if (serverEndpoint2 != null)
+        {
             serverEndpoint2.close();
+        }
         if (serverEndpoint3 != null)
+        {
             serverEndpoint3.close();
+        }
 
         TCPRegistry.reset();
         // TODO TCPRegistery.assertAllServersStopped();
@@ -101,7 +110,8 @@ public class ReplicationTest {
     }
 
     @NotNull
-    private static AssetTree create(final int hostId, Function<Bytes, Wire> writeType) {
+    private static AssetTree create(final int hostId, Function<Bytes, Wire> writeType, Consumer<AssetTree> applyRules)
+    {
         AssetTree tree = new VanillaAssetTree((byte) hostId)
                 .forTesting()
                 .withConfig(resourcesDir() + "/cmkvst", OS.TARGET + "/" + hostId);
@@ -115,13 +125,21 @@ public class ReplicationTest {
                 new ChronicleMapKeyValueStore(context.wireType(writeType).putReturnsNull(false),
                         asset));
 
+        if (applyRules != null)
+        {
+            applyRules.accept(tree);
+        }
+
         return tree;
     }
 
-    public static String resourcesDir() {
+    public static String resourcesDir()
+    {
         String path = ReplicationTest.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         if (path == null)
+        {
             return ".";
+        }
         return new File(path).getParentFile().getParentFile() + "/src/test/resources";
     }
 
@@ -171,7 +189,8 @@ public class ReplicationTest {
 //    }
 
     @Test
-    public void test() throws InterruptedException {
+    public void test() throws InterruptedException
+    {
 
         final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
                 .class);
@@ -189,14 +208,18 @@ public class ReplicationTest {
         map2.put("hello2", "world2");
         map3.put("hello3", "world3");
 
-        for (int i = 1; i <= 50; i++) {
+        for (int i = 1; i <= 50; i++)
+        {
             if (map1.size() == 3 && map2.size() == 3 && map3.size() == 3)
+            {
                 break;
+            }
             Jvm.pause(200);
         }
 
 
-        for (Map m : new Map[]{map1, map2, map3}) {
+        for (Map m : new Map[]{map1, map2, map3})
+        {
             Assert.assertEquals("world1", m.get("hello1"));
             Assert.assertEquals("world2", m.get("hello2"));
             Assert.assertEquals("world3", m.get("hello3"));
@@ -207,6 +230,7 @@ public class ReplicationTest {
 
     /**
      * Test that events are only received once and in order
+     *
      * @throws InterruptedException
      * @throws InvalidSubscriberException
      */
@@ -233,15 +257,19 @@ public class ReplicationTest {
         map1.put("hello1", "world1");
         map2.put("hello2", "world2");
 
-        for (int i = 1; i <= 50; i++) {
+        for (int i = 1; i <= 50; i++)
+        {
             if (map1.size() == 2 && map2.size() == 2)
+            {
                 break;
+            }
             Jvm.pause(200);
         }
 
         EasyMock.verify(subscriberMock);
 
-        for (Map m : new Map[]{map1, map2}) {
+        for (Map m : new Map[]{map1, map2})
+        {
             Assert.assertEquals("world1", m.get("hello1"));
             Assert.assertEquals("world2", m.get("hello2"));
             Assert.assertEquals(2, m.size());
@@ -250,15 +278,14 @@ public class ReplicationTest {
 
     /**
      * Test that session details are set on all replication method calls.
+     *
      * @throws InterruptedException
      * @throws InvalidSubscriberException
      */
     @Test
-    public void testSessionDetailsSet() throws InterruptedException, InvalidSubscriberException
+    public void testSessionDetailsSet() throws InterruptedException, InvalidSubscriberException, IOException
     {
-        setSessionDetailsAndTestWrapperOnTree(tree1);
-        setSessionDetailsAndTestWrapperOnTree(tree2);
-        setSessionDetailsAndTestWrapperOnTree(tree3);
+        resetTrees(this::setSessionDetailsAndTestWrapperOnTree);
 
         final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
                 .class);
@@ -281,16 +308,20 @@ public class ReplicationTest {
         map1.put("hello1", "world1");
         map2.put("hello2", "world2");
 
-        for (int i = 1; i <= 50; i++) {
+        for (int i = 1; i <= 50; i++)
+        {
             if (map1.size() == 2 && map2.size() == 2)
+            {
                 break;
+            }
             Jvm.pause(200);
         }
 
         EasyMock.verify(subscriberMock);
         EasyMock.reset(subscriberMock); //HACK for endOfSubscription event
 
-        for (Map m : new Map[]{map1, map2}) {
+        for (Map m : new Map[]{map1, map2})
+        {
             Assert.assertEquals("world1", m.get("hello1"));
             Assert.assertEquals("world2", m.get("hello2"));
             Assert.assertEquals(2, m.size());
