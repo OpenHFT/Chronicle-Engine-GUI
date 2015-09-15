@@ -1,5 +1,6 @@
 package musiverification;
 
+import musiverification.helpers.*;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
@@ -7,24 +8,22 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.engine.api.EngineReplication;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapView;
-import net.openhft.chronicle.engine.api.tree.Asset;
+import net.openhft.chronicle.engine.api.pubsub.*;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
 import net.openhft.chronicle.engine.fs.ChronicleMapGroupFS;
 import net.openhft.chronicle.engine.fs.FilePerKeyGroupFS;
 import net.openhft.chronicle.engine.map.*;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
-import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
-import net.openhft.chronicle.network.TCPRegistry;
+import net.openhft.chronicle.network.*;
+import net.openhft.chronicle.network.api.session.*;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 import net.openhft.lang.thread.NamedThreadFactory;
+import org.easymock.*;
 import org.jetbrains.annotations.NotNull;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +33,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -54,10 +52,10 @@ public class ReplicationTest {
     private static AssetTree tree1;
     private static AssetTree tree2;
 
-    @BeforeClass
-    public static void before() throws IOException {
-        YamlLogging.clientWrites = true;
-        YamlLogging.clientReads = true;
+    @Before
+    public void before() throws IOException {
+//        YamlLogging.clientWrites = true;
+//        YamlLogging.clientReads = true;
 
         //YamlLogging.showServerWrites = true;
 
@@ -79,8 +77,8 @@ public class ReplicationTest {
 
     }
 
-    @AfterClass
-    public static void after() {
+    @After
+    public void after() {
 
         if (tree1 != null)
             tree1.close();
@@ -127,50 +125,50 @@ public class ReplicationTest {
         return new File(path).getParentFile().getParentFile() + "/src/test/resources";
     }
 
-    public static void registerTextViewofTree(String desc, AssetTree tree) {
-        tree.registerSubscriber("", TopologicalEvent.class, e ->
-                        // give the collection time to be setup.
-                        ses.schedule(() -> handleTreeUpdate(desc, tree, e), 50, TimeUnit.MILLISECONDS)
-        );
-    }
-
-    static void handleTreeUpdate(String desc, AssetTree tree, TopologicalEvent e) {
-        try {
-            System.out.println(desc + " handle " + e);
-            if (e.added()) {
-                System.out.println(desc + " Added a " + e.name() + " under " + e.assetName());
-                String assetFullName = e.fullName();
-                Asset asset = tree.getAsset(assetFullName);
-                if (asset == null) {
-                    System.out.println("\tbut it's not visible.");
-                    return;
-                }
-                ObjectKeyValueStore view = asset.getView(ObjectKeyValueStore.class);
-                if (view == null) {
-                    System.out.println("\t[node]");
-                } else {
-                    long elements = view.longSize();
-                    Class keyType = view.keyType();
-                    Class valueType = view.valueType();
-                    ObjectKVSSubscription objectKVSSubscription = asset.getView(ObjectKVSSubscription.class);
-                    int keySubscriberCount = objectKVSSubscription.keySubscriberCount();
-                    int entrySubscriberCount = objectKVSSubscription.entrySubscriberCount();
-                    int topicSubscriberCount = objectKVSSubscription.topicSubscriberCount();
-                    System.out.println("\t[map]");
-                    System.out.printf("\t%-20s %s%n", "keyType", keyType.getName());
-                    System.out.printf("\t%-20s %s%n", "valueType", valueType.getName());
-                    System.out.printf("\t%-20s %s%n", "size", elements);
-                    System.out.printf("\t%-20s %s%n", "keySubscriberCount", keySubscriberCount);
-                    System.out.printf("\t%-20s %s%n", "entrySubscriberCount", entrySubscriberCount);
-                    System.out.printf("\t%-20s %s%n", "topicSubscriberCount", topicSubscriberCount);
-                }
-            } else {
-                System.out.println(desc + " Removed a " + e.name() + " under " + e.assetName());
-            }
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-    }
+//    public static void registerTextViewofTree(String desc, AssetTree tree) {
+//        tree.registerSubscriber("", TopologicalEvent.class, e ->
+//                        // give the collection time to be setup.
+//                        ses.schedule(() -> handleTreeUpdate(desc, tree, e), 50, TimeUnit.MILLISECONDS)
+//        );
+//    }
+//
+//    static void handleTreeUpdate(String desc, AssetTree tree, TopologicalEvent e) {
+//        try {
+//            System.out.println(desc + " handle " + e);
+//            if (e.added()) {
+//                System.out.println(desc + " Added a " + e.name() + " under " + e.assetName());
+//                String assetFullName = e.fullName();
+//                Asset asset = tree.getAsset(assetFullName);
+//                if (asset == null) {
+//                    System.out.println("\tbut it's not visible.");
+//                    return;
+//                }
+//                ObjectKeyValueStore view = asset.getView(ObjectKeyValueStore.class);
+//                if (view == null) {
+//                    System.out.println("\t[node]");
+//                } else {
+//                    long elements = view.longSize();
+//                    Class keyType = view.keyType();
+//                    Class valueType = view.valueType();
+//                    ObjectKVSSubscription objectKVSSubscription = asset.getView(ObjectKVSSubscription.class);
+//                    int keySubscriberCount = objectKVSSubscription.keySubscriberCount();
+//                    int entrySubscriberCount = objectKVSSubscription.entrySubscriberCount();
+//                    int topicSubscriberCount = objectKVSSubscription.topicSubscriberCount();
+//                    System.out.println("\t[map]");
+//                    System.out.printf("\t%-20s %s%n", "keyType", keyType.getName());
+//                    System.out.printf("\t%-20s %s%n", "valueType", valueType.getName());
+//                    System.out.printf("\t%-20s %s%n", "size", elements);
+//                    System.out.printf("\t%-20s %s%n", "keySubscriberCount", keySubscriberCount);
+//                    System.out.printf("\t%-20s %s%n", "entrySubscriberCount", entrySubscriberCount);
+//                    System.out.printf("\t%-20s %s%n", "topicSubscriberCount", topicSubscriberCount);
+//                }
+//            } else {
+//                System.out.println(desc + " Removed a " + e.name() + " under " + e.assetName());
+//            }
+//        } catch (Throwable t) {
+//            t.printStackTrace();
+//        }
+//    }
 
     @Test
     public void test() throws InterruptedException {
@@ -182,7 +180,6 @@ public class ReplicationTest {
         final ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String
                 .class);
         Assert.assertNotNull(map2);
-
 
         final ConcurrentMap<String, String> map3 = tree3.acquireMap(NAME, String.class, String
                 .class);
@@ -208,6 +205,109 @@ public class ReplicationTest {
 
     }
 
+    /**
+     * Test that events are only received once and in order
+     * @throws InterruptedException
+     * @throws InvalidSubscriberException
+     */
+    @Test
+    public void testSubscriptionNoOfEvents() throws InterruptedException, InvalidSubscriberException
+    {
+        final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
+                .class);
+        Assert.assertNotNull(map1);
+
+        Subscriber<String> subscriberMock = EasyMock.createStrictMock(Subscriber.class);
+
+        tree1.registerSubscriber(NAME + "?bootstrap=false", String.class, subscriberMock);
+
+        final ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME + "?bootstrap=false", String.class, String
+                .class);
+        Assert.assertNotNull(map2);
+
+        subscriberMock.onMessage("hello1");
+        subscriberMock.onMessage("hello2");
+
+        EasyMock.replay(subscriberMock);
+
+        map1.put("hello1", "world1");
+        map2.put("hello2", "world2");
+
+        for (int i = 1; i <= 50; i++) {
+            if (map1.size() == 2 && map2.size() == 2)
+                break;
+            Jvm.pause(200);
+        }
+
+        EasyMock.verify(subscriberMock);
+
+        for (Map m : new Map[]{map1, map2}) {
+            Assert.assertEquals("world1", m.get("hello1"));
+            Assert.assertEquals("world2", m.get("hello2"));
+            Assert.assertEquals(2, m.size());
+        }
+    }
+
+    /**
+     * Test that session details are set on all replication method calls.
+     * @throws InterruptedException
+     * @throws InvalidSubscriberException
+     */
+    @Test
+    public void testSessionDetailsSet() throws InterruptedException, InvalidSubscriberException
+    {
+        setSessionDetailsAndTestWrapperOnTree(tree1);
+        setSessionDetailsAndTestWrapperOnTree(tree2);
+        setSessionDetailsAndTestWrapperOnTree(tree3);
+
+        final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
+                .class);
+        Assert.assertNotNull(map1);
+
+        Subscriber<String> subscriberMock = EasyMock.createMock(Subscriber.class);
+
+        tree1.registerSubscriber(NAME + "?bootstrap=false", String.class, subscriberMock);
+
+        final ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String
+                .class);
+        Assert.assertNotNull(map2);
+
+        subscriberMock.onMessage("hello1");
+        subscriberMock.onMessage("hello2");
+        subscriberMock.onMessage("hello2"); //TODO hack due to multiple events bug
+
+        EasyMock.replay(subscriberMock);
+
+        map1.put("hello1", "world1");
+        map2.put("hello2", "world2");
+
+        for (int i = 1; i <= 50; i++) {
+            if (map1.size() == 2 && map2.size() == 2)
+                break;
+            Jvm.pause(200);
+        }
+
+        EasyMock.verify(subscriberMock);
+        EasyMock.reset(subscriberMock); //HACK for endOfSubscription event
+
+        for (Map m : new Map[]{map1, map2}) {
+            Assert.assertEquals("world1", m.get("hello1"));
+            Assert.assertEquals("world2", m.get("hello2"));
+            Assert.assertEquals(2, m.size());
+        }
+    }
+
+    private void setSessionDetailsAndTestWrapperOnTree(AssetTree assetTree)
+    {
+        SessionProvider sessionProvider = assetTree.root().acquireView(SessionProvider.class);
+        VanillaSessionDetails vanillaSessionDetails = VanillaSessionDetails.of("testUser", null);
+        sessionProvider.set(vanillaSessionDetails);
+
+        assetTree.root().addWrappingRule(ObjectKVSSubscription.class, "Check session details subscription",
+                CheckSessionDetailsSubscription::new, VanillaKVSSubscription.class);
+
+        assetTree.root().addLeafRule(VanillaKVSSubscription.class, "Chronicle vanilla subscription", VanillaKVSSubscription::new);
+    }
 
 }
 

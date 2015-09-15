@@ -125,7 +125,7 @@ public class RemoteSubscriptionModelTest {
 
         Subscriber<String> testChronicleKeyEventSubscriber = EasyMock.createStrictMock(Subscriber.class);
 
-        //Set up teh mock
+        //Set up the mock
         String update1 = "Update1";
         String update2 = "Update2";
         String update3 = "Update3";
