@@ -14,11 +14,15 @@ public class CheckSessionDetailsSubscription<K, V> implements ObjectKVSSubscript
 {
     private final SessionProvider _sessionProvider;
     private final ObjectKVSSubscription _underlying;
+    private final SessionDetails _sessionDetails;
+    private final String _userId;
 
     public CheckSessionDetailsSubscription(RequestContext requestContext, Asset asset,
                                                  ObjectKVSSubscription underlying)
     {
         _sessionProvider = asset.findView(SessionProvider.class);
+        _sessionDetails = _sessionProvider.get();
+        _userId = _sessionDetails.userId();
         _underlying = underlying;
 
         checkSessionDetails();
@@ -26,21 +30,21 @@ public class CheckSessionDetailsSubscription<K, V> implements ObjectKVSSubscript
 
     private void checkSessionDetails()
     {
-        SessionDetails sessionDetails = _sessionProvider.get();
+//        SessionDetails sessionDetails = _sessionProvider.get();
 
-        if (sessionDetails == null)
-        {
-            throw new IllegalArgumentException("Session Details are null!");
-        }
+//        if (_sessionDetails == null)
+//        {
+//            throw new IllegalArgumentException("Session Details are null!");
+//        }
 
-        String userId = sessionDetails.userId();
+//        String userId = _sessionDetails.userId();
 
-        if (userId == null || "".equals(userId))
+        if (_userId == null || "".equals(_userId))
         {
             throw new IllegalArgumentException("UserId is either null or empty!");
         }
 
-        System.out.println("######User Id Is Set#####: " + userId);
+        System.out.println("######User Id Is Set#####: " + _userId);
     }
 
     @Override
@@ -95,7 +99,7 @@ public class CheckSessionDetailsSubscription<K, V> implements ObjectKVSSubscript
     @Override
     public boolean hasSubscribers()
     {
-        checkSessionDetails();
+//        checkSessionDetails();
         return _underlying.hasSubscribers();
     }
 

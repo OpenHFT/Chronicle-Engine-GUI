@@ -64,14 +64,13 @@ public class ReplicationTest
 
         TCPRegistry.createServerSocketChannelFor("host.port1", "host.port2", "host.port3");
 
-        WireType writeType = WireType.TEXT;
-        tree1 = create(1, writeType, applyRulesToAllTrees);
-        tree2 = create(2, writeType,applyRulesToAllTrees);
-        tree3 = create(3, writeType, applyRulesToAllTrees);
+        tree1 = create(1, WIRE_TYPE, applyRulesToAllTrees);
+        tree2 = create(2, WIRE_TYPE,applyRulesToAllTrees);
+        tree3 = create(3, WIRE_TYPE, applyRulesToAllTrees);
 
-        serverEndpoint1 = new ServerEndpoint("host.port1", tree1, writeType);
-        serverEndpoint2 = new ServerEndpoint("host.port2", tree2, writeType);
-        serverEndpoint3 = new ServerEndpoint("host.port3", tree3, writeType);
+        serverEndpoint1 = new ServerEndpoint("host.port1", tree1, WIRE_TYPE);
+        serverEndpoint2 = new ServerEndpoint("host.port2", tree2, WIRE_TYPE);
+        serverEndpoint3 = new ServerEndpoint("host.port3", tree3, WIRE_TYPE);
     }
 
     @After
@@ -285,6 +284,7 @@ public class ReplicationTest
     @Test
     public void testSessionDetailsSet() throws InterruptedException, InvalidSubscriberException, IOException
     {
+        after();
         resetTrees(this::setSessionDetailsAndTestWrapperOnTree);
 
         final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
@@ -299,6 +299,8 @@ public class ReplicationTest
                 .class);
         Assert.assertNotNull(map2);
 
+        Map[] maps = {map1, map2};
+
         subscriberMock.onMessage("hello1");
         subscriberMock.onMessage("hello2");
         subscriberMock.onMessage("hello2"); //TODO hack due to multiple events bug
@@ -308,14 +310,7 @@ public class ReplicationTest
         map1.put("hello1", "world1");
         map2.put("hello2", "world2");
 
-        for (int i = 1; i <= 50; i++)
-        {
-            if (map1.size() == 2 && map2.size() == 2)
-            {
-                break;
-            }
-            Jvm.pause(200);
-        }
+        waitForReplication(maps, 2);
 
         EasyMock.verify(subscriberMock);
         EasyMock.reset(subscriberMock); //HACK for endOfSubscription event
@@ -325,6 +320,78 @@ public class ReplicationTest
             Assert.assertEquals("world1", m.get("hello1"));
             Assert.assertEquals("world2", m.get("hello2"));
             Assert.assertEquals(2, m.size());
+        }
+    }
+
+    /**
+     * Test that maps are re-replicated when the connection is lost and regained.
+     * @throws InterruptedException
+     * @throws InvalidSubscriberException
+     * @throws IOException
+     */
+    @Test
+    public void testReplicationOnReconnect() throws InterruptedException, InvalidSubscriberException, IOException
+    {
+        final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
+                .class);
+        Assert.assertNotNull(map1);
+
+        ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String
+                .class);
+        Assert.assertNotNull(map2);
+
+        map1.put("hello1", "world1");
+        map2.put("hello2", "world2");
+
+        waitForReplication(new Map[]{map1, map2}, 2);
+
+        for (Map m : new Map[]{map1, map2})
+        {
+            Assert.assertEquals("world1", m.get("hello1"));
+            Assert.assertEquals("world2", m.get("hello2"));
+            Assert.assertEquals(2, m.size());
+        }
+
+        tree2.close();
+        serverEndpoint2.close();
+        tree2 = create(2, WIRE_TYPE, null);
+
+        serverEndpoint2 = new ServerEndpoint("host.port2", tree2, WIRE_TYPE);
+
+        map1.put("Map1NonRep", "NonRepValue");
+
+        map2 = tree2.acquireMap(NAME, String.class, String
+                .class);
+        Assert.assertNotNull(map2);
+
+        waitForReplication(new Map[]{map2}, map1.size());
+
+        Assert.assertEquals("Map1NonRep", map2.get("NonRepValue"));
+        Assert.assertEquals("world1", map2.get("hello1"));
+        Assert.assertEquals("world2", map2.get("hello2"));
+        Assert.assertEquals(2, map2.size());
+    }
+
+    private void waitForReplication(Map[] maps, int mapSize)
+    {
+        for (int i = 1; i <= 50; i++)
+        {
+            boolean allMapsReplicated = true;
+
+            for (Map m : maps)
+            {
+                if(m.size() != mapSize)
+                {
+                    allMapsReplicated = false;
+                }
+            }
+
+            if (allMapsReplicated)
+            {
+                break;
+            }
+
+            Jvm.pause(200);
         }
     }
 
@@ -339,6 +406,4 @@ public class ReplicationTest
 
         assetTree.root().addLeafRule(VanillaKVSSubscription.class, "Chronicle vanilla subscription", VanillaKVSSubscription::new);
     }
-
 }
-
