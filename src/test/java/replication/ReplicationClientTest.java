@@ -130,8 +130,8 @@ public class ReplicationClientTest {
 
         map2.remove("hello");
 
-        Assert.assertEquals("RemovedEvent{assetName='/map', key=hello, oldValue=world}", q1.take().toString());
-        Assert.assertEquals("RemovedEvent{assetName='/map', key=hello, oldValue=world}", q2.take().toString());
+        Assert.assertEquals("RemovedEvent{assetName='/map', key=hello, oldValue=world, isReplicationEvent=false}", q1.take().toString());
+        Assert.assertEquals("RemovedEvent{assetName='/map', key=hello, oldValue=world, isReplicationEvent=false}", q2.take().toString());
     }
 }
 
