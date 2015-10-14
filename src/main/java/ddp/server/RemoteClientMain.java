@@ -26,7 +26,7 @@ public class RemoteClientMain
 
         //TODO DS don't know why this doesn't overwrite what is set in the for RemoteAccess method - server receives "daniels" and no pwd.
         SessionProvider sessionProvider = root.findView(SessionProvider.class);
-        sessionProvider.set(VanillaSessionDetails.of("remote-java-daniels", "secretPwd"));
+        sessionProvider.set(VanillaSessionDetails.of("remote-java-daniels", "secretPwd",""));
 
         MapView<String, String> testMap = assetTree.acquireMap(mapName, String.class, String.class);
 

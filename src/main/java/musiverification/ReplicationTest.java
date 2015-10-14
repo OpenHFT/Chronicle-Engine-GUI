@@ -398,7 +398,7 @@ public class ReplicationTest
     private void setSessionDetailsAndTestWrapperOnTree(AssetTree assetTree)
     {
         SessionProvider sessionProvider = assetTree.root().acquireView(SessionProvider.class);
-        VanillaSessionDetails vanillaSessionDetails = VanillaSessionDetails.of("testUser", null);
+        VanillaSessionDetails vanillaSessionDetails = VanillaSessionDetails.of("testUser", null,"");
         sessionProvider.set(vanillaSessionDetails);
 
         assetTree.root().addWrappingRule(ObjectKVSSubscription.class, "Check session details subscription",

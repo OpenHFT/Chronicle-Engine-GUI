@@ -59,7 +59,7 @@ public class ServerMain {
 
     public void addValuesAndSubscriber() throws InterruptedException {
         SessionProvider sessionProvider = _root.findView(SessionProvider.class);
-        sessionProvider.set(VanillaSessionDetails.of("java-daniels", "secretPwd"));
+        sessionProvider.set(VanillaSessionDetails.of("java-daniels", "secretPwd",""));
 
         MapView<String, String> testMap = _assetTree.acquireMap(_mapName, String.class, String.class);
 
