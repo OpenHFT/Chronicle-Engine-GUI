@@ -118,8 +118,8 @@ public class ReplicationClientTest {
 
         map1.put("hello", "world");
 
-        Assert.assertEquals("InsertedEvent{assetName='/map', key=hello, value=world}", q1.take().toString());
-        Assert.assertEquals("InsertedEvent{assetName='/map', key=hello, value=world}", q2.take().toString());
+        Assert.assertEquals("InsertedEvent{assetName='/map', key=hello, value=world, isReplicationEvent=false}", q1.take().toString());
+        Assert.assertEquals("InsertedEvent{assetName='/map', key=hello, value=world, isReplicationEvent=true}", q2.take().toString());
 
         //Test map 1 content
         Assert.assertEquals(1, map1.size());
