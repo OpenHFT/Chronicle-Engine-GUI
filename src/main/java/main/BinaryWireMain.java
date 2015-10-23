@@ -26,6 +26,8 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 
+import java.io.IOException;
+
 /**
  * Created by andre on 01/05/2015.
  */

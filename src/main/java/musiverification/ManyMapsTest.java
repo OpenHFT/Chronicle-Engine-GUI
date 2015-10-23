@@ -50,7 +50,7 @@ public class ManyMapsTest {
 
         assetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         assetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
-                new ChronicleMapKeyValueStore(context.basePath(basePath + "/" + asset.name()).entries(1200), asset));
+                new ChronicleMapKeyValueStore(context.basePath(basePath + "/" + asset.name()).putReturnsNull(false).entries(1200), asset));
         _maps = Collections.synchronizedMap(new HashMap<>());
 
         System.out.println("Creating maps.");

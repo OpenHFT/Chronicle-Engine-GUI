@@ -24,20 +24,14 @@ import java.util.function.Consumer;
  */
 public class MapEventListenerStatelessClientTest {
     private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
-
-    private static VanillaAssetTree clientAssetTree;
     private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
-
+    private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
+    private static VanillaAssetTree clientAssetTree;
     private static ChronicleTestEventListener _chronicleTestEventListener;
-
     private static MapView<String, String> _StringStringMap;
-
     private static ServerEndpoint serverEndpoint;
-
     private final String _value1 = new String(new char[2 << 20]);//;"TestValue1";
     private final String _value2;
-
-    private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
 
     public MapEventListenerStatelessClientTest() {
         char[] value = new char[2 << 20];
@@ -65,6 +59,14 @@ public class MapEventListenerStatelessClientTest {
         clientAssetTree.registerTopicSubscriber("chronicleMapString", String.class, String.class, _chronicleTestEventListener);
     }
 
+    @AfterClass
+    public static void tearDown() {
+        _StringStringMap.clear();
+        clientAssetTree.close();
+        serverAssetTree.close();
+//        serverEndpoint.close();
+    }
+
     @Before
     public void setUp() {
         _noOfEventsTriggered.set(0);
@@ -72,14 +74,6 @@ public class MapEventListenerStatelessClientTest {
         _StringStringMap.clear();
 
 
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        _StringStringMap.clear();
-        clientAssetTree.close();
-        serverAssetTree.close();
-//        serverEndpoint.close();
     }
 
     /**
@@ -122,7 +116,6 @@ public class MapEventListenerStatelessClientTest {
     /**
      * Test that event listener is triggered for every "acquireUsingLocked" value update.
      */
-
     @Test
     @Ignore("TODO FIX")
     public void testMapEvenListenerAcquireUsingLocked()

@@ -7,7 +7,7 @@ import net.openhft.chronicle.engine.api.pubsub.Publisher;
 import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
-import net.openhft.chronicle.engine.map.ObjectSubscription;
+import net.openhft.chronicle.engine.map.ObjectKVSSubscription;
 import net.openhft.chronicle.engine.map.VanillaMapView;
 import net.openhft.chronicle.engine.map.remote.RemoteKVSSubscription;
 import net.openhft.chronicle.engine.map.remote.RemoteKeyValueStore;
@@ -26,6 +26,7 @@ import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+import topicsubscriptionrepro.ConstructorExceptionClient;
 
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -55,7 +56,7 @@ public class ReplicationClientTest {
         ThreadGroup threadGroup = new ThreadGroup("host=" + connectUri);
         tree.root().addView(ThreadGroup.class, threadGroup);
 
-        tree.root().addLeafRule(ObjectSubscription.class, " ObjectKVSSubscription",
+        tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
                 RemoteKVSSubscription::new);
 
         tree.root().addWrappingRule(MapView.class, "mapv view", VanillaMapView::new, AuthenticatedKeyValueStore.class);
@@ -66,12 +67,10 @@ public class ReplicationClientTest {
         SessionProvider sessionProvider = new VanillaSessionProvider();
 
         tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider,
-                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, ""),
-                true, null));
+                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, ""), true, ConstructorExceptionClient.clientConnectionMonitor()));
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
         MapView<String, String> result = tree.acquireMap(nameName, String.class, String.class);
-
 
         result.clear();
         tree.registerSubscriber(nameName, MapEvent.class, q::add);
@@ -119,8 +118,8 @@ public class ReplicationClientTest {
 
         map1.put("hello", "world");
 
-        Assert.assertEquals("InsertedEvent{assetName='/map', key=hello, value=world}", q1.take().toString());
-        Assert.assertEquals("InsertedEvent{assetName='/map', key=hello, value=world}", q2.take().toString());
+        Assert.assertEquals("InsertedEvent{assetName='/map', key=hello, value=world, isReplicationEvent=false}", q1.take().toString());
+        Assert.assertEquals("InsertedEvent{assetName='/map', key=hello, value=world, isReplicationEvent=true}", q2.take().toString());
 
         //Test map 1 content
         Assert.assertEquals(1, map1.size());
@@ -132,8 +131,8 @@ public class ReplicationClientTest {
 
         map2.remove("hello");
 
-        Assert.assertEquals("RemovedEvent{assetName='/map', key=hello, oldValue=world}", q1.take().toString());
-        Assert.assertEquals("RemovedEvent{assetName='/map', key=hello, oldValue=world}", q2.take().toString());
+        Assert.assertEquals("RemovedEvent{assetName='/map', key=hello, oldValue=world, isReplicationEvent=false}", q1.take().toString());
+        Assert.assertEquals("RemovedEvent{assetName='/map', key=hello, oldValue=world, isReplicationEvent=false}", q2.take().toString());
     }
 }
 

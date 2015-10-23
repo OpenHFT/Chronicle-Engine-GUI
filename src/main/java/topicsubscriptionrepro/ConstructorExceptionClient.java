@@ -2,10 +2,13 @@ package topicsubscriptionrepro;
 
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.VanillaSessionDetails;
+import net.openhft.chronicle.network.connection.ClientConnectionMonitor;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.Map;
 
 public class ConstructorExceptionClient {
@@ -21,7 +24,7 @@ public class ConstructorExceptionClient {
 
         _assetTree.root().forRemoteAccess(
                 new String[]{_serverAddress}, _wireType,
-                VanillaSessionDetails.of("mfil-daniels", null, ""), null);
+                VanillaSessionDetails.of("mfil-daniels", null, ""), clientConnectionMonitor());
 
         try {
             //Constructor is called at this point on server and exception thrown!
@@ -62,5 +65,20 @@ public class ConstructorExceptionClient {
 
         System.out.println("Press any key to exit...");
         System.in.read();
+    }
+
+    @NotNull
+    public static ClientConnectionMonitor clientConnectionMonitor() {
+        return new ClientConnectionMonitor() {
+            @Override
+            public void onConnected(String s, SocketAddress socketAddress) {
+                System.out.println(("onConnected - name=" + s + "," + socketAddress));
+            }
+
+            @Override
+            public void onDisconnected(String s, SocketAddress socketAddress) {
+                System.out.println(("onDisconnected - name=" + s + "," + socketAddress));
+            }
+        };
     }
 }

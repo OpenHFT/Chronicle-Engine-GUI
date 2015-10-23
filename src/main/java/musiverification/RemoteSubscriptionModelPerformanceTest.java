@@ -66,7 +66,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     private static VanillaAssetTree serverAssetTree, clientAssetTree;
     private static ServerEndpoint serverEndpoint;
 
-    private final String _mapName = "PerfTestMap" + counter.incrementAndGet();
+    private final String _mapName = "PerfTestMap" + System.nanoTime();
 
     @BeforeClass
     public static void setUpBeforeClass() throws IOException, URISyntaxException {
@@ -243,7 +243,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     public void testSubscriptionMapEventListenerInsertPerformance() {
         _testMap.clear();
 
-        YamlLogging.setAll(true);
+        YamlLogging.setAll(false);
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 

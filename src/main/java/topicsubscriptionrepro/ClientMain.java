@@ -1,24 +1,26 @@
 package topicsubscriptionrepro;
 
-import net.openhft.chronicle.engine.tree.VanillaAssetTree;
-import net.openhft.chronicle.network.VanillaSessionDetails;
-import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.engine.tree.*;
+import net.openhft.chronicle.network.*;
+import net.openhft.chronicle.wire.*;
 
-import java.io.IOException;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
-public class ClientMain {
+public class ClientMain
+{
     private static final WireType _wireType = WireType.BINARY;
     private static VanillaAssetTree _assetTree;
     private static String _serverAddress = "localhost:5566";
     private static String _mapUri = "/mfil/test/map";
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException
+    {
         _assetTree = new VanillaAssetTree();
 
         _assetTree.root().forRemoteAccess(
                 new String[]{_serverAddress}, _wireType,
-                VanillaSessionDetails.of("mfil-daniels", null, ""), null);
+                VanillaSessionDetails.of("mfil-daniels", null,""),ConstructorExceptionClient.clientConnectionMonitor());
 
         //This works
         _assetTree.registerSubscriber(_mapUri, String.class, message -> System.out.println("Subscriber 1: " + message));

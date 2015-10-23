@@ -73,7 +73,6 @@ public class ReplicationServerMain {
      * @param remoteHostname the hostname of the remote host
      * @throws IOException
      */
-
     public ServerEndpoint create(int identifier, String remoteHostname) throws IOException {
         if (identifier < 0 || identifier > Byte.MAX_VALUE)
             throw new IllegalStateException();
