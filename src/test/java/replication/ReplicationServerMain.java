@@ -10,8 +10,8 @@ import net.openhft.chronicle.engine.fs.Cluster;
 import net.openhft.chronicle.engine.fs.Clusters;
 import net.openhft.chronicle.engine.fs.HostDetails;
 import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.pubsub.VanillaReference;
-import net.openhft.chronicle.engine.pubsub.VanillaTopicPublisher;
+import net.openhft.chronicle.engine.pubsub.MapReference;
+import net.openhft.chronicle.engine.pubsub.MapTopicPublisher;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.session.VanillaSessionProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
@@ -97,9 +97,10 @@ public class ReplicationServerMain {
         tree.root().addView(SessionProvider.class, new VanillaSessionProvider());
         tree.root().addWrappingRule(Replication.class, "replication", VanillaReplication::new, MapView.class);
         tree.root().addWrappingRule(MapView.class, "mapv view", VanillaMapView::new, AuthenticatedKeyValueStore.class);
-        tree.root().addWrappingRule(TopicPublisher.class, " topic publisher", VanillaTopicPublisher::new, MapView.class);
-        tree.root().addWrappingRule(Publisher.class, "publisher", VanillaReference::new, MapView.class);
-        tree.root().addLeafRule(ObjectKVSSubscription.class, " vanilla", VanillaKVSSubscription::new);
+        tree.root().addWrappingRule(TopicPublisher.class, " topic publisher",
+                MapTopicPublisher::new, MapView.class);
+        tree.root().addWrappingRule(Publisher.class, "publisher", MapReference::new, MapView.class);
+        tree.root().addLeafRule(ObjectSubscription.class, " vanilla", MapKVSSubscription::new);
 
         ThreadGroup threadGroup = new ThreadGroup("my-named-thread-group");
         tree.root().addView(ThreadGroup.class, threadGroup);
@@ -108,8 +109,8 @@ public class ReplicationServerMain {
         Asset asset = tree.root().acquireAsset("map");
         asset.addView(AuthenticatedKeyValueStore.class, new ChronicleMapKeyValueStore<>(requestContext("map"), asset));
 
-        tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
-                VanillaKVSSubscription::new);
+        tree.root().addLeafRule(ObjectSubscription.class, " ObjectKVSSubscription",
+                MapKVSSubscription::new);
 
 
         ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + (5700 + identifier), tree, wireType);

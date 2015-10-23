@@ -152,7 +152,7 @@ public class ReplicationTest {
                     long elements = view.longSize();
                     Class keyType = view.keyType();
                     Class valueType = view.valueType();
-                    ObjectKVSSubscription objectKVSSubscription = asset.getView(ObjectKVSSubscription.class);
+                    ObjectSubscription objectKVSSubscription = asset.getView(ObjectSubscription.class);
                     int keySubscriberCount = objectKVSSubscription.keySubscriberCount();
                     int entrySubscriberCount = objectKVSSubscription.entrySubscriberCount();
                     int topicSubscriberCount = objectKVSSubscription.topicSubscriberCount();

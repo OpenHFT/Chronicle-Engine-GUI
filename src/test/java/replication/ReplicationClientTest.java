@@ -7,7 +7,7 @@ import net.openhft.chronicle.engine.api.pubsub.Publisher;
 import net.openhft.chronicle.engine.api.pubsub.TopicPublisher;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
-import net.openhft.chronicle.engine.map.ObjectKVSSubscription;
+import net.openhft.chronicle.engine.map.ObjectSubscription;
 import net.openhft.chronicle.engine.map.VanillaMapView;
 import net.openhft.chronicle.engine.map.remote.RemoteKVSSubscription;
 import net.openhft.chronicle.engine.map.remote.RemoteKeyValueStore;
@@ -55,7 +55,7 @@ public class ReplicationClientTest {
         ThreadGroup threadGroup = new ThreadGroup("host=" + connectUri);
         tree.root().addView(ThreadGroup.class, threadGroup);
 
-        tree.root().addLeafRule(ObjectKVSSubscription.class, " ObjectKVSSubscription",
+        tree.root().addLeafRule(ObjectSubscription.class, " ObjectKVSSubscription",
                 RemoteKVSSubscription::new);
 
         tree.root().addWrappingRule(MapView.class, "mapv view", VanillaMapView::new, AuthenticatedKeyValueStore.class);
@@ -66,10 +66,12 @@ public class ReplicationClientTest {
         SessionProvider sessionProvider = new VanillaSessionProvider();
 
         tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider,
-                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, ""), true));
+                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, ""),
+                true, null));
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
         MapView<String, String> result = tree.acquireMap(nameName, String.class, String.class);
+
 
         result.clear();
         tree.registerSubscriber(nameName, MapEvent.class, q::add);

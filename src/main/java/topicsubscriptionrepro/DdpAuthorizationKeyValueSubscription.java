@@ -1,20 +1,26 @@
 package topicsubscriptionrepro;
 
-import net.openhft.chronicle.engine.api.*;
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.api.pubsub.*;
-import net.openhft.chronicle.engine.api.tree.*;
-import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.query.*;
-import net.openhft.chronicle.network.api.session.*;
-import org.jetbrains.annotations.*;
-import org.slf4j.*;
+import net.openhft.chronicle.engine.api.PermissionDeniedException;
+import net.openhft.chronicle.engine.api.map.KeyValueStore;
+import net.openhft.chronicle.engine.api.map.MapEvent;
+import net.openhft.chronicle.engine.api.pubsub.Subscriber;
+import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
+import net.openhft.chronicle.engine.api.tree.Asset;
+import net.openhft.chronicle.engine.api.tree.RequestContext;
+import net.openhft.chronicle.engine.map.EventConsumer;
+import net.openhft.chronicle.engine.map.ObjectSubscription;
+import net.openhft.chronicle.engine.query.Filter;
+import net.openhft.chronicle.network.api.session.SessionDetails;
+import net.openhft.chronicle.network.api.session.SessionProvider;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.time.*;
-import java.util.function.*;
+import java.time.Instant;
+import java.util.function.Supplier;
 
 
-public class DdpAuthorizationKeyValueSubscription<K, V> implements ObjectKVSSubscription<K, V>
+public class DdpAuthorizationKeyValueSubscription<K, V> implements ObjectSubscription<K, V>
 {
     private static final Logger _logger = LoggerFactory.getLogger(DdpAuthorizationKeyValueSubscription.class);
     private static final String _throwOnCreateMapName = "/throw/on/create";
@@ -23,11 +29,11 @@ public class DdpAuthorizationKeyValueSubscription<K, V> implements ObjectKVSSubs
     private final String _assetName;
     private final SessionProvider _sessionProvider;
     private final Asset _asset;
-    private final ObjectKVSSubscription _underlying;
+    private final ObjectSubscription _underlying;
     private final RequestContext _requestContext;
 
     public DdpAuthorizationKeyValueSubscription(RequestContext requestContext, Asset asset,
-                                                ObjectKVSSubscription underlying)
+                                                ObjectSubscription underlying)
     {
         System.out.println(this.getClass().getName() + ": constructor");
 

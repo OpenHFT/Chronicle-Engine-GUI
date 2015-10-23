@@ -1,12 +1,16 @@
 package topicsubscriptionrepro;
 
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.server.*;
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.engine.api.map.SubscriptionKeyValueStore;
+import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
+import net.openhft.chronicle.engine.map.MapKVSSubscription;
+import net.openhft.chronicle.engine.map.ObjectSubscription;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.VanillaAsset;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.YamlLogging;
 
-import java.io.*;
+import java.io.IOException;
 
 public class ServerMain
 {
@@ -33,12 +37,12 @@ public class ServerMain
 
         //Add wrapping and leaf rules for authorization authentication subscription
         root.addWrappingRule(DdpAuthorizationKeyValueSubscription.class, "DDP authorization subscription",
-                DdpAuthorizationKeyValueSubscription::new, VanillaKVSSubscription.class);
+                DdpAuthorizationKeyValueSubscription::new, ObjectSubscription.class);
 
-        root.addWrappingRule(ObjectKVSSubscription.class, "DDP authentication subscription",
+        root.addWrappingRule(ObjectSubscription.class, "DDP authentication subscription",
                 DdpAuthenticationKeyValueSubscription::new, DdpAuthorizationKeyValueSubscription.class);
 
-        root.addLeafRule(VanillaKVSSubscription.class, "Chronicle vanilla subscription", VanillaKVSSubscription::new);
+        root.addLeafRule(MapKVSSubscription.class, "Chronicle vanilla subscription", MapKVSSubscription::new);
 
         System.out.println("Press any key to exit...");
         System.in.read();

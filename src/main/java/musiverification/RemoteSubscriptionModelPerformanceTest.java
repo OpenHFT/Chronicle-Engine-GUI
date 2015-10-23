@@ -25,7 +25,7 @@ import net.openhft.chronicle.engine.api.map.MapEventListener;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.pubsub.Subscriber;
-import net.openhft.chronicle.engine.api.pubsub.Subscription;
+import net.openhft.chronicle.engine.api.pubsub.SubscriptionCollection;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
@@ -50,6 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+
 
 public class RemoteSubscriptionModelPerformanceTest {
 
@@ -116,7 +117,8 @@ public class RemoteSubscriptionModelPerformanceTest {
 
 
     /**
-     * Test that listening to events for a given key can handle 50 updates per second of 2 MB string values.
+     * Test that listening to events for a given key can handle 50 updates per second of 2 MB string
+     * values.
      */
     @Test
     public void testGetPerformance() {
@@ -165,7 +167,7 @@ public class RemoteSubscriptionModelPerformanceTest {
         Jvm.pause(100);
         Asset child = serverAssetTree.getAsset(_mapName).getChild(key);
         Assert.assertNotNull(child);
-        Subscription subscription = child.subscription(false);
+        SubscriptionCollection subscription = child.subscription(false);
         Assert.assertEquals(1, subscription.subscriberCount());
 
         long start = System.nanoTime();

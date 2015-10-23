@@ -7,7 +7,7 @@ import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.api.tree.RequestContext;
 import net.openhft.chronicle.engine.map.EventConsumer;
-import net.openhft.chronicle.engine.map.ObjectKVSSubscription;
+import net.openhft.chronicle.engine.map.ObjectSubscription;
 import net.openhft.chronicle.engine.query.Filter;
 import net.openhft.chronicle.network.api.session.SessionDetails;
 import net.openhft.chronicle.network.api.session.SessionProvider;
@@ -16,14 +16,14 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 
 //TODO DS implement the rest of the functionality from VanillaKVSSubscription.
-public class AuthenticatedKVSubscription<K, V> implements ObjectKVSSubscription<K, V> {
+public class AuthenticatedKVSubscription<K, V> implements ObjectSubscription<K, V> {
     private final SessionProvider sessionProvider;
     private Asset asset;
-    private ObjectKVSSubscription underlying;
+    private ObjectSubscription underlying;
     private RequestContext requestContext;
 
     public AuthenticatedKVSubscription(RequestContext requestContext, Asset asset,
-                                       ObjectKVSSubscription underlying) {
+                                       ObjectSubscription underlying) {
         System.out.println(this.getClass().getName() + ": constructor");
         this.requestContext = requestContext;
         this.asset = asset;
