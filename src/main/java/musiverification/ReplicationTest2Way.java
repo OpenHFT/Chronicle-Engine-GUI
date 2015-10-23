@@ -261,6 +261,47 @@ public class ReplicationTest2Way {
     }
 
     /**
+     * Test that replication bootstrap is performed when a server in a cluster goes down and only consumer operations
+     * are performed on the failover (replicated) map until the other primary server next comes online.
+     * Workflow:
+     * Server1 and Server2 joins a cluster.
+     * Put and get operations are performed on the same replicated map on each server.
+     * Server1 goes down.
+     * Consumer operations (get) are performed on Server2, but no producer operations are performed (ie. no put).
+     * Server1 comes back and joins the cluster.
+     * Server1 should get bootstrapped and receive all Key/Value pairs in Server2
+     */
+    @Test
+    public void testBootstrapMapConsumersOnlySecondaryRestart() throws InterruptedException
+    {
+        //Create the two references to the replicated map
+        ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String.class);
+        ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String.class);
+
+        testInitialBootStrap(map1, map2);
+
+        //Stop Server1 - everything should be replicated to Server2
+        closeServer1();
+        Jvm.pause(500);
+
+        //Test that all KvPs are on Server2
+        String valueMap1Get = map2.get(keyMap1);
+        String valueMap2Get = map2.get(keyMap2);
+
+        Assert.assertEquals(valueMap1, valueMap1Get);
+        Assert.assertEquals(valueMap2, valueMap2Get);
+
+        //Start Server1 - should join the cluster and bootstrap
+        createServer1();
+        map1 = tree1.acquireMap(NAME, String.class, String.class);
+        waitForReplication(map1, map2.size()); //Wait a while for bootstrapping
+
+        Assert.assertEquals(map2.size(), map1.size());
+        Assert.assertEquals(valueMap1, map1.get(keyMap1));
+        Assert.assertEquals(valueMap2, map1.get(keyMap2));
+    }
+
+    /**
      * Test that values are replicated (bootstrapped) when first connected when only one kvp is put in each map.
      */
     private void testInitialBootStrap(ConcurrentMap<String, String> map1, ConcurrentMap<String, String> map2)
@@ -284,5 +325,15 @@ public class ReplicationTest2Way {
 
         Assert.assertEquals(valueMap2, map1.get(keyMap2)); //Map1 contains KvP put in Map2
         Assert.assertEquals(valueMap1, map2.get(keyMap1)); //Map2 contains KvP put in Map1
+    }
+
+    private void waitForReplication(Map<String, String> map, int mapSize)
+    {
+        for (int i = 1; i <= 50; i++) {
+            if (map.size() == mapSize)
+                break;
+
+            Jvm.pause(200);
+        }
     }
 }
