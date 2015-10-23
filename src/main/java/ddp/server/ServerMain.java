@@ -3,8 +3,8 @@ package ddp.server;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.map.SubscriptionKeyValueStore;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
-import net.openhft.chronicle.engine.map.ObjectKVSSubscription;
-import net.openhft.chronicle.engine.map.VanillaKVSSubscription;
+import net.openhft.chronicle.engine.map.MapKVSSubscription;
+import net.openhft.chronicle.engine.map.ObjectSubscription;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAsset;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
@@ -51,10 +51,10 @@ public class ServerMain {
                 DdpAuthenticatedKeyValueStore::new, AuthorizedKeyValueStore.class);
 
 
-        _root.addWrappingRule(ObjectKVSSubscription.class, "authenticated subscription",
-                AuthenticatedKVSubscription::new, VanillaKVSSubscription.class);
+        _root.addWrappingRule(ObjectSubscription.class, "authenticated subscription",
+                AuthenticatedKVSubscription::new, MapKVSSubscription.class);
 
-        _root.addLeafRule(VanillaKVSSubscription.class, "DDP", VanillaKVSSubscription::new);
+        _root.addLeafRule(MapKVSSubscription.class, "DDP", MapKVSSubscription::new);
     }
 
     public void addValuesAndSubscriber() throws InterruptedException {

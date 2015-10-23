@@ -1,30 +1,45 @@
 package musiverification;
 
-import musiverification.helpers.*;
-import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.core.*;
-import net.openhft.chronicle.core.pool.*;
-import net.openhft.chronicle.engine.api.*;
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.api.pubsub.*;
-import net.openhft.chronicle.engine.api.tree.*;
-import net.openhft.chronicle.engine.fs.*;
+import musiverification.helpers.CheckSessionDetailsSubscription;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.engine.api.EngineReplication;
+import net.openhft.chronicle.engine.api.map.KeyValueStore;
+import net.openhft.chronicle.engine.api.map.MapView;
+import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
+import net.openhft.chronicle.engine.api.pubsub.Subscriber;
+import net.openhft.chronicle.engine.api.tree.AssetTree;
+import net.openhft.chronicle.engine.fs.ChronicleMapGroupFS;
+import net.openhft.chronicle.engine.fs.FilePerKeyGroupFS;
 import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.server.*;
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.network.*;
-import net.openhft.chronicle.network.api.session.*;
-import net.openhft.chronicle.wire.*;
-import net.openhft.lang.thread.*;
-import org.easymock.*;
-import org.jetbrains.annotations.*;
-import org.junit.*;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.TCPRegistry;
+import net.openhft.chronicle.network.VanillaSessionDetails;
+import net.openhft.chronicle.network.api.session.SessionProvider;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.YamlLogging;
+import net.openhft.lang.thread.NamedThreadFactory;
+import org.easymock.EasyMock;
+import org.jetbrains.annotations.NotNull;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.io.*;
-import java.nio.file.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Created by Rob Austin
@@ -401,9 +416,9 @@ public class ReplicationTest
         VanillaSessionDetails vanillaSessionDetails = VanillaSessionDetails.of("testUser", null,"");
         sessionProvider.set(vanillaSessionDetails);
 
-        assetTree.root().addWrappingRule(ObjectKVSSubscription.class, "Check session details subscription",
-                CheckSessionDetailsSubscription::new, VanillaKVSSubscription.class);
+        assetTree.root().addWrappingRule(ObjectSubscription.class, "Check session details subscription",
+                CheckSessionDetailsSubscription::new, MapKVSSubscription.class);
 
-        assetTree.root().addLeafRule(VanillaKVSSubscription.class, "Chronicle vanilla subscription", VanillaKVSSubscription::new);
+        assetTree.root().addLeafRule(MapKVSSubscription.class, "Chronicle vanilla subscription", MapKVSSubscription::new);
     }
 }

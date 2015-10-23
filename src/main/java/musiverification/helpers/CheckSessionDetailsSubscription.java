@@ -1,24 +1,29 @@
 package musiverification.helpers;
 
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.api.pubsub.*;
-import net.openhft.chronicle.engine.api.tree.*;
-import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.query.*;
-import net.openhft.chronicle.network.api.session.*;
+import net.openhft.chronicle.engine.api.map.KeyValueStore;
+import net.openhft.chronicle.engine.api.map.MapEvent;
+import net.openhft.chronicle.engine.api.pubsub.Subscriber;
+import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
+import net.openhft.chronicle.engine.api.tree.Asset;
+import net.openhft.chronicle.engine.api.tree.RequestContext;
+import net.openhft.chronicle.engine.map.EventConsumer;
+import net.openhft.chronicle.engine.map.ObjectSubscription;
+import net.openhft.chronicle.engine.query.Filter;
+import net.openhft.chronicle.network.api.session.SessionDetails;
+import net.openhft.chronicle.network.api.session.SessionProvider;
 
 /**
  * Created by daniels on 15/09/2015.
  */
-public class CheckSessionDetailsSubscription<K, V> implements ObjectKVSSubscription<K, V>
+public class CheckSessionDetailsSubscription<K, V> implements ObjectSubscription<K, V>
 {
     private final SessionProvider _sessionProvider;
-    private final ObjectKVSSubscription _underlying;
+    private final ObjectSubscription _underlying;
     private final SessionDetails _sessionDetails;
     private final String _userId;
 
     public CheckSessionDetailsSubscription(RequestContext requestContext, Asset asset,
-                                                 ObjectKVSSubscription underlying)
+                                           ObjectSubscription underlying)
     {
         _sessionProvider = asset.findView(SessionProvider.class);
         _sessionDetails = _sessionProvider.get();
