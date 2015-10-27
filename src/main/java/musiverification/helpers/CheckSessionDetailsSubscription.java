@@ -1,16 +1,11 @@
 package musiverification.helpers;
 
-import net.openhft.chronicle.engine.api.map.KeyValueStore;
-import net.openhft.chronicle.engine.api.map.MapEvent;
-import net.openhft.chronicle.engine.api.pubsub.Subscriber;
-import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
-import net.openhft.chronicle.engine.api.tree.Asset;
-import net.openhft.chronicle.engine.api.tree.RequestContext;
-import net.openhft.chronicle.engine.map.EventConsumer;
-import net.openhft.chronicle.engine.map.ObjectSubscription;
-import net.openhft.chronicle.engine.query.Filter;
-import net.openhft.chronicle.network.api.session.SessionDetails;
-import net.openhft.chronicle.network.api.session.SessionProvider;
+import net.openhft.chronicle.engine.api.map.*;
+import net.openhft.chronicle.engine.api.pubsub.*;
+import net.openhft.chronicle.engine.api.tree.*;
+import net.openhft.chronicle.engine.map.*;
+import net.openhft.chronicle.engine.query.*;
+import net.openhft.chronicle.network.api.session.*;
 
 /**
  * Created by daniels on 15/09/2015.
@@ -19,37 +14,49 @@ public class CheckSessionDetailsSubscription<K, V> implements ObjectSubscription
 {
     private final SessionProvider _sessionProvider;
     private final ObjectSubscription _underlying;
-    private final SessionDetails _sessionDetails;
-    private final String _userId;
 
     public CheckSessionDetailsSubscription(RequestContext requestContext, Asset asset,
                                            ObjectSubscription underlying)
     {
         _sessionProvider = asset.findView(SessionProvider.class);
-        _sessionDetails = _sessionProvider.get();
-        _userId = _sessionDetails.userId();
         _underlying = underlying;
 
-        checkSessionDetails();
+//        checkSessionDetails();
     }
 
     private void checkSessionDetails()
     {
-//        SessionDetails sessionDetails = _sessionProvider.get();
+        SessionDetails sessionDetails = _sessionProvider.get();
 
-//        if (_sessionDetails == null)
-//        {
-//            throw new IllegalArgumentException("Session Details are null!");
-//        }
+        if (sessionDetails == null)
+        {
+            throw new IllegalArgumentException("Session Details are null!");
+        }
+        else {
+            System.out.println("SessionDetails: " + sessionDetails);
+        }
 
-//        String userId = _sessionDetails.userId();
+        String userId = sessionDetails.userId();
 
-        if (_userId == null || "".equals(_userId))
+        if (userId == null || "".equals(userId))
         {
             throw new IllegalArgumentException("UserId is either null or empty!");
         }
+        else
+        {
+            System.out.println("UserId: " + userId);
+        }
 
-        System.out.println("######User Id Is Set#####: " + _userId);
+        String domain = sessionDetails.domain();
+
+        if (domain == null || "".equals(domain))
+        {
+            throw new IllegalArgumentException("Domain is either null or empty!");
+        }
+        else
+        {
+            System.out.println("Domain: " + domain);
+        }
     }
 
     @Override
@@ -76,28 +83,28 @@ public class CheckSessionDetailsSubscription<K, V> implements ObjectSubscription
     @Override
     public void registerDownstream(EventConsumer<K, V> subscription)
     {
-        checkSessionDetails();
+//        checkSessionDetails();
         _underlying.registerDownstream(subscription);
     }
 
     @Override
     public boolean needsPrevious()
     {
-        checkSessionDetails();
+//        checkSessionDetails();
         return _underlying.needsPrevious();
     }
 
     @Override
     public void setKvStore(KeyValueStore<K, V> store)
     {
-        checkSessionDetails();
+//        checkSessionDetails();
         _underlying.setKvStore(store);
     }
 
     @Override
     public void notifyEvent(MapEvent<K, V> changeEvent)
     {
-        checkSessionDetails();
+//        checkSessionDetails();
         _underlying.notifyEvent(changeEvent);
     }
 
@@ -125,35 +132,35 @@ public class CheckSessionDetailsSubscription<K, V> implements ObjectSubscription
     @Override
     public int keySubscriberCount()
     {
-        checkSessionDetails();
+//        checkSessionDetails();
         return _underlying.keySubscriberCount();
     }
 
     @Override
     public int entrySubscriberCount()
     {
-        checkSessionDetails();
+//        checkSessionDetails();
         return _underlying.entrySubscriberCount();
     }
 
     @Override
     public int topicSubscriberCount()
     {
-        checkSessionDetails();
+//        checkSessionDetails();
         return _underlying.topicSubscriberCount();
     }
 
     @Override
     public int subscriberCount()
     {
-        checkSessionDetails();
+//        checkSessionDetails();
         return _underlying.subscriberCount();
     }
 
     @Override
     public void close()
     {
-        checkSessionDetails();
+//        checkSessionDetails();
         _underlying.close();
     }
 }
