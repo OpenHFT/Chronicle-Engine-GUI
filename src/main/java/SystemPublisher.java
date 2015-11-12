@@ -62,7 +62,7 @@ public class SystemPublisher
                 for (; ; )
                 {
 
-                    for (int i = 1; i < marketDataKeys.length - 1; i++)
+                    for (int i = 0; i < marketDataKeys.length; i++)
                     {
                         String marketDataKey = marketDataKeys[i];
                         Double mktValue = marketDataMap.get(marketDataKey);
