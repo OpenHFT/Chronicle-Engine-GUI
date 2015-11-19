@@ -20,6 +20,7 @@ import net.openhft.chronicle.network.api.session.SessionProvider;
 import net.openhft.chronicle.network.connection.SocketAddressSupplier;
 import net.openhft.chronicle.network.connection.TcpChannelHub;
 import net.openhft.chronicle.threads.EventGroup;
+import net.openhft.chronicle.threads.HandlerPriority;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
@@ -67,7 +68,8 @@ public class ReplicationClientTest {
         SessionProvider sessionProvider = new VanillaSessionProvider();
 
         tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider,
-                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, ""), true, ConstructorExceptionClient.clientConnectionMonitor()));
+                eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, ""),
+                true, ConstructorExceptionClient.clientConnectionMonitor(), HandlerPriority.MONITOR));
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
         MapView<String, String> result = tree.acquireMap(nameName, String.class, String.class);
