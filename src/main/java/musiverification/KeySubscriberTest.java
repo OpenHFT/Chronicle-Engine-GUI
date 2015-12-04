@@ -1,17 +1,21 @@
 package musiverification;
 
-import net.openhft.chronicle.engine.api.tree.*;
-import net.openhft.chronicle.engine.server.*;
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.network.*;
-import net.openhft.chronicle.wire.*;
-import org.junit.*;
+import net.openhft.chronicle.engine.api.tree.AssetTree;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.TCPRegistry;
+import net.openhft.chronicle.wire.WireType;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.atomic.*;
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static net.openhft.chronicle.engine.Chassis.*;
+import static net.openhft.chronicle.engine.Chassis.assetTree;
+import static net.openhft.chronicle.engine.Chassis.resetChassis;
 
 public class KeySubscriberTest
 {
@@ -44,8 +48,10 @@ public class KeySubscriberTest
         _clientAssetTree = new VanillaAssetTree(89).forRemoteAccess("SubscriptionModelOnKeyTest.port", WireType.BINARY);
 
         _stringStringMap = _clientAssetTree.acquireMap(_mapName + "?" + _mapArgs, String.class, String.class);
-        //FIXME why are we required to make a call first?
-//        _stringStringMap.size();
+
+        //FIXME why are we required to make a call first? -
+        // to make it a map for the key subscription.
+        _stringStringMap.size();
     }
 
     @After
@@ -106,7 +112,7 @@ public class KeySubscriberTest
         {
             System.out.println("Waiting for events...");
             waitCounter++;
-            Thread.sleep(100);
+            Thread.sleep(1000);
         }
     }
 }

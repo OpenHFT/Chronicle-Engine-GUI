@@ -175,4 +175,15 @@ public class TestUtils {
     public static String getKey(String mapName, int counter) {
         return String.format("%s-%s", mapName, counter);
     }
+
+    public static void deleteRecursive(File file) {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null)
+                for (File f : files)
+                    deleteRecursive(f);
+        }
+        //noinspection ResultOfMethodCallIgnored
+        file.delete();
+    }
 }

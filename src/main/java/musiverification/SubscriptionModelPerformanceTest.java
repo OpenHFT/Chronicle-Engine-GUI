@@ -21,8 +21,6 @@ import org.junit.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
@@ -72,7 +70,7 @@ public class SubscriptionModelPerformanceTest {
         WireType wireType = WireType.BINARY;
 
         _mapName = "PerfTestMap" + System.nanoTime();
-        Files.deleteIfExists(Paths.get(OS.TARGET, _mapName));
+        TestUtils.deleteRecursive(new File(OS.TARGET, _mapName));
 
         TCPRegistry.createServerSocketChannelFor(hostPortDescription);
         serverAssetTree = new VanillaAssetTree(14).forTesting();

@@ -14,6 +14,7 @@ import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
 import org.junit.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -40,13 +41,7 @@ public class ManyMapsTest {
         String basePath = OS.TARGET + "/ManyMapTests";
         Files.createDirectories(Paths.get(basePath));
 
-        Files.walk(Paths.get(basePath)).filter(p -> !Files.isDirectory(p)).forEach(p -> {
-            try {
-                Files.deleteIfExists(p);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        TestUtils.deleteRecursive(new File(basePath));
 
         assetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         assetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->

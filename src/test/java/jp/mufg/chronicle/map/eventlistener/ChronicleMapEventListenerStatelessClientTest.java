@@ -18,9 +18,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -57,8 +56,8 @@ public class ChronicleMapEventListenerStatelessClientTest {
 
         clientAssetTree = new VanillaAssetTree().forRemoteAccess("ChronicleMapEventListenerStatelessClientTest", WireType.TEXT);
 
+        TestUtils.deleteRecursive(new File(_mapBasePath));
 
-        Files.deleteIfExists(Paths.get(OS.TARGET, "chronicleMapString"));
         VanillaAsset root = serverAssetTree.root();
         root.addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->

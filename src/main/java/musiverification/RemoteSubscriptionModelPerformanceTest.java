@@ -43,8 +43,6 @@ import software.chronicle.enterprise.kvstores.chaching.CacheKVStore;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
@@ -104,7 +102,7 @@ public class RemoteSubscriptionModelPerformanceTest {
 
     @Before
     public void setUp() throws IOException {
-        Files.deleteIfExists(Paths.get(OS.TARGET, _mapName));
+        TestUtils.deleteRecursive(new File(OS.TARGET, _mapName));
 
         _testMap = clientAssetTree.acquireMap(_mapName + "?putReturnsNull=true", String.class, String.class);
 

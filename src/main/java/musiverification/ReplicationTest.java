@@ -1,5 +1,6 @@
 package musiverification;
 
+import ddp.api.TestUtils;
 import musiverification.helpers.CheckSessionDetailsSubscription;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
@@ -32,8 +33,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -75,7 +74,7 @@ public class ReplicationTest
         ClassAliasPool.CLASS_ALIASES.addAlias(ChronicleMapGroupFS.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(FilePerKeyGroupFS.class);
         //Delete any files from the last run
-        Files.deleteIfExists(Paths.get(OS.TARGET, NAME));
+        TestUtils.deleteRecursive(new File(OS.TARGET, NAME));
 
         TCPRegistry.createServerSocketChannelFor("host.port1", "host.port2", "host.port3");
 
