@@ -27,6 +27,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+@Ignore("TODO FIX on windows")
 public class SubscriptionModelPerformanceTest {
 
     //TODO DS test having the server side on another machine

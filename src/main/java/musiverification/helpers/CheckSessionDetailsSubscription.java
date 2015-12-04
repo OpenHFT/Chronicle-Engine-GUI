@@ -1,11 +1,16 @@
 package musiverification.helpers;
 
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.api.pubsub.*;
-import net.openhft.chronicle.engine.api.tree.*;
-import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.query.*;
-import net.openhft.chronicle.network.api.session.*;
+import net.openhft.chronicle.engine.api.map.KeyValueStore;
+import net.openhft.chronicle.engine.api.map.MapEvent;
+import net.openhft.chronicle.engine.api.pubsub.Subscriber;
+import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
+import net.openhft.chronicle.engine.api.tree.Asset;
+import net.openhft.chronicle.engine.api.tree.RequestContext;
+import net.openhft.chronicle.engine.map.EventConsumer;
+import net.openhft.chronicle.engine.map.ObjectSubscription;
+import net.openhft.chronicle.engine.query.Filter;
+import net.openhft.chronicle.network.api.session.SessionDetails;
+import net.openhft.chronicle.network.api.session.SessionProvider;
 
 /**
  * Created by daniels on 15/09/2015.
@@ -51,7 +56,8 @@ public class CheckSessionDetailsSubscription<K, V> implements ObjectSubscription
 
         if (domain == null || "".equals(domain))
         {
-            throw new IllegalArgumentException("Domain is either null or empty!");
+            System.err.println("Domain: " + domain);
+//            throw new IllegalArgumentException("Domain is either null or empty!");
         }
         else
         {

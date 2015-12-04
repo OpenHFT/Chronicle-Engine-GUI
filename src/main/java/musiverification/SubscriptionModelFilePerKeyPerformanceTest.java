@@ -83,7 +83,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
                         keyEventSubscriber.waitForEvents(_noOfPuts * i, 0.1),
                 () -> IntStream.range(0, _noOfPuts).forEach(
                         i -> _testMap.put(key + i, counter.incrementAndGet() + _twoMbTestString)),
-                _noOfRunsToAverage, 3 * _secondInNanos);
+                _noOfRunsToAverage, 4 * _secondInNanos);
 
         //Test that the correct number of events was triggered on event listener
         keyEventSubscriber.waitForEvents(_noOfPuts * _noOfRunsToAverage, 0.3);
@@ -109,7 +109,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
                 _testMap.put(key, i + _twoMbTestString);
                 _testMap.size();
             });
-        }, _noOfRunsToAverage, 3 * _secondInNanos);
+        }, _noOfRunsToAverage, 4 * _secondInNanos);
 
         //Test that the correct number of events was triggered on event listener
         topicSubscriber.waitForEvents(_noOfPuts * _noOfRunsToAverage, 0.7);
