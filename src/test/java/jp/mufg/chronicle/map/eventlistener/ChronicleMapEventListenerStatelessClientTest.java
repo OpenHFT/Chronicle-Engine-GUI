@@ -32,7 +32,7 @@ import java.util.function.Consumer;
  * Created by daniels on 31/03/2015.
  */
 public class ChronicleMapEventListenerStatelessClientTest {
-    private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
+    private static final String _mapBasePath = OS.TARGET + "/ChronicleMapEventListenerStatelessClientTest";
     private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
     private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
     private static ChronicleTestEventListener _chronicleTestEventListener;
@@ -40,11 +40,13 @@ public class ChronicleMapEventListenerStatelessClientTest {
     private static Map<String, String> _StringStringMap;
     private static Map<String, String> _StringStringMapClient;
     private static ServerEndpoint serverEndpoint;
-    private final String _value1 = new String(new char[2 << 20]);//;"TestValue1";
+    private final String _value1;
     private final String _value2;
 
     public ChronicleMapEventListenerStatelessClientTest() {
         char[] value = new char[2 << 20];
+        Arrays.fill(value, 'Z');
+        _value1 = new String(value);
         Arrays.fill(value, 'd');
         _value2 = new String(value);
     }
@@ -60,7 +62,7 @@ public class ChronicleMapEventListenerStatelessClientTest {
         VanillaAsset root = serverAssetTree.root();
         root.addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
-                new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(50).averageValueSize(2 << 20).putReturnsNull(true), asset));
+                new ChronicleMapKeyValueStore(context.basePath(_mapBasePath).entries(50).averageValueSize(2 << 20).putReturnsNull(true), asset));
 
         serverEndpoint = new ServerEndpoint("ChronicleMapEventListenerStatelessClientTest", serverAssetTree, WireType.TEXT);
 

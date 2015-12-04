@@ -80,7 +80,7 @@ public class RemoteSubscriptionModelPerformanceTest {
         //The following line doesn't add anything and breaks subscriptions
         serverAssetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
-                new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(_noOfPuts).averageValueSize(_twoMbTestStringLength), asset));
+                new ChronicleMapKeyValueStore(context.basePath(OS.TARGET + "/RemoteSubscriptionModelPerformanceTest").entries(_noOfPuts).averageValueSize(_twoMbTestStringLength), asset));
 
         TCPRegistry.createServerSocketChannelFor("RemoteSubscriptionModelPerformanceTest.port");
         serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);

@@ -2,6 +2,7 @@ package jp.mufg.chronicle.map.eventlistener;
 
 import ddp.api.TestUtils;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
@@ -23,7 +24,7 @@ import java.util.function.Consumer;
  * Created by daniels on 31/03/2015.
  */
 public class MapEventListenerStatelessClientTest {
-    private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
+    private static final String _mapBasePath = OS.TARGET + "/MapEventListenerStatelessClientTest";
     private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
     private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
     private static VanillaAssetTree clientAssetTree;
