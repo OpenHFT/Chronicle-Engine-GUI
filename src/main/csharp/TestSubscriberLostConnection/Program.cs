@@ -21,13 +21,14 @@ namespace TestSubscriberLostConnection
     {
         static void Main(string[] args)
         {
+            const string host = "localhost"; // "10.0.2.2";
             string mapUri = "/failover/test/map1";
             string stopKey = "K5"; //Stop key for server on port 9088
             string stopValue = "Value-K5";
 
             NetworkCredential cred = new NetworkCredential("daniels", String.Empty, "mfil");
 
-            var connectionDetails1 = GetConnectionDetails("localhost", 9088);
+            var connectionDetails1 = GetConnectionDetails(host, 9088);
 
             try
             {
@@ -46,8 +47,14 @@ namespace TestSubscriberLostConnection
                         Console.WriteLine("OnDisconnect: " + c.Port + " - " + m);
                     };
 
-//                    chronicleMapClient.OnFailure +=
-//                        (msg, exception) => Console.WriteLine("ON ERROR " + msg + " | " + exception);
+                    bool clientAlive = true;
+                    chronicleMapClient.OnFailure +=
+                        (msg, exception) =>
+                        {
+                            Console.WriteLine("ON ERROR " + msg + " | " + exception);
+                            Console.WriteLine("Client dead");
+                            clientAlive = false;
+                        };
 
                     //Register subscriber priting out the keys that are changed
                     Subscriber<string> keysSubscriber = Console.WriteLine;
@@ -59,9 +66,9 @@ namespace TestSubscriberLostConnection
                     }
 
                     //Keep alive listening for events until we get an exception
-                    while (true)
+                    while (clientAlive)
                     {
-                        Console.WriteLine("sleeping");
+                        Console.WriteLine("sleeping; now " + DateTime.Now);
                         Thread.Sleep(200);
                     }
                 }
