@@ -2,6 +2,7 @@ package jp.mufg.chronicle.map.eventlistener;
 
 import ddp.api.TestUtils;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
@@ -25,7 +26,7 @@ import static net.openhft.chronicle.core.Jvm.pause;
  */
 @Ignore("CHENT-49 attempts to use optimisations which are not ready")
 public class FastMapEventListenerStatelessClientTest {
-    private static final String _mapBasePath = "Chronicle"; //OS.TARGET + "/Chronicle";
+    private static final String _mapBasePath = OS.TARGET + "/FastMapEventListenerStatelessClientTest";
 
     private static VanillaAssetTree clientAssetTree;
     private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();

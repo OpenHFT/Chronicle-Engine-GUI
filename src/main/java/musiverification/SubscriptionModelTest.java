@@ -267,16 +267,17 @@ public class SubscriptionModelTest {
     public void testTopicSubscriptionBootstrappingFalse() throws InvalidSubscriberException {
         //Using a strict mock as we want to verify that events come in in the right order
         TopicSubscriber<String, String> topicSubscriberMock = EasyMock.createStrictMock(TopicSubscriber.class);
-        _clientAssetTree.registerTopicSubscriber(_mapName + "?bootstrap=false", String.class, String.class, topicSubscriberMock);
 
         String key = "KeyBootstrappingFalse";
         String value = "BootstrappingFalse";
+        _stringStringMap.put(key, value);
+
+        _clientAssetTree.registerTopicSubscriber(_mapName + "?bootstrap=false", String.class, String.class, topicSubscriberMock);
 
         //No events should be triggered on topic subscriber
 
         EasyMock.replay(topicSubscriberMock);
 
-        _stringStringMap.put(key, value);
 
         EasyMock.verify(topicSubscriberMock);
 

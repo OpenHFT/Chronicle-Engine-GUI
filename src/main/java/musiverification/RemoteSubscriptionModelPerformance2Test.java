@@ -36,8 +36,6 @@ import org.junit.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
@@ -71,7 +69,7 @@ public class RemoteSubscriptionModelPerformance2Test {
         //The following line doesn't add anything and breaks subscriptions
         serverAssetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
-                new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(_noOfPuts).putReturnsNull(false).averageValueSize(_twoMbTestStringLength), asset));
+                new ChronicleMapKeyValueStore(context.basePath(OS.TARGET + "/RemoteSubscriptionModelPerformance2Test").entries(_noOfPuts).putReturnsNull(false).averageValueSize(_twoMbTestStringLength), asset));
         TCPRegistry.createServerSocketChannelFor("RemoteSubscriptionModelPerformanceTest.port");
         serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);
 
@@ -88,7 +86,7 @@ public class RemoteSubscriptionModelPerformance2Test {
 
     @Before
     public void setUp() throws IOException {
-        Files.deleteIfExists(Paths.get(OS.TARGET, _mapName));
+        TestUtils.deleteRecursive(new File(OS.TARGET, _mapName));
 
         _testMap = clientAssetTree.acquireMap(_mapName, String.class, String.class);
 

@@ -1,5 +1,6 @@
 package musiverification;
 
+import ddp.api.TestUtils;
 import musiverification.helpers.CheckSessionDetailsSubscription;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
@@ -32,8 +33,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -75,7 +74,7 @@ public class ReplicationTest
         ClassAliasPool.CLASS_ALIASES.addAlias(ChronicleMapGroupFS.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(FilePerKeyGroupFS.class);
         //Delete any files from the last run
-        Files.deleteIfExists(Paths.get(OS.TARGET, NAME));
+        TestUtils.deleteRecursive(new File(OS.TARGET, NAME));
 
         TCPRegistry.createServerSocketChannelFor("host.port1", "host.port2", "host.port3");
 
@@ -259,12 +258,14 @@ public class ReplicationTest
 
         tree1.registerSubscriber(NAME + "?bootstrap=false", String.class, subscriberMock);
 
-        final ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME + "?bootstrap=false", String.class, String
+        Jvm.pause(100);
+        final ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String
                 .class);
         Assert.assertNotNull(map2);
 
         subscriberMock.onMessage("hello1");
         subscriberMock.onMessage("hello2");
+        EasyMock.expectLastCall().atLeastOnce();
 
         EasyMock.replay(subscriberMock);
 
@@ -288,6 +289,8 @@ public class ReplicationTest
             Assert.assertEquals("world2", m.get("hello2"));
             Assert.assertEquals(2, m.size());
         }
+
+        EasyMock.reset(subscriberMock);
     }
 
     /**
@@ -310,6 +313,7 @@ public class ReplicationTest
 
         tree1.registerSubscriber(NAME + "?bootstrap=false", String.class, subscriberMock);
 
+        Jvm.pause(100);
         final ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String
                 .class);
         Assert.assertNotNull(map2);
@@ -318,7 +322,7 @@ public class ReplicationTest
 
         subscriberMock.onMessage("hello1");
         subscriberMock.onMessage("hello2");
-        subscriberMock.onMessage("hello2"); //TODO hack due to multiple events bug
+//        subscriberMock.onMessage("hello2"); //TODO hack due to multiple events bug
 
         EasyMock.replay(subscriberMock);
 
@@ -381,10 +385,10 @@ public class ReplicationTest
 
         waitForReplication(new Map[]{map2}, map1.size());
 
-        Assert.assertEquals("Map1NonRep", map2.get("NonRepValue"));
+        Assert.assertEquals("NonRepValue", map2.get("Map1NonRep"));
         Assert.assertEquals("world1", map2.get("hello1"));
         Assert.assertEquals("world2", map2.get("hello2"));
-        Assert.assertEquals(2, map2.size());
+        Assert.assertEquals(3, map2.size());
     }
 
     private void waitForReplication(Map[] maps, int mapSize)
