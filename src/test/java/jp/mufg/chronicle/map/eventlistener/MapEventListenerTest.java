@@ -8,6 +8,7 @@ import net.openhft.chronicle.map.MapEventListener;
 import net.openhft.chronicle.map.WriteContext;
 import net.openhft.chronicle.tools.ChronicleTools;
 import net.openhft.lang.values.StringValue;
+import org.jetbrains.annotations.Nullable;
 import org.junit.*;
 
 import java.io.File;
@@ -17,23 +18,21 @@ import java.util.function.Consumer;
 /**
  * Created by daniels on 31/03/2015.
  */
-public class MapEventListenerTest
-{
+public class MapEventListenerTest {
     private static final String _chronicleMapStringFilePath = OS.TARGET + "/chronicleMapStringListenerTest";
     private static final String _chronicleMapStringValueFilePath = OS.TARGET + "/chronicleMapStringValueListenerTest";
     private static File _chronicleStringMapFile;
     private static File _chronicleStringValueMapFile;
 
-//    private ChronicleTestEventListener _chronicleTestEventListener;
-private static int _noOfEventsTriggered = 0;
+    //    private ChronicleTestEventListener _chronicleTestEventListener;
+    private static int _noOfEventsTriggered = 0;
     private final String _value1 = "TestValue1";
     private final String _value2 = "TestValue2";
     private ChronicleMap<String, String> _chronicleMapString;
     private ChronicleMap<String, StringValue> _chronicleMapStringValue;
 
     @BeforeClass
-    public static void beforeClass() throws IOException
-    {
+    public static void beforeClass() throws IOException {
         new File(OS.TARGET).mkdir();
 
         _chronicleStringMapFile = new File(_chronicleMapStringFilePath);
@@ -68,8 +67,7 @@ private static int _noOfEventsTriggered = 0;
      * @
      */
     @Test
-    public void testMapEvenListenerPut()
-    {
+    public void testMapEvenListenerPut() {
         String testKey = "TestKeyPut";
         int noOfIterations = 50;
 
@@ -85,8 +83,7 @@ private static int _noOfEventsTriggered = 0;
      * @
      */
     @Test
-    public void testMapEvenListenerReplace()
-    {
+    public void testMapEvenListenerReplace() {
         String testKey = "TestKeyGetReplace";
         int noOfIterations = 50;
 
@@ -108,16 +105,14 @@ private static int _noOfEventsTriggered = 0;
      */
     @Test
     @Ignore("TODO")
-    public void testMapEvenListenerAcquireUsingLocked()
-    {
+    public void testMapEvenListenerAcquireUsingLocked() {
         StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
 
         String testKey = "TestKeyAcquireUsingLocked";
         int noOfIterations = 50;
 
         Consumer<String> consumer = (x) -> {
-            try (WriteContext<String, StringValue> writeContext = _chronicleMapStringValue.acquireUsingLocked(testKey, valueInstance))
-            {
+            try (WriteContext<String, StringValue> writeContext = _chronicleMapStringValue.acquireUsingLocked(testKey, valueInstance)) {
                 valueInstance.setValue(x);
             }
         };
@@ -135,8 +130,7 @@ private static int _noOfEventsTriggered = 0;
      */
     @Test
     @Ignore("TODO")
-    public void testMapEvenListenerAcquireUsing()
-    {
+    public void testMapEvenListenerAcquireUsing() {
         StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
 
         String testKey = "TestKeyAcquireUsing";
@@ -160,8 +154,7 @@ private static int _noOfEventsTriggered = 0;
      */
     @Test
     @Ignore("TODO")
-    public void testMapEvenListenerGetUsing()
-    {
+    public void testMapEvenListenerGetUsing() {
         StringValue valueInstance = _chronicleMapStringValue.newValueInstance();
 
         String testKey = "TestKeyGetUsing";
@@ -181,25 +174,20 @@ private static int _noOfEventsTriggered = 0;
     }
 
     /**
-     * Performs the given number of iterations and alternates between calling consumer1 and consumer2 passing
-     * either _value1 or _value2.
+     * Performs the given number of iterations and alternates between calling consumer1 and
+     * consumer2 passing either _value1 or _value2.
      *
      * @param consumer1      Consumer1 to call.
      * @param consumer2      Consumer2 to call.
      * @param noOfIterations Number of iterations to perform.
      */
-    private void testIterateAndAlternate(Consumer<String> consumer1, Consumer<String> consumer2, int noOfIterations)
-    {
+    private void testIterateAndAlternate(Consumer<String> consumer1, Consumer<String> consumer2, int noOfIterations) {
         long startTime = System.nanoTime();
 
-        for (int i = 0; i < noOfIterations; i++)
-        {
-            if (i % 2 == 0)
-            {
+        for (int i = 0; i < noOfIterations; i++) {
+            if (i % 2 == 0) {
                 consumer1.accept(_value1);
-            }
-            else
-            {
+            } else {
                 consumer2.accept(_value2);
             }
         }
@@ -212,13 +200,14 @@ private static int _noOfEventsTriggered = 0;
         Assert.assertEquals(noOfIterations, _noOfEventsTriggered);
     }
 
-    private class ChronicleTestEventListener extends MapEventListener
-    {
+    private class ChronicleTestEventListener extends MapEventListener {
+
+
         @Override
-        public void onPut(Object key, Object newValue, Object replacedValue, boolean
-                replicationEvent, boolean added)
-        {
+        public void onPut(Object key, Object newValue, @Nullable Object replacedValue, boolean replicationEvent, boolean added, boolean hasValueChanged, byte identifier, byte replacedIdentifier, long timeStamp, long replacedTimeStamp) {
             _noOfEventsTriggered++;
         }
+
+
     }
 }
