@@ -26,6 +26,7 @@ import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import topicsubscriptionrepro.ConstructorExceptionClient;
 
@@ -86,6 +87,8 @@ public class ReplicationClientTest {
         server2.close();
     }
 
+
+    @Ignore("to be run manually")
     @Test
     public void test() throws InterruptedException, IOException {
 
