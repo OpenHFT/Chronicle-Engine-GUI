@@ -1,12 +1,11 @@
 package topicsubscriptionrepro;
 
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.server.*;
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.VanillaAsset;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.wire.WireType;
 
-import java.io.*;
+import java.io.IOException;
 
 public class ServerMain
 {
@@ -16,7 +15,7 @@ public class ServerMain
     public static void main(String[] args) throws IOException
     {
 //        YamlLogging.setAll(true);
-        VanillaAssetTree assetTree = new VanillaAssetTree().forServer();
+        VanillaAssetTree assetTree = new VanillaAssetTree().forServer(Throwable::printStackTrace);
 //        VanillaAssetTree assetTree = new VanillaAssetTree().forTesting();
 
         VanillaAsset root = assetTree.root();

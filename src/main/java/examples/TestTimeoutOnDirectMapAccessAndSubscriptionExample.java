@@ -1,11 +1,14 @@
 package examples;
 
-import java.io.*;
-import java.util.*;
-import net.openhft.chronicle.engine.api.pubsub.*;
-import net.openhft.chronicle.engine.server.*;
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.engine.api.pubsub.Publisher;
+import net.openhft.chronicle.engine.api.pubsub.Subscriber;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.YamlLogging;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Server side class to demonstrate issue whereby there is a timeout on the client
@@ -46,7 +49,7 @@ public class TestTimeoutOnDirectMapAccessAndSubscriptionExample
         private int _port;
 
         //TODO DS get config settings from db or prop file
-        private final VanillaAssetTree _assetTree = new VanillaAssetTree().forServer(false);
+        private final VanillaAssetTree _assetTree = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
         private ServerEndpoint _serverEndpoint;
 
         public ChronicleDataPublisher() throws IOException

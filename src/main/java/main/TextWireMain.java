@@ -21,8 +21,6 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 
-import java.io.IOException;
-
 /**
  * Created by andre on 01/05/2015.
  */
@@ -35,7 +33,7 @@ public class TextWireMain {
         YamlLogging.showServerReads = true;
         // the default is BinaryWire
         int port = 8088;
-        VanillaAssetTree assetTree = new VanillaAssetTree().forTesting(false);
+        VanillaAssetTree assetTree = new VanillaAssetTree().forTesting(false, Throwable::printStackTrace);
 
         final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree, WIRE_TYPE);
 

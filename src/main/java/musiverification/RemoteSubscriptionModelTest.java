@@ -45,7 +45,7 @@ public class RemoteSubscriptionModelTest {
     public void setUp() throws IOException{
         resetChassis();
 
-        AssetTree serverAssetTree = new VanillaAssetTree(1).forTesting();
+        AssetTree serverAssetTree = new VanillaAssetTree(1).forTesting(Throwable::printStackTrace);
         //The following line doesn't add anything and breaks subscriptions
         serverAssetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
@@ -54,7 +54,8 @@ public class RemoteSubscriptionModelTest {
         TCPRegistry.createServerSocketChannelFor("RemoteSubscriptionModelPerformanceTest.port");
         ServerEndpoint serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);
 
-        _clientAssetTree = new VanillaAssetTree(13).forRemoteAccess("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY);
+        _clientAssetTree = new VanillaAssetTree(13).forRemoteAccess
+                ("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY, Throwable::printStackTrace);
 
 //        _clientAssetTree.root().addWrappingRule(MapView.class, "ENTERPRISE" + " cached -> sub",
 //                VanillaMapView::new, CacheKVStore.class);

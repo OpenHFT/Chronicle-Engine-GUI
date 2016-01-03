@@ -37,7 +37,8 @@ public class ManyMapsMain {
     private static String _mapBaseName = "ManyMapsTest-";
 
     public static void main(String[] args) {
-        AssetTree clientAssetTree = new VanillaAssetTree(11).forRemoteAccess("localhost:" + BinaryWireMain.PORT, WireType.BINARY);
+        AssetTree clientAssetTree = new VanillaAssetTree(11).forRemoteAccess("localhost:" +
+                BinaryWireMain.PORT, WireType.BINARY, Throwable::printStackTrace);
         System.out.println("Creating maps.");
         AtomicInteger count = new AtomicInteger();
         Map<String, Map<String, String>> _clientMaps = new HashMap<>();

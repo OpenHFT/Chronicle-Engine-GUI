@@ -32,7 +32,7 @@ import java.util.function.Consumer;
  */
 public class ChronicleMapEventListenerStatelessClientTest {
     private static final String _mapBasePath = OS.TARGET + "/ChronicleMapEventListenerStatelessClientTest";
-    private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
+    private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting(Throwable::printStackTrace);
     private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
     private static ChronicleTestEventListener _chronicleTestEventListener;
     private static VanillaAssetTree clientAssetTree;
@@ -54,7 +54,8 @@ public class ChronicleMapEventListenerStatelessClientTest {
     public static void beforeClass() throws IOException {
         TCPRegistry.createServerSocketChannelFor("ChronicleMapEventListenerStatelessClientTest");
 
-        clientAssetTree = new VanillaAssetTree().forRemoteAccess("ChronicleMapEventListenerStatelessClientTest", WireType.TEXT);
+        clientAssetTree = new VanillaAssetTree().forRemoteAccess
+                ("ChronicleMapEventListenerStatelessClientTest", WireType.TEXT, Throwable::printStackTrace);
 
         TestUtils.deleteRecursive(new File(_mapBasePath));
 

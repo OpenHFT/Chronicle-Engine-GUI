@@ -44,8 +44,7 @@ import java.util.function.Function;
  * Created by Rob Austin
  */
 
-public class ReplicationTest
-{
+public class ReplicationTest {
 
     public static final WireType WIRE_TYPE = WireType.TEXT;
     public static final String NAME = "/ChMaps/test";
@@ -59,13 +58,11 @@ public class ReplicationTest
     private static AssetTree tree2;
 
     @Before
-    public void before() throws IOException
-    {
+    public void before() throws IOException {
         resetTrees(null);
     }
 
-    private void resetTrees(Consumer<AssetTree> applyRulesToAllTrees) throws IOException
-    {
+    private void resetTrees(Consumer<AssetTree> applyRulesToAllTrees) throws IOException {
 //        YamlLogging.clientWrites = true;
 //        YamlLogging.clientReads = true;
 
@@ -79,7 +76,7 @@ public class ReplicationTest
         TCPRegistry.createServerSocketChannelFor("host.port1", "host.port2", "host.port3");
 
         tree1 = create(1, WIRE_TYPE, applyRulesToAllTrees);
-        tree2 = create(2, WIRE_TYPE,applyRulesToAllTrees);
+        tree2 = create(2, WIRE_TYPE, applyRulesToAllTrees);
         tree3 = create(3, WIRE_TYPE, applyRulesToAllTrees);
 
         serverEndpoint1 = new ServerEndpoint("host.port1", tree1, WIRE_TYPE);
@@ -88,31 +85,24 @@ public class ReplicationTest
     }
 
     @After
-    public void after()
-    {
-        if (tree1 != null)
-        {
+    public void after() {
+        if (tree1 != null) {
             tree1.close();
         }
-        if (tree2 != null)
-        {
+        if (tree2 != null) {
             tree2.close();
         }
-        if (tree3 != null)
-        {
+        if (tree3 != null) {
             tree3.close();
         }
 
-        if (serverEndpoint1 != null)
-        {
+        if (serverEndpoint1 != null) {
             serverEndpoint1.close();
         }
-        if (serverEndpoint2 != null)
-        {
+        if (serverEndpoint2 != null) {
             serverEndpoint2.close();
         }
-        if (serverEndpoint3 != null)
-        {
+        if (serverEndpoint3 != null) {
             serverEndpoint3.close();
         }
 
@@ -123,10 +113,9 @@ public class ReplicationTest
     }
 
     @NotNull
-    private static AssetTree create(final int hostId, Function<Bytes, Wire> writeType, Consumer<AssetTree> applyRules)
-    {
+    private static AssetTree create(final int hostId, Function<Bytes, Wire> writeType, Consumer<AssetTree> applyRules) {
         AssetTree tree = new VanillaAssetTree((byte) hostId)
-                .forTesting()
+                .forTesting(Throwable::printStackTrace)
                 .withConfig(resourcesDir() + "/cmkvst", OS.TARGET + "/" + hostId);
 
         tree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore",
@@ -138,19 +127,16 @@ public class ReplicationTest
                 new ChronicleMapKeyValueStore(context.wireType(writeType).putReturnsNull(false),
                         asset));
 
-        if (applyRules != null)
-        {
+        if (applyRules != null) {
             applyRules.accept(tree);
         }
 
         return tree;
     }
 
-    public static String resourcesDir()
-    {
+    public static String resourcesDir() {
         String path = ReplicationTest.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        if (path == null)
-        {
+        if (path == null) {
             return ".";
         }
         return new File(path).getParentFile().getParentFile() + "/src/test/resources";
@@ -202,8 +188,7 @@ public class ReplicationTest
 //    }
 
     @Test
-    public void test() throws InterruptedException
-    {
+    public void test() throws InterruptedException {
 
         final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
                 .class);
@@ -221,18 +206,15 @@ public class ReplicationTest
         map2.put("hello2", "world2");
         map3.put("hello3", "world3");
 
-        for (int i = 1; i <= 50; i++)
-        {
-            if (map1.size() == 3 && map2.size() == 3 && map3.size() == 3)
-            {
+        for (int i = 1; i <= 50; i++) {
+            if (map1.size() == 3 && map2.size() == 3 && map3.size() == 3) {
                 break;
             }
             Jvm.pause(200);
         }
 
 
-        for (Map m : new Map[]{map1, map2, map3})
-        {
+        for (Map m : new Map[]{map1, map2, map3}) {
             Assert.assertEquals("world1", m.get("hello1"));
             Assert.assertEquals("world2", m.get("hello2"));
             Assert.assertEquals("world3", m.get("hello3"));
@@ -248,8 +230,7 @@ public class ReplicationTest
      * @throws InvalidSubscriberException
      */
     @Test
-    public void testSubscriptionNoOfEvents() throws InterruptedException, InvalidSubscriberException
-    {
+    public void testSubscriptionNoOfEvents() throws InterruptedException, InvalidSubscriberException {
         final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
                 .class);
         Assert.assertNotNull(map1);
@@ -272,10 +253,8 @@ public class ReplicationTest
         map1.put("hello1", "world1");
         map2.put("hello2", "world2");
 
-        for (int i = 1; i <= 50; i++)
-        {
-            if (map1.size() == 2 && map2.size() == 2)
-            {
+        for (int i = 1; i <= 50; i++) {
+            if (map1.size() == 2 && map2.size() == 2) {
                 break;
             }
             Jvm.pause(200);
@@ -283,8 +262,7 @@ public class ReplicationTest
 
         EasyMock.verify(subscriberMock);
 
-        for (Map m : new Map[]{map1, map2})
-        {
+        for (Map m : new Map[]{map1, map2}) {
             Assert.assertEquals("world1", m.get("hello1"));
             Assert.assertEquals("world2", m.get("hello2"));
             Assert.assertEquals(2, m.size());
@@ -300,8 +278,7 @@ public class ReplicationTest
      * @throws InvalidSubscriberException
      */
     @Test
-    public void testSessionDetailsSet() throws InterruptedException, InvalidSubscriberException, IOException
-    {
+    public void testSessionDetailsSet() throws InterruptedException, InvalidSubscriberException, IOException {
         after();
         resetTrees(this::setSessionDetailsAndTestWrapperOnTree);
 
@@ -334,8 +311,7 @@ public class ReplicationTest
         EasyMock.verify(subscriberMock);
         EasyMock.reset(subscriberMock); //HACK for endOfSubscription event
 
-        for (Map m : new Map[]{map1, map2})
-        {
+        for (Map m : new Map[]{map1, map2}) {
             Assert.assertEquals("world1", m.get("hello1"));
             Assert.assertEquals("world2", m.get("hello2"));
             Assert.assertEquals(2, m.size());
@@ -344,13 +320,13 @@ public class ReplicationTest
 
     /**
      * Test that maps are re-replicated when the connection is lost and regained.
+     *
      * @throws InterruptedException
      * @throws InvalidSubscriberException
      * @throws IOException
      */
     @Test
-    public void testReplicationOnReconnect() throws InterruptedException, InvalidSubscriberException, IOException
-    {
+    public void testReplicationOnReconnect() throws InterruptedException, InvalidSubscriberException, IOException {
         final ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String
                 .class);
         Assert.assertNotNull(map1);
@@ -364,8 +340,7 @@ public class ReplicationTest
 
         waitForReplication(new Map[]{map1, map2}, 2);
 
-        for (Map m : new Map[]{map1, map2})
-        {
+        for (Map m : new Map[]{map1, map2}) {
             Assert.assertEquals("world1", m.get("hello1"));
             Assert.assertEquals("world2", m.get("hello2"));
             Assert.assertEquals(2, m.size());
@@ -391,22 +366,17 @@ public class ReplicationTest
         Assert.assertEquals(3, map2.size());
     }
 
-    private void waitForReplication(Map[] maps, int mapSize)
-    {
-        for (int i = 1; i <= 50; i++)
-        {
+    private void waitForReplication(Map[] maps, int mapSize) {
+        for (int i = 1; i <= 50; i++) {
             boolean allMapsReplicated = true;
 
-            for (Map m : maps)
-            {
-                if(m.size() != mapSize)
-                {
+            for (Map m : maps) {
+                if (m.size() != mapSize) {
                     allMapsReplicated = false;
                 }
             }
 
-            if (allMapsReplicated)
-            {
+            if (allMapsReplicated) {
                 break;
             }
 
@@ -414,10 +384,9 @@ public class ReplicationTest
         }
     }
 
-    private void setSessionDetailsAndTestWrapperOnTree(AssetTree assetTree)
-    {
+    private void setSessionDetailsAndTestWrapperOnTree(AssetTree assetTree) {
         SessionProvider sessionProvider = assetTree.root().acquireView(SessionProvider.class);
-        VanillaSessionDetails vanillaSessionDetails = VanillaSessionDetails.of("testUser", null,"");
+        VanillaSessionDetails vanillaSessionDetails = VanillaSessionDetails.of("testUser", null, "");
         sessionProvider.set(vanillaSessionDetails);
 
         assetTree.root().addWrappingRule(ObjectSubscription.class, "Check session details subscription",

@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  */
 public class MapEventListenerStatelessClientTest {
     private static final String _mapBasePath = OS.TARGET + "/MapEventListenerStatelessClientTest";
-    private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
+    private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting(Throwable::printStackTrace);
     private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
     private static VanillaAssetTree clientAssetTree;
     private static ChronicleTestEventListener _chronicleTestEventListener;
@@ -43,7 +43,8 @@ public class MapEventListenerStatelessClientTest {
     @BeforeClass
     public static void beforeClass() throws IOException {
         TCPRegistry.createServerSocketChannelFor("MapEventListenerStatelessClientTest");
-        clientAssetTree = new VanillaAssetTree().forRemoteAccess("MapEventListenerStatelessClientTest", WireType.BINARY);
+        clientAssetTree = new VanillaAssetTree().forRemoteAccess
+                ("MapEventListenerStatelessClientTest", WireType.BINARY, Throwable::printStackTrace);
 
         VanillaAsset root = serverAssetTree.root();
         root.enableTranslatingValuesToBytesStore();

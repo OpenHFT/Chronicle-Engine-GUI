@@ -30,7 +30,7 @@ public class ManyMapsTest {
     //    private static int _noOfMaps = Boolean.getBoolean("quick") ? 100 : 1_100;
     private static int _noOfMaps = Boolean.getBoolean("quick") ? 10 : 1100;
     private static int _noOfKvps = 1_000;
-    private static AssetTree assetTree = new VanillaAssetTree(12).forTesting();
+    private static AssetTree assetTree = new VanillaAssetTree(12).forTesting(Throwable::printStackTrace);
 
     static {
         System.setProperty("heartbeat.timeout", "100000");
@@ -135,7 +135,8 @@ public class ManyMapsTest {
         TCPRegistry.createServerSocketChannelFor("SubscriptionEventTest.host.port");
         ServerEndpoint serverEndpoint = new ServerEndpoint("SubscriptionEventTest.host.port", assetTree, WireType.BINARY);
 
-        AssetTree clientAssetTree = new VanillaAssetTree(11).forRemoteAccess("SubscriptionEventTest.host.port", WireType.BINARY);
+        AssetTree clientAssetTree = new VanillaAssetTree(11).forRemoteAccess
+                ("SubscriptionEventTest.host.port", WireType.BINARY, Throwable::printStackTrace);
         System.out.println("Creating maps.");
         AtomicInteger count = new AtomicInteger();
         IntStream.rangeClosed(1, _noOfMaps).forEach(i -> {

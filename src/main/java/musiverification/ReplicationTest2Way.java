@@ -75,20 +75,17 @@ public class ReplicationTest2Way {
         TCPRegistry.reset();
     }
 
-    private static void createServer1()
-    {
+    private static void createServer1() {
         tree1 = create(1, WIRE_TYPE, "clusterTwo");
         serverEndpoint1 = new ServerEndpoint("host.port1", tree1, WIRE_TYPE);
     }
 
-    private static void createServer2()
-    {
+    private static void createServer2() {
         tree2 = create(2, WIRE_TYPE, "clusterTwo");
         serverEndpoint2 = new ServerEndpoint("host.port2", tree2, WIRE_TYPE);
     }
 
-    private static void closeServer1()
-    {
+    private static void closeServer1() {
         if (serverEndpoint1 != null)
             serverEndpoint1.close();
 
@@ -96,8 +93,7 @@ public class ReplicationTest2Way {
             tree1.close();
     }
 
-    private static void closeServer2()
-    {
+    private static void closeServer2() {
         if (serverEndpoint2 != null)
             serverEndpoint2.close();
 
@@ -105,15 +101,13 @@ public class ReplicationTest2Way {
             tree2.close();
     }
 
-    private static void restartServer1()
-    {
+    private static void restartServer1() {
         closeServer1();
         Jvm.pause(500);
         createServer1();
     }
 
-    private static void restartServer2()
-    {
+    private static void restartServer2() {
         closeServer2();
         Jvm.pause(500);
         createServer2();
@@ -122,7 +116,7 @@ public class ReplicationTest2Way {
     @NotNull
     private static AssetTree create(final int hostId, Function<Bytes, Wire> writeType, final String clusterTwo) {
         AssetTree tree = new VanillaAssetTree((byte) hostId)
-                .forTesting()
+                .forTesting(Throwable::printStackTrace)
                 .withConfig(resourcesDir() + "/cmkvst", OS.TARGET + "/" + hostId);
 
         tree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore",
@@ -148,7 +142,8 @@ public class ReplicationTest2Way {
     }
 
     /**
-     * Test that values are replicated (bootstrapped) when first connected when only one kvp is put in each map.
+     * Test that values are replicated (bootstrapped) when first connected when only one kvp is put
+     * in each map.
      */
     @Test
     public void testBootstrapOneKvPPerMapFirstBootstrap() throws InterruptedException {
@@ -160,7 +155,8 @@ public class ReplicationTest2Way {
     }
 
     /**
-     * Test that values are replicated (bootstrapped) when first connected when TWO kvps are put in each map.
+     * Test that values are replicated (bootstrapped) when first connected when TWO kvps are put in
+     * each map.
      */
     @Test
     public void testBootstrapTwoKvPPerMapFirstBootstrap() throws InterruptedException {
@@ -203,7 +199,8 @@ public class ReplicationTest2Way {
     }
 
     /**
-     * Test that maps are replicated after first connection and that the primary map is bootstrapped when restarted.
+     * Test that maps are replicated after first connection and that the primary map is bootstrapped
+     * when restarted.
      */
     @Test
     public void testBootstrapOneKvPPerMapPrimaryRestart() throws InterruptedException {
@@ -230,11 +227,11 @@ public class ReplicationTest2Way {
     }
 
     /**
-     * Test that maps are replicated after first connection and that the secondary map is bootstrapped when restarted.
+     * Test that maps are replicated after first connection and that the secondary map is
+     * bootstrapped when restarted.
      */
     @Test
-    public void testBootstrapOneKvPPerMapSecondaryRestart() throws InterruptedException
-    {
+    public void testBootstrapOneKvPPerMapSecondaryRestart() throws InterruptedException {
         ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String.class);
         ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String.class);
 
@@ -257,19 +254,16 @@ public class ReplicationTest2Way {
     }
 
     /**
-     * Test that replication bootstrap is performed when a server in a cluster goes down and only consumer operations
-     * are performed on the failover (replicated) map until the other primary server next comes online.
-     * Workflow:
-     * Server1 and Server2 joins a cluster.
-     * Put and get operations are performed on the same replicated map on each server.
-     * Server1 goes down.
-     * Consumer operations (get) are performed on Server2, but no producer operations are performed (ie. no put).
-     * Server1 comes back and joins the cluster.
-     * Server1 should get bootstrapped and receive all Key/Value pairs in Server2
+     * Test that replication bootstrap is performed when a server in a cluster goes down and only
+     * consumer operations are performed on the failover (replicated) map until the other primary
+     * server next comes online. Workflow: Server1 and Server2 joins a cluster. Put and get
+     * operations are performed on the same replicated map on each server. Server1 goes down.
+     * Consumer operations (get) are performed on Server2, but no producer operations are performed
+     * (ie. no put). Server1 comes back and joins the cluster. Server1 should get bootstrapped and
+     * receive all Key/Value pairs in Server2
      */
     @Test
-    public void testBootstrapMapConsumersOnlySecondaryRestart() throws InterruptedException
-    {
+    public void testBootstrapMapConsumersOnlySecondaryRestart() throws InterruptedException {
         //Create the two references to the replicated map
         ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String.class);
         ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String.class);
@@ -298,10 +292,10 @@ public class ReplicationTest2Way {
     }
 
     /**
-     * Test that values are replicated (bootstrapped) when first connected when only one kvp is put in each map.
+     * Test that values are replicated (bootstrapped) when first connected when only one kvp is put
+     * in each map.
      */
-    private void testInitialBootStrap(ConcurrentMap<String, String> map1, ConcurrentMap<String, String> map2)
-    {
+    private void testInitialBootStrap(ConcurrentMap<String, String> map1, ConcurrentMap<String, String> map2) {
         assertNotNull(map1);
         assertNotNull(map2);
         Jvm.pause(200);
@@ -323,8 +317,7 @@ public class ReplicationTest2Way {
         Assert.assertEquals(valueMap1, map2.get(keyMap1)); //Map2 contains KvP put in Map1
     }
 
-    private void waitForReplication(Map<String, String> map, int mapSize)
-    {
+    private void waitForReplication(Map<String, String> map, int mapSize) {
         for (int i = 1; i <= 50; i++) {
             if (map.size() == mapSize)
                 break;

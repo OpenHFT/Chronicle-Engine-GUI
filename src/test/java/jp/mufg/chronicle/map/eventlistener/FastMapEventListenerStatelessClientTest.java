@@ -29,7 +29,7 @@ public class FastMapEventListenerStatelessClientTest {
     private static final String _mapBasePath = OS.TARGET + "/FastMapEventListenerStatelessClientTest";
 
     private static VanillaAssetTree clientAssetTree;
-    private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting();
+    private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting(Throwable::printStackTrace);
 
     private static ChronicleTestEventListener _chronicleTestEventListener;
 
@@ -49,7 +49,8 @@ public class FastMapEventListenerStatelessClientTest {
     @BeforeClass
     public static void beforeClass() throws IOException {
         TCPRegistry.createServerSocketChannelFor("FastMapEventListenerStatelessClientTest");
-        clientAssetTree = new VanillaAssetTree().forRemoteAccess("FastMapEventListenerStatelessClientTest", WireType.TEXT);
+        clientAssetTree = new VanillaAssetTree().forRemoteAccess
+                ("FastMapEventListenerStatelessClientTest", WireType.TEXT, Throwable::printStackTrace);
         VanillaAsset root = serverAssetTree.root();
         root.enableTranslatingValuesToBytesStore();
         root.addLeafRule(AuthenticatedKeyValueStore.class, "use File Per Key",

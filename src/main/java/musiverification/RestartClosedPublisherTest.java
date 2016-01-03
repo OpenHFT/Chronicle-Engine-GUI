@@ -1,19 +1,22 @@
 package musiverification;
 
 
-import net.openhft.chronicle.core.*;
-import net.openhft.chronicle.engine.server.*;
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.network.*;
-import net.openhft.chronicle.wire.*;
-import org.jetbrains.annotations.*;
-import org.junit.*;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.TCPRegistry;
+import net.openhft.chronicle.wire.WireType;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
-public class RestartClosedPublisherTest
-{
+public class RestartClosedPublisherTest {
     public static final WireType WIRE_TYPE = WireType.TEXT;
     private static final String CONNECTION_1 = "Test1.host.port";
     private ServerEndpoint _serverEndpoint1;
@@ -22,28 +25,25 @@ public class RestartClosedPublisherTest
     private String _testMapUri = "/test/map";
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         TCPRegistry.createServerSocketChannelFor(CONNECTION_1);
-        _server = new VanillaAssetTree().forServer();
+        _server = new VanillaAssetTree().forServer(Throwable::printStackTrace);
 
         _serverEndpoint1 = new ServerEndpoint(CONNECTION_1, _server, WIRE_TYPE);
 
         createRemoteClient();
     }
 
-    private void createRemoteClient()
-    {
-        _remote = new VanillaAssetTree().forRemoteAccess(CONNECTION_1, WIRE_TYPE);
+    private void createRemoteClient() {
+        _remote = new VanillaAssetTree().forRemoteAccess(CONNECTION_1, WIRE_TYPE, Throwable::printStackTrace);
     }
 
     /**
-     * Test that a client can connect to a server side map, register a subscriber and perform put. Close the client,
-     * create new one and do the same.
+     * Test that a client can connect to a server side map, register a subscriber and perform put.
+     * Close the client, create new one and do the same.
      */
     @Test
-    public void testClientReconnectionOnMap() throws InterruptedException
-    {
+    public void testClientReconnectionOnMap() throws InterruptedException {
         String testKey = "Key1";
         String value = "Value1";
 
@@ -59,9 +59,8 @@ public class RestartClosedPublisherTest
     }
 
     @NotNull
-    private void connectClientAndPerformPutGetTest(String testKey, String value, BlockingQueue<String> eventQueue) throws InterruptedException
-    {
-        _remote = new VanillaAssetTree().forRemoteAccess(CONNECTION_1, WIRE_TYPE);
+    private void connectClientAndPerformPutGetTest(String testKey, String value, BlockingQueue<String> eventQueue) throws InterruptedException {
+        _remote = new VanillaAssetTree().forRemoteAccess(CONNECTION_1, WIRE_TYPE, Throwable::printStackTrace);
 
         String keySubUri = _testMapUri + "/" + testKey + "?bootstrap=false";
         Map<String, String> map = _remote.acquireMap(_testMapUri, String.class, String.class);

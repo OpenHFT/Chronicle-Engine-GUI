@@ -1,20 +1,31 @@
 package musiverification;
 
-import musiverification.helpers.*;
-import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.core.*;
-import net.openhft.chronicle.engine.api.tree.*;
-import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.server.*;
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.network.*;
-import net.openhft.chronicle.wire.*;
-import org.jetbrains.annotations.*;
-import org.junit.*;
+import musiverification.helpers.CheckSessionDetailsSubscription;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.engine.api.tree.AssetTree;
+import net.openhft.chronicle.engine.map.MapKVSSubscription;
+import net.openhft.chronicle.engine.map.ObjectSubscription;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.TCPRegistry;
+import net.openhft.chronicle.network.VanillaSessionDetails;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.YamlLogging;
+import org.jetbrains.annotations.NotNull;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.io.*;
-import java.util.concurrent.*;
-import java.util.function.*;
+import java.io.IOException;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class SessionDetailsTest
 {
@@ -42,7 +53,8 @@ public class SessionDetailsTest
         serverAssetTree = create(1, WIRE_TYPE, applyRulesToAllTrees);
 
         remoteAssetTree = new VanillaAssetTree();
-        remoteAssetTree.root().forRemoteAccess(new String[]{"host.port1"}, WIRE_TYPE, VanillaSessionDetails.of("java-client", null, "java-domain"), null);
+        remoteAssetTree.root().forRemoteAccess(new String[]{"host.port1"}, WIRE_TYPE,
+                VanillaSessionDetails.of("java-client", null, "java-domain"), null, Throwable::printStackTrace);
 
         serverEndpoint = new ServerEndpoint("host.port1", serverAssetTree, WIRE_TYPE);
     }
@@ -74,7 +86,7 @@ public class SessionDetailsTest
     private static AssetTree create(final int hostId, Function<Bytes, Wire> writeType, Consumer<AssetTree> applyRules)
     {
         AssetTree tree = new VanillaAssetTree((byte) hostId)
-                .forTesting();
+                .forTesting(Throwable::printStackTrace);
 
         //Add session detail check wrapper for
         tree.root().addWrappingRule(ObjectSubscription.class, "Check session details subscription",

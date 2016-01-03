@@ -65,7 +65,7 @@ public class RemoteSubscriptionModelPerformance2Test {
         _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath); //.substring(1, 1 << 10);
         _twoMbTestStringLength = _twoMbTestString.length();
 
-        serverAssetTree = new VanillaAssetTree(1).forTesting();
+        serverAssetTree = new VanillaAssetTree(1).forTesting(Throwable::printStackTrace);
         //The following line doesn't add anything and breaks subscriptions
         serverAssetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
@@ -73,7 +73,8 @@ public class RemoteSubscriptionModelPerformance2Test {
         TCPRegistry.createServerSocketChannelFor("RemoteSubscriptionModelPerformanceTest.port");
         serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);
 
-        clientAssetTree = new VanillaAssetTree(13).forRemoteAccess("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY);
+        clientAssetTree = new VanillaAssetTree(13).forRemoteAccess
+                ("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY, Throwable::printStackTrace);
     }
 
     @AfterClass

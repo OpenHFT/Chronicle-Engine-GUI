@@ -37,7 +37,7 @@ public class ServerMain {
         //TODO DS move to constructor
         int port = 8088;
 
-        _assetTree = new VanillaAssetTree().forServer();
+        _assetTree = new VanillaAssetTree().forServer(Throwable::printStackTrace);
 
         _root = _assetTree.root();
 

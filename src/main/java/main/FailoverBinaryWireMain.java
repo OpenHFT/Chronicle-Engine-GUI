@@ -16,19 +16,14 @@
 
 package main;
 
-import net.openhft.chronicle.core.*;
-import net.openhft.chronicle.core.pool.*;
-import net.openhft.chronicle.engine.api.map.*;
-import net.openhft.chronicle.engine.map.*;
-import net.openhft.chronicle.engine.server.*;
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.wire.WireType;
 
 /**
  * Created by andre on 01/05/2015.
  */
-public class FailoverBinaryWireMain
-{
+public class FailoverBinaryWireMain {
     public static final WireType WIRE_TYPE = WireType.BINARY;
     private static VanillaAssetTree _assetTree1;
     private static VanillaAssetTree _assetTree2;
@@ -44,8 +39,7 @@ public class FailoverBinaryWireMain
         failoverBinaryWireMain.start();
     }
 
-    private void start()
-    {
+    private void start() {
         //Create test map on all servers
         _assetTree1.acquireMap(_mapUri, String.class, String.class).size();
         _assetTree2.acquireMap(_mapUri, String.class, String.class).size();
@@ -81,10 +75,9 @@ public class FailoverBinaryWireMain
         System.out.println("Servers running, start C# unit test...");
     }
 
-    private FailoverBinaryWireMain()
-    {
-        _assetTree1 = new VanillaAssetTree().forServer(false);
-        _assetTree2 = new VanillaAssetTree().forServer(false);
-        _assetTree3 = new VanillaAssetTree().forServer(false);
+    private FailoverBinaryWireMain() {
+        _assetTree1 = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
+        _assetTree2 = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
+        _assetTree3 = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
     }
 }

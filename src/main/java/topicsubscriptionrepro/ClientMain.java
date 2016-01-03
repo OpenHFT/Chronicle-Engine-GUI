@@ -1,11 +1,11 @@
 package topicsubscriptionrepro;
 
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.network.*;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.VanillaSessionDetails;
+import net.openhft.chronicle.wire.WireType;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.Map;
 
 public class ClientMain
 {
@@ -20,7 +20,8 @@ public class ClientMain
 
         _assetTree.root().forRemoteAccess(
                 new String[]{_serverAddress}, _wireType,
-                VanillaSessionDetails.of("mfil-daniels", null,""),ConstructorExceptionClient.clientConnectionMonitor());
+                VanillaSessionDetails.of("mfil-daniels", null, ""), ConstructorExceptionClient
+                        .clientConnectionMonitor(), Throwable::printStackTrace);
 
         //This works
         _assetTree.registerSubscriber(_mapUri, String.class, message -> System.out.println("Subscriber 1: " + message));

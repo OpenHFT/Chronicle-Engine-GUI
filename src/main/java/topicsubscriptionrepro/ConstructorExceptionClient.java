@@ -24,7 +24,7 @@ public class ConstructorExceptionClient {
 
         _assetTree.root().forRemoteAccess(
                 new String[]{_serverAddress}, _wireType,
-                VanillaSessionDetails.of("mfil-daniels", null, ""), clientConnectionMonitor());
+                VanillaSessionDetails.of("mfil-daniels", null, ""), clientConnectionMonitor(), Throwable::printStackTrace);
 
         try {
             //Constructor is called at this point on server and exception thrown!
