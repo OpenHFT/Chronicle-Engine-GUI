@@ -8,14 +8,20 @@ import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.pubsub.Subscriber;
 import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
-import net.openhft.chronicle.engine.tree.AddedAssetEvent;
-import net.openhft.chronicle.engine.tree.ExistingAssetEvent;
-import net.openhft.chronicle.engine.tree.RemovedAssetEvent;
-import net.openhft.chronicle.engine.tree.TopologicalEvent;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.*;
+import net.openhft.chronicle.network.TCPRegistry;
+import net.openhft.chronicle.wire.WireType;
+import net.sf.cglib.core.Block;
 import org.easymock.EasyMock;
 import org.junit.*;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.DoubleAccumulator;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -23,27 +29,96 @@ import java.util.stream.IntStream;
 import static net.openhft.chronicle.engine.Chassis.*;
 
 public class SubscriptionModelTest {
+    private static final WireType WIRE_TYPE = WireType.BINARY;
     private static Map<String, String> _stringStringMap;
     private static String _mapName = "/chronicleMapString";
     private static String _mapArgs = "putReturnsNull=true";
     private static AssetTree _clientAssetTree;
-
-    //TODO DS all events should be asynchronous
-    //TODO DS call back method must include map name (I don't think it does?), key name, value inserted - no longer necessary as you subscribe to a specific map
+    private static ServerEndpoint _serverEndpoint;
+    private static String _serverAddress = "host.port1";
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         resetChassis();
 
         _stringStringMap = acquireMap(String.format("%s?%s", _mapName, _mapArgs), String.class, String.class);
         _stringStringMap.clear();
 
         _clientAssetTree = assetTree();
+
+        TCPRegistry.createServerSocketChannelFor(_serverAddress);
+        _serverEndpoint = new ServerEndpoint(_serverAddress, _clientAssetTree, WIRE_TYPE);
     }
 
     @After
     public void tearDown() {
         assetTree().close();
+
+        if (_serverEndpoint != null) {
+            _serverEndpoint.close();
+        }
+
+        TCPRegistry.reset();
+    }
+
+    @Test
+    public void testSubscriptionStringDoubleMap() throws InterruptedException {
+
+        BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
+        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, onThrowable::add);
+
+        String mapName = "/test/maps/string/double/test";
+        String mapNameSubscriber = mapName + "?bootstrap=false";
+
+        Map<String, Double> stringDoubleMapView = remoteClient.acquireMap(mapName, String.class, Double.class);
+        int size = stringDoubleMapView.size();
+
+        Assert.assertEquals(0, size);
+
+        BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
+
+        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
+
+        String key = "k1";
+        double value = 1.23;
+
+        stringDoubleMapView.put(key, value);
+        MapEvent mapEvent = mapEvents.poll(200, TimeUnit.MILLISECONDS);
+
+        Assert.assertEquals(key, mapEvent.getKey());
+        Assert.assertEquals(value, (double)mapEvent.getValue(), 0.0);
+
+        //No throwables expected
+        Assert.assertNull(onThrowable.poll());
+    }
+
+    @Test
+    public void testTopicSubscriptionStringDoubleMap() throws InterruptedException {
+
+        BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
+        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, onThrowable::add);
+
+        String mapName = "/test/maps/string/double/test";
+        String mapNameSubscriber = mapName + "?bootstrap=false";
+
+        Map<String, Double> stringDoubleMapView = remoteClient.acquireMap(mapName, String.class, Double.class);
+        int size = stringDoubleMapView.size();
+
+        Assert.assertEquals(0, size);
+
+        BlockingQueue<Double> mapEvents = new ArrayBlockingQueue<>(1);
+
+        remoteClient.registerTopicSubscriber(mapNameSubscriber, String.class, Double.class, (k, v) -> mapEvents.add(v));
+
+        String key = "k1";
+        double value = 1.23;
+
+        stringDoubleMapView.put(key, value);
+        Assert.assertEquals(value, mapEvents.poll(200, TimeUnit.MILLISECONDS), 0.0);
+//        Assert.assertEquals(value, (double)mapEvent.getValue(), 0.0);
+
+        //No throwables expected
+        Assert.assertNull(onThrowable.poll());
     }
 
     /**
@@ -94,9 +169,6 @@ public class SubscriptionModelTest {
      */
     @Test
     public void testSubscriptionSpecificKey() throws InvalidSubscriberException {
-        //TODO DS connecting to a server based Java component using the clietn API can be notified by callback methods for specified key in a given map
-
-        //TODO DS refactor to use mock (strict)
         String testKey = "Key-sub-1";
 
         Subscriber<String> testChronicleKeyEventSubscriber = EasyMock.createStrictMock(Subscriber.class);
@@ -118,7 +190,7 @@ public class SubscriptionModelTest {
         EasyMock.replay(testChronicleKeyEventSubscriber);
 
         //Setting bootstrap = false otherwise we would get an initial event with null
-        _clientAssetTree.registerSubscriber(_mapName + "/" + testKey + "?bootstrap=false", String.class, testChronicleKeyEventSubscriber); //TODO DS do a test with boot strapping
+        _clientAssetTree.registerSubscriber(_mapName + "/" + testKey + "?bootstrap=false", String.class, testChronicleKeyEventSubscriber);
 
         //Perform some puts and replace
         _stringStringMap.put(testKey, update1);
@@ -151,8 +223,6 @@ public class SubscriptionModelTest {
      */
     @Test
     public void testSubscriptionKeyEvents() throws InvalidSubscriberException {
-        //TODO DS connecting to a server based Java component using the clietn API can be notified by callback methods for specified key in a given map
-
         String testKey1 = "Key-sub-1";
         String testKey2 = "Key-sub-2";
         String testKey3 = "Key-sub-3";
@@ -218,9 +288,6 @@ public class SubscriptionModelTest {
      */
     @Test
     public void testSubscriptionOnMap() throws InvalidSubscriberException {
-        //TODO DS the loops can be refactored by having a method which performs the loop and accepts a consumer
-        //TODO DS connecting to a server based Java component using the client API can be notified by callback methods for all updates in map
-
         //Using a strict mock as we want to verify that events come in in the right order
         TopicSubscriber<String, String> topicSubscriberMock = EasyMock.createStrictMock(TopicSubscriber.class);
         _clientAssetTree.registerTopicSubscriber(_mapName, String.class, String.class, topicSubscriberMock);
@@ -431,6 +498,4 @@ public class SubscriptionModelTest {
     private void iterateAndExecuteConsumer(BiConsumer<String, String> methodToExecute, int noOfKeys, String keyBase, String valueBase) {
         iterateAndExecuteConsumer(methodToExecute, c -> c, c -> c, noOfKeys, keyBase, valueBase);
     }
-
-    //TODO DS how do we remove maps? Add test. - see testMapAddedKeyListener()
 }
