@@ -53,7 +53,7 @@ import java.util.stream.IntStream;
 public class RemoteSubscriptionModelPerformanceTest {
 
     //TODO DS test having the server side on another machine
-    private static final int _noOfPuts = 50;
+    private static final int _noOfPuts = 5;
     private static final int _noOfRunsToAverage = Boolean.getBoolean("quick") ? 2 : 10;
     private static final long _secondInNanos = 1_000_000_000L;
     private static final AtomicInteger counter = new AtomicInteger();
@@ -71,7 +71,7 @@ public class RemoteSubscriptionModelPerformanceTest {
 //        YamlLogging.showServerReads = true;
 //        YamlLogging.clientReads = true;
 
-        _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath)/*.substring(0, 56)*/;
+        _twoMbTestString = TestUtils.loadSystemResourceFileToString(_testStringFilePath).substring(0, 56);
         _twoMbTestStringLength = _twoMbTestString.length();
 
         serverAssetTree = new VanillaAssetTree(1).forTesting(Throwable::printStackTrace);
@@ -102,7 +102,9 @@ public class RemoteSubscriptionModelPerformanceTest {
     }
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, URISyntaxException {
+        if (clientAssetTree == null)
+            setUpBeforeClass();
         TestUtils.deleteRecursive(new File(OS.TARGET, _mapName));
 
         _testMap = clientAssetTree.acquireMap(_mapName + "?putReturnsNull=true", String.class, String.class);
@@ -289,6 +291,7 @@ public class RemoteSubscriptionModelPerformanceTest {
     @Test
     @Ignore("TODO FIX")
     public void testSubscriptionMapEventListenerUpdatePerformance() {
+        YamlLogging.setAll(true);
         _testMap.clear();
 
         //Put values before testing as we want to ignore the insert events
