@@ -15,8 +15,12 @@ import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 import org.easymock.EasyMock;
 import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -27,14 +31,35 @@ import java.util.stream.IntStream;
 
 import static net.openhft.chronicle.engine.Chassis.*;
 
+
+/**
+ * @author Rob Austin.
+ */
+@RunWith(Parameterized.class)
 public class SubscriptionModelTest {
-    private static final WireType WIRE_TYPE = WireType.BINARY;
+
     private static Map<String, String> _stringStringMap;
     private static String _mapName = "/chronicleMapString";
     private static String _mapArgs = "putReturnsNull=true";
     private static AssetTree _clientAssetTree;
     private static ServerEndpoint _serverEndpoint;
     private static String _serverAddress = "host.port1";
+    public static final Double EXPECTED = 1.23;
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+                {WireType.TEXT},
+                {WireType.BINARY}
+        });
+    }
+
+    private final WireType wireType;
+
+    public SubscriptionModelTest(WireType wireType) {
+        this.wireType = wireType;
+    }
+
 
     @Before
     public void setUp() throws IOException {
@@ -46,7 +71,7 @@ public class SubscriptionModelTest {
         _clientAssetTree = assetTree();
 
         TCPRegistry.createServerSocketChannelFor(_serverAddress);
-        _serverEndpoint = new ServerEndpoint(_serverAddress, _clientAssetTree, WIRE_TYPE);
+        _serverEndpoint = new ServerEndpoint(_serverAddress, _clientAssetTree, wireType);
     }
 
     @After
@@ -65,7 +90,8 @@ public class SubscriptionModelTest {
     public void testSubscriptionStringStringMap() throws InterruptedException {
         YamlLogging.setAll(true);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, onThrowable::add);
+        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
+                wireType, onThrowable::add);
 
         String mapName = "/test/maps/string/double/test";
         String mapNameSubscriber = mapName + "?bootstrap=false";
@@ -94,11 +120,115 @@ public class SubscriptionModelTest {
 
 
     @Test
+    public void testSubscriptionFloatFloatMap() throws InterruptedException {
+        YamlLogging.setAll(true);
+        BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
+        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
+                wireType,
+                onThrowable::add);
+
+        String mapName = "/test/maps/string/double/test";
+        String mapNameSubscriber = mapName + "?bootstrap=false";
+
+        Map<Float, Float> stringDoubleMapView = remoteClient.acquireMap(mapName, Float.class,
+                Float.class);
+        int size = stringDoubleMapView.size();
+
+        Assert.assertEquals(0, size);
+
+        BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
+
+        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
+
+        Float key = 1.23f;
+        Float value = 1.23f;
+
+        stringDoubleMapView.put(key, value);
+        MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
+
+        Assert.assertEquals(key, (float) mapEvent.getKey(), 0.001);
+        //Assert.assertEquals(value,mapEvent.getValue(),0.0);
+
+        //No throwables expected
+        Assert.assertNull(onThrowable.poll());
+    }
+
+
+    @Test
+    public void testSubscriptionIntegerIntegerMap() throws InterruptedException {
+        YamlLogging.setAll(true);
+        BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
+        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
+                wireType,
+                onThrowable::add);
+
+        String mapName = "/test/maps/string/double/test";
+        String mapNameSubscriber = mapName + "?bootstrap=false";
+
+        Map<Integer, Integer> stringDoubleMapView = remoteClient.acquireMap(mapName, Integer.class,
+                Integer.class);
+        int size = stringDoubleMapView.size();
+
+        Assert.assertEquals(0, size);
+
+        BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
+
+        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
+
+        Integer key = 1;
+        Integer value = 2;
+
+        stringDoubleMapView.put(key, value);
+        MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
+
+        Assert.assertEquals(key, mapEvent.getKey());
+        //Assert.assertEquals(value,mapEvent.getValue(),0.0);
+
+        //No throwables expected
+        Assert.assertNull(onThrowable.poll());
+    }
+
+
+    @Test
+    public void testSubscriptionLongLongMap() throws InterruptedException {
+        YamlLogging.setAll(true);
+        BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
+        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
+                wireType,
+                onThrowable::add);
+
+        String mapName = "/test/maps/string/double/test";
+        String mapNameSubscriber = mapName + "?bootstrap=false";
+
+        Map<Long, Long> stringDoubleMapView = remoteClient.acquireMap(mapName, Long.class,
+                Long.class);
+        int size = stringDoubleMapView.size();
+
+        Assert.assertEquals(0, size);
+
+        BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
+
+        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
+
+        Long key = 1L;
+        Long value = 2L;
+
+        stringDoubleMapView.put(key, value);
+        MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
+
+        Assert.assertEquals(key, mapEvent.getKey());
+        //Assert.assertEquals(value,mapEvent.getValue(),0.0);
+
+        //No throwables expected
+        Assert.assertNull(onThrowable.poll());
+    }
+
+    @Test
     public void testSubscriptionStringDoubleMap() throws InterruptedException {
         YamlLogging.setAll(true);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                WIRE_TYPE, onThrowable::add);
+                wireType, onThrowable::add);
 
 
         String mapName = "/test/maps/string/double/test";
@@ -132,7 +262,7 @@ public class SubscriptionModelTest {
         YamlLogging.setAll(true);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                WIRE_TYPE, onThrowable::add);
+                wireType, onThrowable::add);
 
 
         String mapName = "/test/maps/string/double/test";
@@ -147,7 +277,7 @@ public class SubscriptionModelTest {
 
         remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
 
-        double key = 1.1;
+        double key = 1.0;
         double value = 1.23;
 
         stringDoubleMapView.put(key, value);
@@ -164,7 +294,8 @@ public class SubscriptionModelTest {
     public void testTopicSubscriptionStringDoubleMap() throws InterruptedException {
 
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, onThrowable::add);
+        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
+                wireType, onThrowable::add);
 
         String mapName = "/test/maps/string/double/test";
         String mapNameSubscriber = mapName + "?bootstrap=false";
