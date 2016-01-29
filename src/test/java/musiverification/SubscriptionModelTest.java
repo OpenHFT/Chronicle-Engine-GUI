@@ -38,13 +38,18 @@ import static net.openhft.chronicle.engine.Chassis.*;
 @RunWith(Parameterized.class)
 public class SubscriptionModelTest {
 
+    public static final Double EXPECTED = 1.23;
     private static Map<String, String> _stringStringMap;
     private static String _mapName = "/chronicleMapString";
     private static String _mapArgs = "putReturnsNull=true";
     private static AssetTree _clientAssetTree;
     private static ServerEndpoint _serverEndpoint;
     private static String _serverAddress = "host.port1";
-    public static final Double EXPECTED = 1.23;
+    private final WireType wireType;
+
+    public SubscriptionModelTest(WireType wireType) {
+        this.wireType = wireType;
+    }
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
@@ -53,13 +58,6 @@ public class SubscriptionModelTest {
                 {WireType.BINARY}
         });
     }
-
-    private final WireType wireType;
-
-    public SubscriptionModelTest(WireType wireType) {
-        this.wireType = wireType;
-    }
-
 
     @Before
     public void setUp() throws IOException {
@@ -173,7 +171,8 @@ public class SubscriptionModelTest {
 
         BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
 
-        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
+        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, (e) ->
+                mapEvents.add(e));
 
         Integer key = 1;
         Integer value = 2;

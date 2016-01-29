@@ -6,7 +6,7 @@
 
 
     <!-- ************ NOTE : Please add the xml commented out below to your
-                                  /m2/settings.xml ( or your internal nexus server )   ************
+                                  ${user.home}/.m2/settings.xml ( or your internal nexus server )   ************
 
   <settings>
        <servers>
