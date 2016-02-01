@@ -13,6 +13,7 @@ import net.openhft.chronicle.engine.tree.VanillaAsset;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -64,6 +65,7 @@ public class ChronicleMapEventListenerStatelessClientTest {
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(_mapBasePath).entries(50).averageValueSize(2 << 20).putReturnsNull(true), asset));
 
+
         serverEndpoint = new ServerEndpoint("ChronicleMapEventListenerStatelessClientTest", serverAssetTree, WireType.TEXT);
 
         _noOfEventsTriggered.set(0);
@@ -76,6 +78,7 @@ public class ChronicleMapEventListenerStatelessClientTest {
         //_StringStringMapClient = clientAssetTree.acquireMap("chronicleMapString", String.class, String.class);
         clientAssetTree.registerTopicSubscriber("chronicleMapString", String.class,
                 String.class, _chronicleTestEventListener);
+        YamlLogging.setAll(false);
 
     }
 
@@ -124,8 +127,8 @@ public class ChronicleMapEventListenerStatelessClientTest {
     }
 
     /**
-     * Performs the given number of iterations and alternates between calling consumer1 and consumer2 passing
-     * either _value1 or _value2.
+     * Performs the given number of iterations and alternates between calling consumer1 and
+     * consumer2 passing either _value1 or _value2.
      *
      * @param consumer1      Consumer1 to call.
      * @param consumer2      Consumer2 to call.
