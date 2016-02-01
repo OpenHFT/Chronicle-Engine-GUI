@@ -66,9 +66,11 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
     }
 
     /**
-     * Test that listening to events for a given key can handle 50 updates per second of 2 MB string values.
+     * Test that listening to events for a given key can handle 50 updates per second of 2 MB string
+     * values.
      */
     @Test
+    @Ignore("performance test - so hardware dependant")
     public void testSubscriptionMapEventOnKeyPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 
@@ -90,10 +92,11 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
     }
 
     /**
-     * Test that listening to events for a given map can handle 50 updates per second of 2 MB string values and are
-     * triggering events which contain both the key and value (topic).
+     * Test that listening to events for a given map can handle 50 updates per second of 2 MB string
+     * values and are triggering events which contain both the key and value (topic).
      */
     @Test
+    @Ignore("perfornace test is hardware dependant")
     public void testSubscriptionMapEventOnTopicPerformance() {
         String key = TestUtils.getKey(_mapName, 0);
 
@@ -120,6 +123,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
      * Expect it to handle at least 50 2 MB updates per second.
      */
     @Test
+    @Ignore("performance test - so hardware dependant")
     public void testSubscriptionMapEventListenerInsertPerformance() {
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
@@ -235,8 +239,8 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
     }
 
     /**
-     * Checks that all updates triggered are for the key specified in the constructor and increments the number of
-     * updates.
+     * Checks that all updates triggered are for the key specified in the constructor and increments
+     * the number of updates.
      */
     class TestChronicleKeyEventSubscriber implements Subscriber<String> {
         private int _stringLength;
@@ -272,9 +276,9 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
     }
 
     /**
-     * Topic subscriber checking for each message that it is for the right key (in constructor) and the expected size
-     * value.
-     * Increments event counter which can be checked at the end of the test.
+     * Topic subscriber checking for each message that it is for the right key (in constructor) and
+     * the expected size value. Increments event counter which can be checked at the end of the
+     * test.
      */
     class TestChronicleTopicSubscriber implements TopicSubscriber<String, String> {
         private String _keyName;
@@ -287,7 +291,8 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         }
 
         /**
-         * Test that the topic/key is the one specified in constructor and the message is the expected size.
+         * Test that the topic/key is the one specified in constructor and the message is the
+         * expected size.
          *
          * @throws InvalidSubscriberException
          */
@@ -319,9 +324,9 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
     }
 
     /**
-     * Map event listener for performance testing. Checks that the key is the one expected and the size of the value is
-     * as expected.
-     * Increments event specific counters that can be used to check agains the expected number of events.
+     * Map event listener for performance testing. Checks that the key is the one expected and the
+     * size of the value is as expected. Increments event specific counters that can be used to
+     * check agains the expected number of events.
      */
     class TestChronicleMapEventListener implements MapEventListener<String, String> {
         private AtomicInteger _noOfInsertEvents = new AtomicInteger(0);
