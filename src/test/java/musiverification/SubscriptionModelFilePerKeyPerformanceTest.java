@@ -13,6 +13,7 @@ import net.openhft.chronicle.engine.api.pubsub.TopicSubscriber;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
 import net.openhft.chronicle.engine.map.FilePerKeyValueStore;
 import net.openhft.chronicle.engine.tree.VanillaAsset;
+import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.*;
 
 import java.io.Closeable;
@@ -46,18 +47,21 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws InterruptedException {
         Chassis.resetChassis();
 
         ((VanillaAsset) Chassis.assetTree().root()).enableTranslatingValuesToBytesStore();
 
         String basePath = OS.TARGET + "/fpk/" + counter.getAndIncrement();
+
         System.out.println("Writing to " + basePath);
         Chassis.assetTree().root().addLeafRule(AuthenticatedKeyValueStore.class, "FilePer Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(basePath), asset));
         _testMap = Chassis.acquireMap(_mapName, String.class, String.class);
 
         _testMap.clear();
+        Thread.sleep(500);
+        YamlLogging.setAll(false);
     }
 
     @After
@@ -70,14 +74,16 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
      * values.
      */
     @Test
-    @Ignore("performance test - so hardware dependant")
-    public void testSubscriptionMapEventOnKeyPerformance() {
+    public void testSubscriptionMapEventOnKeyPerformance() throws InterruptedException {
         String key = TestUtils.getKey(_mapName, 0);
 
         //Create subscriber and register
         TestChronicleKeyEventSubscriber keyEventSubscriber = new TestChronicleKeyEventSubscriber(_twoMbTestStringLength);
 
         Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, me -> keyEventSubscriber.onMessage((String) me.getValue()));
+
+        // allow time for the subsribe to be registered
+        Thread.sleep(1000);
 
         AtomicInteger counter = new AtomicInteger();
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
@@ -96,14 +102,16 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
      * values and are triggering events which contain both the key and value (topic).
      */
     @Test
-    @Ignore("perfornace test is hardware dependant")
-    public void testSubscriptionMapEventOnTopicPerformance() {
+    public void testSubscriptionMapEventOnTopicPerformance() throws InterruptedException {
         String key = TestUtils.getKey(_mapName, 0);
 
         //Create subscriber and register
         TestChronicleTopicSubscriber topicSubscriber = new TestChronicleTopicSubscriber(key, _twoMbTestStringLength);
 
         Chassis.registerTopicSubscriber(_mapName, String.class, String.class, topicSubscriber);
+
+        // allow time for the subsribe to be registered
+        Thread.sleep(500);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
@@ -123,11 +131,13 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
      * Expect it to handle at least 50 2 MB updates per second.
      */
     @Test
-    @Ignore("performance test - so hardware dependant")
-    public void testSubscriptionMapEventListenerInsertPerformance() {
+    public void testSubscriptionMapEventListenerInsertPerformance() throws InterruptedException {
         //Create subscriber and register
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
         Chassis.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
+
+        // allow time for the subsribe to be registered
+        Thread.sleep(500);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
@@ -155,7 +165,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
      * Expect it to handle at least 50 2 MB updates per second.
      */
     @Test
-    public void testSubscriptionMapEventListenerUpdatePerformance() {
+    public void testSubscriptionMapEventListenerUpdatePerformance() throws InterruptedException {
         //Put values before testing as we want to ignore the insert events
         Function<Integer, Object> putFunction = a -> _testMap.put(TestUtils.getKey(_mapName, a), System.nanoTime() + _twoMbTestString);
 
@@ -168,6 +178,9 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
         Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
+
+        // allow time for the subsribe to be registered
+        Thread.sleep(500);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
@@ -201,6 +214,8 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         TestChronicleMapEventListener mapEventListener = new TestChronicleMapEventListener(_mapName, _twoMbTestStringLength);
 
         Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
+
+        Thread.sleep(500);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         long runtimeInNanos = 0;
