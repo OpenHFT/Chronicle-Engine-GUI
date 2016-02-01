@@ -7,6 +7,7 @@ import net.openhft.chronicle.map.ChronicleMapBuilder;
 import net.openhft.chronicle.map.MapEventListener;
 import net.openhft.chronicle.map.WriteContext;
 import net.openhft.chronicle.tools.ChronicleTools;
+import net.openhft.chronicle.wire.YamlLogging;
 import net.openhft.lang.values.StringValue;
 import org.jetbrains.annotations.Nullable;
 import org.junit.*;
@@ -59,6 +60,7 @@ public class MapEventListenerTest {
                 .of(String.class, StringValue.class)
                 .eventListener(_chronicleTestEventListener)
                 .createPersistedTo(_chronicleStringValueMapFile);
+        YamlLogging.setAll(false);
     }
 
     /**

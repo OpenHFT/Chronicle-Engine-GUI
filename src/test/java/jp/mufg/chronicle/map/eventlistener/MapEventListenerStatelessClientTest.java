@@ -12,6 +12,7 @@ import net.openhft.chronicle.engine.tree.VanillaAsset;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.*;
 
 import java.io.IOException;
@@ -59,6 +60,7 @@ public class MapEventListenerStatelessClientTest {
 
         _StringStringMap = clientAssetTree.acquireMap("chronicleMapString", String.class, String.class);
         clientAssetTree.registerTopicSubscriber("chronicleMapString", String.class, String.class, _chronicleTestEventListener);
+
     }
 
     @AfterClass
@@ -74,7 +76,7 @@ public class MapEventListenerStatelessClientTest {
         _noOfEventsTriggered.set(0);
 
         _StringStringMap.clear();
-
+        YamlLogging.setAll(false);
 
     }
 

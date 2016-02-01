@@ -4,6 +4,7 @@ import ddp.api.TestUtils;
 import jp.mufg.chronicle.map.testclasses.MapContainer;
 import jp.mufg.chronicle.map.testclasses.QuoteMapKey;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +29,7 @@ public class ChronicleMapPutPerformanceTestUpdated {
 
         marketDataCache = new MapContainer(file);
 //        marketDataCache = new MapContainerEnum(file);
+        YamlLogging.setAll(false);
     }
 
     @After
