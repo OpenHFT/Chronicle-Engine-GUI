@@ -1,5 +1,6 @@
 package replication;
 
+import net.openhft.chronicle.core.threads.EventLoop;
 import net.openhft.chronicle.engine.api.EngineReplication;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.Publisher;
@@ -18,7 +19,6 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.engine.tree.VanillaReplication;
 import net.openhft.chronicle.network.api.session.SessionProvider;
 import net.openhft.chronicle.threads.EventGroup;
-import net.openhft.chronicle.threads.api.EventLoop;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 

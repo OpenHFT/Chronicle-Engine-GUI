@@ -2,7 +2,6 @@ package musiverification;
 
 import ddp.api.TestUtils;
 import musiverification.helpers.CheckSessionDetailsSubscription;
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -20,7 +19,6 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.network.VanillaSessionDetails;
 import net.openhft.chronicle.network.api.session.SessionProvider;
-import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 import net.openhft.lang.thread.NamedThreadFactory;
@@ -38,7 +36,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Created by Rob Austin
@@ -113,7 +110,8 @@ public class ReplicationTest {
     }
 
     @NotNull
-    private static AssetTree create(final int hostId, Function<Bytes, Wire> writeType, Consumer<AssetTree> applyRules) {
+    private static AssetTree create(final int hostId, WireType writeType, Consumer<AssetTree>
+            applyRules) {
         AssetTree tree = new VanillaAssetTree((byte) hostId)
                 .forTesting(Throwable::printStackTrace)
                 .withConfig(resourcesDir() + "/cmkvst", OS.TARGET + "/" + hostId);

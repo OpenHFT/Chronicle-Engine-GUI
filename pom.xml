@@ -40,7 +40,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-               <version>1.11.8</version>
+                <version>1.11.15-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -84,6 +84,7 @@
         <dependency>
             <groupId>software.chronicle</groupId>
             <artifactId>chronicle-enterprise</artifactId>
+            <version>1.11.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -98,7 +99,13 @@
 
         <dependency>
             <groupId>net.openhft</groupId>
+            <artifactId>chronicle-wire</artifactId>
+            <version>1.3.5-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>net.openhft</groupId>
             <artifactId>chronicle-engine</artifactId>
+            <version>1.11.4-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -109,6 +116,17 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle-network</artifactId>
+            <version>1.0.65-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle-core</artifactId>
+            <version>1.3.3-SNAPSHOT</version>
         </dependency>
 
         <!-- test -->

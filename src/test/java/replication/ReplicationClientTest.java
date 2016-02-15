@@ -1,6 +1,6 @@
 package replication;
 
-import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.threads.HandlerPriority;
 import net.openhft.chronicle.engine.api.map.MapEvent;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.Publisher;
@@ -20,8 +20,6 @@ import net.openhft.chronicle.network.api.session.SessionProvider;
 import net.openhft.chronicle.network.connection.SocketAddressSupplier;
 import net.openhft.chronicle.network.connection.TcpChannelHub;
 import net.openhft.chronicle.threads.EventGroup;
-import net.openhft.chronicle.threads.HandlerPriority;
-import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.After;
@@ -33,7 +31,6 @@ import topicsubscriptionrepro.ConstructorExceptionClient;
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.function.Function;
 
 import static net.openhft.chronicle.engine.api.tree.RequestContext.requestContext;
 
@@ -51,7 +48,7 @@ public class ReplicationClientTest {
     private ServerEndpoint server2;
 
     private static MapView<String, String> create(String nameName, Integer hostId, String connectUri,
-                                                  BlockingQueue<MapEvent> q, Function<Bytes, Wire> wireType) {
+                                                  BlockingQueue<MapEvent> q, WireType wireType) {
         tree = new VanillaAssetTree(hostId);
 
         final Asset asset = tree.root().acquireAsset(nameName);
@@ -62,15 +59,16 @@ public class ReplicationClientTest {
                 RemoteKVSSubscription::new);
 
         tree.root().addWrappingRule(MapView.class, "mapv view", VanillaMapView::new, AuthenticatedKeyValueStore.class);
-        tree.root().addWrappingRule(TopicPublisher.class, " topic publisher", RemoteTopicPublisher::new, MapView.class);
+        tree.root().addLeafRule(TopicPublisher.class, " topic publisher", RemoteTopicPublisher::new);
         tree.root().addLeafRule(Publisher.class, "publisher", RemoteReference::new);
 
         EventGroup eventLoop = new EventGroup(true);
         SessionProvider sessionProvider = new VanillaSessionProvider();
 
-        tree.root().addView(TcpChannelHub.class, new TcpChannelHub(sessionProvider,
+        final TcpChannelHub tcpChannelHub = new TcpChannelHub(sessionProvider,
                 eventLoop, wireType, "", new SocketAddressSupplier(new String[]{connectUri}, ""),
-                true, ConstructorExceptionClient.clientConnectionMonitor(), HandlerPriority.MONITOR));
+                true, ConstructorExceptionClient.clientConnectionMonitor(), HandlerPriority.MONITOR);
+        tree.root().addView(TcpChannelHub.class, tcpChannelHub);
         asset.addView(AuthenticatedKeyValueStore.class, new RemoteKeyValueStore(requestContext(nameName), asset));
 
         MapView<String, String> result = tree.acquireMap(nameName, String.class, String.class);
