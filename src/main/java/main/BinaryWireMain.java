@@ -57,7 +57,7 @@ public class BinaryWireMain {
         }
 
 
-        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree, WIRE_TYPE);
+        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree);
 
         if (args.length == 1 && args[0].compareTo("-debug") == 0)
         {
