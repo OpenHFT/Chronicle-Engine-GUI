@@ -52,7 +52,7 @@ public class RemoteSubscriptionModelTest {
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET + "/RemoteSubscriptionModelTest").entries(20).averageValueSize(10_000), asset));
 
         TCPRegistry.createServerSocketChannelFor("RemoteSubscriptionModelPerformanceTest.port");
-        ServerEndpoint serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);
+        ServerEndpoint serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree);
 
         _clientAssetTree = new VanillaAssetTree(13).forRemoteAccess
                 ("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY, Throwable::printStackTrace);

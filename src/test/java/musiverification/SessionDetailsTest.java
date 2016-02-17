@@ -56,7 +56,7 @@ public class SessionDetailsTest
         remoteAssetTree.root().forRemoteAccess(new String[]{"host.port1"}, WIRE_TYPE,
                 VanillaSessionDetails.of("java-client", null, "java-domain"), null, Throwable::printStackTrace);
 
-        serverEndpoint = new ServerEndpoint("host.port1", serverAssetTree, WIRE_TYPE);
+        serverEndpoint = new ServerEndpoint("host.port1", serverAssetTree);
     }
 
     @After

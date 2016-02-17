@@ -133,7 +133,7 @@ public class ManyMapsTest {
     public void testConnectToMultipleMapsUsingTheSamePort() throws IOException {
         Map<String, Map<String, String>> _clientMaps = new HashMap<>();
         TCPRegistry.createServerSocketChannelFor("SubscriptionEventTest.host.port");
-        ServerEndpoint serverEndpoint = new ServerEndpoint("SubscriptionEventTest.host.port", assetTree, WireType.BINARY);
+        ServerEndpoint serverEndpoint = new ServerEndpoint("SubscriptionEventTest.host.port", assetTree);
 
         AssetTree clientAssetTree = new VanillaAssetTree(11).forRemoteAccess
                 ("SubscriptionEventTest.host.port", WireType.BINARY, Throwable::printStackTrace);

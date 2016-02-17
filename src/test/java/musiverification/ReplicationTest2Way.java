@@ -74,12 +74,12 @@ public class ReplicationTest2Way {
 
     private static void createServer1() {
         tree1 = create(1, WIRE_TYPE, "clusterTwo");
-        serverEndpoint1 = new ServerEndpoint("host.port1", tree1, WIRE_TYPE);
+        serverEndpoint1 = new ServerEndpoint("host.port1", tree1);
     }
 
     private static void createServer2() {
         tree2 = create(2, WIRE_TYPE, "clusterTwo");
-        serverEndpoint2 = new ServerEndpoint("host.port2", tree2, WIRE_TYPE);
+        serverEndpoint2 = new ServerEndpoint("host.port2", tree2);
     }
 
     private static void closeServer1() {

@@ -112,7 +112,7 @@ public class ReplicationServerMain {
                 MapKVSSubscription::new);
 
 
-        ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + (5700 + identifier), tree, wireType);
+        ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + (5700 + identifier), tree);
         return serverEndpoint;
     }
 }
