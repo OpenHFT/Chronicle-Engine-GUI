@@ -28,21 +28,15 @@ import static net.openhft.chronicle.core.Jvm.pause;
 @Ignore("CHENT-49 attempts to use optimisations which are not ready")
 public class FastMapEventListenerStatelessClientTest {
     private static final String _mapBasePath = OS.TARGET + "/FastMapEventListenerStatelessClientTest";
-
-    private static VanillaAssetTree clientAssetTree;
     private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting(Throwable::printStackTrace);
-
+    private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
+    private static VanillaAssetTree clientAssetTree;
     private static ChronicleTestEventListener _chronicleTestEventListener;
-
     private static Map<String, BytesStore> _StringStringMap;
     private static Map<String, BytesStore> _StringStringMapClient;
-
     private static ServerEndpoint serverEndpoint;
-
     private final BytesStore _value1 = BytesStore.wrap(ByteBuffer.allocateDirect(2 << 20));//;"TestValue1";
     private final BytesStore _value2 = BytesStore.wrap(ByteBuffer.allocateDirect(2_000_000));//;"TestValue2";
-
-    private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
 
     public FastMapEventListenerStatelessClientTest() {
     }
@@ -57,7 +51,7 @@ public class FastMapEventListenerStatelessClientTest {
         root.addLeafRule(AuthenticatedKeyValueStore.class, "use File Per Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(_mapBasePath), asset));
 
-        serverEndpoint = new ServerEndpoint("FastMapEventListenerStatelessClientTest", serverAssetTree);
+        serverEndpoint = new ServerEndpoint("FastMapEventListenerStatelessClientTest", serverAssetTree, WireType.TEXT);
 
 
         _StringStringMap = serverAssetTree.acquireMap("chronicleMapString?putReturnsNull=true", String.class, BytesStore.class);
@@ -69,19 +63,19 @@ public class FastMapEventListenerStatelessClientTest {
 
     }
 
-    @Before
-    public void setUp() {
-        _noOfEventsTriggered.set(0);
-        _StringStringMap.clear();
-        YamlLogging.setAll(false);
-    }
-
     @AfterClass
     public static void tearDown() {
         _StringStringMap.clear();
         clientAssetTree.close();
         serverEndpoint.close();
         serverAssetTree.close();
+    }
+
+    @Before
+    public void setUp() {
+        _noOfEventsTriggered.set(0);
+        _StringStringMap.clear();
+        YamlLogging.setAll(false);
     }
 
     /**

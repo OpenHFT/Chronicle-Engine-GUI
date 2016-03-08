@@ -52,7 +52,7 @@ public class MapEventListenerStatelessClientTest {
         root.addLeafRule(AuthenticatedKeyValueStore.class, "use File Per Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(_mapBasePath), asset));
 
-        serverEndpoint = new ServerEndpoint("MapEventListenerStatelessClientTest", serverAssetTree);
+        serverEndpoint = new ServerEndpoint("MapEventListenerStatelessClientTest", serverAssetTree, WireType.BINARY);
 
 //        _StringStringMap = serverAssetTree.acquireMap("chronicleMapString?putReturnsNull=true", String.class, String.class);
 

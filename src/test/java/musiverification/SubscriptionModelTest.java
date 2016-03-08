@@ -69,7 +69,7 @@ public class SubscriptionModelTest {
         _clientAssetTree = assetTree();
 
         TCPRegistry.createServerSocketChannelFor(_serverAddress);
-        _serverEndpoint = new ServerEndpoint(_serverAddress, _clientAssetTree);
+        _serverEndpoint = new ServerEndpoint(_serverAddress, _clientAssetTree, wireType);
     }
 
     @After

@@ -36,6 +36,20 @@ public class SessionDetailsTest
     private static AssetTree serverAssetTree;
     private static VanillaAssetTree remoteAssetTree;
 
+    @NotNull
+    private static AssetTree create(final int hostId, Function<Bytes, Wire> writeType, Consumer<AssetTree> applyRules) {
+        AssetTree tree = new VanillaAssetTree((byte) hostId)
+                .forTesting(Throwable::printStackTrace);
+
+        //Add session detail check wrapper for
+        tree.root().addWrappingRule(ObjectSubscription.class, "Check session details subscription",
+                CheckSessionDetailsSubscription::new, MapKVSSubscription.class);
+
+        tree.root().addLeafRule(MapKVSSubscription.class, "Chronicle vanilla subscription", MapKVSSubscription::new);
+
+        return tree;
+    }
+
     @Before
     public void before() throws IOException
     {
@@ -56,7 +70,7 @@ public class SessionDetailsTest
         remoteAssetTree.root().forRemoteAccess(new String[]{"host.port1"}, WIRE_TYPE,
                 VanillaSessionDetails.of("java-client", null, "java-domain"), null, Throwable::printStackTrace);
 
-        serverEndpoint = new ServerEndpoint("host.port1", serverAssetTree);
+        serverEndpoint = new ServerEndpoint("host.port1", serverAssetTree, WIRE_TYPE);
     }
 
     @After
@@ -80,21 +94,6 @@ public class SessionDetailsTest
         TCPRegistry.reset();
         YamlLogging.clientWrites = false;
         YamlLogging.clientReads = false;
-    }
-
-    @NotNull
-    private static AssetTree create(final int hostId, Function<Bytes, Wire> writeType, Consumer<AssetTree> applyRules)
-    {
-        AssetTree tree = new VanillaAssetTree((byte) hostId)
-                .forTesting(Throwable::printStackTrace);
-
-        //Add session detail check wrapper for
-        tree.root().addWrappingRule(ObjectSubscription.class, "Check session details subscription",
-                CheckSessionDetailsSubscription::new, MapKVSSubscription.class);
-
-        tree.root().addLeafRule(MapKVSSubscription.class, "Chronicle vanilla subscription", MapKVSSubscription::new);
-
-        return tree;
     }
 
     @Test

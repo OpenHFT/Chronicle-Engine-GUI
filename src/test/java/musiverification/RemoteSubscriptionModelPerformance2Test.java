@@ -71,7 +71,7 @@ public class RemoteSubscriptionModelPerformance2Test {
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET + "/RemoteSubscriptionModelPerformance2Test").entries(_noOfPuts).putReturnsNull(false).averageValueSize(_twoMbTestStringLength), asset));
         TCPRegistry.createServerSocketChannelFor("RemoteSubscriptionModelPerformanceTest.port");
-        serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree);
+        serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);
 
         clientAssetTree = new VanillaAssetTree(13).forRemoteAccess
                 ("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY, Throwable::printStackTrace);

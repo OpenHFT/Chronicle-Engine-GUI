@@ -34,6 +34,12 @@ public class FailoverBinaryWireMain {
     private final String _server2StopKey = "K10";
     private final String _server3StopKey = "K15";
 
+    private FailoverBinaryWireMain() {
+        _assetTree1 = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
+        _assetTree2 = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
+        _assetTree3 = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
+    }
+
     public static void main(String[] args) {
         FailoverBinaryWireMain failoverBinaryWireMain = new FailoverBinaryWireMain();
         failoverBinaryWireMain.start();
@@ -46,9 +52,9 @@ public class FailoverBinaryWireMain {
         _assetTree3.acquireMap(_mapUri, String.class, String.class).size();
 
         //Start endpoints
-        final ServerEndpoint serverEndpoint1 = new ServerEndpoint("*:" + 9088, _assetTree1);
-        final ServerEndpoint serverEndpoint2 = new ServerEndpoint("*:" + 9089, _assetTree2);
-        final ServerEndpoint serverEndpoint3 = new ServerEndpoint("*:" + 9090, _assetTree3);
+        final ServerEndpoint serverEndpoint1 = new ServerEndpoint("*:" + 9088, _assetTree1, WIRE_TYPE);
+        final ServerEndpoint serverEndpoint2 = new ServerEndpoint("*:" + 9089, _assetTree2, WIRE_TYPE);
+        final ServerEndpoint serverEndpoint3 = new ServerEndpoint("*:" + 9090, _assetTree3, WIRE_TYPE);
 
         //Register server stop subscribers
         _assetTree1.registerSubscriber(_mapUri + "/" + _server1StopKey + "?bootstrap=false", String.class, v -> {
@@ -73,11 +79,5 @@ public class FailoverBinaryWireMain {
         });
 
         System.out.println("Servers running, start C# unit test...");
-    }
-
-    private FailoverBinaryWireMain() {
-        _assetTree1 = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
-        _assetTree2 = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
-        _assetTree3 = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
     }
 }

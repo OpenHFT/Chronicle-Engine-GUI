@@ -66,7 +66,7 @@ public class ChronicleMapEventListenerStatelessClientTest {
                 new ChronicleMapKeyValueStore(context.basePath(_mapBasePath).entries(50).averageValueSize(2 << 20).putReturnsNull(true), asset));
 
 
-        serverEndpoint = new ServerEndpoint("ChronicleMapEventListenerStatelessClientTest", serverAssetTree);
+        serverEndpoint = new ServerEndpoint("ChronicleMapEventListenerStatelessClientTest", serverAssetTree, WireType.TEXT);
 
         _noOfEventsTriggered.set(0);
 

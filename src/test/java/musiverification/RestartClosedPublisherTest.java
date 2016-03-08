@@ -29,7 +29,7 @@ public class RestartClosedPublisherTest {
         TCPRegistry.createServerSocketChannelFor(CONNECTION_1);
         _server = new VanillaAssetTree().forServer(Throwable::printStackTrace);
 
-        _serverEndpoint1 = new ServerEndpoint(CONNECTION_1, _server);
+        _serverEndpoint1 = new ServerEndpoint(CONNECTION_1, _server, WIRE_TYPE);
 
         createRemoteClient();
     }

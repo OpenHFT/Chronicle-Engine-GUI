@@ -45,11 +45,10 @@ public class TestTimeoutOnDirectMapAccessAndSubscriptionExample
      */
     public static class ChronicleDataPublisher implements AutoCloseable
     {
-        private WireType _wireType;
-        private int _port;
-
         //TODO DS get config settings from db or prop file
         private final VanillaAssetTree _assetTree = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
+        private WireType _wireType;
+        private int _port;
         private ServerEndpoint _serverEndpoint;
 
         public ChronicleDataPublisher() throws IOException
@@ -64,7 +63,7 @@ public class TestTimeoutOnDirectMapAccessAndSubscriptionExample
             _port = port;
             _wireType = wireType;
 
-            _serverEndpoint = new ServerEndpoint("*:" + _port, _assetTree);
+            _serverEndpoint = new ServerEndpoint("*:" + _port, _assetTree, wireType);
         }
 
         public <K, V> Map<K, V> getMap(String uri, Class<K> keyClass, Class<V> valueClass)

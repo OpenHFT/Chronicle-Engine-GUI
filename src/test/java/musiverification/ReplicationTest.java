@@ -54,61 +54,6 @@ public class ReplicationTest {
     private static AssetTree tree1;
     private static AssetTree tree2;
 
-    @Before
-    public void before() throws IOException {
-        resetTrees(null);
-    }
-
-    private void resetTrees(Consumer<AssetTree> applyRulesToAllTrees) throws IOException {
-//        YamlLogging.clientWrites = true;
-//        YamlLogging.clientReads = true;
-
-        //YamlLogging.showServerWrites = true;
-
-        ClassAliasPool.CLASS_ALIASES.addAlias(ChronicleMapGroupFS.class);
-        ClassAliasPool.CLASS_ALIASES.addAlias(FilePerKeyGroupFS.class);
-        //Delete any files from the last run
-        TestUtils.deleteRecursive(new File(OS.TARGET, NAME));
-
-        TCPRegistry.createServerSocketChannelFor("host.port1", "host.port2", "host.port3");
-
-        tree1 = create(1, WIRE_TYPE, applyRulesToAllTrees);
-        tree2 = create(2, WIRE_TYPE, applyRulesToAllTrees);
-        tree3 = create(3, WIRE_TYPE, applyRulesToAllTrees);
-
-        serverEndpoint1 = new ServerEndpoint("host.port1", tree1);
-        serverEndpoint2 = new ServerEndpoint("host.port2", tree2);
-        serverEndpoint3 = new ServerEndpoint("host.port3", tree3);
-    }
-
-    @After
-    public void after() {
-        if (tree1 != null) {
-            tree1.close();
-        }
-        if (tree2 != null) {
-            tree2.close();
-        }
-        if (tree3 != null) {
-            tree3.close();
-        }
-
-        if (serverEndpoint1 != null) {
-            serverEndpoint1.close();
-        }
-        if (serverEndpoint2 != null) {
-            serverEndpoint2.close();
-        }
-        if (serverEndpoint3 != null) {
-            serverEndpoint3.close();
-        }
-
-        TCPRegistry.reset();
-        // TODO TCPRegistery.assertAllServersStopped();
-        YamlLogging.clientWrites = false;
-        YamlLogging.clientReads = false;
-    }
-
     @NotNull
     private static AssetTree create(final int hostId, WireType writeType, Consumer<AssetTree>
             applyRules) {
@@ -138,6 +83,61 @@ public class ReplicationTest {
             return ".";
         }
         return new File(path).getParentFile().getParentFile() + "/src/test/resources";
+    }
+
+    @Before
+    public void before() throws IOException {
+        resetTrees(null);
+    }
+
+    private void resetTrees(Consumer<AssetTree> applyRulesToAllTrees) throws IOException {
+//        YamlLogging.clientWrites = true;
+//        YamlLogging.clientReads = true;
+
+        //YamlLogging.showServerWrites = true;
+
+        ClassAliasPool.CLASS_ALIASES.addAlias(ChronicleMapGroupFS.class);
+        ClassAliasPool.CLASS_ALIASES.addAlias(FilePerKeyGroupFS.class);
+        //Delete any files from the last run
+        TestUtils.deleteRecursive(new File(OS.TARGET, NAME));
+
+        TCPRegistry.createServerSocketChannelFor("host.port1", "host.port2", "host.port3");
+
+        tree1 = create(1, WIRE_TYPE, applyRulesToAllTrees);
+        tree2 = create(2, WIRE_TYPE, applyRulesToAllTrees);
+        tree3 = create(3, WIRE_TYPE, applyRulesToAllTrees);
+
+        serverEndpoint1 = new ServerEndpoint("host.port1", tree1, WIRE_TYPE);
+        serverEndpoint2 = new ServerEndpoint("host.port2", tree2, WIRE_TYPE);
+        serverEndpoint3 = new ServerEndpoint("host.port3", tree3, WIRE_TYPE);
+    }
+
+    @After
+    public void after() {
+        if (tree1 != null) {
+            tree1.close();
+        }
+        if (tree2 != null) {
+            tree2.close();
+        }
+        if (tree3 != null) {
+            tree3.close();
+        }
+
+        if (serverEndpoint1 != null) {
+            serverEndpoint1.close();
+        }
+        if (serverEndpoint2 != null) {
+            serverEndpoint2.close();
+        }
+        if (serverEndpoint3 != null) {
+            serverEndpoint3.close();
+        }
+
+        TCPRegistry.reset();
+        // TODO TCPRegistery.assertAllServersStopped();
+        YamlLogging.clientWrites = false;
+        YamlLogging.clientReads = false;
     }
 
 //    public static void registerTextViewofTree(String desc, AssetTree tree) {
@@ -348,7 +348,7 @@ public class ReplicationTest {
         serverEndpoint2.close();
         tree2 = create(2, WIRE_TYPE, null);
 
-        serverEndpoint2 = new ServerEndpoint("host.port2", tree2);
+        serverEndpoint2 = new ServerEndpoint("host.port2", tree2, WIRE_TYPE);
 
         map1.put("Map1NonRep", "NonRepValue");
 

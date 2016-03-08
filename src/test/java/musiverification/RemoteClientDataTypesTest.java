@@ -25,17 +25,16 @@ import java.util.concurrent.TimeUnit;
 @RunWith(Parameterized.class)
 public class RemoteClientDataTypesTest {
 
-    private Class _keyClass;
-    private Class _valueClass;
-    private Object _key;
-    private Object _value;
-    private String _mapUri;
-
     private static AssetTree _serverAssetTree;
     private static AssetTree _clientAssetTree;
     private static ServerEndpoint _serverEndpoint;
     private static String _serverAddress = "host.port1";
     private final WireType _wireType;
+    private Class _keyClass;
+    private Class _valueClass;
+    private Object _key;
+    private Object _value;
+    private String _mapUri;
 
     //    public RemoteClientDataTypesTest(WireType wireType) {
 //        this.wireType = wireType;
@@ -76,7 +75,7 @@ public class RemoteClientDataTypesTest {
         _serverAssetTree = new VanillaAssetTree().forServer(null);
 
         TCPRegistry.createServerSocketChannelFor(_serverAddress);
-        _serverEndpoint = new ServerEndpoint(_serverAddress, _serverAssetTree);
+        _serverEndpoint = new ServerEndpoint(_serverAddress, _serverAssetTree, _wireType);
 
         _clientAssetTree = new VanillaAssetTree().forRemoteAccess(_serverAddress, _wireType, null);
     }

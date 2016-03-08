@@ -35,7 +35,7 @@ public class TextWireMain {
         int port = 8088;
         VanillaAssetTree assetTree = new VanillaAssetTree().forTesting(false, Throwable::printStackTrace);
 
-        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree);
+        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree, WIRE_TYPE);
 
         if (args.length == 1 && args[0].compareTo("-debug") == 0)
         {

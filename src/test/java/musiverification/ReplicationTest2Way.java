@@ -36,16 +36,14 @@ import static org.junit.Assert.assertNotNull;
 public class ReplicationTest2Way {
     public static final WireType WIRE_TYPE = WireType.TEXT;
     public static final String NAME = "/ChMaps/test";
+    public static final String keyMap1 = "keyMap1";
+    public static final String valueMap1 = "valueMap1";
+    public static final String keyMap2 = "keyMap2";
+    public static final String valueMap2 = "valueMap2";
     public static ServerEndpoint serverEndpoint1;
     public static ServerEndpoint serverEndpoint2;
     private static AssetTree tree1;
     private static AssetTree tree2;
-
-    public static final String keyMap1 = "keyMap1";
-    public static final String valueMap1 = "valueMap1";
-
-    public static final String keyMap2 = "keyMap2";
-    public static final String valueMap2 = "valueMap2";
 
     @BeforeClass
     public static void before() throws IOException {
@@ -74,12 +72,12 @@ public class ReplicationTest2Way {
 
     private static void createServer1() {
         tree1 = create(1, WIRE_TYPE, "clusterTwo");
-        serverEndpoint1 = new ServerEndpoint("host.port1", tree1);
+        serverEndpoint1 = new ServerEndpoint("host.port1", tree1, WIRE_TYPE);
     }
 
     private static void createServer2() {
         tree2 = create(2, WIRE_TYPE, "clusterTwo");
-        serverEndpoint2 = new ServerEndpoint("host.port2", tree2);
+        serverEndpoint2 = new ServerEndpoint("host.port2", tree2, WIRE_TYPE);
     }
 
     private static void closeServer1() {

@@ -130,7 +130,7 @@ public class ReplicationServerMain {
 
 
         closeables.add(tree);
-        ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + (5700 + identifier), tree);
+        ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + (5700 + identifier), tree, wireType);
         closeables.add(serverEndpoint);
 
         return serverEndpoint;

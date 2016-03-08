@@ -7,7 +7,10 @@ import net.openhft.chronicle.engine.api.map.MapEvent;
 import net.openhft.chronicle.engine.api.map.MapEventListener;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
-import net.openhft.chronicle.engine.map.*;
+import net.openhft.chronicle.engine.map.CMap2EngineReplicator;
+import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
+import net.openhft.chronicle.engine.map.InsertedEvent;
+import net.openhft.chronicle.engine.map.VanillaMapView;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
@@ -89,7 +92,7 @@ public class ArrayMapTest {
 
             connection = "ArrayMapTest." + name.getMethodName() + ".host.port";
             TCPRegistry.createServerSocketChannelFor(connection);
-            serverEndpoint = new ServerEndpoint(connection, serverAssetTree);
+            serverEndpoint = new ServerEndpoint(connection, serverAssetTree, wireType);
             assetTree = new VanillaAssetTree().forRemoteAccess(connection, wireType, x -> t.set(x));
         } else {
             assetTree = serverAssetTree;
