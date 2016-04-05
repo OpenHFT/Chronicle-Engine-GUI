@@ -107,9 +107,9 @@ public class ReplicationTest {
         tree2 = create(2, WIRE_TYPE, applyRulesToAllTrees);
         tree3 = create(3, WIRE_TYPE, applyRulesToAllTrees);
 
-        serverEndpoint1 = new ServerEndpoint("host.port1", tree1, WIRE_TYPE);
-        serverEndpoint2 = new ServerEndpoint("host.port2", tree2, WIRE_TYPE);
-        serverEndpoint3 = new ServerEndpoint("host.port3", tree3, WIRE_TYPE);
+        serverEndpoint1 = new ServerEndpoint("host.port1", tree1);
+        serverEndpoint2 = new ServerEndpoint("host.port2", tree2);
+        serverEndpoint3 = new ServerEndpoint("host.port3", tree3);
     }
 
     @After
@@ -136,8 +136,8 @@ public class ReplicationTest {
 
         TCPRegistry.reset();
         // TODO TCPRegistery.assertAllServersStopped();
-        YamlLogging.clientWrites = false;
-        YamlLogging.clientReads = false;
+        YamlLogging.showClientWrites(false);
+        YamlLogging.showClientReads(false);
     }
 
 //    public static void registerTextViewofTree(String desc, AssetTree tree) {
@@ -348,7 +348,7 @@ public class ReplicationTest {
         serverEndpoint2.close();
         tree2 = create(2, WIRE_TYPE, null);
 
-        serverEndpoint2 = new ServerEndpoint("host.port2", tree2, WIRE_TYPE);
+        serverEndpoint2 = new ServerEndpoint("host.port2", tree2);
 
         map1.put("Map1NonRep", "NonRepValue");
 

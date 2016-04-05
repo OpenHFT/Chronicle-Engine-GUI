@@ -58,12 +58,12 @@ public class TestTimeoutOnDirectMapAccessAndSubscriptionExample
 
         public ChronicleDataPublisher(int port, WireType wireType) throws IOException
         {
-            YamlLogging.showServerReads = true;
-            YamlLogging.showServerWrites = true;
+            YamlLogging.showServerReads(true);
+            YamlLogging.showServerWrites(true);
             _port = port;
             _wireType = wireType;
 
-            _serverEndpoint = new ServerEndpoint("*:" + _port, _assetTree, wireType);
+            _serverEndpoint = new ServerEndpoint("*:" + _port, _assetTree);
         }
 
         public <K, V> Map<K, V> getMap(String uri, Class<K> keyClass, Class<V> valueClass)

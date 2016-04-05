@@ -40,7 +40,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.12.3</version>
+                <version>1.12.4-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -85,6 +85,7 @@
             <groupId>software.chronicle</groupId>
             <artifactId>chronicle-enterprise</artifactId>
         </dependency>
+
 
         <dependency>
             <groupId>net.openhft</groupId>
@@ -136,6 +137,16 @@
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle-engine</artifactId>
+            <version>1.12.2-beta-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle-engine</artifactId>
+            <version>1.12.2-beta-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

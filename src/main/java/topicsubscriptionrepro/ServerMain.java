@@ -7,20 +7,18 @@ import net.openhft.chronicle.wire.WireType;
 
 import java.io.IOException;
 
-public class ServerMain
-{
+public class ServerMain {
     public static final WireType WIRE_TYPE = WireType.BINARY; //TODO DS get from constructor?
     private static int _port = 5566;
 
-    public static void main(String[] args) throws IOException
-    {
+    public static void main(String[] args) throws IOException {
 //        YamlLogging.setAll(true);
         VanillaAssetTree assetTree = new VanillaAssetTree().forServer(Throwable::printStackTrace);
 //        VanillaAssetTree assetTree = new VanillaAssetTree().forTesting();
 
         VanillaAsset root = assetTree.root();
 
-        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + _port, assetTree, WIRE_TYPE);
+        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + _port, assetTree);
 
         //FIXME remove these rules and it still won't work.
         //Add wrapping rules for authorization and authentication

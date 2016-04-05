@@ -52,9 +52,9 @@ public class FailoverBinaryWireMain {
         _assetTree3.acquireMap(_mapUri, String.class, String.class).size();
 
         //Start endpoints
-        final ServerEndpoint serverEndpoint1 = new ServerEndpoint("*:" + 9088, _assetTree1, WIRE_TYPE);
-        final ServerEndpoint serverEndpoint2 = new ServerEndpoint("*:" + 9089, _assetTree2, WIRE_TYPE);
-        final ServerEndpoint serverEndpoint3 = new ServerEndpoint("*:" + 9090, _assetTree3, WIRE_TYPE);
+        final ServerEndpoint serverEndpoint1 = new ServerEndpoint("*:" + 9088, _assetTree1);
+        final ServerEndpoint serverEndpoint2 = new ServerEndpoint("*:" + 9089, _assetTree2);
+        final ServerEndpoint serverEndpoint3 = new ServerEndpoint("*:" + 9090, _assetTree3);
 
         //Register server stop subscribers
         _assetTree1.registerSubscriber(_mapUri + "/" + _server1StopKey + "?bootstrap=false", String.class, v -> {

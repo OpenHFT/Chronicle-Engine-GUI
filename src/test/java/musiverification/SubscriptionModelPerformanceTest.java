@@ -15,7 +15,6 @@ import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
-import net.openhft.chronicle.wire.YamlLogging;
 import org.junit.*;
 
 import java.io.File;
@@ -63,8 +62,7 @@ public class SubscriptionModelPerformanceTest {
 
     @Before
     public void setUp() throws IOException {
-//        YamlLogging.clientReads = YamlLogging.clientWrites= true;
-        YamlLogging.clientReads = YamlLogging.clientWrites = false;
+
 
 
         String hostPortDescription = "SubscriptionModelPerformanceTest-"+ System.nanoTime();
@@ -78,7 +76,7 @@ public class SubscriptionModelPerformanceTest {
 
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET + "/SubscriptionModelPerformanceTest").entries(50).averageValueSize(2 << 20), asset));
-        serverEndpoint = new ServerEndpoint(hostPortDescription, serverAssetTree, wireType);
+        serverEndpoint = new ServerEndpoint(hostPortDescription, serverAssetTree);
         clientAssetTree = new VanillaAssetTree(15).forRemoteAccess(hostPortDescription, wireType, Throwable::printStackTrace);
     }
 

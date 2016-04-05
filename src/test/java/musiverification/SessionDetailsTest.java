@@ -12,7 +12,6 @@ import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.network.VanillaSessionDetails;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
-import net.openhft.chronicle.wire.YamlLogging;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Assert;
@@ -70,7 +69,7 @@ public class SessionDetailsTest
         remoteAssetTree.root().forRemoteAccess(new String[]{"host.port1"}, WIRE_TYPE,
                 VanillaSessionDetails.of("java-client", null, "java-domain"), null, Throwable::printStackTrace);
 
-        serverEndpoint = new ServerEndpoint("host.port1", serverAssetTree, WIRE_TYPE);
+        serverEndpoint = new ServerEndpoint("host.port1", serverAssetTree);
     }
 
     @After
@@ -92,8 +91,7 @@ public class SessionDetailsTest
         }
 
         TCPRegistry.reset();
-        YamlLogging.clientWrites = false;
-        YamlLogging.clientReads = false;
+
     }
 
     @Test

@@ -30,12 +30,12 @@ public class TextWireMain {
     public static void main(String[] args) {
 
 
-        YamlLogging.showServerReads = true;
+        YamlLogging.showServerReads(true);
         // the default is BinaryWire
         int port = 8088;
         VanillaAssetTree assetTree = new VanillaAssetTree().forTesting(false, Throwable::printStackTrace);
 
-        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree, WIRE_TYPE);
+        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree);
 
         if (args.length == 1 && args[0].compareTo("-debug") == 0)
         {

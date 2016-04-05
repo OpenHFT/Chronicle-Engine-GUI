@@ -52,7 +52,7 @@ public class RemoteSubscriptionModelTest {
                 new ChronicleMapKeyValueStore(context.basePath(OS.TARGET + "/RemoteSubscriptionModelTest").entries(20).averageValueSize(10_000), asset));
 
         TCPRegistry.createServerSocketChannelFor("RemoteSubscriptionModelPerformanceTest.port");
-        ServerEndpoint serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree, WireType.BINARY);
+        ServerEndpoint serverEndpoint = new ServerEndpoint("RemoteSubscriptionModelPerformanceTest.port", serverAssetTree);
 
         _clientAssetTree = new VanillaAssetTree(13).forRemoteAccess
                 ("RemoteSubscriptionModelPerformanceTest.port", WireType.BINARY, Throwable::printStackTrace);
@@ -247,8 +247,8 @@ public class RemoteSubscriptionModelTest {
     @Test
     public void testSubscriptionOnMap() throws InvalidSubscriberException {
         //Using a strict mock as we want to verify that events come in in the right order
-        YamlLogging.showServerReads = true;
-        YamlLogging.showServerWrites = true;
+        YamlLogging.showServerReads(true);
+        YamlLogging.showServerWrites(true);
 
         TopicSubscriber<String, String> topicSubscriberMock = EasyMock.createStrictMock(TopicSubscriber.class);
         _clientAssetTree.registerTopicSubscriber(_mapName, String.class, String.class, topicSubscriberMock);
