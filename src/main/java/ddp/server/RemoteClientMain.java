@@ -1,5 +1,6 @@
 package ddp.server;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.tree.VanillaAsset;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
@@ -43,7 +44,7 @@ public class RemoteClientMain
 
         testMap.registerSubscriber(x -> System.out.println("REMOTE RECEIVED EVENT: " + x));
 
-        Thread.sleep(200);
+        Jvm.pause(200);
 
         key = "TestKey2";
         value = "TestValue2";

@@ -119,7 +119,7 @@ public class ArrayMapTest {
 
 
     @Test
-    public void testByteArrayValue() throws Exception {
+    public void testByteArrayValue() {
 
         final MapView<String, byte[]> map = assetTree.acquireMap("name", String.class, byte[]
                 .class);
@@ -132,7 +132,7 @@ public class ArrayMapTest {
 
 
     @Test
-    public void testByteArrayValueWithRealBytes() throws Exception {
+    public void testByteArrayValueWithRealBytes() {
 
         final MapView<String, byte[]> map = assetTree.acquireMap("name", String.class, byte[]
                 .class);
@@ -145,7 +145,7 @@ public class ArrayMapTest {
     }
 
     @Test
-    public void testByteArrayValueWithRealBytesNegative() throws Exception {
+    public void testByteArrayValueWithRealBytesNegative() {
 
         final MapView<String, byte[]> map = assetTree.acquireMap("name", String.class, byte[]
                 .class);
@@ -158,7 +158,7 @@ public class ArrayMapTest {
     }
 
     @Test
-    public void testByteArrayMapEventSubscription() throws Exception {
+    public void testByteArrayMapEventSubscription() throws InterruptedException {
 
         BlockingQueue<MapEvent> mapEventQueue = new ArrayBlockingQueue<>(1);
 
@@ -184,7 +184,7 @@ public class ArrayMapTest {
     }
 
     @Test
-    public void testByteArrayMapEventSubscriptionTyped() throws Exception {
+    public void testByteArrayMapEventSubscriptionTyped() throws InterruptedException {
 
         BlockingQueue<byte[]> mapEventQueue = new ArrayBlockingQueue<>(1);
 

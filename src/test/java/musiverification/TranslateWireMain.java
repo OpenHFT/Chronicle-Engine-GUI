@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 public class TranslateWireMain {
     @Test
     public void translate() {
-        Bytes bytes = Bytes.fromHexString("00000060 79 82 06 02 00 00 8A 80  04 F4 FF 01 53 4B 33 50 y······· ····SK3P\n" +
+        Bytes bytes = Bytes.fromHexString("00000060 79 82 06 02 00 00 8A 80  04 F4 FF 01 53 4B 33 50 y....... ....SK3P\n" +
                 "00000070 4D 50 4D 46 44 53 54 4D  34 54 37 52 43 31 45 4F MPMFDSTM 4T7RC1EO\n" +
                 "00000080 4D 44 33 4E 51 37 46 45  39 55 55 34 42 4E 53 31 MD3NQ7FE 9UU4BNS1\n" +
                 "00000090 46 47 4E 4C 47 36 43 4A  47 5A 34 50 49 52 48 39 FGNLG6CJ GZ4PIRH9\n" +
@@ -45,12 +45,12 @@ public class TranslateWireMain {
                 "00000230 31 30 59 39 32 34 4F 38  34 4D 34 59 50 38 5A 56 10Y924O8 4M4YP8ZV\n" +
                 "00000240 34 59 31 4C 33 57 4F 41  49 35 32 41 45 57 51 44 4Y1L3WOA I52AEWQD\n" +
                 "00000250 37 57 48 49 48 4A 48 38  42 4A 55 41 30 4F 54 36 7WHIHJH8 BJUA0OT6\n" +
-                "00000260 44 58 33 4D 54 4E 59 30  46 45 34 43 C9 74 69 6D DX3MTNY0 FE4C·tim\n" +
-                "00000270 65 73 74 61 6D 70 A7 4C  81 82 6D 51 01 00 00 CA estamp·L ··mQ····\n" +
-                "00000280 69 64 65 6E 74 69 66 69  65 72 04 C9 69 73 44 65 identifi er··isDe\n" +
-                "00000290 6C 65 74 65 64 B0 D2 62  6F 6F 74 53 74 72 61 70 leted··b ootStrap\n" +
-                "000002a0 54 69 6D 65 53 74 61 6D  70 A7 51 56 91 6D 51 01 TimeStam p·QV·mQ·\n" +
-                "000002b0 00 00 BE 12 72 65 6D 6F  74 65 49 64 65 6E 74 69 ····remo teIdenti\n" +
+                "00000260 44 58 33 4D 54 4E 59 30  46 45 34 43 C9 74 69 6D DX3MTNY0 FE4C.tim\n" +
+                "00000270 65 73 74 61 6D 70 A7 4C  81 82 6D 51 01 00 00 CA estamp.L ..mQ....\n" +
+                "00000280 69 64 65 6E 74 69 66 69  65 72 04 C9 69 73 44 65 identifi er..isDe\n" +
+                "00000290 6C 65 74 65 64 B0 D2 62  6F 6F 74 53 74 72 61 70 leted..b ootStrap\n" +
+                "000002a0 54 69 6D 65 53 74 61 6D  70 A7 51 56 91 6D 51 01 TimeStam p.QV.mQ.\n" +
+                "000002b0 00 00 BE 12 72 65 6D 6F  74 65 49 64 65 6E 74 69 ....remo teIdenti\n" +
                 "000002c0 66 69 65 72 3D 33                                fier=3");
         Bytes<ByteBuffer> text = Bytes.elasticByteBuffer();
         new BinaryWire(bytes)

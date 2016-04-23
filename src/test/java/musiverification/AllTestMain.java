@@ -20,7 +20,7 @@ public class AllTestMain {
         RunNotifier runNotifier = new RunNotifier();
         runNotifier.addFirstListener(new RunListener() {
             @Override
-            public void testFailure(Failure failure) throws Exception {
+            public void testFailure(Failure failure) {
                 failures.add(failure);
                 System.err.println(failure);
                 failure.getException().printStackTrace();
@@ -28,7 +28,7 @@ public class AllTestMain {
         });
         for (Class testClass : new Class[]{
                 ReplicationTest.class,
-                RemoteSubscriptionModelPerformanceTest.class,
+//                RemoteSubscriptionModelPerformanceTest.class,
                 RemoteSubscriptionModelPerformance2Test.class,
                 SubscriptionModelTest.class,
                 SubscriptionModelPerformanceTest.class,

@@ -1,5 +1,6 @@
 package ddp.server;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.map.SubscriptionKeyValueStore;
 import net.openhft.chronicle.engine.map.AuthenticatedKeyValueStore;
@@ -76,7 +77,7 @@ public class ServerMain {
 
         testMap.registerSubscriber(x -> System.out.println("EVENT: " + x));
 
-        Thread.sleep(200);
+        Jvm.pause(200);
 
         key = "TestKey2";
         value = "TestValue2";

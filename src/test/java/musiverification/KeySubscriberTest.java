@@ -1,5 +1,6 @@
 package musiverification;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
@@ -75,7 +76,7 @@ public class KeySubscriberTest
             System.out.println("KeySubscriber (#" + eventNo + ") " + m);
         });
 
-        Thread.sleep(200);
+        Jvm.pause(200);
 
         _stringStringMap.put(testKey, "Val1");
         _stringStringMap.put(testKey, "Val2");
@@ -97,7 +98,7 @@ public class KeySubscriberTest
             System.out.println("KeySubscriber (#" + eventNo + ") " + m);
         });
 
-        Thread.sleep(200);
+        Jvm.pause(200);
 
         _stringStringMap.put(testKey, "Val1");
         _stringStringMap.put(testKey, "Val2");
@@ -113,7 +114,7 @@ public class KeySubscriberTest
         {
             System.out.println("Waiting for events...");
             waitCounter++;
-            Thread.sleep(1000);
+            Jvm.pause(1000);
         }
     }
 }

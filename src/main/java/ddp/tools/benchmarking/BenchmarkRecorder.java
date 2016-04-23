@@ -1,6 +1,11 @@
 package ddp.tools.benchmarking;
 
-import java.util.*;
+import net.openhft.chronicle.core.Jvm;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 //TODO DS document
 public class BenchmarkRecorder
@@ -84,7 +89,7 @@ public class BenchmarkRecorder
         {
             waited++;
             System.out.println("Waiting...");
-            Thread.sleep(waitTime);
+            Jvm.pause(waitTime);
         }
 
         if(anyNullvalues)

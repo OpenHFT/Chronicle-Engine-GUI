@@ -60,7 +60,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         _testMap = Chassis.acquireMap(_mapName, String.class, String.class);
 
         _testMap.clear();
-        Thread.sleep(500);
+        Jvm.pause(500);
         YamlLogging.setAll(false);
     }
 
@@ -83,7 +83,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, me -> keyEventSubscriber.onMessage((String) me.getValue()));
 
         // allow time for the subsribe to be registered
-        Thread.sleep(1000);
+        Jvm.pause(1000);
 
         AtomicInteger counter = new AtomicInteger();
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
@@ -111,7 +111,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         Chassis.registerTopicSubscriber(_mapName, String.class, String.class, topicSubscriber);
 
         // allow time for the subsribe to be registered
-        Thread.sleep(500);
+        Jvm.pause(500);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(() -> {
@@ -137,7 +137,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         Chassis.registerSubscriber(_mapName, MapEvent.class, e -> e.apply(mapEventListener));
 
         // allow time for the subsribe to be registered
-        Thread.sleep(500);
+        Jvm.pause(500);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
@@ -180,7 +180,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
         Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
 
         // allow time for the subsribe to be registered
-        Thread.sleep(500);
+        Jvm.pause(500);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         TestUtils.runMultipleTimesAndVerifyAvgRuntime(i -> {
@@ -215,7 +215,7 @@ public class SubscriptionModelFilePerKeyPerformanceTest {
 
         Chassis.registerSubscriber(_mapName + "?bootstrap=false", MapEvent.class, e -> e.apply(mapEventListener));
 
-        Thread.sleep(500);
+        Jvm.pause(500);
 
         //Perform test a number of times to allow the JVM to warm up, but verify runtime against average
         long runtimeInNanos = 0;

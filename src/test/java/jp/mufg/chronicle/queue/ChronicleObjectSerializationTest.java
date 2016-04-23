@@ -19,13 +19,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChronicleObjectSerializationTest
 {
+    // TODO Fix test so files are deleted on Windows.
+    static final AtomicInteger counter = new AtomicInteger();
     String chronicleQueueBase = OS.TARGET + "/Chronicle/data";
     Chronicle chronicle;
     EnumTestInterface writer;
     FromChronicle<EnumTestInterfaceImpl> reader;
-
-    // TODO Fix test so files are deleted on Windows.
-    static final AtomicInteger counter = new AtomicInteger();
 
     @Before
     public void setUp() throws IOException {

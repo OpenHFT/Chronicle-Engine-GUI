@@ -2,6 +2,7 @@ package queue;
 
 import net.openhft.chronicle.Chronicle;
 import net.openhft.chronicle.ExcerptAppender;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -119,16 +120,7 @@ public class ToChronicle implements InvocationHandler
     private void sleep()
     {
         if (_sleepInMs > 0)
-        {
-            try
-            {
-                Thread.sleep(_sleepInMs);
-            }
-            catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
-        }
+            Jvm.pause(_sleepInMs);
     }
 
     private void printDebuggingInfo(String info)
