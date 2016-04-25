@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
+import static musiverification.SessionDetailsTest.serverEndpoint;
+
 /**
  * Created by daniels on 31/03/2015.
  */
@@ -31,12 +33,13 @@ public class MapEventListenerStatelessClientTest {
     private static VanillaAssetTree clientAssetTree;
     private static ChronicleTestEventListener _chronicleTestEventListener;
     private static MapView<String, String> _StringStringMap;
-    private static ServerEndpoint serverEndpoint;
-    private final String _value1 = new String(new char[2 << 20]);//;"TestValue1";
+
+    private final int size = 1 << 10;
+    private final String _value1 = new String(new char[size]);//;"TestValue1";
     private final String _value2;
 
     public MapEventListenerStatelessClientTest() {
-        char[] value = new char[2 << 20];
+        char[] value = new char[size];
         Arrays.fill(value, 'd');
         _value2 = new String(value);
     }
@@ -87,6 +90,7 @@ public class MapEventListenerStatelessClientTest {
      */
     @Test
     public void testMapEvenListenerClientPut() {
+        ///  YamlLogging.setAll(true);
         String testKey = "TestKeyPut";
         int noOfIterations = 50;
 
@@ -122,8 +126,7 @@ public class MapEventListenerStatelessClientTest {
      */
     @Test
     @Ignore("TODO FIX")
-    public void testMapEvenListenerAcquireUsingLocked()
-    {
+    public void testMapEvenListenerAcquireUsingLocked() {
         String testKey = "TestKeyAcquireUsingLocked";
         String testKey2 = "TestKeyAcquireUsingLocked2";
         int noOfIterations = 50;
@@ -139,12 +142,10 @@ public class MapEventListenerStatelessClientTest {
 
     /**
      * Test that event listener is triggered for every "getUsing" value update.
-     *
      */
     @Test
     @Ignore("TODO FIX")
-    public void testMapEvenListenerGetUsing()
-    {
+    public void testMapEvenListenerGetUsing() {
         String testKey = "testMapEvenListenerGetUsing";
         String testKey2 = "testMapEvenListenerGetUsing2";
         int noOfIterations = 50;
