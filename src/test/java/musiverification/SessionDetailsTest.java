@@ -12,6 +12,7 @@ import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.network.VanillaSessionDetails;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.YamlLogging;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Assert;
@@ -97,8 +98,7 @@ public class SessionDetailsTest
     @Test
     public void test() throws InterruptedException
     {
-
-
+        YamlLogging.setAll(true);
         final ConcurrentMap<String, String> map1 = remoteAssetTree.acquireMap(NAME, String.class, String
                 .class);
         Assert.assertNotNull(map1);
