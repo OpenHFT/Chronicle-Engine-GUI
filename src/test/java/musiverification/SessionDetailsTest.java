@@ -58,9 +58,7 @@ public class SessionDetailsTest
 
     private void resetTrees(Consumer<AssetTree> applyRulesToAllTrees) throws IOException
     {
-//        YamlLogging.clientWrites = true;
-//        YamlLogging.clientReads = true;
-        //YamlLogging.showServerWrites = true;
+        YamlLogging.setAll(true);
 
         TCPRegistry.createServerSocketChannelFor("host.port1");
 
