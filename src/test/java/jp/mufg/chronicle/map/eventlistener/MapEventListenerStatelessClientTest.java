@@ -102,7 +102,7 @@ public class MapEventListenerStatelessClientTest {
     /**
      * Test that event listener is triggered for every replace.
      */
-    @Test
+    @Test(timeout = 60000)
     public void testMapEvenListenerReplace() {
         String testKey = "TestKeyGetReplace";
         String testKey2 = "TestKeyGetReplace";
@@ -141,7 +141,7 @@ public class MapEventListenerStatelessClientTest {
     /**
      * Test that event listener is triggered for every "getUsing" value update.
      */
-    @Test
+    @Test(timeout = 60000)
     public void testMapEvenListenerGetUsing() {
         String testKey = "testMapEvenListenerGetUsing";
         String testKey2 = "testMapEvenListenerGetUsing2";
