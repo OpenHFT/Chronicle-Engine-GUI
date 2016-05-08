@@ -27,8 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class SessionDetailsTest
-{
+public class SessionDetailsTest {
 
     public static final WireType WIRE_TYPE = WireType.BINARY;
     public static final String NAME = "/session/details/test";
@@ -51,14 +50,12 @@ public class SessionDetailsTest
     }
 
     @Before
-    public void before() throws IOException
-    {
+    public void before() throws IOException {
         resetTrees(null);
     }
 
-    private void resetTrees(Consumer<AssetTree> applyRulesToAllTrees) throws IOException
-    {
-        YamlLogging.setAll(true);
+    private void resetTrees(Consumer<AssetTree> applyRulesToAllTrees) throws IOException {
+        YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
 
         TCPRegistry.createServerSocketChannelFor("host.port1");
 
@@ -72,20 +69,16 @@ public class SessionDetailsTest
     }
 
     @After
-    public void after()
-    {
-        if (remoteAssetTree != null)
-        {
+    public void after() {
+        if (remoteAssetTree != null) {
             remoteAssetTree.close();
         }
 
-        if (serverAssetTree != null)
-        {
+        if (serverAssetTree != null) {
             serverAssetTree.close();
         }
 
-        if (serverEndpoint != null)
-        {
+        if (serverEndpoint != null) {
             serverEndpoint.close();
         }
 
@@ -94,11 +87,10 @@ public class SessionDetailsTest
     }
 
     @Test
-    public void test() throws InterruptedException
-    {
-        YamlLogging.setAll(true);
-        final ConcurrentMap<String, String> map1 = remoteAssetTree.acquireMap(NAME, String.class, String
-                .class);
+    public void test() throws InterruptedException {
+        YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
+        final ConcurrentMap<String, String> map1 = remoteAssetTree
+                .acquireMap(NAME, String.class, String.class);
         Assert.assertNotNull(map1);
 
         map1.size();

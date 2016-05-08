@@ -247,8 +247,8 @@ public class RemoteSubscriptionModelTest {
     @Test
     public void testSubscriptionOnMap() throws InvalidSubscriberException {
         //Using a strict mock as we want to verify that events come in in the right order
-        YamlLogging.showServerReads(true);
-        YamlLogging.showServerWrites(true);
+//        YamlLogging.showServerReads(true);
+//        YamlLogging.showServerWrites(true);
 
         TopicSubscriber<String, String> topicSubscriberMock = EasyMock.createStrictMock(TopicSubscriber.class);
         _clientAssetTree.registerTopicSubscriber(_mapName, String.class, String.class, topicSubscriberMock);

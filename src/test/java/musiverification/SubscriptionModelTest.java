@@ -86,7 +86,7 @@ public class SubscriptionModelTest {
 
     @Test
     public void testSubscriptionStringStringMap() throws InterruptedException {
-        YamlLogging.setAll(true);
+        YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
                 wireType, onThrowable::add);
@@ -119,7 +119,7 @@ public class SubscriptionModelTest {
 
     @Test
     public void testSubscriptionFloatFloatMap() throws InterruptedException {
-        YamlLogging.setAll(true);
+        YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
                 wireType,
@@ -154,7 +154,7 @@ public class SubscriptionModelTest {
 
     @Test
     public void testSubscriptionIntegerIntegerMap() throws InterruptedException {
-        YamlLogging.setAll(true);
+        YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
                 wireType,
@@ -190,7 +190,7 @@ public class SubscriptionModelTest {
 
     @Test
     public void testSubscriptionLongLongMap() throws InterruptedException {
-        YamlLogging.setAll(true);
+        YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
                 wireType,
@@ -224,7 +224,7 @@ public class SubscriptionModelTest {
 
     @Test
     public void testSubscriptionStringDoubleMap() throws InterruptedException {
-        YamlLogging.setAll(true);
+        YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
                 wireType, onThrowable::add);
@@ -258,7 +258,7 @@ public class SubscriptionModelTest {
 
     @Test
     public void testSubscriptionDoubleDoubleMap() throws InterruptedException {
-        YamlLogging.setAll(true);
+        YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
                 wireType, onThrowable::add);
