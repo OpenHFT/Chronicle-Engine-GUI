@@ -23,7 +23,7 @@ namespace TestRealTimeThrottling.Models
         /// <param name="update">double containing updated rate</param>
         private void ValueCallBack(double update)
         {
-            Console.WriteLine("Key: " + Key + ", Value: " + update);
+            Console.WriteLine("Key: " + Key + ", Value: " + update+ "Time:" + DateTime.Now);
             Value = update;
         }
 

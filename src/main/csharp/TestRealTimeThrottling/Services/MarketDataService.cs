@@ -38,7 +38,7 @@ namespace TestRealTimeThrottling.Services
         public ISubscription RegisterMarketDataSubscription(string key, Subscriber<double> callback)
         {
             var chronicleCallback = new Subscriber<double>(callback);
-            return _chronicleMapClient.registerKeySubscriber("/adept/marketdata/realtime", key, chronicleCallback);//, extraParameters:_extraParameters);
+            return _chronicleMapClient.registerKeySubscriber("/adept/marketdata/realtime", key, chronicleCallback, extraParameters:_extraParameters);
         }
 
         /// <summary>

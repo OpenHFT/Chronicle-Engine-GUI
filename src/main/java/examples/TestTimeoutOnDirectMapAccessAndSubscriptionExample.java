@@ -21,7 +21,7 @@ public class TestTimeoutOnDirectMapAccessAndSubscriptionExample
 {
     public static void main(String[] args)
     {
-        final int chroniclePort = 7890;
+        final int chroniclePort = 8088;
         try
         {
             ChronicleDataPublisher chronicleDataPublisher = new ChronicleDataPublisher(chroniclePort, WireType.BINARY);
