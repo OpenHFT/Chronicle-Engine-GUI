@@ -1,10 +1,14 @@
 package queue4.externalizableObjects;
 
+import net.openhft.chronicle.wire.Wires;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.List;
+
+import static net.openhft.chronicle.wire.WireType.TEXT;
 
 /**
  * Created by cliveh on 10/05/2016.
@@ -28,7 +32,7 @@ public class Values implements Externalizable {
     }
 
     public void set_values(List<Double> values) {
-        this._values = _values;
+        this._values = values;
     }
 
     @Override
@@ -42,4 +46,15 @@ public class Values implements Externalizable {
         _value1 = in.readDouble();
         _values = (List<Double>)in.readObject();
     }
+
+    @Override
+    public String toString() {
+        return TEXT.asString(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return Wires.isEquals(this, obj);
+    }
+
 }

@@ -144,13 +144,11 @@ public class ToChronicle implements InvocationHandler {
                             bytes.writeUnsignedByte('T');
                             bytes.writeShort((short) arg);
                         } else {
-
-                            // TODO How to write externalizable object to the queue?
+                            bytes.writeUnsignedByte('X');
+                            dc.wire().getValueOut().object(arg);
                         }
                     }
                 }
-                _appender.writeBytes(bytes);
-
             }
             return null;
         }

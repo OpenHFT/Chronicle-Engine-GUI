@@ -1,10 +1,15 @@
 package queue4.externalizableObjects;
 
 
+import net.openhft.chronicle.wire.HashWire;
+import net.openhft.chronicle.wire.Wires;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+
+import static net.openhft.chronicle.wire.WireType.TEXT;
 
 /**
  * Created by cliveh on 10/05/2016.
@@ -93,5 +98,20 @@ public class MarketDataKey implements Externalizable {
         _type = (MarketDataType) in.readObject();
         _marketDataId = in.readUTF();
         _field = (MarketDataField) in.readObject();
+    }
+
+    @Override
+    public int hashCode() {
+        return HashWire.hash32(this);
+    }
+
+    @Override
+    public String toString() {
+        return TEXT.asString(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return Wires.isEquals(this, obj);
     }
 }

@@ -1,9 +1,14 @@
 package queue4.externalizableObjects;
 
+import net.openhft.chronicle.wire.HashWire;
+import net.openhft.chronicle.wire.Wires;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+
+import static net.openhft.chronicle.wire.WireType.TEXT;
 
 /**
  * Created by cliveh on 10/05/2016.
@@ -38,16 +43,16 @@ public class InstrumentId implements Externalizable, Comparable<InstrumentId> {
         return _longId;
     }
 
+    public void set_longId(long _longId) {
+        this._longId = _longId;
+    }
+
     public short get_shortId() {
         return _shortId;
     }
 
     public void set_shortId(short _shortId) {
         this._shortId = _shortId;
-    }
-
-    public void set_longId(long _longId) {
-        this._longId = _longId;
     }
 
     public double get_doubleId() {
@@ -98,5 +103,22 @@ public class InstrumentId implements Externalizable, Comparable<InstrumentId> {
         _longId = in.readLong();
         _doubleId = in.readDouble();
         _floatId = in.readFloat();
+        _stringId = in.readUTF();
     }
+
+    @Override
+    public int hashCode() {
+        return HashWire.hash32(this);
+    }
+
+    @Override
+    public String toString() {
+        return TEXT.asString(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return Wires.isEquals(this, obj);
+    }
+
 }

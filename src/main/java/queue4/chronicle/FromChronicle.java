@@ -2,6 +2,7 @@ package queue4.chronicle;
 
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.queue.ExcerptTailer;
 import net.openhft.chronicle.wire.DocumentContext;
 import org.jetbrains.annotations.NotNull;
@@ -200,10 +201,13 @@ public class FromChronicle<T> {
                             args[i] = bytesStore;
                             break;
 
-                        default:
+                        case 'X':
+                            args[i] = dc.wire().getValueIn()
+                                    .object();
+                            break;
 
-                            // TODO If here reading object.  How to read externalizable object?
-                            //args[i] = bytes.readObject();
+                        default:
+                            throw new IORuntimeException("Unrecognised token " + typeInt + " '" + (char) typeInt + "'");
                     }
                 }
             }

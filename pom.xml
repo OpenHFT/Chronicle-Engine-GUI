@@ -88,26 +88,7 @@
 
         <dependency>
             <groupId>net.openhft</groupId>
-            <artifactId>chronicle-map</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>net.openhft</groupId>
             <artifactId>chronicle</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>net.openhft</groupId>
-            <artifactId>chronicle-wire</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.openhft</groupId>
-            <artifactId>chronicle-engine</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>net.openhft</groupId>
-            <artifactId>chronicle-bytes</artifactId>
         </dependency>
 
         <dependency>
@@ -115,20 +96,10 @@
             <artifactId>slf4j-simple</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>net.openhft</groupId>
-            <artifactId>chronicle-network</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.openhft</groupId>
-            <artifactId>chronicle-core</artifactId>
-        </dependency>
-
         <!-- test -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
             <scope>compile</scope>
         </dependency>
 
