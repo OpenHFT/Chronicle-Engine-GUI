@@ -83,9 +83,8 @@
 
         <dependency>
             <groupId>software.chronicle</groupId>
-            <artifactId>chronicle-enterprise</artifactId>
+            <artifactId>chronicle-engine-enterprise</artifactId>
         </dependency>
-
 
         <dependency>
             <groupId>net.openhft</groupId>
