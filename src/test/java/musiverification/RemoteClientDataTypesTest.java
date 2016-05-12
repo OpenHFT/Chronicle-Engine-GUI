@@ -58,7 +58,9 @@ public class RemoteClientDataTypesTest {
                 {WireType.TEXT, Double.class, Double.class, 2.1, 1.321, "/tests/ddp/data/hub/remote/double/double/test-map"},
                 {WireType.BINARY, Double.class, Double.class, 2.1, 1.143, "/tests/ddp/data/hub/remote/double/double/test-map"},
                 {WireType.TEXT, Double.class, String.class, 2.1, "Value1", "/tests/ddp/data/hub/remote/double/string/test-map"},
-                {WireType.BINARY, Double.class, String.class, 2.1, "Value2", "/tests/ddp/data/hub/remote/double/string/test-map"}
+                {WireType.BINARY, Double.class, String.class, 2.1, "Value2", "/tests/ddp/data/hub/remote/double/string/test-map"},
+                {WireType.TEXT, String.class, String.class, "key2", "test value".getBytes(), "/tests/ddp/data/hub/remote/double/string/test-map"},
+                {WireType.BINARY, String.class, String.class, "key2", "test value".getBytes(), "/tests/ddp/data/hub/remote/double/string/test-map"}
         });
     }
 
@@ -97,7 +99,7 @@ public class RemoteClientDataTypesTest {
         TCPRegistry.reset();
     }
 
-    @Ignore("Peter to fix")
+    //@Ignore("Peter to fix")
     @Test
     public void testDataTypesMapAndEvents() throws InterruptedException {
         BlockingQueue valueSubscriptionQueue = new ArrayBlockingQueue<>(1);
@@ -113,6 +115,7 @@ public class RemoteClientDataTypesTest {
 
         String subscriberMapUri = _mapUri + "?bootstrap=false";
         String valueOnlySubscriberUri = _mapUri + "/" + _key.toString() + "?bootstrap=false";
+
 
         //Register all types of subscribers
         _clientAssetTree.registerTopicSubscriber(subscriberMapUri, _keyClass, _valueClass, (t, v) -> topicSubscriptionQueue.add(v));
