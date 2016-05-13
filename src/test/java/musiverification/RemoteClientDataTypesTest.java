@@ -6,7 +6,10 @@ import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -59,8 +62,8 @@ public class RemoteClientDataTypesTest {
                 {WireType.BINARY, Double.class, Double.class, 2.1, 1.143, "/tests/ddp/data/hub/remote/double/double/test-map"},
                 {WireType.TEXT, Double.class, String.class, 2.1, "Value1", "/tests/ddp/data/hub/remote/double/string/test-map"},
                 {WireType.BINARY, Double.class, String.class, 2.1, "Value2", "/tests/ddp/data/hub/remote/double/string/test-map"},
-                {WireType.TEXT, String.class, String.class, "key2", "test value".getBytes(), "/tests/ddp/data/hub/remote/double/string/test-map"},
-                {WireType.BINARY, String.class, String.class, "key2", "test value".getBytes(), "/tests/ddp/data/hub/remote/double/string/test-map"}
+                {WireType.TEXT, String.class, byte[].class, "key2", "test value".getBytes(), "/tests/ddp/data/hub/remote/double/string/test-map"},
+                {WireType.BINARY, String.class, byte[].class, "key2", "test value".getBytes(), "/tests/ddp/data/hub/remote/double/string/test-map"}
         });
     }
 
@@ -74,12 +77,12 @@ public class RemoteClientDataTypesTest {
 
     @Before
     public void setUp() throws IOException {
-        _serverAssetTree = new VanillaAssetTree().forServer(null);
+        _serverAssetTree = new VanillaAssetTree().forServer(Throwable::printStackTrace);
 
         TCPRegistry.createServerSocketChannelFor(_serverAddress);
         _serverEndpoint = new ServerEndpoint(_serverAddress, _serverAssetTree);
 
-        _clientAssetTree = new VanillaAssetTree().forRemoteAccess(_serverAddress, _wireType, null);
+        _clientAssetTree = new VanillaAssetTree().forRemoteAccess(_serverAddress, _wireType, Throwable::printStackTrace);
     }
 
     @After
@@ -129,12 +132,20 @@ public class RemoteClientDataTypesTest {
 
         //Get the value back and check that it is the same
         Object valueGet = testMap.get(_key);
-        Assert.assertEquals(_value, valueGet);
+        assertEquals(_value, valueGet);
 
         int timeout = 200;
-        Assert.assertEquals(_value, valueSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
-        Assert.assertEquals(_value, eventSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
-        Assert.assertEquals(_value, topicSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
-        Assert.assertEquals(_key, topicOnlySubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
+        assertEquals(_value, valueSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
+        assertEquals(_value, eventSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
+        assertEquals(_value, topicSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
+        assertEquals(_key, topicOnlySubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
+    }
+
+    private void assertEquals(Object o1, Object o2) {
+        if (o1 instanceof byte[])
+            Assert.assertArrayEquals((byte[]) o1, (byte[]) o2);
+        else
+            Assert.assertEquals(o1, o2);
+
     }
 }
