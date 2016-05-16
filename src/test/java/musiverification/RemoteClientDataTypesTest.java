@@ -132,20 +132,26 @@ public class RemoteClientDataTypesTest {
 
         //Get the value back and check that it is the same
         Object valueGet = testMap.get(_key);
-        assertEquals(_value, valueGet);
+        if (valueGet instanceof byte[]) {
+            Assert.assertArrayEquals((byte[]) _value, (byte[]) valueGet);
+        }
+        else {
+            Assert.assertEquals(_value, valueGet);
+        }
 
         int timeout = 200;
-        assertEquals(_value, valueSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
-        assertEquals(_value, eventSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
-        assertEquals(_value, topicSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
-        assertEquals(_key, topicOnlySubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
-    }
 
-    private void assertEquals(Object o1, Object o2) {
-        if (o1 instanceof byte[])
-            Assert.assertArrayEquals((byte[]) o1, (byte[]) o2);
-        else
-            Assert.assertEquals(o1, o2);
-
+        if (valueGet instanceof byte[]) {
+            Assert.assertArrayEquals((byte[])_value, (byte[])valueSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
+            Assert.assertArrayEquals((byte[])_value, (byte[])eventSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
+            Assert.assertArrayEquals((byte[])_value, (byte[])topicSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
+            Assert.assertEquals(_key, topicOnlySubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
+        }
+        else {
+            Assert.assertEquals(_value, valueSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
+            Assert.assertEquals(_value, eventSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
+            Assert.assertEquals(_value, topicSubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
+            Assert.assertEquals(_key, topicOnlySubscriptionQueue.poll(timeout, TimeUnit.MILLISECONDS));
+        }
     }
 }
