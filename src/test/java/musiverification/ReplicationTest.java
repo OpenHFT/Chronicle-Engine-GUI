@@ -107,6 +107,13 @@ public class ReplicationTest {
         tree2 = create(2, WIRE_TYPE, applyRulesToAllTrees);
         tree3 = create(3, WIRE_TYPE, applyRulesToAllTrees);
 
+        System.out.println("#Rules for the root of tree1");
+        System.out.println(tree1.root().dumpRules());
+        System.out.println("#Rules for the root of tree2");
+        System.out.println(tree2.root().dumpRules());
+        System.out.println("#Rules for the root of tree3");
+        System.out.println(tree3.root().dumpRules());
+
         serverEndpoint1 = new ServerEndpoint("host.port1", tree1);
         serverEndpoint2 = new ServerEndpoint("host.port2", tree2);
         serverEndpoint3 = new ServerEndpoint("host.port3", tree3);
