@@ -107,8 +107,8 @@ public class ReplicationTest {
         tree2 = create(2, WIRE_TYPE, applyRulesToAllTrees);
         tree3 = create(3, WIRE_TYPE, applyRulesToAllTrees);
 
-        System.out.println("#Rules for the root of tree1");
-        System.out.println(tree1.root().dumpRules());
+        System.out.println("#Rules for the root of tree1:/proc/connections");
+        System.out.println(tree1.acquireAsset("/proc/connections").dumpRules());
         System.out.println("#Rules for the root of tree2");
         System.out.println(tree2.root().dumpRules());
         System.out.println("#Rules for the root of tree3");
