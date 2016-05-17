@@ -10,6 +10,7 @@ import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
 import net.openhft.chronicle.engine.api.pubsub.Subscriber;
+import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
 import net.openhft.chronicle.engine.fs.ChronicleMapGroupFS;
 import net.openhft.chronicle.engine.fs.FilePerKeyGroupFS;
@@ -28,6 +29,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +43,6 @@ import java.util.function.Consumer;
 /**
  * Created by Rob Austin
  */
-
 public class ReplicationTest {
 
     public static final WireType WIRE_TYPE = WireType.TEXT;
@@ -107,16 +109,41 @@ public class ReplicationTest {
         tree2 = create(2, WIRE_TYPE, applyRulesToAllTrees);
         tree3 = create(3, WIRE_TYPE, applyRulesToAllTrees);
 
-        System.out.println("#Rules for the root of tree1:/proc/connections");
-        System.out.println(tree1.acquireAsset("/proc/connections").dumpRules());
+        System.out.println("#Rules for the root of tree1");
+        try
+        {
+            dumpAllRulesFor(tree1.root());
+
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        //System.out.println(tree1.root().dumpRules());
         System.out.println("#Rules for the root of tree2");
-        System.out.println(tree2.root().dumpRules());
+        //System.out.println(tree2.root().dumpRules());
         System.out.println("#Rules for the root of tree3");
-        System.out.println(tree3.root().dumpRules());
+        //System.out.println(tree3.root().dumpRules());
 
         serverEndpoint1 = new ServerEndpoint("host.port1", tree1);
         serverEndpoint2 = new ServerEndpoint("host.port2", tree2);
         serverEndpoint3 = new ServerEndpoint("host.port3", tree3);
+    }
+
+    public void dumpAllRulesFor(Asset asset) throws InvalidSubscriberException
+    {
+        if(asset != null)
+        {
+            System.out.println("===============================================================");
+            System.out.println("Start print rules for " + asset.fullName());
+            System.out.println(asset.dumpRules());
+            System.out.println("End print rules for " + asset.fullName());
+            System.out.println("----------------------------------------------------------------");
+
+            System.out.println("Start print rules for child of " + asset.fullName());
+            asset.forEachChild(this::dumpAllRulesFor);
+            System.out.println("End print rules for child of " + asset.fullName());
+        }
     }
 
     @After
