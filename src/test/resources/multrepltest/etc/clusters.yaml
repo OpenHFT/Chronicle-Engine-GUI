@@ -1,4 +1,6 @@
 cluster: {
+  context: !EngineClusterContext {
+  }
   host1: {
     hostId: 1,
     tcpBufferSize: 65536,
