@@ -1,3 +1,9 @@
+--- !EngineCfg {
+#
+# Configuration files are being placed in /etc following the Unix convention, but could be anywhere
+#
+etc: {
+    clusters: !ClustersCfg {
 cluster: {
   context: !EngineClusterContext {
   }
@@ -55,4 +61,6 @@ cluster: {
     connectUri: localhost:8888,
     timeoutMs: 1000,
   }
+}
+}
 }
