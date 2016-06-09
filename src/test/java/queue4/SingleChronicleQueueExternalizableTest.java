@@ -1,38 +1,36 @@
 package queue4;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.queue.ExcerptTailer;
-import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue;
-import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder;
-import net.openhft.chronicle.tools.ChronicleTools;
-import net.openhft.chronicle.wire.BinaryWire;
-import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.Wire;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import queue4.chronicle.FromChronicle;
-import queue4.chronicle.ToChronicle;
-import queue4.externalizableObjects.*;
-
-import java.io.IOException;
+import java.io.*;
+import java.time.*;
 import java.util.*;
 
-import static net.openhft.chronicle.wire.WireType.TEXT;
+import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.pool.*;
+import net.openhft.chronicle.queue.*;
+import net.openhft.chronicle.queue.impl.single.*;
+import net.openhft.chronicle.tools.*;
+import net.openhft.chronicle.wire.*;
+import org.junit.*;
+import queue4.chronicle.*;
+import queue4.externalizableObjects.*;
+
+import static net.openhft.chronicle.wire.WireType.*;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 /**
  * Created by cliveh on 10/05/2016.
  */
-public class SingleChronicleQueueExternalizableTest {
+public class SingleChronicleQueueExternalizableTest
+{
 
     String chronicleQueueBase = OS.TARGET + "/Chronicle/data";
     private SingleChronicleQueue _queue;
 
-    static void testFor(Object o) {
+
+    static void testFor(Object o)
+    {
         final String cs = TEXT.asString(o);
         System.out.println("# testFor\n" + cs);
         final Object o1 = Marshallable.fromString(cs);
@@ -51,10 +49,13 @@ public class SingleChronicleQueueExternalizableTest {
         assertEquals(o, o3);
     }
 
+
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException
+    {
         _queue = SingleChronicleQueueBuilder.binary(chronicleQueueBase).build();
     }
+
 
     @Test
     public void testExternalizable() throws Exception
@@ -79,7 +80,7 @@ public class SingleChronicleQueueExternalizableTest {
         instrumentId.set_doubleId(1.0);
         instrumentId.set_floatId(1.0f);
         instrumentId.set_longId(1_0);
-        instrumentId.set_shortId((short)1);
+        instrumentId.set_shortId((short) 1);
         instrumentId.set_stringId("1");
 //        testFor(instrumentId);
 
@@ -123,52 +124,105 @@ public class SingleChronicleQueueExternalizableTest {
         ExcerptTailer tailer = _queue.createTailer();
         tailer.toStart();
 
-        TestEventManager testEventManager = new TestEventManager(config);
-        FromChronicle<TestEventManager> fromChronicle = FromChronicle.of(testEventManager, tailer);
+        TestEventManagerMarketDataKeyEnvironmentConfig testEventManager = new TestEventManagerMarketDataKeyEnvironmentConfig(config);
+        FromChronicle<TestEventManagerMarketDataKeyEnvironmentConfig> fromChronicle = FromChronicle.of(testEventManager, tailer);
         fromChronicle.readOne();
     }
 
+    @Test
+    public void miscellaneousTypeConfigTest() throws Exception
+    {
+        // Instantiate a MiscellaneousTypesConfig
+        MiscellaneousTypesConfig miscellaneousTypesConfig = new MiscellaneousTypesConfig();
+        miscellaneousTypesConfig.setId("SomeIdToo");
+        miscellaneousTypesConfig.setExecutor("executor");
+        miscellaneousTypesConfig.setRetransmit(false);
+        miscellaneousTypesConfig.setSystemDate(ZonedDateTime.of(2016, 6, 9, 0, 0, 0, 0, ZoneId.systemDefault()));
+        double[] doublePcaMatrixData = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
+        miscellaneousTypesConfig.setDoublePcaMatrixData(doublePcaMatrixData);
+        int[] integerPcaMatrixData = {1, 2, 3, 4, 5, 6, 7};
+        miscellaneousTypesConfig.setIntPcaMatrixData(integerPcaMatrixData);
+        long[] longPcaMatrixData = {1_0, 2_0, 3_0, 4_0, 5_0, 6_0, 7_0};
+        miscellaneousTypesConfig.setLongPcaMatrixData(longPcaMatrixData);
+        float[] floatPcaMatrixData = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f};
+        miscellaneousTypesConfig.setFloatPcaMatrixData(floatPcaMatrixData);
+        boolean[] booleanPcaMatrixData = {true, false, true, false, true, false, true};
+        miscellaneousTypesConfig.setIsPcaMatrixData(booleanPcaMatrixData);
+
+        TreeSet<SwapId> orderedTenors = new TreeSet<>();
+        orderedTenors.add(new SwapId(1.0));
+        orderedTenors.add(new SwapId(2.0));
+        orderedTenors.add(new SwapId(3.0));
+        orderedTenors.add(new SwapId(4.0));
+        orderedTenors.add(new SwapId(5.0));
+        orderedTenors.add(new SwapId(6.0));
+        miscellaneousTypesConfig.setOrderedTenors(orderedTenors);
+
+        String valuationEnvironment = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n<!DOCTYPE boost_serialization>\n<boost_serialization signature=\"serialization::archive\" version=\"4\">\netc etc";
+        miscellaneousTypesConfig.setValuationEnvironment(valuationEnvironment);
+
+        EventManager toChronicle = ToChronicle.of(EventManager.class, _queue);
+        toChronicle.onConfigAdd("executor", miscellaneousTypesConfig);
+        ExcerptTailer tailer = _queue.createTailer();
+        tailer.toStart();
+
+        TestEventManagerMiscellaneousTypesConfig testEventManager = new TestEventManagerMiscellaneousTypesConfig(miscellaneousTypesConfig);
+        FromChronicle<TestEventManagerMiscellaneousTypesConfig> fromChronicle = FromChronicle.of(testEventManager, tailer);
+        fromChronicle.readOne();
+    }
+
+
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() throws IOException
+    {
         _queue.close();
         ChronicleTools.deleteDirOnExit(chronicleQueueBase);
     }
 
+
     /**
      * TestEventManager is where the asserts take place
      */
-    public class TestEventManager implements EventManager
+    public class TestEventManagerMarketDataKeyEnvironmentConfig implements EventManager
     {
         private MarketDataKeyEnvironmentsConfig _config;
 
-        public TestEventManager(MarketDataKeyEnvironmentsConfig config)
+
+        public TestEventManagerMarketDataKeyEnvironmentConfig(MarketDataKeyEnvironmentsConfig config)
         {
             _config = config;
         }
 
 
         @Override
-        public String getExecutor() {
+        public String getExecutor()
+        {
             return null;
         }
 
+
         @Override
-        public void getConfig(String executor) {
+        public void getConfig(String executor)
+        {
 
         }
 
+
         @Override
-        public void setConfig(String executor) {
+        public void setConfig(String executor)
+        {
 
         }
 
+
         @Override
-        public void onConfigAdd(String executor, ConfigSetting addedConfigSetting) {
+        public void onConfigAdd(String executor, ConfigSetting addedConfigSetting)
+        {
             assertEquals("executor", executor);
             assertEquals(TEXT.asString(_config), TEXT.asString(addedConfigSetting));
             Assert.assertNotNull(addedConfigSetting);
             Assert.assertTrue(addedConfigSetting instanceof MarketDataKeyEnvironmentsConfig);
-            MarketDataKeyEnvironmentsConfig marketDataKeyEnvironmentsConfig = (MarketDataKeyEnvironmentsConfig)addedConfigSetting;
+            MarketDataKeyEnvironmentsConfig marketDataKeyEnvironmentsConfig = (MarketDataKeyEnvironmentsConfig) addedConfigSetting;
             Assert.assertNotNull(marketDataKeyEnvironmentsConfig);
             assertEquals(_config.getId(), marketDataKeyEnvironmentsConfig.getId());
             assertEquals(_config.getExecutor(), marketDataKeyEnvironmentsConfig.getExecutor());
@@ -223,43 +277,176 @@ public class SingleChronicleQueueExternalizableTest {
 
         }
 
+
         @Override
-        public void onConfigUpdate(String executor, ConfigSetting updateConfigSetting) {
+        public void onConfigUpdate(String executor, ConfigSetting updateConfigSetting)
+        {
 
         }
 
+
         @Override
-        public void onConfigRemove(String executor, ConfigSetting removedConfigSetting) {
+        public void onConfigRemove(String executor, ConfigSetting removedConfigSetting)
+        {
 
         }
 
+
         @Override
-        public void getMarketData(String executor) {
+        public void getMarketData(String executor)
+        {
 
         }
 
+
         @Override
-        public void setMarketData(String executor) {
+        public void setMarketData(String executor)
+        {
 
         }
 
+
         @Override
-        public void onMarketDataUpdate(String producer, MarketDataSupplier supplier, MarketDataSource source, MarketDataType type, String id, byte[] marketDataUpdates, boolean isRetransmit) throws Exception {
+        public void onMarketDataUpdate(String producer, MarketDataSupplier supplier, MarketDataSource source, MarketDataType type, String id, byte[] marketDataUpdates, boolean isRetransmit) throws Exception
+        {
 
         }
 
+
         @Override
-        public void process(String executor) {
+        public void process(String executor)
+        {
 
         }
 
+
         @Override
-        public boolean hasChanged() {
+        public boolean hasChanged()
+        {
             return false;
         }
 
+
         @Override
-        public boolean isInitialized() {
+        public boolean isInitialized()
+        {
+            return false;
+        }
+    }
+
+    /**
+     * TestEventManager is where the asserts take place
+     */
+    public class TestEventManagerMiscellaneousTypesConfig implements EventManager
+    {
+        private MiscellaneousTypesConfig _config;
+
+
+        public TestEventManagerMiscellaneousTypesConfig(MiscellaneousTypesConfig config)
+        {
+            _config = config;
+        }
+
+
+        @Override
+        public String getExecutor()
+        {
+            return null;
+        }
+
+
+        @Override
+        public void getConfig(String executor)
+        {
+
+        }
+
+
+        @Override
+        public void setConfig(String executor)
+        {
+
+        }
+
+
+        @Override
+        public void onConfigAdd(String executor, ConfigSetting addedConfigSetting)
+        {
+            assertEquals("executor", executor);
+            assertEquals(TEXT.asString(_config), TEXT.asString(addedConfigSetting));
+            Assert.assertNotNull(addedConfigSetting);
+            Assert.assertTrue(addedConfigSetting instanceof MiscellaneousTypesConfig);
+            MiscellaneousTypesConfig miscellaneousTypesConfig = (MiscellaneousTypesConfig) addedConfigSetting;
+            Assert.assertNotNull(miscellaneousTypesConfig);
+            assertEquals(_config.getId(), miscellaneousTypesConfig.getId());
+            assertEquals(_config.getExecutor(), miscellaneousTypesConfig.getExecutor());
+            assertEquals(_config.isRetransmit(), miscellaneousTypesConfig.isRetransmit());
+
+            assertEquals(_config.getSystemDate(), miscellaneousTypesConfig.getSystemDate());
+            assertTrue(Arrays.equals(_config.getDoublePcaMatrixData(), miscellaneousTypesConfig.getDoublePcaMatrixData()));
+            assertTrue(Arrays.equals(_config.getIntPcaMatrixData(), miscellaneousTypesConfig.getIntPcaMatrixData()));
+            assertTrue(Arrays.equals(_config.getLongPcaMatrixData(), miscellaneousTypesConfig.getLongPcaMatrixData()));
+            assertTrue(Arrays.equals(_config.getFloatPcaMatrixData(), miscellaneousTypesConfig.getFloatPcaMatrixData()));
+            assertTrue(Arrays.equals(_config.getIsPcaMatrixData(), miscellaneousTypesConfig.getIsPcaMatrixData()));
+
+            assertEquals(_config.getOrderedTenors(), miscellaneousTypesConfig.getOrderedTenors());
+
+            assertEquals(_config.getValuationEnvironment(), miscellaneousTypesConfig.getValuationEnvironment());
+        }
+
+
+        @Override
+        public void onConfigUpdate(String executor, ConfigSetting updateConfigSetting)
+        {
+
+        }
+
+
+        @Override
+        public void onConfigRemove(String executor, ConfigSetting removedConfigSetting)
+        {
+
+        }
+
+
+        @Override
+        public void getMarketData(String executor)
+        {
+
+        }
+
+
+        @Override
+        public void setMarketData(String executor)
+        {
+
+        }
+
+
+        @Override
+        public void onMarketDataUpdate(String producer, MarketDataSupplier supplier, MarketDataSource source, MarketDataType type, String id, byte[] marketDataUpdates, boolean isRetransmit) throws Exception
+        {
+
+        }
+
+
+        @Override
+        public void process(String executor)
+        {
+
+        }
+
+
+        @Override
+        public boolean hasChanged()
+        {
+            return false;
+        }
+
+
+        @Override
+        public boolean isInitialized()
+        {
             return false;
         }
     }

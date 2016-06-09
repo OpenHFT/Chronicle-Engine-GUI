@@ -36,7 +36,9 @@ public class ChronicleObjectSerializationTest
         EnumTestInterfaceImpl enumTestImpl = new EnumTestInterfaceImpl();
 
         writer = ToChronicle.of(EnumTestInterface.class, chronicle);
-        reader = FromChronicle.of(enumTestImpl, chronicle.createTailer());
+        ExcerptTailer tailer = chronicle.createTailer();
+        tailer.toEnd();
+        reader = FromChronicle.of(enumTestImpl, tailer);
     }
 
     @After
