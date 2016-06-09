@@ -1,20 +1,17 @@
 package queue4.chronicle;
 
-
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.queue.ExcerptTailer;
 import net.openhft.chronicle.wire.DocumentContext;
-import org.jetbrains.annotations.NotNull;
-import queue4.externalizableObjects.MarketDataField;
-import queue4.externalizableObjects.MarketDataSource;
-import queue4.externalizableObjects.MarketDataSupplier;
-import queue4.externalizableObjects.MarketDataType;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jetbrains.annotations.*;
+import queue4.externalizableObjects.*;
 
 /**
  * Used to read method invocations for a specified interface that are stored in a Chronicle and invoke these methods on a provided object that implements the interface.
@@ -25,7 +22,8 @@ import java.util.Map;
  *
  * @param <T> The interface whose method invocations are being read.
  */
-public class FromChronicle<T> {
+public class FromChronicle<T>
+{
     private final T _instance;
     private final ExcerptTailer _tailer;
     private final Map<String, Method> methodMap = new HashMap<>();
@@ -41,12 +39,15 @@ public class FromChronicle<T> {
      * @param instance The object whose methods should be invoked when a method invocation is read from Chronicle.
      * @param tailer   The object to use to read method invocations from the Chronicle.
      */
-    private FromChronicle(@NotNull T instance, ExcerptTailer tailer) {
+    private FromChronicle(@NotNull T instance, ExcerptTailer tailer)
+    {
         _instance = instance;
         _tailer = tailer;
 
-        for (Method m : _instance.getClass().getMethods()) {
-            if (m.getDeclaringClass() != Object.class) {
+        for (Method m : _instance.getClass().getMethods())
+        {
+            if (m.getDeclaringClass() != Object.class)
+            {
                 methodMap.put(m.getName(), m);
             }
         }
@@ -63,7 +64,8 @@ public class FromChronicle<T> {
      * @return The instance of this that can be used to read method invocations.
      */
     @NotNull
-    public static <T> FromChronicle<T> of(@NotNull T instance, ExcerptTailer tailer) {
+    public static <T> FromChronicle<T> of(@NotNull T instance, ExcerptTailer tailer)
+    {
         return new FromChronicle<>(instance, tailer);
     }
 
@@ -75,8 +77,10 @@ public class FromChronicle<T> {
      * @param arraySize  The number of arguments that the method has.
      * @return The array to use
      */
-    private Object[] getArgumentArray(String methodName, int arraySize) {
-        if (!argumentArrays.containsKey(methodName)) {
+    private Object[] getArgumentArray(String methodName, int arraySize)
+    {
+        if (!argumentArrays.containsKey(methodName))
+        {
             argumentArrays.put(methodName, new Object[arraySize]);
         }
 
@@ -93,7 +97,8 @@ public class FromChronicle<T> {
      * @param methodName The name of the method.
      * @return The metadata or null if there was no method with the provided name.
      */
-    private Method findMethod(String methodName) {
+    private Method findMethod(String methodName)
+    {
         return methodMap.getOrDefault(methodName, null);
     }
 
@@ -103,22 +108,23 @@ public class FromChronicle<T> {
      *
      * @return true if an object was read. false otherwise.
      */
-    public boolean readOne() throws Exception {
-        // See if there are any objects left to read on the Chronicle
+    public boolean readOne() throws Exception
+    {
+        try (final DocumentContext dc = _tailer.readingDocument())
+        {
+            // See if there are any objects left to read on the Chronicle
+            if(!dc.isPresent())
+            {
+                return false;
+            }
 
-        //FIXME CH Not sure how to handle this
-//        if (!_tailer.nextIndex())
-//        {
-//            return false;
-//        }
+            // Read any meta-data is added before each event is written to the Chronicle
+            if(dc.isMetaData())
+            {
+                // TODO CH Do something
+                return true;
+            }
 
-
-        // Read any meta-data is added before each event is written to the Chronicle
-
-        //TODO Re-add metadata
-        //MetaData.get().readMarshallable(tailer);
-
-        try (final DocumentContext dc = _tailer.readingDocument()) {
             // Get the name of the method and the meta data about the method
             Bytes<?> bytes = dc.wire().bytes();
             String methodName = bytes.readUtf8();
@@ -130,18 +136,21 @@ public class FromChronicle<T> {
             int len = (int) bytes.readStopBit();
             Object[] args = null;
 
-            if (len > 0) {
+            if (len > 0)
+            {
                 // Get an object array to store the values for the arguments read from the Chronicle
                 // and process each argument in turn storing the values in the object array
 
                 args = getArgumentArray(m.getName(), len);
 
-                for (int i = 0; i < len; i++) {
+                for (int i = 0; i < len; i++)
+                {
                     // Read the type of the argument
 
                     int typeInt = bytes.readUnsignedByte();
 
-                    switch (typeInt) {
+                    switch (typeInt)
+                    {
                         case 'S':
                             args[i] = bytes.readUtf8();
                             break;
@@ -201,9 +210,12 @@ public class FromChronicle<T> {
                             args[i] = bytesStore;
                             break;
 
+                        case 'O':
+                            args[i] = bytes.readBoolean();
+                            break;
+
                         case 'X':
-                            args[i] = dc.wire().getValueIn()
-                                    .object();
+                            args[i] = dc.wire().getValueIn().object();
                             break;
 
                         default:
