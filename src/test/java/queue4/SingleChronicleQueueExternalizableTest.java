@@ -9,7 +9,6 @@ import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.pool.*;
 import net.openhft.chronicle.queue.*;
 import net.openhft.chronicle.queue.impl.single.*;
-import net.openhft.chronicle.tools.*;
 import net.openhft.chronicle.wire.*;
 import org.junit.*;
 import queue4.chronicle.*;
@@ -17,7 +16,6 @@ import queue4.externalizableObjects.*;
 
 import static net.openhft.chronicle.wire.WireType.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Created by cliveh on 10/05/2016.
@@ -25,8 +23,8 @@ import static org.junit.Assert.assertEquals;
 public class SingleChronicleQueueExternalizableTest
 {
 
-    String chronicleQueueBase = OS.TARGET + "/Chronicle/data";
-    private SingleChronicleQueue _queue;
+    String chronicleQueueBase1 = OS.TARGET + "/Chronicle/data1";
+    String chronicleQueueBase2 = OS.TARGET + "/Chronicle/data2";
 
 
     static void testFor(Object o)
@@ -49,17 +47,30 @@ public class SingleChronicleQueueExternalizableTest
         assertEquals(o, o3);
     }
 
-
-    @Before
-    public void setUp() throws IOException
+    private void deleteChronicle(String path)
     {
-        _queue = SingleChronicleQueueBuilder.binary(chronicleQueueBase).build();
+        File file = new File(path);
+        File[] fileList = file.listFiles();
+        if(fileList != null)
+        {
+            for (int n = 0; n < fileList.length; n++)
+            {
+                if (fileList[n].isFile())
+                {
+                    fileList[n].delete();
+                }
+            }
+        }
+        file.delete();
     }
 
 
     @Test
     public void testExternalizable() throws Exception
     {
+        deleteChronicle(chronicleQueueBase1);
+
+        SingleChronicleQueue queue1 = SingleChronicleQueueBuilder.binary(chronicleQueueBase1).build();
         ClassAliasPool.CLASS_ALIASES.addAlias(MarketDataKey.class, MarketDataSource.class,
                 MarketDataSupplier.class, MarketDataType.class, MarketDataField.class,
                 InstrumentId.class, Values.class, MarketDataKeyEnvironment.class,
@@ -119,19 +130,24 @@ public class SingleChronicleQueueExternalizableTest
         config.set_marketDataKeyEnvironments(marketDataKeyEnvironments);
         testFor(config);
 
-        EventManager toChronicle = ToChronicle.of(EventManager.class, _queue);
+        EventManager toChronicle = ToChronicle.of(EventManager.class, queue1);
         toChronicle.onConfigAdd("executor", config);
-        ExcerptTailer tailer = _queue.createTailer();
+        ExcerptTailer tailer = queue1.createTailer();
         tailer.toStart();
 
         TestEventManagerMarketDataKeyEnvironmentConfig testEventManager = new TestEventManagerMarketDataKeyEnvironmentConfig(config);
         FromChronicle<TestEventManagerMarketDataKeyEnvironmentConfig> fromChronicle = FromChronicle.of(testEventManager, tailer);
         fromChronicle.readOne();
+        queue1.close();
     }
+
 
     @Test
     public void miscellaneousTypeConfigTest() throws Exception
     {
+        deleteChronicle(chronicleQueueBase2);
+        SingleChronicleQueue queue2 = SingleChronicleQueueBuilder.binary(chronicleQueueBase2).build();
+
         // Instantiate a MiscellaneousTypesConfig
         MiscellaneousTypesConfig miscellaneousTypesConfig = new MiscellaneousTypesConfig();
         miscellaneousTypesConfig.setId("SomeIdToo");
@@ -161,22 +177,15 @@ public class SingleChronicleQueueExternalizableTest
         String valuationEnvironment = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n<!DOCTYPE boost_serialization>\n<boost_serialization signature=\"serialization::archive\" version=\"4\">\netc etc";
         miscellaneousTypesConfig.setValuationEnvironment(valuationEnvironment);
 
-        EventManager toChronicle = ToChronicle.of(EventManager.class, _queue);
+        EventManager toChronicle = ToChronicle.of(EventManager.class, queue2);
         toChronicle.onConfigAdd("executor", miscellaneousTypesConfig);
-        ExcerptTailer tailer = _queue.createTailer();
+        ExcerptTailer tailer = queue2.createTailer();
         tailer.toStart();
 
         TestEventManagerMiscellaneousTypesConfig testEventManager = new TestEventManagerMiscellaneousTypesConfig(miscellaneousTypesConfig);
         FromChronicle<TestEventManagerMiscellaneousTypesConfig> fromChronicle = FromChronicle.of(testEventManager, tailer);
         fromChronicle.readOne();
-    }
-
-
-    @After
-    public void tearDown() throws IOException
-    {
-        _queue.close();
-        ChronicleTools.deleteDirOnExit(chronicleQueueBase);
+        queue2.close();
     }
 
 
