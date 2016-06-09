@@ -185,15 +185,15 @@ public class MiscellaneousTypesConfig implements ConfigSetting
         out.writeUTF(_executor);
         out.writeBoolean(_isRetransmit);
 
-      //  out.writeObject(_systemDate);
+        out.writeObject(_systemDate);
 
-      //  out.writeObject(_doublePcaMatrixData);
-//        out.writeObject(_intPcaMatrixData);
-//        out.writeObject(_longPcaMatrixData);
-//        out.writeObject(_floatPcaMatrixData);
-//        out.writeObject(_isPcaMatrixData);
+        out.writeObject(_doublePcaMatrixData);
+        out.writeObject(_intPcaMatrixData);
+        out.writeObject(_longPcaMatrixData);
+        out.writeObject(_floatPcaMatrixData);
+        out.writeObject(_isPcaMatrixData);
 
-    //    out.writeObject(_orderedTenors);
+        out.writeObject(_orderedTenors);
 
         byte[] bytes = _valuationEnvironment.getBytes();
 
@@ -231,18 +231,15 @@ public class MiscellaneousTypesConfig implements ConfigSetting
         _id = in.readUTF();
         _executor = in.readUTF();
         _isRetransmit = in.readBoolean();
-        //_systemDate = (ZonedDateTime) in.readObject();
-      //  String zonedDateTimeString = (String)in.readObject();
+        _systemDate = (ZonedDateTime) in.readObject();
 
-    //    _doublePcaMatrixData = (double[]) in.readObject();
-//        _intPcaMatrixData = (int []) in.readObject();
-//        _longPcaMatrixData = (long[]) in.readObject();
-//        _floatPcaMatrixData = (float[]) in.readObject();
-//        _isPcaMatrixData = (boolean[]) in.readObject();
+        _doublePcaMatrixData = (double[]) in.readObject();
+        _intPcaMatrixData = (int []) in.readObject();
+        _longPcaMatrixData = (long[]) in.readObject();
+        _floatPcaMatrixData = (float[]) in.readObject();
+        _isPcaMatrixData = (boolean[]) in.readObject();
 
-    //    _orderedTenors = (TreeSet<SwapId>)in.readObject();
-
-       // _orderedTenors = new TreeSet<>((LinkedHashSet<InstrumentId>) in.readObject());
+        _orderedTenors = (TreeSet<SwapId>)in.readObject();
 
 
         // Read the size of the byte array that was put on the queue to represent the close valuation environment.
