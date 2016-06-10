@@ -1,16 +1,17 @@
 package queue4.externalizableObjects;
 
 import java.io.*;
-import java.time.*;
-import java.util.*;
-import java.util.zip.*;
+import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.util.TreeSet;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 
 
 /**
  * Represents configuration information for a change of system date.
  */
-public class MiscellaneousTypesConfig implements ConfigSetting
-{
+public class MiscellaneousTypesConfig implements ConfigSetting {
     private final static int BUFFER_SIZE = 2048;
 
     private String _id;
@@ -26,10 +27,8 @@ public class MiscellaneousTypesConfig implements ConfigSetting
     private String _valuationEnvironment;
 
 
-
     @Override
-    public String getExecutor()
-    {
+    public String getExecutor() {
         return _executor;
     }
 
@@ -39,37 +38,29 @@ public class MiscellaneousTypesConfig implements ConfigSetting
      *
      * @param executor The executor.
      */
-    public void setExecutor(String executor)
-    {
+    public void setExecutor(String executor) {
         _executor = executor;
     }
 
 
-
     @Override
-    public String getId()
-    {
+    public String getId() {
         return _id;
     }
 
 
-
-    public void setId(String id)
-    {
+    public void setId(String id) {
         _id = id;
     }
 
 
-
     @Override
-    public boolean isRetransmit()
-    {
+    public boolean isRetransmit() {
         return _isRetransmit;
     }
 
     @Override
-    public void setRetransmit(boolean isRetransmit)
-    {
+    public void setRetransmit(boolean isRetransmit) {
         _isRetransmit = isRetransmit;
     }
 
@@ -77,8 +68,7 @@ public class MiscellaneousTypesConfig implements ConfigSetting
     /**
      * Gets the system date for this.
      */
-    public ZonedDateTime getSystemDate()
-    {
+    public ZonedDateTime getSystemDate() {
         return _systemDate;
     }
 
@@ -88,99 +78,83 @@ public class MiscellaneousTypesConfig implements ConfigSetting
      *
      * @param systemDate The system date.
      */
-    public void setSystemDate(ZonedDateTime systemDate)
-    {
+    public void setSystemDate(ZonedDateTime systemDate) {
         _systemDate = systemDate;
     }
 
 
-    public double[] getDoublePcaMatrixData()
-    {
+    public double[] getDoublePcaMatrixData() {
         return _doublePcaMatrixData;
     }
 
 
-    public void setDoublePcaMatrixData(double[] doublePcaMatrixData)
-    {
+    public void setDoublePcaMatrixData(double[] doublePcaMatrixData) {
         _doublePcaMatrixData = doublePcaMatrixData;
     }
 
 
-    public int[] getIntPcaMatrixData()
-    {
+    public int[] getIntPcaMatrixData() {
         return _intPcaMatrixData;
     }
 
 
-    public void setIntPcaMatrixData(int[] intPcaMatrixData)
-    {
+    public void setIntPcaMatrixData(int[] intPcaMatrixData) {
         _intPcaMatrixData = intPcaMatrixData;
     }
 
 
-    public long[] getLongPcaMatrixData()
-    {
+    public long[] getLongPcaMatrixData() {
         return _longPcaMatrixData;
     }
 
 
-    public void setLongPcaMatrixData(long[] longPcaMatrixData)
-    {
+    public void setLongPcaMatrixData(long[] longPcaMatrixData) {
         _longPcaMatrixData = longPcaMatrixData;
     }
 
 
-    public float[] getFloatPcaMatrixData()
-    {
+    public float[] getFloatPcaMatrixData() {
         return _floatPcaMatrixData;
     }
 
 
-    public void setFloatPcaMatrixData(float[] floatPcaMatrixData)
-    {
+    public void setFloatPcaMatrixData(float[] floatPcaMatrixData) {
         _floatPcaMatrixData = floatPcaMatrixData;
     }
 
 
-    public boolean[] getIsPcaMatrixData()
-    {
+    public boolean[] getIsPcaMatrixData() {
         return _isPcaMatrixData;
     }
 
 
-    public void setIsPcaMatrixData(boolean[] isPcaMatrixData)
-    {
+    public void setIsPcaMatrixData(boolean[] isPcaMatrixData) {
         _isPcaMatrixData = isPcaMatrixData;
     }
 
 
-    public TreeSet<SwapId> getOrderedTenors()
-    {
+    public TreeSet<SwapId> getOrderedTenors() {
         return _orderedTenors;
     }
 
 
-    public void setOrderedTenors(TreeSet<SwapId> orderedTenors)
-    {
+    public void setOrderedTenors(TreeSet<SwapId> orderedTenors) {
         _orderedTenors = orderedTenors;
     }
 
 
-    public String getValuationEnvironment()
-    {
+    public String getValuationEnvironment() {
         return _valuationEnvironment;
     }
 
 
-    public void setValuationEnvironment(String valuationEnvironment)
-    {
+    public void setValuationEnvironment(String valuationEnvironment) {
         _valuationEnvironment = valuationEnvironment;
     }
 
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException
-    {
+    public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(_id);
         out.writeUTF(_executor);
         out.writeBoolean(_isRetransmit);
@@ -195,28 +169,14 @@ public class MiscellaneousTypesConfig implements ConfigSetting
 
         out.writeObject(_orderedTenors);
 
-        byte[] bytes = _valuationEnvironment.getBytes();
+        byte[] bytes = _valuationEnvironment.getBytes(StandardCharsets.UTF_8);
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byteArrayOutputStream.reset();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DeflaterOutputStream dos = new DeflaterOutputStream(baos);
+        dos.write(bytes);
+        dos.close();
 
-        Deflater deflater = new Deflater(Deflater.BEST_SPEED, true);
-        deflater.reset();
-        deflater.setInput(bytes);
-        deflater.finish();
-
-        byte[] buffer = new byte[BUFFER_SIZE];
-
-        while (!deflater.finished())
-        {
-            int bytesCompressed = deflater.deflate(buffer);
-            byteArrayOutputStream.write(buffer, 0, bytesCompressed);
-        }
-
-        byteArrayOutputStream.close();
-        byte[] compressedArray = byteArrayOutputStream.toByteArray();
-
-
+        byte[] compressedArray = baos.toByteArray();
         // Write the number of bytes and the bytes
 
         out.writeInt(compressedArray.length);
@@ -224,66 +184,41 @@ public class MiscellaneousTypesConfig implements ConfigSetting
     }
 
 
-
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException
-    {
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         _id = in.readUTF();
         _executor = in.readUTF();
         _isRetransmit = in.readBoolean();
         _systemDate = (ZonedDateTime) in.readObject();
 
         _doublePcaMatrixData = (double[]) in.readObject();
-        _intPcaMatrixData = (int []) in.readObject();
+        _intPcaMatrixData = (int[]) in.readObject();
         _longPcaMatrixData = (long[]) in.readObject();
         _floatPcaMatrixData = (float[]) in.readObject();
         _isPcaMatrixData = (boolean[]) in.readObject();
 
-        _orderedTenors = (TreeSet<SwapId>)in.readObject();
-
+        _orderedTenors = (TreeSet<SwapId>) in.readObject();
 
         // Read the size of the byte array that was put on the queue to represent the close valuation environment.
         int readBytes = in.readInt();
 
-        if (readBytes == 0)
-        {
+        if (readBytes == 0) {
             _valuationEnvironment = null;
-        }
-        else
-        {
+
+        } else {
             byte[] inputBytes = new byte[readBytes];
 
-            // Read bytes and decompress into close valuation environment string.
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            byteArrayOutputStream.reset();
+            int len0 = in.read(inputBytes);
+            assert len0 == readBytes;
 
-            byte[] buffer = new byte[BUFFER_SIZE];
-            in.read(inputBytes);
-
-            Inflater inflater = new Inflater(true);
-            inflater.reset();
-            inflater.setInput(inputBytes);
-
-            while (!inflater.finished())
-            {
-                int count = 0;
-
-                try
-                {
-                    count = inflater.inflate(buffer);
-                }
-                catch (DataFormatException e)
-                {
-                    e.printStackTrace();
-                }
-
-                byteArrayOutputStream.write(buffer, 0, count);
+            try (InflaterInputStream iis = new InflaterInputStream(new ByteArrayInputStream(inputBytes));
+                 ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[BUFFER_SIZE];
+                for (int len; (len = iis.read(buffer)) > 0; )
+                    baos.write(buffer, 0, len);
+                byte[] output = baos.toByteArray();
+                _valuationEnvironment = new String(output, StandardCharsets.UTF_8);
             }
-
-            byteArrayOutputStream.close();
-            byte[] output = byteArrayOutputStream.toByteArray();
-            _valuationEnvironment = new String(output);
-            inflater.end();
         }
     }
 
@@ -292,8 +227,7 @@ public class MiscellaneousTypesConfig implements ConfigSetting
      * See java.lang.Object.
      */
     @Override
-    public final int hashCode()
-    {
+    public final int hashCode() {
         int hashCode = 17;
         hashCode = hashCode * 31 + (_isRetransmit ? 1 : 0);
         hashCode = hashCode * 31 + _id.hashCode();
@@ -308,22 +242,15 @@ public class MiscellaneousTypesConfig implements ConfigSetting
      * See java.lang.Object.
      */
     @Override
-    public final boolean equals(Object o)
-    {
-        if (this == o)
-        {
+    public final boolean equals(Object o) {
+        if (this == o) {
             return true;
-        }
-        else
-        {
-            if (o instanceof ZonedDateTime)
-            {
+        } else {
+            if (o instanceof ZonedDateTime) {
                 MiscellaneousTypesConfig zdtc = (MiscellaneousTypesConfig) o;
 
                 return (_isRetransmit == zdtc._isRetransmit) && (_id == zdtc._id) && _executor.equals(zdtc._executor) && _systemDate.equals(zdtc._systemDate);
-            }
-            else
-            {
+            } else {
                 return false;
             }
         }
