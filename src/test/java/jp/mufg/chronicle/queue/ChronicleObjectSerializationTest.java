@@ -192,7 +192,7 @@ public class ChronicleObjectSerializationTest
     }
 
     @Test
-    @Ignore("TODO Fix test")
+    @Ignore("TODO Not supported currently")
     public void testDataValueClassWithEnumAndObjectMap()
     {
         Map<TestEnum, Object> enumObjectMap = new HashMap<>();
