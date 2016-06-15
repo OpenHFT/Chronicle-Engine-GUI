@@ -45,7 +45,7 @@ public class ArrayMapTest {
     private static AtomicReference<Throwable> t = new AtomicReference();
     private final Boolean isRemote;
     private final WireType wireType;
-    public String connection = "SteamTest.host.port";
+    public String connection = "ArrayMapTest.host.port";
     @NotNull
     @Rule
     public TestName name = new TestName();
