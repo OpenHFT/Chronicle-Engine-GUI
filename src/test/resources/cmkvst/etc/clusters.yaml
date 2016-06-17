@@ -1,30 +1,23 @@
---- !EngineCfg {
-#
-# Configuration files are being placed in /etc following the Unix convention, but could be anywhere
-#
-etc: {
-    clusters: !ClustersCfg {
-      cluster: {
-        context: !EngineClusterContext {
-        }
-        host1: {
-          hostId: 1,
-          tcpBufferSize: 65536,
-          connectUri: host.port1,
-          timeoutMs: 1000,
-        },
-       host2: {
-          hostId: 2,
-          tcpBufferSize: 65536,
-          connectUri: host.port2,
-          timeoutMs: 1000,
-        },
-        host3: {
-          hostId: 3,
-          tcpBufferSize: 65536,
-          connectUri: host.port3,
-          timeoutMs: 1000,
-       }
+cluster: {
+  context: !EngineClusterContext {
   }
+  host1: {
+    hostId: 1,
+    tcpBufferSize: 65536,
+    connectUri: host.port1,
+    timeoutMs: 1000,
+  },
+ host2: {
+    hostId: 2,
+    tcpBufferSize: 65536,
+    connectUri: host.port2,
+    timeoutMs: 1000,
+  },
+  host3: {
+    hostId: 3,
+    tcpBufferSize: 65536,
+    connectUri: host.port3,
+    timeoutMs: 1000,
  }
 }
+
