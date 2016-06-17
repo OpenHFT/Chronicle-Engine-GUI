@@ -28,7 +28,7 @@ import static net.openhft.chronicle.core.Jvm.pause;
 @Ignore("CHENT-49 attempts to use optimisations which are not ready")
 public class FastMapEventListenerStatelessClientTest {
     private static final String _mapBasePath = OS.TARGET + "/FastMapEventListenerStatelessClientTest";
-    private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting(Throwable::printStackTrace);
+    private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forServer(true);
     private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
     private static VanillaAssetTree clientAssetTree;
     private static ChronicleTestEventListener _chronicleTestEventListener;

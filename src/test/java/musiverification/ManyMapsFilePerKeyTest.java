@@ -26,7 +26,7 @@ public class ManyMapsFilePerKeyTest {
     private static int _noOfMaps = Boolean.getBoolean("quick") ? 10 : 100;
     private static int _noOfKvps = 1_000;
 
-    private static VanillaAssetTree assetTree = new VanillaAssetTree(10).forTesting(Throwable::printStackTrace);
+    private static VanillaAssetTree assetTree = new VanillaAssetTree(10).forServer(true);
 
     @BeforeClass
     public static void setUp() {

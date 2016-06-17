@@ -26,6 +26,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -122,8 +123,7 @@ public class SubscriptionModelTest {
         YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                wireType,
-                onThrowable::add);
+                wireType);
 
         String mapName = "/test/maps/string/double/test";
         String mapNameSubscriber = mapName + "?bootstrap=false";
@@ -157,8 +157,7 @@ public class SubscriptionModelTest {
         YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                wireType,
-                onThrowable::add);
+                wireType);
 
         String mapName = "/test/maps/string/double/test";
         String mapNameSubscriber = mapName + "?bootstrap=false";
@@ -192,10 +191,9 @@ public class SubscriptionModelTest {
     public void testSubscriptionLongLongMap() throws InterruptedException {
         YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                wireType,
-                onThrowable::add);
 
+
+        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, wireType);
         String mapName = "/test/maps/string/double/test";
         String mapNameSubscriber = mapName + "?bootstrap=false";
 
@@ -226,8 +224,11 @@ public class SubscriptionModelTest {
     public void testSubscriptionStringDoubleMap() throws InterruptedException {
         YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
+
+        Consumer<Throwable> t = onThrowable::add;
+
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                wireType, onThrowable::add);
+                wireType, t);
 
 
         String mapName = "/test/maps/string/double/test";

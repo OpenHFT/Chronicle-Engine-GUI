@@ -77,7 +77,7 @@ public class RemoteClientDataTypesTest {
 
     @Before
     public void setUp() throws IOException {
-        _serverAssetTree = new VanillaAssetTree().forServer(Throwable::printStackTrace);
+        _serverAssetTree = new VanillaAssetTree().forServer(true);
 
         TCPRegistry.createServerSocketChannelFor(_serverAddress);
         _serverEndpoint = new ServerEndpoint(_serverAddress, _serverAssetTree);

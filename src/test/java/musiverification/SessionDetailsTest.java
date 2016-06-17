@@ -38,7 +38,7 @@ public class SessionDetailsTest {
     @NotNull
     private static AssetTree create(final int hostId, Function<Bytes, Wire> writeType, Consumer<AssetTree> applyRules) {
         AssetTree tree = new VanillaAssetTree((byte) hostId)
-                .forTesting(Throwable::printStackTrace);
+                .forTesting();
 
         //Add session detail check wrapper for
         tree.root().addWrappingRule(ObjectSubscription.class, "Check session details subscription",
@@ -63,7 +63,7 @@ public class SessionDetailsTest {
 
         remoteAssetTree = new VanillaAssetTree();
         remoteAssetTree.root().forRemoteAccess(new String[]{"host.port1"}, WIRE_TYPE,
-                VanillaSessionDetails.of("java-client", null, "java-domain"), null, Throwable::printStackTrace);
+                VanillaSessionDetails.of("java-client", null, "java-domain"), null);
 
         serverEndpoint = new ServerEndpoint("host.port1", serverAssetTree);
     }

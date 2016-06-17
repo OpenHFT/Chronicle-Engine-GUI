@@ -30,7 +30,7 @@ import java.util.function.Consumer;
  */
 public class ChronicleMapEventListenerStatelessClientTest {
     private static final String _mapBasePath = OS.TARGET + "/ChronicleMapEventListenerStatelessClientTest";
-    private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forTesting(Throwable::printStackTrace);
+    private static final VanillaAssetTree serverAssetTree = new VanillaAssetTree().forServer(true);
     private static final AtomicInteger _noOfEventsTriggered = new AtomicInteger();
     private static ChronicleTestEventListener _chronicleTestEventListener;
     private static VanillaAssetTree clientAssetTree;

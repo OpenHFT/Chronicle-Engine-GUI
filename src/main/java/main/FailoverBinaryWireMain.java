@@ -20,6 +20,8 @@ import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.wire.WireType;
 
+import java.io.IOException;
+
 /**
  * Created by andre on 01/05/2015.
  */
@@ -35,17 +37,17 @@ public class FailoverBinaryWireMain {
     private final String _server3StopKey = "K15";
 
     private FailoverBinaryWireMain() {
-        _assetTree1 = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
-        _assetTree2 = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
-        _assetTree3 = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
+        _assetTree1 = new VanillaAssetTree().forServer(false );
+        _assetTree2 = new VanillaAssetTree().forServer(false );
+        _assetTree3 = new VanillaAssetTree().forServer(false);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         FailoverBinaryWireMain failoverBinaryWireMain = new FailoverBinaryWireMain();
         failoverBinaryWireMain.start();
     }
 
-    private void start() {
+    private void start() throws IOException {
         //Create test map on all servers
         _assetTree1.acquireMap(_mapUri, String.class, String.class).size();
         _assetTree2.acquireMap(_mapUri, String.class, String.class).size();

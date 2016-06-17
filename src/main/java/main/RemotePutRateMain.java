@@ -44,7 +44,7 @@ public class RemotePutRateMain {
         _twoMbTestStringLength = _twoMbTestString.length();
 
         VanillaAssetTree clientAssetTree = new VanillaAssetTree(13).forRemoteAccess(hostname +
-                ":" + BinaryWireMain.PORT, WireType.BINARY, Throwable::printStackTrace);
+                ":" + BinaryWireMain.PORT, WireType.BINARY);
 
         Map<String, String> _testMap = clientAssetTree.acquireMap(_mapName, String.class, String.class);
 

@@ -67,12 +67,12 @@ public class ReplicationTest2Way {
         TCPRegistry.reset();
     }
 
-    private static void createServer1() {
+    private static void createServer1() throws IOException {
         tree1 = create(1, WIRE_TYPE, "clusterTwo");
         serverEndpoint1 = new ServerEndpoint("host.port1", tree1);
     }
 
-    private static void createServer2() {
+    private static void createServer2() throws IOException {
         tree2 = create(2, WIRE_TYPE, "clusterTwo");
         serverEndpoint2 = new ServerEndpoint("host.port2", tree2);
     }
@@ -93,13 +93,13 @@ public class ReplicationTest2Way {
             tree2.close();
     }
 
-    private static void restartServer1() {
+    private static void restartServer1() throws IOException {
         closeServer1();
         Jvm.pause(500);
         createServer1();
     }
 
-    private static void restartServer2() {
+    private static void restartServer2() throws IOException {
         closeServer2();
         Jvm.pause(500);
         createServer2();
@@ -108,7 +108,7 @@ public class ReplicationTest2Way {
     @NotNull
     private static AssetTree create(final int hostId, WireType writeType, final String clusterTwo) {
         AssetTree tree = new VanillaAssetTree((byte) hostId)
-                .forTesting(Throwable::printStackTrace)
+                .forTesting()
                 .withConfig(resourcesDir() + "/cmkvst", OS.TARGET + "/" + hostId);
 
         tree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore",
@@ -195,7 +195,7 @@ public class ReplicationTest2Way {
      * when restarted.
      */
     @Test
-    public void testBootstrapOneKvPPerMapPrimaryRestart() throws InterruptedException {
+    public void testBootstrapOneKvPPerMapPrimaryRestart() throws InterruptedException, IOException {
 
         ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String.class);
         ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String.class);
@@ -223,7 +223,7 @@ public class ReplicationTest2Way {
      * bootstrapped when restarted.
      */
     @Test
-    public void testBootstrapOneKvPPerMapSecondaryRestart() throws InterruptedException {
+    public void testBootstrapOneKvPPerMapSecondaryRestart() throws InterruptedException, IOException {
         ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String.class);
         ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String.class);
 
@@ -255,7 +255,7 @@ public class ReplicationTest2Way {
      * receive all Key/Value pairs in Server2
      */
     @Test
-    public void testBootstrapMapConsumersOnlySecondaryRestart() throws InterruptedException {
+    public void testBootstrapMapConsumersOnlySecondaryRestart() throws InterruptedException, IOException {
         //Create the two references to the replicated map
         ConcurrentMap<String, String> map1 = tree1.acquireMap(NAME, String.class, String.class);
         ConcurrentMap<String, String> map2 = tree2.acquireMap(NAME, String.class, String.class);

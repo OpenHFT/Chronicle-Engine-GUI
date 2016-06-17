@@ -23,7 +23,7 @@ public class RemoteClientMain
         String mapName = _useNewMap ? _remoteMapName : _serverMapName;
 
         VanillaAssetTree assetTree = new VanillaAssetTree().forRemoteAccess("localhost:8088",
-                WireType.BINARY, Throwable::printStackTrace);
+                WireType.BINARY);
 
         VanillaAsset root = assetTree.root();
 

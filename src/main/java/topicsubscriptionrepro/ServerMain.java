@@ -13,7 +13,7 @@ public class ServerMain {
 
     public static void main(String[] args) throws IOException {
 //        YamlLogging.setAll(true);
-        VanillaAssetTree assetTree = new VanillaAssetTree().forServer(Throwable::printStackTrace);
+        VanillaAssetTree assetTree = new VanillaAssetTree().forServer();
 //        VanillaAssetTree assetTree = new VanillaAssetTree().forTesting();
 
         VanillaAsset root = assetTree.root();

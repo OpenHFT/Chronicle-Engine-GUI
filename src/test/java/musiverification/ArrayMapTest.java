@@ -49,7 +49,7 @@ public class ArrayMapTest {
     @NotNull
     @Rule
     public TestName name = new TestName();
-    private AssetTree assetTree = new VanillaAssetTree(1).forTesting(x -> t.compareAndSet(null, x));
+    private AssetTree assetTree = new VanillaAssetTree(1).forServer(true);
     private VanillaAssetTree serverAssetTree;
     private ServerEndpoint serverEndpoint;
 
@@ -75,7 +75,7 @@ public class ArrayMapTest {
 
     @Before
     public void before() throws IOException {
-        serverAssetTree = new VanillaAssetTree(2).forTesting(x -> t.compareAndSet(null, x));
+        serverAssetTree = new VanillaAssetTree(2).forServer(true);
 
         if (isRemote) {
 

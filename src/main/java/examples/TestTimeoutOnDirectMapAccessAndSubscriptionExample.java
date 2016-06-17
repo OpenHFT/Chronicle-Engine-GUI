@@ -46,7 +46,7 @@ public class TestTimeoutOnDirectMapAccessAndSubscriptionExample
     public static class ChronicleDataPublisher implements AutoCloseable
     {
         //TODO DS get config settings from db or prop file
-        private final VanillaAssetTree _assetTree = new VanillaAssetTree().forServer(false, Throwable::printStackTrace);
+        private final VanillaAssetTree _assetTree = new VanillaAssetTree().forServer(false);
         private WireType _wireType;
         private int _port;
         private ServerEndpoint _serverEndpoint;

@@ -34,11 +34,11 @@ public class ServerMain {
         System.in.read();
     }
 
-    public void start() {
+    public void start() throws IOException {
         //TODO DS move to constructor
         int port = 8088;
 
-        _assetTree = new VanillaAssetTree().forServer(Throwable::printStackTrace);
+        _assetTree = new VanillaAssetTree().forServer();
 
         _root = _assetTree.root();
 

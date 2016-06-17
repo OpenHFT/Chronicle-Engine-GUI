@@ -37,7 +37,7 @@ public class KeySubscriberTest
     {
         resetChassis();
 
-        AssetTree serverAssetTree = new VanillaAssetTree(1).forTesting(Throwable::printStackTrace);
+        AssetTree serverAssetTree = new VanillaAssetTree(1).forServer(true);
         //The following line doesn't add anything and breaks subscriptions
 //        serverAssetTree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore", VanillaMapView::new, KeyValueStore.class);
 //        serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->

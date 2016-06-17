@@ -22,7 +22,7 @@ public class ClientMain
         _assetTree.root().forRemoteAccess(
                 new String[]{_serverAddress}, _wireType,
                 VanillaSessionDetails.of("mfil-daniels", null, ""), ConstructorExceptionClient
-                        .clientConnectionMonitor(), Throwable::printStackTrace);
+                        .clientConnectionMonitor());
 
         //This works
         _assetTree.registerSubscriber(_mapUri, String.class, message -> System.out.println("Subscriber 1: " + message));

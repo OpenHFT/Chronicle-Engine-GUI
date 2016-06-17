@@ -7,22 +7,17 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.engine.api.EngineReplication;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapView;
-import net.openhft.chronicle.engine.api.map.SubscriptionKeyValueStore;
-import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
-import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
-import net.openhft.chronicle.engine.cfg.ClustersCfg;
-import net.openhft.chronicle.engine.cfg.EngineCfg;
 import net.openhft.chronicle.engine.fs.ChronicleMapGroupFS;
 import net.openhft.chronicle.engine.fs.FilePerKeyGroupFS;
-import net.openhft.chronicle.engine.map.*;
+import net.openhft.chronicle.engine.map.CMap2EngineReplicator;
+import net.openhft.chronicle.engine.map.ChronicleMapKeyValueStore;
+import net.openhft.chronicle.engine.map.VanillaMapView;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
-import net.openhft.chronicle.engine.tree.VanillaAsset;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.network.VanillaSessionDetails;
 import net.openhft.chronicle.network.api.session.SessionProvider;
-import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.WireType;
 
 import java.io.File;
@@ -83,7 +78,7 @@ public class ReplicatedServerMain {
     private static AssetTree create(final int hostId, WireType writeType, Consumer<AssetTree>
             applyRules) {
         AssetTree tree = new VanillaAssetTree((byte) hostId)
-                .forTesting(Throwable::printStackTrace)
+                .forTesting()
                 .withConfig(resourcesDir() + "/multrepltest", OS.TARGET + "/" + hostId);
 
         tree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore",

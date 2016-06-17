@@ -29,8 +29,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +58,7 @@ public class ReplicationTest {
     private static AssetTree create(final int hostId, WireType writeType, Consumer<AssetTree>
             applyRules) {
         AssetTree tree = new VanillaAssetTree((byte) hostId)
-                .forTesting(Throwable::printStackTrace)
+                .forTesting()
                 .withConfig(resourcesDir() + "/cmkvst", OS.TARGET + "/" + hostId);
 
         tree.root().addWrappingRule(MapView.class, "map directly to KeyValueStore",

@@ -30,7 +30,7 @@ public class ManyMapsTest {
     //    private static int _noOfMaps = Boolean.getBoolean("quick") ? 100 : 1_100;
     private static int _noOfMaps = Boolean.getBoolean("quick") ? 10 : 1100;
     private static int _noOfKvps = 1_000;
-    private static AssetTree assetTree = new VanillaAssetTree(12).forTesting(Throwable::printStackTrace);
+    private static AssetTree assetTree = new VanillaAssetTree(12).forServer(true);
 
     static {
         System.setProperty("heartbeat.timeout", "100000");
