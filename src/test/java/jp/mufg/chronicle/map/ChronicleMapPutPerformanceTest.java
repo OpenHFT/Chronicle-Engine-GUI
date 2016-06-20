@@ -8,10 +8,7 @@ import jp.mufg.chronicle.map.testclasses.QuoteMapKey;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
 import net.openhft.chronicle.tools.ChronicleTools;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TestName;
 
 import java.io.File;
@@ -20,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
-
+        @Ignore("ignored long running perfromance test")
 // TODO need to add expected performance measures.
 public class ChronicleMapPutPerformanceTest {
     static final QuoteMapKey[] quoteMapKey = {
