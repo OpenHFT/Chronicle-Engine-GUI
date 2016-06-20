@@ -129,6 +129,7 @@ public class ManyMapsTest {
         }
     }
 
+    @Ignore("long running test")
     @Test
     public void testConnectToMultipleMapsUsingTheSamePort() throws IOException {
         Map<String, Map<String, String>> _clientMaps = new HashMap<>();
