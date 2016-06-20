@@ -27,7 +27,7 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
-
+@Ignore("long running performance test")
 public class SubscriptionModelFilePerKeyPerformanceTest {
     static final AtomicInteger counter = new AtomicInteger();
 
