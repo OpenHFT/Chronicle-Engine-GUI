@@ -1,17 +1,17 @@
 package topicsubscriptionrepro;
 
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+
+import java.io.IOException;
 import java.util.*;
 
-import net.openhft.chronicle.engine.server.*;
-import net.openhft.chronicle.engine.tree.*;
-
 /**
- * This class mimics the server side market data updates that occur in Data Manager.
- * It was originally written to highlight an issue whereby updates from server side (1.12.27-SNAPSHOT)
- * were no longer being received after a couple of minutes.
+ * This class mimics the server side market data updates that occur in Data Manager. It was
+ * originally written to highlight an issue whereby updates from server side (1.12.27-SNAPSHOT) were
+ * no longer being received after a couple of minutes.
  */
-public class MimicMarketDataServerSideUpdates
-{
+public class MimicMarketDataServerSideUpdates {
     private static VanillaAssetTree _assetTree;
     private static ServerEndpoint _serverEndpoint;
     private static Random _random = new Random();
@@ -22,13 +22,10 @@ public class MimicMarketDataServerSideUpdates
      *
      * @param args
      */
-    public static void main(String[] args) throws InterruptedException
-    {
+    public static void main(String[] args) throws InterruptedException, IOException {
         final int port = 5799;
         final String assetTreeErrorMessage = "Error occurred in VanillaAssetTree: ";
-        _assetTree = new VanillaAssetTree().forServer(false, e -> {
-            System.err.println(assetTreeErrorMessage + e.getMessage());
-        });
+        _assetTree = new VanillaAssetTree().forServer(false);
         _serverEndpoint = new ServerEndpoint("*:" + port, _assetTree);
         Map<String, String> marketDataMap = _assetTree.acquireMap("/adept/marketdata", String.class, String.class);
         initializeMarketMap(marketDataMap);
@@ -39,8 +36,7 @@ public class MimicMarketDataServerSideUpdates
         List<String> valueList = new ArrayList<>(values);
 
         // Randomly update values every 300ms from set of values
-        while (true)
-        {
+        while (true) {
             randomUpdate(keys, marketDataMap, valueList);
             Thread.sleep(300);
         }
@@ -53,8 +49,7 @@ public class MimicMarketDataServerSideUpdates
      *
      * @param marketDataMap
      */
-    public static void initializeMarketMap(Map<String, String> marketDataMap)
-    {
+    public static void initializeMarketMap(Map<String, String> marketDataMap) {
         marketDataMap.put("9|USD SB LCH 15Y|5|12|4|NY IRS USD", "d1.0");
         marketDataMap.put("9|USD SB LCH 15Y|5|30|4|NY IRS USD", "d1.0");
         marketDataMap.put("97|USD SB LCH 15Y|5|12|4|NY IRS USD", "d1.0");
@@ -1157,8 +1152,7 @@ public class MimicMarketDataServerSideUpdates
      *
      * @param values
      */
-    public static void initializeValues(Set<String> values)
-    {
+    public static void initializeValues(Set<String> values) {
         values.add("d1.7461");
         values.add("d1.77494");
         values.add("d1.7787");
@@ -2676,8 +2670,7 @@ public class MimicMarketDataServerSideUpdates
      * @param marketDataMap
      * @param valueList
      */
-    public static void randomUpdate(List<String> keys, Map<String, String> marketDataMap, List<String> valueList)
-    {
+    public static void randomUpdate(List<String> keys, Map<String, String> marketDataMap, List<String> valueList) {
         int randomKeyInt = _random.nextInt(keys.size());
         int randomValueInt = _random.nextInt(valueList.size());
         marketDataMap.put(keys.get(randomKeyInt), valueList.get(randomValueInt));
