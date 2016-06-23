@@ -1,10 +1,13 @@
 package losingserverupdatesissue;
 
-import java.io.*;
-import java.util.*;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 
-import net.openhft.chronicle.engine.server.*;
-import net.openhft.chronicle.engine.tree.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class mimics the server side market data updates that occur in Data Manager.
@@ -28,9 +31,8 @@ public class MimicMarketDataServerSideUpdates
         List<MimicMarketDataUpdate> updates = initializeUpdates(args[0]);
         final int port = 5639;
         final String assetTreeErrorMessage = "Error occurred in VanillaAssetTree: ";
-        _assetTree = new VanillaAssetTree().forServer(false, e -> {
-            System.err.println(assetTreeErrorMessage + e.getMessage());
-        });
+        _assetTree = new VanillaAssetTree().forServer(false);
+
         _serverEndpoint = new ServerEndpoint("*:" + port, _assetTree);
         Map<String, String> marketDataMap = _assetTree.acquireMap("/adept/marketdata", String.class, String.class);
 

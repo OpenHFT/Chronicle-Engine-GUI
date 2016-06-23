@@ -1,12 +1,13 @@
 package losingserverupdatesissue;
 
-import java.io.*;
-import java.util.*;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.VanillaSessionDetails;
+import net.openhft.chronicle.wire.WireType;
+import topicsubscriptionrepro.ConstructorExceptionClient;
 
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.network.*;
-import net.openhft.chronicle.wire.*;
-import topicsubscriptionrepro.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is a test for running Java map against server side VanillaAssetTree.
@@ -28,7 +29,7 @@ public class ChronicleClientTest
         _assetTree.root().forRemoteAccess(
                 new String[]{_serverAddress}, _wireType,
                 VanillaSessionDetails.of("mfil-cliveh", null, ""), ConstructorExceptionClient
-                        .clientConnectionMonitor(), Throwable::printStackTrace);
+                        .clientConnectionMonitor());
 
         List<String> marketDataSubscriptions = createMarketDataKeys();
         //This works
