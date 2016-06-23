@@ -18,7 +18,7 @@ public class ChronicleClientTest
 {
     private static final WireType _wireType = WireType.BINARY;
     private static VanillaAssetTree _assetTree;
-    private static String _serverAddress = "localhost:5639";
+    private static String _serverAddress = "localhost:5638";
     private static String _mapUri = "/adept/marketdata";
 
 
@@ -36,12 +36,20 @@ public class ChronicleClientTest
         for (int i = 0; i < marketDataSubscriptions.size(); i++)
         {
             System.out.println("Registering for: " + marketDataSubscriptions.get(i));
-            _assetTree.registerSubscriber(_mapUri + "/" + marketDataSubscriptions.get(i) + "?view=reference&keyType=string&valueType=string&bootstrap=true&throttlePeriodMs=30", String.class, message -> System.out.println("30 " + message + ", time received: " + System.currentTimeMillis()));
+
+            _assetTree.registerSubscriber(_mapUri + "/" + marketDataSubscriptions.get(i) +
+                    "?view=reference&keyType=string&valueType=string&throttlePeriodMs=30", String.class, message -> System.out.println("30 " + message + ", time received: " + System.currentTimeMillis()));
+
+            //origional(marketDataSubscriptions, i);
             //   _assetTree.registerSubscriber(_mapUri + "/" + marketDataSubscriptions.get(i), String.class, message ->System.out.println("Message no throttle " + message + ", time received: " + System.currentTimeMillis()));
         }
 
         System.out.println("Press any key to exit...");
         System.in.read();
+    }
+
+    private static void origional(List<String> marketDataSubscriptions, int i) {
+        _assetTree.registerSubscriber(_mapUri + "/" + marketDataSubscriptions.get(i) + "?view=reference&keyType=string&valueType=string&bootstrap=true&throttlePeriodMs=30", String.class, message -> System.out.println("30 " + message + ", time received: " + System.currentTimeMillis()));
     }
 
 
