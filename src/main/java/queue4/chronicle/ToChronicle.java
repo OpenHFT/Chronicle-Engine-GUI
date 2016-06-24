@@ -73,7 +73,7 @@ public class ToChronicle implements InvocationHandler
             // Lazily create the appender
             if (_appender == null)
             {
-                _appender = _chronicle.createAppender();//  TODO .methodWriter(); and pass in the interface want to write
+                _appender = _chronicle.acquireAppender();//  TODO .methodWriter(); and pass in the interface want to write
             }
 
             try (final DocumentContext dc = _appender.writingDocument())
