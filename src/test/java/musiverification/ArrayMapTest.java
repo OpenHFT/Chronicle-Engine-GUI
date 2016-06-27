@@ -32,6 +32,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+
 
 /**
  * test using the listener both remotely or locally via the engine
@@ -123,10 +125,10 @@ public class ArrayMapTest {
 
         final MapView<String, byte[]> map = assetTree.acquireMap("name", String.class, byte[]
                 .class);
-        map.put("1", "hello world".getBytes());
+        map.put("1", "hello world".getBytes(ISO_8859_1));
 
         final byte[] bytes = map.get("1");
-        Assert.assertArrayEquals("hello world".getBytes(), bytes);
+        Assert.assertArrayEquals("hello world".getBytes(ISO_8859_1), bytes);
 
     }
 

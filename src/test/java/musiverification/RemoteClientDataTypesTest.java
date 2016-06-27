@@ -21,6 +21,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+
 
 /**
  * @author Daniel Schiermer
@@ -62,8 +64,8 @@ public class RemoteClientDataTypesTest {
                 {WireType.BINARY, Double.class, Double.class, 2.1, 1.143, "/tests/ddp/data/hub/remote/double/double/test-map"},
                 {WireType.TEXT, Double.class, String.class, 2.1, "Value1", "/tests/ddp/data/hub/remote/double/string/test-map"},
                 {WireType.BINARY, Double.class, String.class, 2.1, "Value2", "/tests/ddp/data/hub/remote/double/string/test-map"},
-                {WireType.TEXT, String.class, byte[].class, "key2", "test value".getBytes(), "/tests/ddp/data/hub/remote/double/string/test-map"},
-                {WireType.BINARY, String.class, byte[].class, "key2", "test value".getBytes(), "/tests/ddp/data/hub/remote/double/string/test-map"}
+                {WireType.TEXT, String.class, byte[].class, "key2", "test value".getBytes(ISO_8859_1), "/tests/ddp/data/hub/remote/double/string/test-map"},
+                {WireType.BINARY, String.class, byte[].class, "key2", "test value".getBytes(ISO_8859_1), "/tests/ddp/data/hub/remote/double/string/test-map"}
         });
     }
 

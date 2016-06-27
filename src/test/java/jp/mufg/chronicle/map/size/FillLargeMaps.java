@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.stream.IntStream;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+
 /**
  * Created by daniels on 09/04/2015.
  */
@@ -22,7 +24,7 @@ public class FillLargeMaps {
 
         String value = "Random String";
 
-        putValueInMapNoOfTimes(String.class, value, noOfEntriesExpected, noOfEntriesToPut, mapName, value.getBytes().length, deleteMapOnExit);
+        putValueInMapNoOfTimes(String.class, value, noOfEntriesExpected, noOfEntriesToPut, mapName, value.getBytes(ISO_8859_1).length, deleteMapOnExit);
     }
 
     public static void fillLargeMapWithDoubles(boolean deleteMapOnExit) throws IOException {
