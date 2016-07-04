@@ -223,8 +223,9 @@ public class SubscriptionModelTest {
     }
 
     @Test
-    public void testThrottling() throws Exception
+    public void testThrottlingForValueOnlySubscription() throws Exception
     {
+        String topic = "Hello";
         //Create the Topic Subscriber
         BlockingQueue<MapEvent> eventsQueue = new LinkedBlockingQueue<>();
 
@@ -235,18 +236,17 @@ public class SubscriptionModelTest {
 
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, wireType);
         String mapName = "/test/maps/string/double/test";
-        String mapNameSubscriber = mapName + "?bootstrap=false&throttlePeriodMs="+ throttlePeriod;
+        String mapNameSubscriber = mapName + "/" + topic + "?bootstrap=false&throttlePeriodMs="+ throttlePeriod;
         Map<String, String> stringStringMapView = remoteClient.acquireMap(mapName, String.class, String.class);
         int size = stringStringMapView.size();
 
 
         //Register subscriber and sleep to allow the async event to take effect
-        //_dataStorePublisher.registerTopicOnlySubscriber(MapEvent.class, topicSubscriberStringOp, throttlePeriod, false);
-        remoteClient.registerTopicSubscriber(mapNameSubscriber, String.class, MapEvent.class, topicSubscriber);
+        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, subscriber);
         Thread.sleep(200);
 
         for (int i = 0; i < 10; i++) {
-            stringStringMapView.put("Hello", "World" + i);
+            stringStringMapView.put(topic , "World" + i);
         }
 
         long timeLastReceived = 0;
@@ -271,7 +271,94 @@ public class SubscriptionModelTest {
 
         Assert.assertEquals("World9", last.getValue());
 
-        stringStringMapView.put("Hello", "World10");
+        stringStringMapView.put(topic , "World10");
+
+        for (; ; ) {
+            MapEvent actual = eventsQueue.poll(2, SECONDS);
+
+            if (actual == null)
+                break;
+
+            final long timeSinceLastMessage = System.currentTimeMillis() - timeLastReceived;
+            timeLastReceived = System.currentTimeMillis();
+            // check that the  timeSinceLastMessage is 90% of the  throttlePeriod
+            Assert.assertTrue(timeSinceLastMessage >= throttlePeriod * .9);
+            last = actual;
+
+        }
+
+        // the last message should be the latest
+        Assert.assertEquals("World10", last.getValue());
+
+        //Put KvP and expect event
+        String key1 = "k1";
+        String value1 = "v1";
+        stringStringMapView.put(key1, value1);
+
+        MapEvent event = eventsQueue.poll(200, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(key1, event.getKey());
+        Assert.assertEquals(value1, event.getValue());
+
+        //Unregister subscriber and sleep to allow the async event to take effect
+        //_dataStorePublisher.unregisterTopicSubscriber(topicSubscriber);
+        Thread.sleep(20);
+
+        String value2 = "v2";
+        stringStringMapView.put(key1, value2);
+        event = eventsQueue.poll(100, TimeUnit.MILLISECONDS);
+        Assert.assertNull(event); //should not receive event thus null test
+    }
+
+    @Test
+    public void testThrottlingForTopicSubscription() throws Exception
+    {
+        String topic = "Hello";
+        //Create the Topic Subscriber
+        BlockingQueue<MapEvent> eventsQueue = new LinkedBlockingQueue<>();
+
+        //DataSubscriber<MapEvent> topicSubscriberStringOp = (v) -> System.out.println(String.format("Print %s %s",v,System.currentTimeMillis()));
+        Subscriber<MapEvent> subscriber = (v) -> eventsQueue.add(v);
+        TopicSubscriber<String,MapEvent> topicSubscriber = (k,v) -> eventsQueue.add(v);
+        long throttlePeriod = 1000;
+
+        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, wireType);
+        String mapName = "/test/maps/string/double/test";
+        String mapNameSubscriber = mapName + "?bootstrap=false&throttlePeriodMs="+ throttlePeriod;
+        Map<String, String> stringStringMapView = remoteClient.acquireMap(mapName, String.class, String.class);
+        int size = stringStringMapView.size();
+
+
+        //Register subscriber and sleep to allow the async event to take effect
+        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, subscriber);
+        Thread.sleep(200);
+
+        for (int i = 0; i < 10; i++) {
+            stringStringMapView.put(topic, "World" + i);
+        }
+
+        long timeLastReceived = 0;
+        MapEvent last = null;
+
+        for (; ; ) {
+            long t1 = System.currentTimeMillis();
+            MapEvent actual = eventsQueue.poll(2, SECONDS);
+            long t2 = System.currentTimeMillis();
+            System.out.println(String.format("t1 and t2:  %s %s  %s %s",t1,t2, t2-t1, actual == null ? "" : actual.getValue()));
+            if (actual == null)
+                break;
+
+            final long timeSinceLastMessage = System.currentTimeMillis() - timeLastReceived;
+            timeLastReceived = System.currentTimeMillis();
+            // check that the timeSinceLastMessage is 90% of the  throttlePeriod
+            System.out.println(String.format("timeSinceLastMessage and throttlePeriod %s %s",timeSinceLastMessage,throttlePeriod ));
+            Assert.assertTrue(timeSinceLastMessage >= (throttlePeriod * .9));
+            last = actual;
+
+        }
+
+        Assert.assertEquals("World9", last.getValue());
+
+        stringStringMapView.put(topic, "World10");
 
         for (; ; ) {
             MapEvent actual = eventsQueue.poll(2, SECONDS);
