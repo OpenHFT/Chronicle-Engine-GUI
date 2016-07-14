@@ -5,6 +5,7 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -27,11 +28,10 @@ public class MimicMarketDataServerSideUpdates {
      */
     public static void main(String[] args) throws Exception {
 
-
+        String workingDirectory = System.getProperty("user.dir");
+        String updatesFile = Paths.get(workingDirectory, "src/main/resources/DataManagerExtraLoggingForUpdates.csv").toString();
         // First arg
-        List<MimicMarketDataUpdate> updates = initializeUpdates(args.length == 0 ?
-                "/Users/robaustin/git-projects/MUFG/src/main/resources" +
-                        "/DataManagerExtraLoggingForUpdates.csv" : args[0]);
+        List<MimicMarketDataUpdate> updates = initializeUpdates(updatesFile);
         final int port = 5638;
         final String assetTreeErrorMessage = "Error occurred in VanillaAssetTree: ";
         _assetTree = new VanillaAssetTree().forServer(false);
