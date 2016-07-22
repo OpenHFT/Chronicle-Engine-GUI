@@ -18,7 +18,6 @@ public class Values implements Externalizable {
     private double _value1;
     private List<Double> _values;
 
-
     public double get_value1() {
         return _value1;
     }

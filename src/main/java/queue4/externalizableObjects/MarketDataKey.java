@@ -1,6 +1,5 @@
 package queue4.externalizableObjects;
 
-
 import net.openhft.chronicle.wire.HashWire;
 import net.openhft.chronicle.wire.Wires;
 
@@ -84,7 +83,6 @@ public class MarketDataKey implements Externalizable {
         out.writeUTF(_marketDataId);
         out.writeObject(_field);
     }
-
 
     /**
      * @see java.io.Externalizable

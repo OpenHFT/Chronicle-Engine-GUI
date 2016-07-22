@@ -120,7 +120,6 @@ public class ReplicationTest2Way {
                 new ChronicleMapKeyValueStore(context.wireType(writeType).cluster(clusterTwo),
                         asset));
 
-
         return tree;
     }
 

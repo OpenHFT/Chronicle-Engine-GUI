@@ -22,12 +22,10 @@ public interface ConfigSetting extends Externalizable
      */
     void setExecutor(String executor);
 
-
     /**
      * @return The unique identifier for the configuration setting.
      */
     String getId();
-
 
     /**
      * Set the unique identifier for the configuration setting.
@@ -36,12 +34,10 @@ public interface ConfigSetting extends Externalizable
      */
     void setId(String id);
 
-
     /**
      * @return true if this is for retransmit, false otherwise.
      */
     boolean isRetransmit();
-
 
     /**
      * Used to sets the retransmit property.

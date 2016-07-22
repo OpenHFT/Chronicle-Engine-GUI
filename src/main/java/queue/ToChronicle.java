@@ -76,7 +76,6 @@ public class ToChronicle implements InvocationHandler
             printDebuggingInfo("Method name: " + method.getName());
             _appender.writeUTFΔ(method.getName());
 
-
             // Write the arguments for the method being invoked
 
             if (args == null)
@@ -90,7 +89,6 @@ public class ToChronicle implements InvocationHandler
                 // Write the number of arguments that the method has
 
                 _appender.writeStopBit(args.length);
-
 
                 // Add the type and value for each method argument
 
@@ -106,7 +104,6 @@ public class ToChronicle implements InvocationHandler
                     }
                 }
             }
-
 
             // Write the object to Chronicle
 

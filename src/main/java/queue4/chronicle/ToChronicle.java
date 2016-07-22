@@ -1,6 +1,5 @@
 package queue4.chronicle;
 
-
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.queue.ExcerptAppender;
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue;
@@ -23,7 +22,6 @@ public class ToChronicle implements InvocationHandler
     private ExcerptAppender _appender;
     private Long _maxMessageSize = null;
 
-
     /**
      * @param chronicle The Chronicle to use.
      */
@@ -32,7 +30,6 @@ public class ToChronicle implements InvocationHandler
         _chronicle = chronicle;
         _maxMessageSize = maxMessageSize;
     }
-
 
     /**
      * Creates a proxy object for a specified interface.
@@ -49,13 +46,11 @@ public class ToChronicle implements InvocationHandler
         return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[]{interfaceType}, new ToChronicle(chronicle, null));
     }
 
-
     @NotNull
     public static <T> T of(@NotNull Class<T> interfaceType, SingleChronicleQueue chronicle, long maxMessageSize) throws IOException
     {
         return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[]{interfaceType}, new ToChronicle(chronicle, maxMessageSize));
     }
-
 
     /**
      * @see InvocationHandler
@@ -84,11 +79,9 @@ public class ToChronicle implements InvocationHandler
                 //TODO Meta Data not required as queue4 takes care of this
                 //MetaData.get().writeMarshallable(appender);
 
-
                 // Write the name of the method being invoked to Chronicle
                 Bytes<?> bytes = dc.wire().bytes();
                 bytes.writeUtf8(method.getName());
-
 
                 // Write the arguments for the method being invoked
 
@@ -101,7 +94,6 @@ public class ToChronicle implements InvocationHandler
                 {
                     // Write the number of arguments that the method has
                     bytes.writeStopBit(args.length);
-
 
                     // Add the type and value for each method argument
 

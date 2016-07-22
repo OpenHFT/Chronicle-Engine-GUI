@@ -40,7 +40,6 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectSubscription<K, 
         underlying.registerKeySubscriber(rc, subscriber, filter);
     }
 
-
     @Override
     public void registerTopicSubscriber(RequestContext rc, TopicSubscriber subscriber) {
         System.out.println(this.getClass().getName() + ": registerTopicSubscriber");
@@ -49,7 +48,6 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectSubscription<K, 
         isAuthenticated();
         underlying.registerTopicSubscriber(rc, subscriber);
     }
-
 
     @Override
     public boolean needsPrevious() {
@@ -140,7 +138,6 @@ public class AuthenticatedKVSubscription<K, V> implements ObjectSubscription<K, 
         isAuthenticated();
         return underlying.topicSubscriberCount();
     }
-
 
     @Override
     public void close() {

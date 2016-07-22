@@ -72,7 +72,6 @@ public class MarketDataKeyEnvironmentsConfig implements ConfigSetting{
         _isRetransmit = isRetransmit;
     }
 
-
     @Override
     public String toString() {
         return TEXT.asString(this);

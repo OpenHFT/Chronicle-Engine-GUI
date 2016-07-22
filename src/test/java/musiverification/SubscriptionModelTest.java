@@ -37,7 +37,6 @@ import java.util.stream.IntStream;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static net.openhft.chronicle.engine.Chassis.*;
 
-
 /**
  * @author Rob Austin.
  */
@@ -53,7 +52,6 @@ public class SubscriptionModelTest {
     private static String _serverAddress = "host.port1";
     private final WireType wireType;
     private Map<ExceptionKey, Integer> exceptionKeyIntegerMap;
-
 
     public SubscriptionModelTest(WireType wireType) {
         this.wireType = wireType;
@@ -200,7 +198,6 @@ public class SubscriptionModelTest {
         YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
 
-
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, wireType);
         String mapName = "/test/maps/string/double/test";
         String mapNameSubscriber = mapName + "?bootstrap=false";
@@ -243,7 +240,6 @@ public class SubscriptionModelTest {
 
         Assert.assertEquals(0, stringStringMapView.size());
 
-
         String key = "hello";
         String value = "world";
         //   stringStringMapView.put(key, value);
@@ -279,7 +275,6 @@ public class SubscriptionModelTest {
 
         Assert.assertEquals(0, stringStringMapView.size());
 
-
         //Register subscriber and sleep to allow the async event to take effect
         remoteClient.registerSubscriber(mapNameSubscriber, String.class, new Subscriber<String>() {
             @Override
@@ -287,7 +282,6 @@ public class SubscriptionModelTest {
                 eventsQueue.add(s);
             }
         });
-
 
         String lastValue = "";
         for (int i = 0; i < 100; i++) {
@@ -373,7 +367,6 @@ public class SubscriptionModelTest {
         Map<String, String> stringStringMapView = remoteClient.acquireMap(mapName, String.class, String.class);
         int size = stringStringMapView.size();
 
-
         //Register subscriber and sleep to allow the async event to take effect
         remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, subscriber);
         Thread.sleep(200);
@@ -452,7 +445,6 @@ public class SubscriptionModelTest {
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
                 wireType, t);
 
-
         String mapName = "/test/maps/string/double/test";
         String mapNameSubscriber = mapName + "?bootstrap=false";
 
@@ -484,7 +476,6 @@ public class SubscriptionModelTest {
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
         VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
                 wireType, onThrowable::add);
-
 
         String mapName = "/test/maps/string/double/test";
         String mapNameSubscriber = mapName + "?bootstrap=false";
@@ -543,7 +534,6 @@ public class SubscriptionModelTest {
         Assert.assertTrue(count.get() >= 5 && count.get() <= 20);
     }
 
-
     private void check(Object v, long throttlePeriod, AtomicLong lastTime, AtomicLong count) {
 
         Assert.assertNotNull(v);
@@ -553,7 +543,6 @@ public class SubscriptionModelTest {
         Assert.assertTrue(t0 <= (t1 - (throttlePeriod * .9)));
         count.incrementAndGet();
     }
-
 
     @Test
     public void testTopicSubscriptionStringDoubleMap() throws InterruptedException {
@@ -809,7 +798,6 @@ public class SubscriptionModelTest {
         //No events should be triggered on topic subscriber
 
         EasyMock.replay(topicSubscriberMock);
-
 
         EasyMock.verify(topicSubscriberMock);
 

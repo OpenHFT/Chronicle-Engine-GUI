@@ -38,7 +38,6 @@ public class ManyMapsTest {
     private static int _noOfKvps = 1_000;
     private static AssetTree assetTree = new VanillaAssetTree(12).forServer(true);
 
-
     @BeforeClass
     public static void setUp() throws IOException {
         String basePath = OS.TARGET + "/ManyMapTests";
@@ -132,7 +131,6 @@ public class ManyMapsTest {
         }
     }
 
-
     @Test
     public void testConnectToMultipleMapsUsingTheSamePort() throws IOException {
         Map<String, Map<String, String>> _clientMaps = new HashMap<>();
@@ -181,7 +179,6 @@ public class ManyMapsTest {
         clientAssetTree.close();
         serverEndpoint.close();
     }
-
 
     /**
      * Test creating an engine with an underlying Chronicle Map store where the base path is

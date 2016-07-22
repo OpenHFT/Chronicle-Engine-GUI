@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.function.Supplier;
 
-
 public class DdpAuthorizationKeyValueSubscription<K, V> implements ObjectSubscription<K, V>
 {
     private static final Logger _logger = LoggerFactory.getLogger(DdpAuthorizationKeyValueSubscription.class);
@@ -56,7 +55,6 @@ public class DdpAuthorizationKeyValueSubscription<K, V> implements ObjectSubscri
 
         _underlying.registerKeySubscriber(rc, subscriber, filter);
     }
-
 
     @Override
     public void registerTopicSubscriber(RequestContext rc, TopicSubscriber subscriber)

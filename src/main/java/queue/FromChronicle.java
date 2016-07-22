@@ -65,7 +65,6 @@ public class FromChronicle<T>
         return new FromChronicle<>(instance, tailer, enableDebuggingLog, sleepInMs);
     }
 
-
     /**
      * Gets an object array that can be used to store the arguments for a specified method.
      *
@@ -121,7 +120,6 @@ public class FromChronicle<T>
         printDebuggingInfo("Method name: " + methodName);
         Method m = findMethod(methodName);
 
-
         // Get the number of arguments that the method has
 
         int len = (int) _tailer.readStopBit();
@@ -149,7 +147,6 @@ public class FromChronicle<T>
                 }
             }
         }
-
 
         // Invoke the method and return true to signal that a method was read from the Chronicle
 

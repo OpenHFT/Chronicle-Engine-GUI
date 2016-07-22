@@ -7,7 +7,6 @@ import java.util.TreeSet;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
-
 /**
  * Represents configuration information for a change of system date.
  */
@@ -26,12 +25,10 @@ public class MiscellaneousTypesConfig implements ConfigSetting {
     private TreeSet<SwapId> _orderedTenors;
     private String _valuationEnvironment;
 
-
     @Override
     public String getExecutor() {
         return _executor;
     }
-
 
     /**
      * Sets the executor for this configuration information.
@@ -42,17 +39,14 @@ public class MiscellaneousTypesConfig implements ConfigSetting {
         _executor = executor;
     }
 
-
     @Override
     public String getId() {
         return _id;
     }
 
-
     public void setId(String id) {
         _id = id;
     }
-
 
     @Override
     public boolean isRetransmit() {
@@ -64,14 +58,12 @@ public class MiscellaneousTypesConfig implements ConfigSetting {
         _isRetransmit = isRetransmit;
     }
 
-
     /**
      * Gets the system date for this.
      */
     public ZonedDateTime getSystemDate() {
         return _systemDate;
     }
-
 
     /**
      * Sets the system date.
@@ -82,76 +74,61 @@ public class MiscellaneousTypesConfig implements ConfigSetting {
         _systemDate = systemDate;
     }
 
-
     public double[] getDoublePcaMatrixData() {
         return _doublePcaMatrixData;
     }
-
 
     public void setDoublePcaMatrixData(double[] doublePcaMatrixData) {
         _doublePcaMatrixData = doublePcaMatrixData;
     }
 
-
     public int[] getIntPcaMatrixData() {
         return _intPcaMatrixData;
     }
-
 
     public void setIntPcaMatrixData(int[] intPcaMatrixData) {
         _intPcaMatrixData = intPcaMatrixData;
     }
 
-
     public long[] getLongPcaMatrixData() {
         return _longPcaMatrixData;
     }
-
 
     public void setLongPcaMatrixData(long[] longPcaMatrixData) {
         _longPcaMatrixData = longPcaMatrixData;
     }
 
-
     public float[] getFloatPcaMatrixData() {
         return _floatPcaMatrixData;
     }
-
 
     public void setFloatPcaMatrixData(float[] floatPcaMatrixData) {
         _floatPcaMatrixData = floatPcaMatrixData;
     }
 
-
     public boolean[] getIsPcaMatrixData() {
         return _isPcaMatrixData;
     }
-
 
     public void setIsPcaMatrixData(boolean[] isPcaMatrixData) {
         _isPcaMatrixData = isPcaMatrixData;
     }
 
-
     public TreeSet<SwapId> getOrderedTenors() {
         return _orderedTenors;
     }
-
 
     public void setOrderedTenors(TreeSet<SwapId> orderedTenors) {
         _orderedTenors = orderedTenors;
     }
 
-
     public String getValuationEnvironment() {
         return _valuationEnvironment;
     }
 
-
     public void setValuationEnvironment(String valuationEnvironment) {
         _valuationEnvironment = valuationEnvironment;
     }
-
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
@@ -182,7 +159,6 @@ public class MiscellaneousTypesConfig implements ConfigSetting {
         out.writeInt(compressedArray.length);
         out.write(compressedArray);
     }
-
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
@@ -222,7 +198,6 @@ public class MiscellaneousTypesConfig implements ConfigSetting {
         }
     }
 
-
     /**
      * See java.lang.Object.
      */
@@ -236,7 +211,6 @@ public class MiscellaneousTypesConfig implements ConfigSetting {
 
         return hashCode;
     }
-
 
     /**
      * See java.lang.Object.

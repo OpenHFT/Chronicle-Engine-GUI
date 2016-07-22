@@ -83,7 +83,6 @@ public class BenchmarkRecorder
 
         System.out.println(_receivedTimes.values().stream().anyMatch(v -> v == null));
 
-
         while ((anyNullvalues = _receivedTimes.values().stream().anyMatch(v -> v == null))
                 && waited < noOfWaits)
         {
@@ -113,7 +112,6 @@ public class BenchmarkRecorder
             Long receivedTime = _receivedTimes.get(key);
 
             Long roundTrip = receivedTime - submitTime;
-
 
             benchmarkResult.addRoundTrip(key, roundTrip);
         }

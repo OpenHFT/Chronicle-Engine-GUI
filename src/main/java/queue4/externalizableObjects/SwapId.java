@@ -11,7 +11,6 @@ public class SwapId implements Externalizable, Comparable<SwapId>
     private String _tenorLabel;
     private int _hash;
 
-
     /**
      * @param tenor The tenor (e.g. 10 for "10Y").
      */
@@ -20,14 +19,12 @@ public class SwapId implements Externalizable, Comparable<SwapId>
         updateValues(tenor);
     }
 
-
     /**
      * Only provided to allow class to be serialized/de-serialized; not not use!!
      */
     public SwapId()
     {
     }
-
 
     /**
      * Copy constructor.
@@ -38,7 +35,6 @@ public class SwapId implements Externalizable, Comparable<SwapId>
     {
         updateValues(id.getTenor());
     }
-
 
     /**
      * @param tenor The tenor of the swap
@@ -58,7 +54,6 @@ public class SwapId implements Externalizable, Comparable<SwapId>
         }
     }
 
-
     /**
      * Sets the values and re-calculates the hash code.
      *
@@ -71,7 +66,6 @@ public class SwapId implements Externalizable, Comparable<SwapId>
         buildHashCode();
     }
 
-
     /**
      * @return The tenor label (e.g. "10Y").
      */
@@ -79,7 +73,6 @@ public class SwapId implements Externalizable, Comparable<SwapId>
     {
         return _tenorLabel;
     }
-
 
     /**
      * Set the tenor label
@@ -91,7 +84,6 @@ public class SwapId implements Externalizable, Comparable<SwapId>
         _tenorLabel = tenorLabel;
     }
 
-
     /**
      * @return The tenor (e.g. 10 for "10Y").
      */
@@ -100,14 +92,12 @@ public class SwapId implements Externalizable, Comparable<SwapId>
         return _tenor;
     }
 
-
     public void setTenor(double tenor)
     {
         _tenor = tenor;
         _tenorLabel = SwapId.getTenorLabel(_tenor);
         buildHashCode();
     }
-
 
     /**
      * @param id The ID to compare against
@@ -119,7 +109,6 @@ public class SwapId implements Externalizable, Comparable<SwapId>
         return Double.compare(_tenor, id._tenor);
     }
 
-
     /**
      * Build hashCode based on other fields in constructor and also when deserializing.
      * <p/>
@@ -130,7 +119,6 @@ public class SwapId implements Externalizable, Comparable<SwapId>
         _hash = 17 + 31 * (int) _tenor;
     }
 
-
     /**
      * @see Object
      */
@@ -139,7 +127,6 @@ public class SwapId implements Externalizable, Comparable<SwapId>
     {
         return _hash;
     }
-
 
     /**
      * @see Object
@@ -166,7 +153,6 @@ public class SwapId implements Externalizable, Comparable<SwapId>
         }
     }
 
-
     /**
      * @see Object
      */
@@ -176,7 +162,6 @@ public class SwapId implements Externalizable, Comparable<SwapId>
         return _tenorLabel;
     }
 
-
     /**
      * @see Externalizable
      */
@@ -185,7 +170,6 @@ public class SwapId implements Externalizable, Comparable<SwapId>
     {
         out.writeDouble(_tenor);
     }
-
 
     /**
      * @see Externalizable

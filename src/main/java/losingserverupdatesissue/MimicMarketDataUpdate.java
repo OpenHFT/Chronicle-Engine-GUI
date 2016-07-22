@@ -17,7 +17,6 @@ public class MimicMarketDataUpdate
         _lag = lag;
     }
 
-
     /**
      * Market data key
      * @return
@@ -27,7 +26,6 @@ public class MimicMarketDataUpdate
         return _key;
     }
 
-
     /**
      * Market data value
      * @return
@@ -36,7 +34,6 @@ public class MimicMarketDataUpdate
     {
         return _value;
     }
-
 
     /**
      * The lag in milliseconds

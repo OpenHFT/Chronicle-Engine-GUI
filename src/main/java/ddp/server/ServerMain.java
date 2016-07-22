@@ -51,7 +51,6 @@ public class ServerMain {
         _root.addWrappingRule(AuthenticatedKeyValueStore.class, "authenticated kvs",
                 DdpAuthenticatedKeyValueStore::new, AuthorizedKeyValueStore.class);
 
-
         _root.addWrappingRule(ObjectSubscription.class, "authenticated subscription",
                 AuthenticatedKVSubscription::new, MapKVSSubscription.class);
 

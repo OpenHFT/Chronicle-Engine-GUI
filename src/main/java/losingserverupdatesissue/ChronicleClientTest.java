@@ -21,7 +21,6 @@ public class ChronicleClientTest
     private static String _serverAddress = "localhost:5638";
     private static String _mapUri = "/adept/marketdata";
 
-
     public static void main(String[] args) throws IOException, InterruptedException
     {
         _assetTree = new VanillaAssetTree();
@@ -51,7 +50,6 @@ public class ChronicleClientTest
     private static void origional(List<String> marketDataSubscriptions, int i) {
         _assetTree.registerSubscriber(_mapUri + "/" + marketDataSubscriptions.get(i) + "?view=reference&keyType=string&valueType=string&bootstrap=true&throttlePeriodMs=30", String.class, message -> System.out.println("30 " + message + ", time received: " + System.currentTimeMillis()));
     }
-
 
     private static List<String> createMarketDataKeys()
     {

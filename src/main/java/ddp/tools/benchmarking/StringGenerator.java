@@ -26,12 +26,6 @@ public class StringGenerator
 //        return sb.toString();
 //    }
 
-
-
-
-
-
-
     public static String createStringOfSize(int stringSizeInKb, char character)
     {
         //1 KB = 1024 bytes and each Java char is 2 bytes in size
@@ -60,11 +54,6 @@ public class StringGenerator
         }
         return sb.toString();
     }
-
-
-
-
-
 
     public static String createRandomStringOfSize(int stringSizeInKb)
     {

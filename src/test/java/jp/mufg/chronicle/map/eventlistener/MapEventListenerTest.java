@@ -204,12 +204,10 @@ public class MapEventListenerTest {
 
     private class ChronicleTestEventListener extends MapEventListener {
 
-
         @Override
         public void onPut(Object key, Object newValue, @Nullable Object replacedValue, boolean replicationEvent, boolean added, boolean hasValueChanged, byte identifier, byte replacedIdentifier, long timeStamp, long replacedTimeStamp) {
             _noOfEventsTriggered++;
         }
-
 
     }
 }

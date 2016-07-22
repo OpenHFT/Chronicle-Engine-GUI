@@ -63,8 +63,6 @@ public class SubscriptionModelPerformanceTest {
     @Before
     public void setUp() throws IOException {
 
-
-
         String hostPortDescription = "SubscriptionModelPerformanceTest-"+ System.nanoTime();
         WireType wireType = WireType.BINARY;
 
@@ -267,7 +265,6 @@ public class SubscriptionModelPerformanceTest {
             Assert.assertEquals(0, mapEventListener.getNoOfUpdateEvents().get());
 
         }
-
 
         Assert.assertTrue((runtimeInNanos / (_noOfPuts * _noOfRunsToAverage)) <= _secondInNanos);
         clientAssetTree.unregisterSubscriber(_mapName + "?bootstrap=false", mapEventSubscriber);

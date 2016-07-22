@@ -50,20 +50,17 @@ public enum MarketDataSource
     CME_MODEL(38),
     ADEPT(39);
 
-
     /**
      * Cache mapping the custom ids with the Eum types to ensure fast reverse lookup.
      * Lazily loaded.
      */
     private static Map<Integer, MarketDataSource> _idMappings;
 
-
     /**
      * Custom id value (byte because we are unlikely to exceed 127 enum types).
      * Custom ids should never change, but enum declaration order can change.
      */
     private final int _id;
-
 
     /**
      * Creates a new MarketDataSource with the given id. Id must be unique.
@@ -75,7 +72,6 @@ public enum MarketDataSource
     {
         _id = id;
     }
-
 
     /**
      * Initialise the id mapping map with all MarketDataSource; returns immediately if the map has already been initialised.
@@ -108,7 +104,6 @@ public enum MarketDataSource
         }
     }
 
-
     /**
      * Returns the MarketDataSource with the given id.
      * If no such MarketDataSource exist null is returned.
@@ -122,7 +117,6 @@ public enum MarketDataSource
 
         return _idMappings.get(id);
     }
-
 
     /**
      * @return Id for the MarketDataSource

@@ -4,7 +4,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
     <!-- ************ NOTE : Please add the xml commented out below to your
                                   ${user.home}/.m2/settings.xml ( or your internal nexus server )   ************
 
@@ -47,7 +46,6 @@
 
         </dependencies>
     </dependencyManagement>
-
 
     <repositories>
         <repository>

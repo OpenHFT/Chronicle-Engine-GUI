@@ -23,19 +23,16 @@ public enum MarketDataType {
     SWAP_CURVE_SPREAD(12),
     SWAP_VALUATION_ENVIRONMENT(13);
 
-
     /**
      * Cache mapping the custom ids with the Eum types to ensure fast reverse lookup; lazily loaded.
      */
     private static Map<Integer, MarketDataType> _idMappings;
-
 
     /**
      * Custom id value (byte because we are unlikely to exceed 127 enum types).
      * Custom ids should never change, but enum declaration order can change.
      */
     private final int _id;
-
 
     /**
      * Creates a new MarketDataSupplier with the given id.
@@ -45,7 +42,6 @@ public enum MarketDataType {
     private MarketDataType(int id) {
         _id = id;
     }
-
 
     /**
      * Initialise the id mapping map with all MarketDataSupplier.
@@ -75,7 +71,6 @@ public enum MarketDataType {
         }
     }
 
-
     /**
      * Returns the MarketDataSupplier with the given ID.
      *
@@ -87,7 +82,6 @@ public enum MarketDataType {
 
         return _idMappings.get(id);
     }
-
 
     /**
      * @return The ID.

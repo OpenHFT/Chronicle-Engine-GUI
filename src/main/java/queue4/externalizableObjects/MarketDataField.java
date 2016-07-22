@@ -111,7 +111,6 @@ public enum MarketDataField {
     SETTLEMENT_DATE((byte) 100),
     BINARY_SERIALIZATION((byte) 101);
 
-
     /**
      * Cache mapping the custom ids with the Eum types to ensure fast reverse lookup.
      * Lazily loaded.
@@ -119,14 +118,12 @@ public enum MarketDataField {
 
     private static Map<Byte, MarketDataField> _idMappings;
 
-
     /**
      * Custom id value
      * Custom ids should never change, but enum declaration order can change.
      */
 
     private final byte _id;
-
 
     /**
      * Creates a new MarketDataField with the given id. Id must be unique.
@@ -137,7 +134,6 @@ public enum MarketDataField {
     MarketDataField(byte id) {
         _id = id;
     }
-
 
     /**
      * Initialise the id mapping map with all MarketDataField.
@@ -166,7 +162,6 @@ public enum MarketDataField {
         }
     }
 
-
     /**
      * Returns the MarketDataField with the given id.
      * If no such MarketDataField exist null is returned.
@@ -179,7 +174,6 @@ public enum MarketDataField {
 
         return _idMappings.get(id);
     }
-
 
     /**
      * @return Id for the MarketDataField

@@ -165,7 +165,6 @@ public class ManyMapsFilePerKeyTest {
         Assert.assertEquals(value2, map2.get(key2));
     }
 
-
     /**
      * Creates configured number of maps and fills them with configured number of key/value pairs
      */

@@ -53,7 +53,6 @@ public class FastMapEventListenerStatelessClientTest {
 
         serverEndpoint = new ServerEndpoint("FastMapEventListenerStatelessClientTest", serverAssetTree);
 
-
         _StringStringMap = serverAssetTree.acquireMap("chronicleMapString?putReturnsNull=true", String.class, BytesStore.class);
 
         _chronicleTestEventListener = new ChronicleTestEventListener();
@@ -113,7 +112,6 @@ public class FastMapEventListenerStatelessClientTest {
                 consumer,
                 noOfIterations);
     }
-
 
     /**
      * Performs the given number of iterations and alternates between calling consumer1 and consumer2 passing

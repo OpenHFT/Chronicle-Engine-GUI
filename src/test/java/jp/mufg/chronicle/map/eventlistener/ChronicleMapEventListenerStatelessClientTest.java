@@ -62,7 +62,6 @@ public class ChronicleMapEventListenerStatelessClientTest {
         serverAssetTree.root().addLeafRule(KeyValueStore.class, "use Chronicle Map", (context, asset) ->
                 new ChronicleMapKeyValueStore(context.basePath(_mapBasePath).entries(50).averageValueSize(2 << 20).putReturnsNull(true), asset));
 
-
         serverEndpoint = new ServerEndpoint("ChronicleMapEventListenerStatelessClientTest", serverAssetTree);
 
         _noOfEventsTriggered.set(0);

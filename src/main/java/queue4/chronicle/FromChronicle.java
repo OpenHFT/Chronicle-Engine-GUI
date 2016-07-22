@@ -31,7 +31,6 @@ public class FromChronicle<T>
     // Number of arguments for each method call should not change
     // at runtime which is why this is possible.
 
-
     /**
      * Creates an instance of this that can be used to read invocations of the methods for a specified interface stored in a Chronicle and
      * invoke these methods on a provided object that implements the interface.
@@ -53,7 +52,6 @@ public class FromChronicle<T>
         }
     }
 
-
     /**
      * Creates an instance of this that can be used to read invocations of the methods for a specified interface stored in a Chronicle and
      * invoke these methods on a provided object that implements the interface.
@@ -68,7 +66,6 @@ public class FromChronicle<T>
     {
         return new FromChronicle<>(instance, tailer);
     }
-
 
     /**
      * Gets an object array that can be used to store the arguments for a specified method.
@@ -90,7 +87,6 @@ public class FromChronicle<T>
         return objects;
     }
 
-
     /**
      * Retrieves the metadata about a specified method.
      *
@@ -101,7 +97,6 @@ public class FromChronicle<T>
     {
         return methodMap.getOrDefault(methodName, null);
     }
-
 
     /**
      * Reads the next method invocation from the Chronicle.
@@ -129,7 +124,6 @@ public class FromChronicle<T>
             Bytes<?> bytes = dc.wire().bytes();
             String methodName = bytes.readUtf8();
             Method m = findMethod(methodName);
-
 
             // Get the number of arguments that the method has
 
@@ -223,7 +217,6 @@ public class FromChronicle<T>
                     }
                 }
             }
-
 
             // Invoke the method and return true to signal that a method was read from the Chronicle
 

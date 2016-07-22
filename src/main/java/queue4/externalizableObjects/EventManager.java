@@ -11,7 +11,6 @@ public interface EventManager
      */
     String getExecutor();
 
-
     /**
      * Triggered if a failover event is fired for the EventManager. Ignored by default.
      *
@@ -25,7 +24,6 @@ public interface EventManager
     {
     }
 
-
     /***
      * Called to startup an event manager.
      *
@@ -34,7 +32,6 @@ public interface EventManager
     default void startup(String executor)
     {
     }
-
 
     /**
      * Called to stop an event manager.
@@ -45,12 +42,10 @@ public interface EventManager
     {
     }
 
-
     /**
      * @param executor The executor that the event is of relevance to.
      */
     void getConfig(String executor);
-
 
     /**
      * Called to signal that the configuration requested has all been updated.
@@ -58,7 +53,6 @@ public interface EventManager
      * @param executor The executor that the event is of relevance to.
      */
     void setConfig(String executor);
-
 
     /**
      * Called when a configuration setting has been added.
@@ -68,7 +62,6 @@ public interface EventManager
      */
     void onConfigAdd(String executor, ConfigSetting addedConfigSetting);
 
-
     /**
      * Called when a configuration setting has been updated.
      *
@@ -76,7 +69,6 @@ public interface EventManager
      * @param updateConfigSetting The config setting that has been updated.
      */
     void onConfigUpdate(String executor, ConfigSetting updateConfigSetting);
-
 
     /**
      * Called when a configuration setting has been removed.
@@ -86,7 +78,6 @@ public interface EventManager
      */
     void onConfigRemove(String executor, ConfigSetting removedConfigSetting);
 
-
     /**
      * Called to get market data.
      *
@@ -94,14 +85,12 @@ public interface EventManager
      */
     void getMarketData(String executor);
 
-
     /**
      * Called to signal that the market data requested has all been updated.
      *
      * @param executor The executor that the event is of relevance to.
      */
     void setMarketData(String executor);
-
 
     /**
      * Called when a market data update has been received.
@@ -116,7 +105,6 @@ public interface EventManager
      */
     void onMarketDataUpdate(String producer, MarketDataSupplier supplier, MarketDataSource source, MarketDataType type, String id, byte[] marketDataUpdates, boolean isRetransmit) throws Exception;
 
-
     /**
      * Called to process the events consumed.
      *
@@ -124,12 +112,10 @@ public interface EventManager
      */
     void process(String executor);
 
-
     /**
      * @return true if this has changed since the last time that process was called.
      */
     boolean hasChanged();
-
 
     /**
      * Flag indicating whether the event manager has been initialized or not.

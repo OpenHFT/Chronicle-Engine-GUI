@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
-
 /**
  * @author Daniel Schiermer
  */
@@ -121,13 +120,11 @@ public class RemoteClientDataTypesTest {
         String subscriberMapUri = _mapUri + "?bootstrap=false";
         String valueOnlySubscriberUri = _mapUri + "/" + _key.toString() + "?bootstrap=false";
 
-
         //Register all types of subscribers
         _clientAssetTree.registerTopicSubscriber(subscriberMapUri, _keyClass, _valueClass, (t, v) -> topicSubscriptionQueue.add(v));
         _clientAssetTree.registerSubscriber(subscriberMapUri, _keyClass, topicOnlySubscriptionQueue::add);
         _clientAssetTree.registerSubscriber(subscriberMapUri, MapEvent.class, mapEvent -> mapEvent.apply((assetName, key, oldValue, newValue) -> eventSubscriptionQueue.add(newValue)));
         _clientAssetTree.registerSubscriber(valueOnlySubscriberUri, _valueClass, valueSubscriptionQueue::add);
-
 
         //put the kvp
         testMap.put(_key, _value);

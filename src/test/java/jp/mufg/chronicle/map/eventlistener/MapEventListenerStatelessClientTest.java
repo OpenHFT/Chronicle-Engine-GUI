@@ -203,7 +203,6 @@ public class MapEventListenerStatelessClientTest {
         Assert.assertEquals(noOfIterations * count, _noOfEventsTriggered.get(), count);
     }
 
-
     private void waitFor(BooleanSupplier b) {
         for (int i = 1; i <= 40; i++)
             if (!b.getAsBoolean())

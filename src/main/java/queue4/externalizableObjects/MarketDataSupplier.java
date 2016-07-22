@@ -19,20 +19,17 @@ public enum MarketDataSupplier
     BROADWAY(3),
     ADEPT(4);
 
-
     /**
      * Cache mapping the custom ids with the Eum types to ensure fast reverse lookup.
      * Lazily loaded.
      */
     private static Map<Integer, MarketDataSupplier> _idMappings;
 
-
     /**
      * Custom id value (byte because we are unlikely to exceed 127 enum types).
      * Custom ids should never change, but enum declaration order can change.
      */
     private final int _id;
-
 
     /**
      * Creates a new MarketDataSupplier with the given id.
@@ -43,7 +40,6 @@ public enum MarketDataSupplier
     {
         _id = id;
     }
-
 
     /**
      * Initialise the id mapping map with all MarketDataSupplier.
@@ -77,7 +73,6 @@ public enum MarketDataSupplier
         }
     }
 
-
     /**
      * Returns the MarketDataSupplier with the given ID.
      *
@@ -90,7 +85,6 @@ public enum MarketDataSupplier
 
         return _idMappings.get(id);
     }
-
 
     /**
      * @return Id for the MarketDataSupplier

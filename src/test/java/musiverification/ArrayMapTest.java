@@ -34,7 +34,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
-
 /**
  * test using the listener both remotely or locally via the engine
  *
@@ -90,8 +89,6 @@ public class ArrayMapTest {
                     new ChronicleMapKeyValueStore(context.wireType(wireType).putReturnsNull(false),
                             asset));
 
-
-
             connection = "ArrayMapTest." + name.getMethodName() + ".host.port";
             TCPRegistry.createServerSocketChannelFor(connection);
             serverEndpoint = new ServerEndpoint(connection, serverAssetTree);
@@ -119,7 +116,6 @@ public class ArrayMapTest {
         TCPRegistry.reset();
     }
 
-
     @Test
     public void testByteArrayValue() {
 
@@ -131,7 +127,6 @@ public class ArrayMapTest {
         Assert.assertArrayEquals("hello world".getBytes(ISO_8859_1), bytes);
 
     }
-
 
     @Test
     public void testByteArrayValueWithRealBytes() {
@@ -192,7 +187,6 @@ public class ArrayMapTest {
 
         final MapView<String, byte[]> map = assetTree.acquireMap("name", String.class, byte[]
                 .class);
-
 
         MapEventListener<String, byte[]> mapEventListenerTyped = (assetName, key1, oldValue, newValue) -> mapEventQueue.add(newValue);
 

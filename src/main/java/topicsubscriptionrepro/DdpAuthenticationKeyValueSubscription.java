@@ -45,7 +45,6 @@ public class DdpAuthenticationKeyValueSubscription<K, V> implements ObjectSubscr
         _underlying.registerKeySubscriber(rc, subscriber, filter);
     }
 
-
     @Override
     public void registerTopicSubscriber(RequestContext rc, TopicSubscriber subscriber)
     {
@@ -54,7 +53,6 @@ public class DdpAuthenticationKeyValueSubscription<K, V> implements ObjectSubscr
         isAuthenticated();
         _underlying.registerTopicSubscriber(rc, subscriber);
     }
-
 
     @Override
     public boolean needsPrevious()
@@ -156,7 +154,6 @@ public class DdpAuthenticationKeyValueSubscription<K, V> implements ObjectSubscr
         isAuthenticated();
         return _underlying.topicSubscriberCount();
     }
-
 
     @Override
     public void close()

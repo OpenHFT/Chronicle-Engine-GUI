@@ -26,7 +26,6 @@ public class SingleChronicleQueueExternalizableTest
     String chronicleQueueBase1 = OS.TARGET + "/Chronicle/data1";
     String chronicleQueueBase2 = OS.TARGET + "/Chronicle/data2";
 
-
     static void testFor(Object o)
     {
         final String cs = TEXT.asString(o);
@@ -63,7 +62,6 @@ public class SingleChronicleQueueExternalizableTest
         }
         file.delete();
     }
-
 
     @Test
     public void testExternalizable() throws Exception
@@ -141,7 +139,6 @@ public class SingleChronicleQueueExternalizableTest
         queue1.close();
     }
 
-
     @Test
     public void miscellaneousTypeConfigTest() throws Exception
     {
@@ -188,7 +185,6 @@ public class SingleChronicleQueueExternalizableTest
         queue2.close();
     }
 
-
     /**
      * TestEventManager is where the asserts take place
      */
@@ -196,12 +192,10 @@ public class SingleChronicleQueueExternalizableTest
     {
         private MarketDataKeyEnvironmentsConfig _config;
 
-
         public TestEventManagerMarketDataKeyEnvironmentConfig(MarketDataKeyEnvironmentsConfig config)
         {
             _config = config;
         }
-
 
         @Override
         public String getExecutor()
@@ -209,20 +203,17 @@ public class SingleChronicleQueueExternalizableTest
             return null;
         }
 
-
         @Override
         public void getConfig(String executor)
         {
 
         }
 
-
         @Override
         public void setConfig(String executor)
         {
 
         }
-
 
         @Override
         public void onConfigAdd(String executor, ConfigSetting addedConfigSetting)
@@ -286,13 +277,11 @@ public class SingleChronicleQueueExternalizableTest
 
         }
 
-
         @Override
         public void onConfigUpdate(String executor, ConfigSetting updateConfigSetting)
         {
 
         }
-
 
         @Override
         public void onConfigRemove(String executor, ConfigSetting removedConfigSetting)
@@ -300,13 +289,11 @@ public class SingleChronicleQueueExternalizableTest
 
         }
 
-
         @Override
         public void getMarketData(String executor)
         {
 
         }
-
 
         @Override
         public void setMarketData(String executor)
@@ -314,13 +301,11 @@ public class SingleChronicleQueueExternalizableTest
 
         }
 
-
         @Override
         public void onMarketDataUpdate(String producer, MarketDataSupplier supplier, MarketDataSource source, MarketDataType type, String id, byte[] marketDataUpdates, boolean isRetransmit) throws Exception
         {
 
         }
-
 
         @Override
         public void process(String executor)
@@ -328,13 +313,11 @@ public class SingleChronicleQueueExternalizableTest
 
         }
 
-
         @Override
         public boolean hasChanged()
         {
             return false;
         }
-
 
         @Override
         public boolean isInitialized()
@@ -350,12 +333,10 @@ public class SingleChronicleQueueExternalizableTest
     {
         private MiscellaneousTypesConfig _config;
 
-
         public TestEventManagerMiscellaneousTypesConfig(MiscellaneousTypesConfig config)
         {
             _config = config;
         }
-
 
         @Override
         public String getExecutor()
@@ -363,20 +344,17 @@ public class SingleChronicleQueueExternalizableTest
             return null;
         }
 
-
         @Override
         public void getConfig(String executor)
         {
 
         }
 
-
         @Override
         public void setConfig(String executor)
         {
 
         }
-
 
         @Override
         public void onConfigAdd(String executor, ConfigSetting addedConfigSetting)
@@ -403,13 +381,11 @@ public class SingleChronicleQueueExternalizableTest
             assertEquals(_config.getValuationEnvironment(), miscellaneousTypesConfig.getValuationEnvironment());
         }
 
-
         @Override
         public void onConfigUpdate(String executor, ConfigSetting updateConfigSetting)
         {
 
         }
-
 
         @Override
         public void onConfigRemove(String executor, ConfigSetting removedConfigSetting)
@@ -417,13 +393,11 @@ public class SingleChronicleQueueExternalizableTest
 
         }
 
-
         @Override
         public void getMarketData(String executor)
         {
 
         }
-
 
         @Override
         public void setMarketData(String executor)
@@ -431,13 +405,11 @@ public class SingleChronicleQueueExternalizableTest
 
         }
 
-
         @Override
         public void onMarketDataUpdate(String producer, MarketDataSupplier supplier, MarketDataSource source, MarketDataType type, String id, byte[] marketDataUpdates, boolean isRetransmit) throws Exception
         {
 
         }
-
 
         @Override
         public void process(String executor)
@@ -445,13 +417,11 @@ public class SingleChronicleQueueExternalizableTest
 
         }
 
-
         @Override
         public boolean hasChanged()
         {
             return false;
         }
-
 
         @Override
         public boolean isInitialized()

@@ -19,7 +19,6 @@ public class MimicMarketDataServerSideUpdates {
     private static VanillaAssetTree _assetTree;
     private static ServerEndpoint _serverEndpoint;
 
-
     /**
      * Entry point
      *
@@ -48,7 +47,6 @@ public class MimicMarketDataServerSideUpdates {
             }
         }
     }
-
 
     /**
      * Read from csv and update
