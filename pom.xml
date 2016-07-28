@@ -35,11 +35,10 @@
                 <version>3.5.1</version>
                 <scope>import</scope>
             </dependency>
-
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.13.10</version>
+                <version>1.13.11</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
