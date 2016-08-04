@@ -1,14 +1,19 @@
 package queue4;
 
-import java.io.*;
-
-import net.openhft.chronicle.core.*;
-import net.openhft.chronicle.core.threads.*;
-import net.openhft.chronicle.queue.*;
-import net.openhft.chronicle.queue.impl.single.*;
-import org.junit.*;
-import queue4.chronicle.*;
+import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.queue.ChronicleQueueBuilder;
+import net.openhft.chronicle.queue.ExcerptTailer;
+import net.openhft.chronicle.queue.RollCycles;
+import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue;
+import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+import queue4.chronicle.FromChronicle;
+import queue4.chronicle.ToChronicle;
 import queue4.externalizableObjects.*;
+
+import java.io.IOException;
 
 /**
  * Created by cliveh on 01/08/2016.
@@ -18,7 +23,7 @@ public class SingleChronicleQueueRollingTest
 
     String chronicleQueueBase1 = OS.TARGET + "/Chronicle/dataRolling";
 
-
+    @Ignore("to be run manually")
     @Test
     public void testRolling() throws Exception
     {
