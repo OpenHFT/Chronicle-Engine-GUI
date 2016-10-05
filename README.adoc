@@ -13,13 +13,7 @@ then in you webbrower goto http://localhost:8080
 
 ###  vaadin-charts
 
-WARNING: When using the article doctype (the default), you can only have one level-0 section title (i.e., the document title) and it must be in the document header.
-
-NOTE: The number of equal signs matches the heading level in the HTML output.
-For example, _Section Level 1_ becomes an `<h2>` heading.
-
-
-WARNING: this project requires the following artifact
+WARNING : this project requires the following artifact
 [source, console]
 ----
     <dependency>
