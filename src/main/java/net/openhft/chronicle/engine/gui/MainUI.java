@@ -26,7 +26,7 @@ public class MainUI extends HorizontalLayout {
     protected Button menuToggle;
     protected CssLayout menuItems;
     protected Button userButton;
-    protected Button statusButton;
+    protected Button treeButton;
     protected VerticalLayout content;
 
     public MainUI() {
