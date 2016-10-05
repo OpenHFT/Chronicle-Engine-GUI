@@ -22,12 +22,15 @@ endif::[]
 :project-name: Asciidoctor PDF
 :project-handle: asciidoctor-pdf
  
+
 [caption=Status]
+ 
+ # Chronicle-Engine-GUI
  
 toc::[]
 
 
-# Chronicle-Engine-GUI
+
 
 a web based client management console to start the jetty application server, please 
 [source, console]
