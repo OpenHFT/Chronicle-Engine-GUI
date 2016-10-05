@@ -23,12 +23,7 @@ endif::[]
 :project-name: Asciidoctor PDF
 :project-handle: asciidoctor-pdf
  
-
- 
 toc::[]
-
-
-
 
 a web based client management console to start the jetty application server, please 
 [source, console]
