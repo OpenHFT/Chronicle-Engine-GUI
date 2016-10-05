@@ -25,4 +25,8 @@ public class UserConsole extends VerticalLayout {
     public UserConsole() {
         Design.read(this);
     }
+
+    public static void main(String[] args) {
+
+    }
 }
