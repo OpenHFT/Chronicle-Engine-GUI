@@ -1,5 +1,8 @@
 ## Chronicle-Engine-GUI
- 
+
+********* THIS IS WORK IN PROGRESS  *********
+
+
 // Settings:
 :experimental:
 :idprefix:
@@ -28,7 +31,7 @@ toc::[]
 a web based client management console to start the jetty application server, please 
 [source, console]
 ----
-mvn  jetty:run
+mvn compile jetty:run
 ----
 
 then in you webbrower goto http://localhost:8080
