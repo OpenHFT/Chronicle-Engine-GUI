@@ -9,8 +9,10 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.UI;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 
 import javax.servlet.annotation.WebServlet;
+import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -24,14 +26,22 @@ import java.util.concurrent.Future;
  * overridden to add component to the user interface and initialize non-component functionality.
  */
 @Theme("mytheme")
-public class MyUI extends UI {
+public class EngineUI extends UI {
+    static VanillaAssetTree TREE;
+
+    static {
+        try {
+            TREE = SimpleEngine.createEngine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-
         UserConsole components = new UserConsole();
         setContent(components);
-
         components.readBps.addComponent(chart("readBps"));
         components.writeBps.addComponent(chart("writeBps"));
     }
@@ -77,8 +87,6 @@ public class MyUI extends UI {
     }
 
 
-
-
     private Chart chart(final String text) {
         final Random random = new Random();
 
@@ -104,8 +112,6 @@ public class MyUI extends UI {
         final DataSeries series2 = new DataSeries();
         {
             PlotOptionsLine plotOptions = new PlotOptionsLine();
-          //  plotOptions.setColor(SolidColor.ALICEBLUE);
-           // plotOptions.setLineWidth(3);
             series2.setPlotOptions(plotOptions);
         }
         final DataSeries series = new DataSeries();
@@ -115,11 +121,11 @@ public class MyUI extends UI {
 
 
         series.setName("Random data");
-        for (int i = -(5*60); i <= 0; i++) {
+        for (int i = -(5 * 60); i <= 0; i++) {
             series.add(new DataSeriesItem(
                     System.currentTimeMillis() + i * 1000, random.nextDouble()));
             series2.add(new DataSeriesItem(
-                    System.currentTimeMillis() + i * 1000, 0.5 +((random.nextDouble() * 0.2) -
+                    System.currentTimeMillis() + i * 1000, 0.5 + ((random.nextDouble() * 0.2) -
                     0.1)));
         }
         runWhileAttached(chart, new Runnable() {
@@ -149,14 +155,11 @@ public class MyUI extends UI {
     }
 
 
-
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
-    @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
+    @VaadinServletConfiguration(ui = EngineUI.class, productionMode = false)
     public static class MyUIServlet extends VaadinServlet {
-    }
-
-
-    public static void main(String[] args) {
 
     }
+
+
 }
