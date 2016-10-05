@@ -21,20 +21,6 @@ endif::[]
 // Aliases:
 :project-name: Asciidoctor PDF
 :project-handle: asciidoctor-pdf
-// URIs:
-:uri-asciidoctor: http://asciidoctor.org
-:uri-gem: http://rubygems.org/gems/asciidoctor-pdf
-:uri-project: https://github.com/asciidoctor/asciidoctor-pdf
-:uri-project-repo: {uri-project}
-:uri-project-issues: {uri-project-repo}/issues
-:uri-project-list: http://discuss.asciidoctor.org
-:uri-prawn: http://prawn.majesticseacreature.com
-:uri-rvm: http://rvm.io
-
-ifdef::status[]
-image:https://img.shields.io/gem/v/asciidoctor-pdf.svg[Latest Release, link={uri-gem}]
-image:https://img.shields.io/badge/license-MIT-blue.svg[MIT License, link=#copyright]
-endif::[]
  
 [caption=Status]
  
