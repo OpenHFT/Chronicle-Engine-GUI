@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+ <head>
+  <meta charset="UTF-8" name="design-properties" content="{&quot;RULERS_VISIBLE&quot;:true,&quot;GUIDELINES_VISIBLE&quot;:false,&quot;SNAP_TO_OBJECTS&quot;:true,&quot;SNAP_TO_GRID&quot;:true,&quot;SNAPPING_DISTANCE&quot;:10,&quot;THEME&quot;:&quot;mytheme&quot;}">
+  <meta charset="UTF-8" name="vaadin-version" content="7.7.0">
+ </head> 
+ <body> 
+  <vaadin-horizontal-layout style-name="valo-menu-responsive" responsive id="responsive-application-template" size-full> 
+   <vaadin-css-layout style-name="valo-menu"> 
+    <vaadin-css-layout style-name="valo-menu-part"> 
+     <vaadin-horizontal-layout style-name="valo-menu-title" width-full _id="menuTitle"> 
+      <vaadin-label size-auto _id="menuTitleLabel" :middle :expand>
+        The 
+       <strong>Application</strong> 
+      </vaadin-label> 
+     </vaadin-horizontal-layout> 
+     <vaadin-button icon="fonticon://FontAwesome/f03a" style-name="primary small valo-menu-toggle" plain-text _id="menuToggle">
+       Menu 
+     </vaadin-button> 
+     <vaadin-css-layout style-name="valo-menuitems" _id="menuItems"> 
+      <vaadin-button icon="fonticon://FontAwesome/f007" primary-style-name="valo-menu-item" width-full plain-text _id="userButton">
+        User 
+      </vaadin-button> 
+      <vaadin-button icon="fonticon://FontAwesome/f080" primary-style-name="valo-menu-item" _id="statusButton">
+        Tree 
+      </vaadin-button> 
+     </vaadin-css-layout> 
+    </vaadin-css-layout> 
+   </vaadin-css-layout> 
+   <vaadin-vertical-layout spacing margin _id="content" :expand></vaadin-vertical-layout> 
+  </vaadin-horizontal-layout>  
+ </body>
+</html>
