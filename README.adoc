@@ -1,0 +1,12 @@
+# Chronicle-Engine-GUI
+
+a web based client management console
+
+
+to start the jetty application server, please 
+[source, console]
+----
+mvn  jetty:run
+----
+
+then in you webbrower goto http://localhost:8080
