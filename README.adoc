@@ -1,4 +1,5 @@
-
+ # Chronicle-Engine-GUI
+ 
 // Settings:
 :experimental:
 :idprefix:
@@ -22,9 +23,7 @@ endif::[]
 :project-name: Asciidoctor PDF
 :project-handle: asciidoctor-pdf
  
- 
- 
- # Chronicle-Engine-GUI
+
  
 toc::[]
 
