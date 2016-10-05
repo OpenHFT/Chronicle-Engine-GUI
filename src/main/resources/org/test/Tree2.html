@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+ <head>
+  <meta charset="UTF-8" name="design-properties" content="{&quot;RULERS_VISIBLE&quot;:true,&quot;GUIDELINES_VISIBLE&quot;:false,&quot;SNAP_TO_OBJECTS&quot;:true,&quot;SNAP_TO_GRID&quot;:true,&quot;SNAPPING_DISTANCE&quot;:10,&quot;THEME&quot;:&quot;mytheme&quot;}">
+  <meta charset="UTF-8" name="vaadin-version" content="7.7.0">
+ </head> 
+ <body> 
+  <vaadin-horizontal-layout spacing size-full margin> 
+   <vaadin-tree style-name="valo-menu-responsive" height-full> 
+    <node text="Desktops"> 
+     <node text="Dell GX240"></node> 
+     <node text="Dell GX260"></node> 
+     <node text="Dell GX280"></node> 
+    </node> 
+    <node text="Laptops"> 
+     <node text="IBM T40"></node> 
+    </node> 
+   </vaadin-tree> 
+   <vaadin-vertical-split-panel split-position="22%" :expand> 
+    <vaadin-horizontal-layout width-full> 
+     <vaadin-vertical-layout size-auto> 
+      <vaadin-image icon="http://chronicle.software/wp-content/uploads/2014/03/ChronicleMap_100px_Rev2.png" style-name="myTableStyle"></vaadin-image> 
+      <vaadin-label size-auto plain-text>
+        Chronicle Map 
+      </vaadin-label> 
+     </vaadin-vertical-layout> 
+     <vaadin-grid-layout width-full></vaadin-grid-layout> 
+     <vaadin-grid-layout width="300px" height="30px" :right> 
+      <row> 
+       <column> 
+        <vaadin-label style-name="bold" size-auto plain-text>
+          Path 
+        </vaadin-label> 
+       </column> 
+       <column> 
+        <vaadin-label size-auto plain-text>
+          /user/data/mymap 
+        </vaadin-label> 
+       </column> 
+      </row> 
+      <row> 
+       <column> 
+        <vaadin-label style-name="bold" size-auto plain-text>
+          Type 
+        </vaadin-label> 
+       </column> 
+       <column> 
+        <vaadin-label size-auto plain-text>
+          Chronicle Map 
+        </vaadin-label> 
+       </column> 
+      </row> 
+     </vaadin-grid-layout> 
+    </vaadin-horizontal-layout> 
+    <vaadin-vertical-layout spacing size-full margin-top> 
+     <vaadin-horizontal-layout spacing width-full value="records 23 / 1302"> 
+      <vaadin-horizontal-layout spacing> 
+       <vaadin-label style-name="bold" size-auto plain-text :middle>
+         Contains : 
+       </vaadin-label> 
+       <vaadin-text-field></vaadin-text-field> 
+       <vaadin-button plain-text>
+         Search 
+       </vaadin-button> 
+      </vaadin-horizontal-layout> 
+      <vaadin-label size-auto plain-text :bottom :right>
+        records : 23 /1024 
+      </vaadin-label> 
+     </vaadin-horizontal-layout> 
+     <vaadin-grid size-full editable _id="datagrid" :expand> 
+      <table> 
+       <colgroup> 
+        <col property-id="Key" sortable> 
+        <col property-id="Value" sortable> 
+       </colgroup> 
+       <thead> 
+        <tr default> 
+         <th plain-text>Project</th> 
+         <th plain-text>Status</th> 
+        </tr> 
+       </thead> 
+       <tbody> 
+        <tr> 
+         <td>Customer Project 1</td> 
+         <td>OK</td> 
+        </tr> 
+        <tr> 
+         <td>Customer Project 2</td> 
+         <td>OK</td> 
+        </tr> 
+        <tr> 
+         <td>Customer Project 3</td> 
+         <td>OK</td> 
+        </tr> 
+        <tr> 
+         <td>Customer Project 4</td> 
+         <td>OK</td> 
+        </tr> 
+        <tr> 
+         <td>Customer Project 5</td> 
+         <td>OK</td> 
+        </tr> 
+        <tr> 
+         <td>Customer Project 6</td> 
+         <td>OK</td> 
+        </tr> 
+        <tr> 
+         <td>Customer Project 7</td> 
+         <td>OK</td> 
+        </tr> 
+        <tr> 
+         <td>Customer Project 8</td> 
+         <td>OK</td> 
+        </tr> 
+        <tr> 
+         <td>Customer Project 9</td> 
+         <td>OK</td> 
+        </tr> 
+       </tbody> 
+      </table> 
+     </vaadin-grid> 
+    </vaadin-vertical-layout> 
+   </vaadin-vertical-split-panel> 
+  </vaadin-horizontal-layout>  
+ </body>
+</html>
