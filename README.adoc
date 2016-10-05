@@ -29,10 +29,7 @@ toc::[]
 
 # Chronicle-Engine-GUI
 
-a web based client management console
-
-
-to start the jetty application server, please 
+a web based client management console to start the jetty application server, please 
 [source, console]
 ----
 mvn  jetty:run
@@ -45,11 +42,11 @@ then in you webbrower goto http://localhost:8080
 WARNING: this project requires the following artifact
 [source, console]
 ----
-    <dependency>
-			<groupId>com.vaadin.addon</groupId>
-			<artifactId>vaadin-charts</artifactId>
-			<version>3.2.0</version>
-		</dependency>
+<dependency>
+	<groupId>com.vaadin.addon</groupId>
+	<artifactId>vaadin-charts</artifactId>
+	<version>3.2.0</version>
+</dependency>
 ----
 
 A licenced version of this artifact can be obtained from https://vaadin.com/framework
