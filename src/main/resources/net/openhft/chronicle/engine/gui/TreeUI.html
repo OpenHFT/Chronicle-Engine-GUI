@@ -16,14 +16,9 @@
      <node text="IBM T40"></node> 
     </node> 
    </vaadin-tree> 
-   <vaadin-vertical-split-panel split-position="30%" :expand> 
+   <vaadin-vertical-layout :expand> 
     <vaadin-horizontal-layout width-full> 
-     <vaadin-vertical-layout size-auto> 
-      <vaadin-image icon="http://chronicle.software/wp-content/uploads/2014/03/ChronicleMap_100px_Rev2.png" style-name="myTableStyle"></vaadin-image> 
-      <vaadin-label size-auto plain-text>
-        Chronicle Map 
-      </vaadin-label> 
-     </vaadin-vertical-layout> 
+     <vaadin-image icon="http://chronicle.software/wp-content/uploads/2014/03/ChronicleMap_100px_Rev2.png" style-name="myTableStyle"></vaadin-image> 
      <vaadin-grid-layout width-full></vaadin-grid-layout> 
      <vaadin-grid-layout width="300px" height="30px" :right> 
       <row> 
@@ -52,7 +47,7 @@
       </row> 
      </vaadin-grid-layout> 
     </vaadin-horizontal-layout> 
-    <vaadin-vertical-layout spacing size-full margin-top> 
+    <vaadin-vertical-layout style-name="content" spacing size-full margin> 
      <vaadin-horizontal-layout spacing width-full value="records 23 / 1302"> 
       <vaadin-horizontal-layout spacing> 
        <vaadin-label style-name="bold" size-auto plain-text :middle>
@@ -120,7 +115,7 @@
       </table> 
      </vaadin-grid> 
     </vaadin-vertical-layout> 
-   </vaadin-vertical-split-panel> 
+   </vaadin-vertical-layout> 
   </vaadin-horizontal-layout>  
  </body>
 </html>
