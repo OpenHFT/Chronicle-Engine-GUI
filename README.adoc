@@ -1,4 +1,4 @@
-
+## Chronicle-Engine-GUI
  
 // Settings:
 :experimental:
@@ -23,7 +23,7 @@ endif::[]
 :project-name: Asciidoctor PDF
 :project-handle: asciidoctor-pdf
  
-## Chronicle-Engine-GUI
+
  
 toc::[]
 
