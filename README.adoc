@@ -13,7 +13,7 @@ then in you webbrower goto http://localhost:8080
 
 ###  vaadin-charts
 
-WARNING : this project requires the following artifact
+WARNING: this project requires the following artifact
 [source, console]
 ----
     <dependency>
