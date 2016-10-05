@@ -1,12 +1,51 @@
-# Chronicle-Engine-GUI
+## Chronicle-Engine-GUI
+ 
+// Settings:
+:experimental:
+:idprefix:
+:idseparator: -
+ifndef::env-github[:icons: font]
+ifdef::env-github,env-browser[]
+:toc: macro
+:toclevels: 1
+endif::[]
+ifdef::env-github[]
+:status:
+:outfilesuffix: .adoc
+:!toc-title:
+:caution-caption: :fire:
+:important-caption: :exclamation:
+:note-caption: :paperclip:
+:tip-caption: :bulb:
+:warning-caption: :warning:
+endif::[]
+// Aliases:
+:project-name: Asciidoctor PDF
+:project-handle: asciidoctor-pdf
+ 
+toc::[]
 
-a web based client management console
-
-
-to start the jetty application server, please 
+a web based client management console to start the jetty application server, please 
 [source, console]
 ----
 mvn  jetty:run
 ----
 
 then in you webbrower goto http://localhost:8080
+
+###  vaadin-charts
+
+WARNING: this project requires the following artifact
+[source, console]
+----
+<dependency>
+	<groupId>com.vaadin.addon</groupId>
+	<artifactId>vaadin-charts</artifactId>
+	<version>3.2.0</version>
+</dependency>
+----
+
+A licenced version of this artifact can be obtained from https://vaadin.com/framework
+
+
+
