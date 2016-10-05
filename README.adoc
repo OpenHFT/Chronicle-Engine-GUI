@@ -10,3 +10,19 @@ mvn  jetty:run
 ----
 
 then in you webbrower goto http://localhost:8080
+
+###  vaadin-charts
+note this project requires the following artifact
+[source, console]
+----
+    <dependency>
+			<groupId>com.vaadin.addon</groupId>
+			<artifactId>vaadin-charts</artifactId>
+			<version>3.2.0</version>
+		</dependency>
+----
+
+A licenced version of this artifact can be obtained from https://vaadin.com/framework
+
+
+
