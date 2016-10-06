@@ -26,7 +26,7 @@ public class SimpleEngine {
             throw Jvm.rethrow(e);
         }
 
-        MapView<String, String> mapView = assetTree.acquireMap("/my/demo/map", String.class, String.class);
+        MapView<String, String> mapView = assetTree.acquireMap("/my/demo", String.class, String.class);
 
         mapView.put("hello", "world");
         return assetTree;

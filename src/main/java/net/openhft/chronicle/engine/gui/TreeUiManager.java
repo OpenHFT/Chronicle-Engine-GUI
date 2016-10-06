@@ -29,10 +29,19 @@ public class TreeUiManager {
         clickListener = click -> {
             final String source = click.getItemId().toString();
             treeUI.contents.removeAllComponents();
-            if (source.endsWith(MAP_VIEW))
+
+
+            if (source.endsWith(MAP_VIEW)) {
+                MapViewUI mapViewUI = new MapViewUI();
+                treeUI.contents.addComponent(mapViewUI);
+                String path = source.substring(0, source.length() - MAP_VIEW.length());
+                mapViewUI.path.setValue(path);
+
+            } else if (source.endsWith(MAP_VIEW)) {
+
+                String path = source.substring(0, source.length() - MAP_VIEW.length());
                 treeUI.contents.addComponent(new MapViewUI());
-            else if (source.endsWith(MAP_VIEW))
-                treeUI.contents.addComponent(new MapViewUI());
+            }
 
         };
 
@@ -63,7 +72,7 @@ public class TreeUiManager {
         if (asset.getView(MapView.class) != null) {
             tree.addItem(e.fullName() + MAP_VIEW);
             tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
-            tree.setItemCaption(e.fullName() + MAP_VIEW, "Map View");
+            tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
             tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
                     () -> TreeUiManager.class.getResourceAsStream("map.png"), "map"));
             tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
@@ -72,10 +81,10 @@ public class TreeUiManager {
         if (asset.getView(MapView.class) != null) {
             tree.addItem(e.fullName() + QUEUE_VIEW);
             tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
-            tree.setItemCaption(e.fullName() + QUEUE_VIEW, "Queue View");
+            tree.setItemCaption(e.fullName() + QUEUE_VIEW, "queue");
             tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
                     () -> TreeUiManager.class.getResourceAsStream("map.png"), "map"));
-            tree.setChildrenAllowed(e.fullName()+ QUEUE_VIEW, false);
+            tree.setChildrenAllowed(e.fullName() + QUEUE_VIEW, false);
         }
 
     }
