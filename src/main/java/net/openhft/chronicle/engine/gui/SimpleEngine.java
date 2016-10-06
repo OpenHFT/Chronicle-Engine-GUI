@@ -1,4 +1,4 @@
-package net.openhft.chronicle.engine.gui.engine;
+package net.openhft.chronicle.engine.gui;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.SimpleEngineMain;
