@@ -17,9 +17,8 @@ import java.util.concurrent.Future;
 class UserUiManager {
 
 
-    protected Component newComponent() {
-        UserUI components = new UserUI();
-
+    Component newComponent() {
+        final UserUI components = new UserUI();
         components.readBps.addComponent(newRandomChart("readBps"));
         components.writeBps.addComponent(newRandomChart("writeBps"));
         return components;
@@ -66,21 +65,17 @@ class UserUiManager {
                     System.currentTimeMillis() + i * 1000, 0.5 + ((random.nextDouble() * 0.2) -
                     0.1)));
         }
-        runWhileAttached(chart, new Runnable() {
+        runWhileAttached(chart, () -> {
+            final long x = System.currentTimeMillis();
+            final double y = random.nextDouble();
+            DataSeriesItem item = new DataSeriesItem(x, y);
+            DataSeriesItem item1 = new DataSeriesItem(x, 0.5 + ((random.nextDouble() * 0.2) -
+                    0.1));
+            series.add(item, true, true);
+            series2.add(item1, true, true);
 
-            @Override
-            public void run() {
-                final long x = System.currentTimeMillis();
-                final double y = random.nextDouble();
-                DataSeriesItem item = new DataSeriesItem(x, y);
-                DataSeriesItem item1 = new DataSeriesItem(x, 0.5 + ((random.nextDouble() * 0.2) -
-                        0.1));
-                series.add(item, true, true);
-                series2.add(item1, true, true);
-
-                series.update(item);
-                series2.update(item1);
-            }
+            series.update(item);
+            series2.update(item1);
         }, 2000, 2000);
 
 
@@ -101,8 +96,8 @@ class UserUiManager {
      * @param interval
      * @param initialPause a timeout after tas is started
      */
-    public static void runWhileAttached(final Component component,
-                                        final Runnable task, final int interval, final int initialPause) {
+    private static void runWhileAttached(final Component component,
+                                         final Runnable task, final int interval, final int initialPause) {
         // Until reliable push available in our demo servers
         UI.getCurrent().setPollInterval(interval);
 

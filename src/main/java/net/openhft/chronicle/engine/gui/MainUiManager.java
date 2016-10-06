@@ -6,12 +6,12 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * @author Rob Austin.
  */
-public class MainUiManager {
+class MainUiManager {
 
     private final UserUiManager userUiManager = new UserUiManager();
     private final TreeUiManager treeUiManager = new TreeUiManager();
 
-    protected Component newComponent() {
+    Component newComponent() {
         MainUI mainUI = new MainUI();
         Component c = userUiManager.newComponent();
         mainUI.content.addComponent(c);
