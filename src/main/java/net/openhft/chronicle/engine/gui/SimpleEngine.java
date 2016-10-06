@@ -12,7 +12,13 @@ import java.io.IOException;
  */
 public class SimpleEngine {
 
-    public static VanillaAssetTree createEngine()   {
+    private static VanillaAssetTree ASSET_TREE = createEngine();
+
+    public static VanillaAssetTree assetTree() {
+        return ASSET_TREE;
+    }
+
+    private static VanillaAssetTree createEngine() {
         VanillaAssetTree assetTree = null;
         try {
             assetTree = SimpleEngineMain.tree();

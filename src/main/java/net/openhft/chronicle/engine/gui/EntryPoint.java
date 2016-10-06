@@ -8,6 +8,8 @@ import com.vaadin.ui.UI;
 
 import javax.servlet.annotation.WebServlet;
 
+import static net.openhft.chronicle.engine.gui.SimpleEngine.assetTree;
+
 
 /**
  * This UI is the application entry point. A UI may either represent a browser window
@@ -23,9 +25,8 @@ public class EntryPoint extends UI {
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        setContent(new MainUiManager().newComponent());
+        setContent(new MainUiManager().newComponent(assetTree()));
     }
-
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = EntryPoint.class, productionMode = false)
