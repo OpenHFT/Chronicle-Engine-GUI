@@ -10,7 +10,7 @@ import net.openhft.chronicle.engine.api.tree.AssetTree;
 class MainUiManager {
 
     private final UserUiManager userUiManager = new UserUiManager();
-    private final TreeUiManager treeUiManager = new TreeUiManager();
+
 
     Component newComponent(final AssetTree assetTree) {
         MainUI mainUI = new MainUI();
@@ -24,9 +24,13 @@ class MainUiManager {
             content.addComponent(userUiManager.newComponent());
         });
 
+
+        TreeUI treeUI = new TreeUI();
+        new TreeUiManager(assetTree, treeUI);
+
         mainUI.treeButton.addClickListener(clickEvent -> {
             content.removeAllComponents();
-            content.addComponent(treeUiManager.newComponent(assetTree));
+            content.addComponent(treeUI);
         });
 
 

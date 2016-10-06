@@ -1,89 +1,84 @@
 package net.openhft.chronicle.engine.gui;
 
+import com.vaadin.event.ItemClickEvent;
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.Tree;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
-import net.openhft.chronicle.network.api.session.SessionDetails;
-import net.openhft.chronicle.network.api.session.SessionProvider;
-import net.openhft.chronicle.threads.NamedThreadFactory;
-import net.openhft.chronicle.threads.Threads;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author Rob Austin.
  */
 public class TreeUiManager {
 
-    protected Component newComponent(AssetTree tree) {
+    public static final String MAP_VIEW = "::map_view";
+    public static final String QUEUE_VIEW = "::queue_view";
 
-        TreeUI result = new TreeUI();
+    final ItemClickEvent.ItemClickListener clickListener;
 
-        registerViewOfTree(tree, result.tree);
-        return result;
+    public TreeUiManager(AssetTree assetTree, TreeUI treeUI) {
+
+        final Tree tree = treeUI.tree;
+
+        assetTree.registerSubscriber("",
+                TopologicalEvent.class, e -> updateTree(assetTree, tree, e));
+
+        clickListener = click -> {
+            final String source = click.getItemId().toString();
+            treeUI.contents.removeAllComponents();
+            if (source.endsWith(MAP_VIEW))
+                treeUI.contents.addComponent(new MapViewUI());
+            else if (source.endsWith(MAP_VIEW))
+                treeUI.contents.addComponent(new MapViewUI());
+
+        };
+
+        tree.addItemClickListener(clickListener);
     }
 
 
-    private static void registerViewOfTree(@NotNull AssetTree assetTree, Tree tree) {
-        Threads.withThreadGroup(assetTree.root().getView(ThreadGroup.class), () -> {
-            ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor(
-                    new NamedThreadFactory("tree-watcher", true));
+    private void updateTree(@NotNull AssetTree assetTree, Tree tree, TopologicalEvent e) {
+        if (e.assetName() == null || !e.added())
+            return;
 
-            SessionProvider view = assetTree.root().findView(SessionProvider.class);
-            final SessionDetails sessionDetails = view.get();
+        tree.markAsDirty();
 
-            ses.submit(() -> {
-                // set the session details on the JMX thread, to the same as the server system session details.
-                final SessionProvider view0 = assetTree.root().findView(SessionProvider.class);
-                view0.set(sessionDetails);
-            });
+        Asset asset = assetTree.getAsset(e.fullName());
+        assert asset != null;
 
-            assetTree.registerSubscriber("", TopologicalEvent.class, e -> {
+        tree.addItem(e.fullName());
+        tree.setItemCaption(e.fullName(), e.name());
 
-                        if (e.assetName() != null) {
+        if (!"/".equals(e.assetName()))
+            tree.setParent(e.fullName(), e.assetName());
 
-                            handleTreeUpdate(assetTree, e, tree);
-                        }
-                    }
-            );
+        tree.setItemIcon(e.fullName(), new StreamResource(
+                () -> TreeUiManager.class.getResourceAsStream("folder.png"), "folder"));
 
-            return null;
-        });
-    }
+        tree.setChildrenAllowed(e.fullName(), true);
 
-    private static void handleTreeUpdate(@NotNull AssetTree tree, @NotNull TopologicalEvent e, Tree result) {
+        if (asset.getView(MapView.class) != null) {
+            tree.addItem(e.fullName() + MAP_VIEW);
+            tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
+            tree.setItemCaption(e.fullName() + MAP_VIEW, "Map View");
+            tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
+                    () -> TreeUiManager.class.getResourceAsStream("map.png"), "map"));
+            tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
+        }
 
-        if (e.added()) {
-            result.markAsDirty();
-
-            Asset asset = tree.getAsset(e.fullName());
-            assert asset != null;
-
-            result.addItem(e.fullName());
-            result.setItemCaption(e.fullName(), e.name());
-
-            if (!"/".equals(e.assetName()))
-                result.setParent(e.fullName(), e.assetName());
-
-            MapView mapView = asset.getView(MapView.class);
-            if (mapView != null) {
-                result.setItemIcon(e.fullName(), new StreamResource(
-                        () -> TreeUiManager.class.getResourceAsStream("map.png"), "map"));
-                result.setChildrenAllowed(e.fullName(), false);
-            } else {
-                result.setItemIcon(e.fullName(), new StreamResource(
-                        () -> TreeUiManager.class.getResourceAsStream("folder.png"), "folder"));
-
-                result.setChildrenAllowed(e.fullName(), true);
-            }
-
+        if (asset.getView(MapView.class) != null) {
+            tree.addItem(e.fullName() + QUEUE_VIEW);
+            tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
+            tree.setItemCaption(e.fullName() + QUEUE_VIEW, "Queue View");
+            tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
+                    () -> TreeUiManager.class.getResourceAsStream("map.png"), "map"));
+            tree.setChildrenAllowed(e.fullName()+ QUEUE_VIEW, false);
         }
 
     }
+
+
 }
