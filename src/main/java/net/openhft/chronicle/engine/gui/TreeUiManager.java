@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Rob Austin.
@@ -46,10 +45,10 @@ public class TreeUiManager {
             });
 
             assetTree.registerSubscriber("", TopologicalEvent.class, e -> {
-                        // give the collection time to be setup.
+
                         if (e.assetName() != null) {
-                            ses.schedule(() -> handleTreeUpdate(assetTree, e, tree), 2000, TimeUnit
-                                    .MILLISECONDS);
+
+                            handleTreeUpdate(assetTree, e, tree);
                         }
                     }
             );
@@ -60,9 +59,8 @@ public class TreeUiManager {
 
     private static void handleTreeUpdate(@NotNull AssetTree tree, @NotNull TopologicalEvent e, Tree result) {
 
-        result.markAsDirty();
-
         if (e.added()) {
+            result.markAsDirty();
 
             Asset asset = tree.getAsset(e.fullName());
             assert asset != null;
@@ -83,7 +81,6 @@ public class TreeUiManager {
                         () -> TreeUiManager.class.getResourceAsStream("folder.png"), "folder"));
 
                 result.setChildrenAllowed(e.fullName(), true);
-
             }
 
         }
