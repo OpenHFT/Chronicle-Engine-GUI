@@ -17,10 +17,10 @@
     </node> 
    </vaadin-tree> 
    <vaadin-vertical-layout :expand> 
-    <vaadin-horizontal-layout width-full> 
-     <vaadin-image icon="http://chronicle.software/wp-content/uploads/2014/03/ChronicleMap_100px_Rev2.png" style-name="myTableStyle"></vaadin-image> 
-     <vaadin-grid-layout width-full></vaadin-grid-layout> 
-     <vaadin-grid-layout width="300px" height="30px" :right> 
+    <vaadin-horizontal-layout style-name="content" width-full margin> 
+     <vaadin-image source="http://chronicle.software/wp-content/uploads/2014/03/ChronicleMap_100px_Rev2.png" style-name="myTableStyle" width="50px" height="50px"></vaadin-image> 
+     <vaadin-grid-layout></vaadin-grid-layout> 
+     <vaadin-grid-layout height="30px" :right> 
       <row> 
        <column> 
         <vaadin-label style-name="bold" size-auto plain-text>
@@ -28,7 +28,7 @@
         </vaadin-label> 
        </column> 
        <column> 
-        <vaadin-label size-auto plain-text>
+        <vaadin-label size-auto plain-text :right>
           /user/data/mymap 
         </vaadin-label> 
        </column> 
@@ -40,7 +40,7 @@
         </vaadin-label> 
        </column> 
        <column> 
-        <vaadin-label size-auto plain-text>
+        <vaadin-label size-auto plain-text :right>
           Chronicle Map 
         </vaadin-label> 
        </column> 
@@ -48,7 +48,7 @@
       <row></row> 
      </vaadin-grid-layout> 
     </vaadin-horizontal-layout> 
-    <vaadin-vertical-layout style-name="content" spacing size-full margin> 
+    <vaadin-vertical-layout spacing size-full margin> 
      <vaadin-horizontal-layout spacing width-full value="records : 0..9 /1024"> 
       <vaadin-horizontal-layout spacing> 
        <vaadin-label style-name="bold" size-auto plain-text :middle>
