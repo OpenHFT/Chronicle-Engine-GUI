@@ -37,8 +37,7 @@ public class MapControl {
         GeneratedPropertyContainer generatedPropertyContainer = addDeleteButton(data);
         Grid grid = new Grid(generatedPropertyContainer);
         grid.setWidth(100, Sizeable.Unit.PERCENTAGE);
-      //  grid.setHeight(100, Sizeable.Unit.PERCENTAGE);
-
+        grid.setHeight(100, Sizeable.Unit.PERCENTAGE);
 
         grid.getColumn("key").setMinimumWidth(100);
         grid.getColumn("value").setMinimumWidth(100);
@@ -51,7 +50,6 @@ public class MapControl {
         grid.setCellStyleGenerator(cellRef -> // Java 8
                 "delete".equals(cellRef.getPropertyId())?
                         "rightalign" : null);
-
 
         deleteColumn
                 .setRenderer(new ButtonRenderer(e -> // Java 8
