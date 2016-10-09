@@ -37,12 +37,23 @@ public class MapControl {
         GeneratedPropertyContainer generatedPropertyContainer = addDeleteButton(data);
         Grid grid = new Grid(generatedPropertyContainer);
         grid.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        grid.setHeight(100, Sizeable.Unit.PERCENTAGE);
+      //  grid.setHeight(100, Sizeable.Unit.PERCENTAGE);
 
-        //grid.setContainerDataSource(generatedPropertyContainer);
+
+        grid.getColumn("key").setMinimumWidth(100);
+        grid.getColumn("value").setMinimumWidth(100);
 
         // Render a button that deletes the data row (item)
-        grid.getColumn("delete")
+        Grid.Column deleteColumn = grid.getColumn("delete");
+        deleteColumn.setWidth(100);
+        deleteColumn.setLastFrozenColumn();
+
+        grid.setCellStyleGenerator(cellRef -> // Java 8
+                "delete".equals(cellRef.getPropertyId())?
+                        "rightalign" : null);
+
+
+        deleteColumn
                 .setRenderer(new ButtonRenderer(e -> // Java 8
                         grid.getContainerDataSource()
                                 .removeItem(e.getItemId())));
@@ -56,11 +67,16 @@ public class MapControl {
         // Set up a filter for all columns
         for (Object pid : grid.getContainerDataSource()
                 .getContainerPropertyIds()) {
+            if ("delete".equals(pid))
+                continue;
+
             HeaderCell cell = filterRow.getCell(pid);
 
             // Have an input field to use for filter
             TextField filterField = new TextField();
-            filterField.setColumns(8);
+            filterField.setHeight(24, Sizeable.Unit.PIXELS);
+            filterField.setWidth(100, Sizeable.Unit.PERCENTAGE);
+            //   filterField.setColumns(16);
 
             // Update filter When the filter input is changed
             filterField.addTextChangeListener(change -> {
