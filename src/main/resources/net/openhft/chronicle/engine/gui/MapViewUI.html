@@ -5,8 +5,8 @@
   <meta charset="UTF-8" name="vaadin-version" content="7.7.0">
  </head> 
  <body> 
-  <vaadin-vertical-layout> 
-   <vaadin-horizontal-layout width-full margin-left margin-right margin-top> 
+  <vaadin-vertical-layout size-full> 
+   <vaadin-horizontal-layout width-full margin> 
     <vaadin-image source="http://chronicle.software/wp-content/uploads/2014/03/ChronicleMap_100px_Rev2.png" style-name="myTableStyle" height="50px"></vaadin-image> 
     <vaadin-grid-layout height="30px"> 
      <row> 
@@ -78,35 +78,19 @@
      <row> 
       <column> 
        <vaadin-label style-name="bold" size-auto plain-text :middle :right>
-         Type 
+         Number Of Records 
        </vaadin-label> 
       </column> 
       <column> 
        <vaadin-label size-auto plain-text :middle :right>
-         Chronicle Map 
+         102,322 
        </vaadin-label> 
       </column> 
      </row> 
      <row></row> 
     </vaadin-grid-layout> 
    </vaadin-horizontal-layout> 
-   <vaadin-vertical-layout spacing size-full margin> 
-    <vaadin-horizontal-layout spacing width-full value="records : 0..9 /1024"> 
-     <vaadin-horizontal-layout spacing> 
-      <vaadin-label style-name="bold" size-auto plain-text :middle>
-        Contains : 
-      </vaadin-label> 
-      <vaadin-text-field></vaadin-text-field> 
-      <vaadin-button plain-text>
-        Search 
-      </vaadin-button> 
-     </vaadin-horizontal-layout> 
-     <vaadin-label size-auto plain-text :bottom :right>
-       records : 0..9 /1024 
-     </vaadin-label> 
-    </vaadin-horizontal-layout> 
-   </vaadin-vertical-layout> 
-   <vaadin-vertical-layout size-full margin _id="gridHolder"></vaadin-vertical-layout> 
+   <vaadin-vertical-layout size-full margin _id="gridHolder" :expand></vaadin-vertical-layout> 
   </vaadin-vertical-layout>  
  </body>
 </html>
