@@ -14,7 +14,7 @@ import java.util.concurrent.Future;
 /**
  * @author Rob Austin.
  */
-class UserUiManager {
+class UserControl {
 
 
     Component newComponent() {

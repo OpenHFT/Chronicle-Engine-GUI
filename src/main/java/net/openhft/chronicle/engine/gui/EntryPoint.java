@@ -25,7 +25,7 @@ public class EntryPoint extends UI {
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        setContent(new MainUiManager().newComponent(assetTree()));
+        setContent(new MainControl().newComponent(assetTree()));
     }
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)

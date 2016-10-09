@@ -12,14 +12,14 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Rob Austin.
  */
-public class TreeUiManager {
+public class TreeControl {
 
     public static final String MAP_VIEW = "::map_view";
     public static final String QUEUE_VIEW = "::queue_view";
 
     final ItemClickEvent.ItemClickListener clickListener;
 
-    public TreeUiManager(AssetTree assetTree, TreeUI treeUI) {
+    public TreeControl(AssetTree assetTree, TreeUI treeUI) {
 
         final Tree tree = treeUI.tree;
 
@@ -34,8 +34,14 @@ public class TreeUiManager {
             if (source.endsWith(MAP_VIEW)) {
                 MapViewUI mapViewUI = new MapViewUI();
                 treeUI.contents.addComponent(mapViewUI);
-                String path = source.substring(0, source.length() - MAP_VIEW.length());
-                mapViewUI.path.setValue(path);
+
+                final String path = source.substring(0, source.length() - MAP_VIEW.length());
+
+                final MapView<Object, Object> mapView =
+                        assetTree.acquireMap(path, Object.class, Object.class);
+
+                MapControl MapControl = new MapControl(mapView, mapViewUI, path);
+                MapControl.init();
 
             } else if (source.endsWith(MAP_VIEW)) {
 
@@ -65,7 +71,7 @@ public class TreeUiManager {
             tree.setParent(e.fullName(), e.assetName());
 
         tree.setItemIcon(e.fullName(), new StreamResource(
-                () -> TreeUiManager.class.getResourceAsStream("folder.png"), "folder"));
+                () -> TreeControl.class.getResourceAsStream("folder.png"), "folder"));
 
         tree.setChildrenAllowed(e.fullName(), true);
 
@@ -74,7 +80,7 @@ public class TreeUiManager {
             tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
             tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
             tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
-                    () -> TreeUiManager.class.getResourceAsStream("map.png"), "map"));
+                    () -> TreeControl.class.getResourceAsStream("map.png"), "map"));
             tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
         }
 
@@ -83,7 +89,7 @@ public class TreeUiManager {
             tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
             tree.setItemCaption(e.fullName() + QUEUE_VIEW, "queue");
             tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
-                    () -> TreeUiManager.class.getResourceAsStream("map.png"), "map"));
+                    () -> TreeControl.class.getResourceAsStream("map.png"), "map"));
             tree.setChildrenAllowed(e.fullName() + QUEUE_VIEW, false);
         }
 
