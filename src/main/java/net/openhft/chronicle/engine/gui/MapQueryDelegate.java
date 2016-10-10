@@ -6,6 +6,7 @@ import com.vaadin.data.util.sqlcontainer.ColumnProperty;
 import com.vaadin.data.util.sqlcontainer.RowItem;
 import com.vaadin.data.util.sqlcontainer.query.OrderBy;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
+import net.openhft.chronicle.core.util.SerializableBiFunction;
 import net.openhft.chronicle.engine.api.map.MapView;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,6 +15,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 import static java.util.Collections.singletonList;
+import static net.openhft.chronicle.engine.map.VaadinLambda.*;
 
 /**
  * @author Rob Austin.
@@ -29,7 +31,6 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
 
     public MapQueryDelegate(@NotNull MapView<K, V> mapView) {
         this.mapView = mapView;
-
     }
 
     @Override
@@ -39,7 +40,7 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
             return mapView.size();
 
         // todo improve this
-        Iterator<Map.Entry<K, V>> entryIterator = newIterator(filters, sorted);
+        Iterator<Map.Entry<K, V>> entryIterator = newIterator(0,filters, sorted);
         int i = 0;
 
         while (entryIterator.hasNext()) {
@@ -53,7 +54,7 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
 
     @Override
     public ResultSet getResults(int offset, int pageLength) throws SQLException {
-        Iterator<Map.Entry<K, V>> iterator = newIterator(filters, sorted);
+        Iterator<Map.Entry<K, V>> iterator = newIterator(offset,filters, sorted);
         int iteratorIndex = 0;
 
         while (offset > iteratorIndex && iterator.hasNext()) {
@@ -91,6 +92,39 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
                 .sorted(sorted)
                 .iterator();
     }
+
+
+    private Iterator<Map.Entry<K, V>> newIterator(int fromIndex,
+                                                  final List<Container.Filter> filters,
+                                                  final Comparator<? super Map.Entry<K, V>> sorted) {
+        final Query<K, V> query = new Query<>();
+        query.fromIndex = fromIndex;
+
+        for (Container.Filter f : filters) {
+            if (f instanceof SimpleStringFilter) {
+                SimpleStringFilter filter = (SimpleStringFilter) f;
+                Type type = Type.valueOf(filter.getPropertyId().toString().toLowerCase());
+                String filterString = filter.getFilterString();
+                query.filters.add(new Filter(type, filterString));
+            }
+        }
+
+        for (OrderBy orderBy : orderBys) {
+            query.marshableOrderBy.add(toMarshableOrderBy(orderBy));
+        }
+
+        final SerializableBiFunction<MapView<K, V>, Query<K, V>, Iterator<Map.Entry<K, V>>> f =
+                apply(query);
+
+        return mapView.applyTo(f, query);
+    }
+
+
+    @NotNull
+    private MarshableOrderBy toMarshableOrderBy(OrderBy orderBy) {
+        return new MarshableOrderBy(orderBy.getColumn(), orderBy.isAscending());
+    }
+
 
     private boolean filter(@NotNull List<Container.Filter> filters, @NotNull Map.Entry<K, V> kvEntry) {
         for (Container.Filter f1 : filters) {
@@ -158,13 +192,9 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
      */
     @Override
     public int storeRow(RowItem row) throws UnsupportedOperationException, SQLException {
-
-
-        ColumnProperty keyP = (ColumnProperty) row.getItemProperty("key");
-
-
-        ColumnProperty valueP = (ColumnProperty) row.getItemProperty("value");
-        ColumnProperty oldValueP = (ColumnProperty) row.getItemProperty("value");
+        final ColumnProperty keyP = (ColumnProperty) row.getItemProperty("key");
+        final ColumnProperty valueP = (ColumnProperty) row.getItemProperty("value");
+        final ColumnProperty oldValueP = (ColumnProperty) row.getItemProperty("value");
 
         K key = (K) keyP.getValue();
         K oldKey = (K) keyP.getOldValue();
@@ -200,12 +230,12 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
 
     @Override
     public void beginTransaction() throws SQLException {
-        System.out.println("beginTransaction");
+
     }
 
     @Override
     public void commit() throws SQLException {
-        System.out.println("commit");
+
     }
 
     @Override
