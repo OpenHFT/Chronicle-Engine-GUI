@@ -23,7 +23,7 @@ public class KeyValueResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public boolean isAutoIncrement(int column) throws SQLException {
-        return true;
+        return false;
     }
 
     @Override
@@ -108,7 +108,7 @@ public class KeyValueResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public boolean isWritable(int column) throws SQLException {
-        throw new UnsupportedOperationException("todo");
+        return true;
     }
 
     @Override

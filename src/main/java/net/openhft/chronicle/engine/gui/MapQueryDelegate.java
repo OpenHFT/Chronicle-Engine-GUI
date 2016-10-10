@@ -2,6 +2,7 @@ package net.openhft.chronicle.engine.gui;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.util.filter.SimpleStringFilter;
+import com.vaadin.data.util.sqlcontainer.ColumnProperty;
 import com.vaadin.data.util.sqlcontainer.RowItem;
 import com.vaadin.data.util.sqlcontainer.query.OrderBy;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
@@ -21,14 +22,14 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
 
     private final MapView<K, V> mapView;
     private List<Container.Filter> filters = Collections.EMPTY_LIST;
-    private Iterator<Map.Entry<K, V>> iterator;
-    private long iteratorIndex = 0;
+
+
     private Comparator<? super Map.Entry<K, V>> sorted = (o1, o2) -> 1;
     private List<OrderBy> orderBys = Collections.EMPTY_LIST;
 
     public MapQueryDelegate(@NotNull MapView<K, V> mapView) {
         this.mapView = mapView;
-        iterator = newIterator(filters, sorted);
+
     }
 
     @Override
@@ -37,6 +38,7 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
         if (filters.isEmpty())
             return mapView.size();
 
+        // todo improve this
         Iterator<Map.Entry<K, V>> entryIterator = newIterator(filters, sorted);
         int i = 0;
 
@@ -53,18 +55,13 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
     public ResultSet getResults(int offset, int pageLength) throws SQLException {
         Iterator<Map.Entry<K, V>> iterator = newIterator(filters, sorted);
         int iteratorIndex = 0;
-        if (offset < iteratorIndex) {
-            this.iterator = newIterator(filters, sorted);
-            iteratorIndex = 0;
-        }
 
-        while (offset < iteratorIndex && this.iterator.hasNext()) {
-            this.iterator.next();
+        while (offset > iteratorIndex && iterator.hasNext()) {
+            iterator.next();
             iteratorIndex++;
         }
 
         return new MapViewResultSet<K, V>(iterator, pageLength);
-
     }
 
 
@@ -83,8 +80,7 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
             return;
 
         this.filters = filters;
-        this.iterator = newIterator(filters, sorted);
-        this.iteratorIndex = 0;
+
     }
 
     @NotNull
@@ -149,9 +145,6 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
 
             return 0;
         };
-
-        iterator = newIterator(filters, sorted);
-        iteratorIndex = 0;
     }
 
     /**
@@ -165,12 +158,44 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
      */
     @Override
     public int storeRow(RowItem row) throws UnsupportedOperationException, SQLException {
-        throw new UnsupportedOperationException();
+
+
+        ColumnProperty keyP = (ColumnProperty) row.getItemProperty("key");
+
+
+        ColumnProperty valueP = (ColumnProperty) row.getItemProperty("value");
+        ColumnProperty oldValueP = (ColumnProperty) row.getItemProperty("value");
+
+        K key = (K) keyP.getValue();
+        K oldKey = (K) keyP.getOldValue();
+        V value = (V) oldValueP.getValue();
+        V oldValue = (V) valueP.getOldValue();
+
+
+        if (keyP.isModified()) {
+            mapView.remove(oldKey);
+            mapView.put(key, value);
+            return 1;
+        }
+
+        if (!valueP.isModified())
+            return 0;
+
+        if (oldValue == null) {
+            mapView.put(key, (V) valueP.getValue());
+            return 1;
+        }
+
+        boolean replace = mapView.replace(key, oldValue, value);
+        return replace ? 1 : 0;
     }
 
     @Override
     public boolean removeRow(RowItem row) throws UnsupportedOperationException, SQLException {
-        throw new UnsupportedOperationException("todo");
+        ColumnProperty keyP = (ColumnProperty) row.getItemProperty("key");
+        final K key = (K) keyP.getValue();
+        Object old = mapView.remove(key);
+        return old != null;
     }
 
     @Override
@@ -185,7 +210,7 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
 
     @Override
     public void rollback() throws SQLException {
-        throw new UnsupportedOperationException("todo");
+
     }
 
     @Override
@@ -195,6 +220,11 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
 
     @Override
     public boolean containsRowWithKey(Object... keys) throws SQLException {
-        throw new UnsupportedOperationException("todo");
+        for (Object k : keys) {
+            if (!mapView.containsKey(k))
+                return false;
+        }
+
+        return true;
     }
 }

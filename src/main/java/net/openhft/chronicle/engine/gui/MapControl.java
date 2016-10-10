@@ -49,9 +49,18 @@ public class MapControl<K, V> {
 
         grid.getColumn("key").setMinimumWidth(100);
         grid.getColumn("value").setMinimumWidth(100);
+        grid.setEditorEnabled(true);
+        grid.setEditorBuffered(false);
+        grid.setSizeFull();
+
+        mapView.registerSubscriber(mapEvent -> ((SQLContainer) data).refresh());
+
+        if (data instanceof SQLContainer) {
+            ((SQLContainer) data).setAutoCommit(true);
+        }
 
         // Render a button that deletes the data row (item)
-        Grid.Column deleteColumn = grid.getColumn("delete");
+        final Grid.Column deleteColumn = grid.getColumn("delete");
         deleteColumn.setWidth(100);
         deleteColumn.setLastFrozenColumn();
 
@@ -66,8 +75,8 @@ public class MapControl<K, V> {
         if (data instanceof Container.Filterable) {
 
             // Create a header row to hold column filters
-            HeaderRow filterRow = grid.appendHeaderRow();
-            Container.Filterable data1 = (Container.Filterable) data;
+            final HeaderRow filterRow = grid.appendHeaderRow();
+            final Container.Filterable filterable = (Container.Filterable) data;
 
             // Set up a filter for all columns
             for (Object pid : grid.getContainerDataSource()
@@ -89,18 +98,17 @@ public class MapControl<K, V> {
                     // data.removeContainerFilters(pid);
 
                     final Collection<SimpleStringFilter> containerFilters = (Collection)
-                            data1.getContainerFilters();
+                            filterable.getContainerFilters();
 
                     Optional<SimpleStringFilter> first = containerFilters.stream().filter(x -> x.getPropertyId().equals(pid)).findFirst();
                     if (first.isPresent())
-                        data1.removeContainerFilter(first.get());
+                        filterable.removeContainerFilter(first.get());
 
 
                     // (Re)create the filter if necessary
                     if (!change.getText().isEmpty())
-                        data1.addContainerFilter(
-                                new SimpleStringFilter(pid,
-                                        change.getText(), true, false));
+                        filterable.addContainerFilter(
+                                new SimpleStringFilter(pid, change.getText(), true, false));
                 });
 
                 cell.setComponent(filterField);
