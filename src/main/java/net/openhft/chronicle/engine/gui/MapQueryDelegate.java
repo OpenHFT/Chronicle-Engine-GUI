@@ -1,8 +1,7 @@
 package net.openhft.chronicle.engine.gui;
 
 import com.vaadin.data.Container;
-import com.vaadin.data.Item;
-import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.data.util.sqlcontainer.RowItem;
 import com.vaadin.data.util.sqlcontainer.query.OrderBy;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
@@ -12,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+
+import static java.util.Collections.singletonList;
 
 /**
  * @author Rob Austin.
@@ -97,15 +98,29 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
 
     private boolean filter(@NotNull List<Container.Filter> filters, @NotNull Map.Entry<K, V> kvEntry) {
         for (Container.Filter f1 : filters) {
-            if (!f1.passesFilter(kvEntry.getKey(), toItem(kvEntry.getValue())))
-                return false;
+
+            if (f1 instanceof SimpleStringFilter) {
+                SimpleStringFilter filter = (SimpleStringFilter) f1;
+                Object item;
+                if ("value".equals(filter.getPropertyId()))
+                    item = kvEntry.getValue();
+                else if ("key".equals(filter.getPropertyId())) {
+                    item = kvEntry.getKey();
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+
+                if (!item.toString().toLowerCase().contains(filter.getFilterString().toLowerCase()))
+                    return false;
+
+            } else {
+                throw new UnsupportedOperationException();
+            }
+
         }
         return true;
     }
 
-    private Item toItem(V value) {
-        return new BeanItem(value.toString());
-    }
 
     @Override
     public void setOrderBy(List<OrderBy> orderBys) throws UnsupportedOperationException {
@@ -174,7 +189,7 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
 
     @Override
     public List<String> getPrimaryKeyColumns() {
-        return Arrays.asList("key");
+        return singletonList("key");
     }
 
     @Override
