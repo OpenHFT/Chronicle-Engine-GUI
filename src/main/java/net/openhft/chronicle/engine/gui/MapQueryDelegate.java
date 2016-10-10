@@ -6,7 +6,6 @@ import com.vaadin.data.util.sqlcontainer.ColumnProperty;
 import com.vaadin.data.util.sqlcontainer.RowItem;
 import com.vaadin.data.util.sqlcontainer.query.OrderBy;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
-import net.openhft.chronicle.core.util.SerializableBiFunction;
 import net.openhft.chronicle.engine.api.map.MapView;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,9 +23,6 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
 
     private final MapView<K, V> mapView;
     private List<Container.Filter> filters = Collections.EMPTY_LIST;
-
-
-    private Comparator<? super Map.Entry<K, V>> sorted = (o1, o2) -> 1;
     private List<OrderBy> orderBys = Collections.EMPTY_LIST;
 
     public MapQueryDelegate(@NotNull MapView<K, V> mapView) {
@@ -40,7 +36,7 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
             return mapView.size();
 
         // todo improve this
-        Iterator<Map.Entry<K, V>> entryIterator = newIterator(0,filters, sorted);
+        Iterator<Map.Entry<K, V>> entryIterator = newIterator(0, filters);
         int i = 0;
 
         while (entryIterator.hasNext()) {
@@ -54,7 +50,7 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
 
     @Override
     public ResultSet getResults(int offset, int pageLength) throws SQLException {
-        Iterator<Map.Entry<K, V>> iterator = newIterator(offset,filters, sorted);
+        Iterator<Map.Entry<K, V>> iterator = newIterator(offset, filters);
         int iteratorIndex = 0;
 
         while (offset > iteratorIndex && iterator.hasNext()) {
@@ -84,19 +80,9 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
 
     }
 
-    @NotNull
-    private Iterator<Map.Entry<K, V>> newIterator(List<Container.Filter> filters, final Comparator<? super Map.Entry<K, V>> sorted) {
-
-        return mapView.entrySet().stream()
-                .filter(kvEntry -> filter(filters, kvEntry))
-                .sorted(sorted)
-                .iterator();
-    }
-
 
     private Iterator<Map.Entry<K, V>> newIterator(int fromIndex,
-                                                  final List<Container.Filter> filters,
-                                                  final Comparator<? super Map.Entry<K, V>> sorted) {
+                                                  final List<Container.Filter> filters) {
         final Query<K, V> query = new Query<>();
         query.fromIndex = fromIndex;
 
@@ -105,7 +91,7 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
                 SimpleStringFilter filter = (SimpleStringFilter) f;
                 Type type = Type.valueOf(filter.getPropertyId().toString().toLowerCase());
                 String filterString = filter.getFilterString();
-                query.filters.add(new Filter(type, filterString));
+                query.marshableFilters.add(new MarshableFilter(type, filterString));
             }
         }
 
@@ -113,10 +99,7 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
             query.marshableOrderBy.add(toMarshableOrderBy(orderBy));
         }
 
-        final SerializableBiFunction<MapView<K, V>, Query<K, V>, Iterator<Map.Entry<K, V>>> f =
-                apply(query);
-
-        return mapView.applyTo(f, query);
+        return mapView.applyTo(iteratorFunction(), query);
     }
 
 
@@ -126,30 +109,6 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
     }
 
 
-    private boolean filter(@NotNull List<Container.Filter> filters, @NotNull Map.Entry<K, V> kvEntry) {
-        for (Container.Filter f1 : filters) {
-
-            if (f1 instanceof SimpleStringFilter) {
-                SimpleStringFilter filter = (SimpleStringFilter) f1;
-                Object item;
-                if ("value".equals(filter.getPropertyId()))
-                    item = kvEntry.getValue();
-                else if ("key".equals(filter.getPropertyId())) {
-                    item = kvEntry.getKey();
-                } else {
-                    throw new UnsupportedOperationException();
-                }
-
-                if (!item.toString().toLowerCase().contains(filter.getFilterString().toLowerCase()))
-                    return false;
-
-            } else {
-                throw new UnsupportedOperationException();
-            }
-
-        }
-        return true;
-    }
 
 
     @Override
@@ -160,25 +119,6 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
             return;
 
         this.orderBys = orderBys0;
-
-        this.sorted = (Comparator<Map.Entry<K, V>>) (o1, o2) -> {
-
-            for (OrderBy order : orderBys0) {
-
-                int result = 0;
-                if ("key".equals(order.getColumn()))
-                    result = ((Comparable) o1.getKey()).compareTo(o2.getKey());
-                else if ("value".equals(order.getColumn()))
-                    result = ((Comparable) o1.getValue()).compareTo(o2.getValue());
-
-                result *= order.isAscending() ? 1 : -1;
-                if (result != 0)
-                    return result;
-
-            }
-
-            return 0;
-        };
     }
 
     /**
