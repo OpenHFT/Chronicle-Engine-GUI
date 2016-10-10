@@ -134,15 +134,16 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
         this.sorted = (Comparator<Map.Entry<K, V>>) (o1, o2) -> {
 
             for (OrderBy order : orderBys0) {
-                if ("key".equals(order.getColumn())) {
-                    int i = ((Comparable) o1.getKey()).compareTo(o2.getKey());
-                    if (i != 0)
-                        return i;
-                } else if ("value".equals(order.getColumn())) {
-                    int i = ((Comparable) o1.getValue()).compareTo(o2.getValue());
-                    if (i != 0)
-                        return i;
-                }
+
+                int result = 0;
+                if ("key".equals(order.getColumn()))
+                    result = ((Comparable) o1.getKey()).compareTo(o2.getKey());
+                else if ("value".equals(order.getColumn()))
+                    result = ((Comparable) o1.getValue()).compareTo(o2.getValue());
+
+                result *= order.isAscending() ? 1 : -1;
+                if (result != 0)
+                    return result;
 
             }
 

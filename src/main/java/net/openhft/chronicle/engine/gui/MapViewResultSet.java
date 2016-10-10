@@ -32,7 +32,6 @@ public class MapViewResultSet<K, V> implements ResultSet {
         boolean success = iterator.hasNext() && count < pagelength;
         if (success) {
             entry = iterator.next();
-            System.out.println("" + count + "" + entry.getValue());
             count++;
         }
         return success;
