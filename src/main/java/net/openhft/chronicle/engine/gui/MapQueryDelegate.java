@@ -11,7 +11,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static net.openhft.chronicle.engine.map.VaadinLambda.*;
@@ -32,25 +35,17 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
     @Override
     public int getCount() throws SQLException {
 
-        if (filters.isEmpty())
+        if (filters.isEmpty() && orderBys.isEmpty())
             return mapView.size();
 
-        // todo improve this
-        Iterator<Map.Entry<K, V>> entryIterator = newIterator(0, filters);
-        int i = 0;
-
-        while (entryIterator.hasNext()) {
-            entryIterator.next();
-            i++;
-        }
-
-        return i;
+        Query<K, V> query = newQuery(0, filters);
+        return (int) (long) (Long) mapView.applyTo(countFunction(), query);
 
     }
 
     @Override
     public ResultSet getResults(int offset, int pageLength) throws SQLException {
-        Iterator<Map.Entry<K, V>> iterator = newIterator(offset, filters);
+        Iterator<Map.Entry<K, V>> iterator = newIterator(offset);
         int iteratorIndex = 0;
 
         while (offset > iteratorIndex && iterator.hasNext()) {
@@ -81,8 +76,17 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
     }
 
 
-    private Iterator<Map.Entry<K, V>> newIterator(int fromIndex,
-                                                  final List<Container.Filter> filters) {
+    private Iterator<Map.Entry<K, V>> newIterator(int fromIndex) {
+        if (fromIndex == 0 && filters.isEmpty() && orderBys.isEmpty()) {
+            return mapView.entrySet().iterator();
+        }
+
+        Query<K, V> query = newQuery(fromIndex, filters);
+        return mapView.applyTo(iteratorFunction(), query);
+    }
+
+    @NotNull
+    private Query<K, V> newQuery(int fromIndex, List<Container.Filter> filters) {
         final Query<K, V> query = new Query<>();
         query.fromIndex = fromIndex;
 
@@ -98,8 +102,7 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
         for (OrderBy orderBy : orderBys) {
             query.marshableOrderBy.add(toMarshableOrderBy(orderBy));
         }
-
-        return mapView.applyTo(iteratorFunction(), query);
+        return query;
     }
 
 
@@ -107,9 +110,6 @@ public class MapQueryDelegate<K, V> implements QueryDelegate {
     private MarshableOrderBy toMarshableOrderBy(OrderBy orderBy) {
         return new MarshableOrderBy(orderBy.getColumn(), orderBy.isAscending());
     }
-
-
-
 
     @Override
     public void setOrderBy(List<OrderBy> orderBys) throws UnsupportedOperationException {
