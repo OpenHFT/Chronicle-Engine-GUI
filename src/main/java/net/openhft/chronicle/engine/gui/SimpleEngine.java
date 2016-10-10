@@ -6,6 +6,8 @@ import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @author Rob Austin.
@@ -354,6 +356,15 @@ public class SimpleEngine {
         mapView.put("WST", "Samoan tala");
         mapView.put("XAF", "CFA franc BEAC");
         mapView.put("XAG", "Silver (one troy ounce)");
+
+        int i = 0;
+
+        Iterator<Map.Entry<String, String>> iterator = mapView.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            System.out.println("" + (i++) + iterator.next().getValue());
+        }
+
         return assetTree;
     }
 

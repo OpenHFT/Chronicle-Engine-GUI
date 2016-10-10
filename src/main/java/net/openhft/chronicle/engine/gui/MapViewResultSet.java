@@ -1,6 +1,7 @@
 package net.openhft.chronicle.engine.gui;
 
 import org.intellij.lang.annotations.MagicConstant;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -17,23 +18,29 @@ import java.util.Map;
 public class MapViewResultSet<K, V> implements ResultSet {
 
     private final Iterator<Map.Entry<K, V>> iterator;
+    private final double pagelength;
     private Map.Entry<K, V> entry;
+    private int count = 0;
 
-    MapViewResultSet(Iterator<Map.Entry<K, V>> iterator) {
+    MapViewResultSet(@NotNull Iterator<Map.Entry<K, V>> iterator, int pagelength) {
         this.iterator = iterator;
+        this.pagelength = pagelength;
     }
 
     @Override
     public boolean next() throws SQLException {
-        boolean success = iterator.hasNext();
-        if (success)
+        boolean success = iterator.hasNext() && count < pagelength;
+        if (success) {
             entry = iterator.next();
+            System.out.println("" + count + "" + entry.getValue());
+            count++;
+        }
         return success;
     }
 
     @Override
     public void close() throws SQLException {
-        throw new UnsupportedOperationException("todo");
+
     }
 
     @Override
@@ -223,17 +230,27 @@ public class MapViewResultSet<K, V> implements ResultSet {
 
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
-        throw new UnsupportedOperationException("todo");
+        return new KeyValueResultSetMetaData("key", "value");
     }
 
     @Override
     public Object getObject(int columnIndex) throws SQLException {
-        throw new UnsupportedOperationException("todo");
+        if (columnIndex == 1)
+            return entry.getKey();
+        if (columnIndex == 2)
+            return entry.getValue();
+
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Object getObject(String columnLabel) throws SQLException {
-        throw new UnsupportedOperationException("todo");
+        if ("key".equals(columnLabel))
+            return entry.getKey();
+        if ("value".equals(columnLabel))
+            return entry.getValue();
+
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -593,7 +610,7 @@ public class MapViewResultSet<K, V> implements ResultSet {
 
     @Override
     public Statement getStatement() throws SQLException {
-        throw new UnsupportedOperationException("todo");
+        return new MyStatement();
     }
 
     @Override

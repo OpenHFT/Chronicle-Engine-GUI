@@ -25,13 +25,13 @@ import static com.vaadin.ui.Grid.HeaderRow;
 /**
  * @author Rob Austin.
  */
-public class MapControl {
+public class MapControl<K, V> {
 
-
+    private final MapView mapView;
     private MapViewUI view;
 
-
-    public MapControl(MapView data, MapViewUI view, String path) {
+    public MapControl(MapView mapView, MapViewUI view, String path) {
+        this.mapView = mapView;
         this.view = view;
         view.path.setValue(path);
     }
@@ -39,10 +39,11 @@ public class MapControl {
     public void init() {
         view.gridHolder.removeAllComponents();
 
-        Container.Indexed data = createContainer();
+        //final Container.Indexed data = createContainer();
+        final Container.Indexed data = createContainer(new MapQueryDelegate<K, V>(mapView));
+        final GeneratedPropertyContainer generatedPropertyContainer = addDeleteButton(data);
 
-        GeneratedPropertyContainer generatedPropertyContainer = addDeleteButton(data);
-        Grid grid = new Grid(generatedPropertyContainer);
+        final Grid grid = new Grid(generatedPropertyContainer);
         grid.setWidth(100, Sizeable.Unit.PERCENTAGE);
         grid.setHeight(100, Sizeable.Unit.PERCENTAGE);
 
@@ -54,31 +55,28 @@ public class MapControl {
         deleteColumn.setWidth(100);
         deleteColumn.setLastFrozenColumn();
 
-        grid.setCellStyleGenerator(cellRef -> // Java 8
-                "delete".equals(cellRef.getPropertyId()) ?
-                        "rightalign" : null);
+        grid.setCellStyleGenerator(cellRef ->
+                "delete".equals(cellRef.getPropertyId()) ? "rightalign" : null);
 
-        deleteColumn
-                .setRenderer(new ButtonRenderer(e -> // Java 8
-                        grid.getContainerDataSource()
-                                .removeItem(e.getItemId())));
+        deleteColumn.setRenderer(
+                new ButtonRenderer(e -> grid.getContainerDataSource().removeItem(e.getItemId())));
 
         view.gridHolder.addComponent(grid);
 
-
         if (data instanceof Container.Filterable) {
+
             // Create a header row to hold column filters
             HeaderRow filterRow = grid.appendHeaderRow();
-
             Container.Filterable data1 = (Container.Filterable) data;
 
             // Set up a filter for all columns
             for (Object pid : grid.getContainerDataSource()
                     .getContainerPropertyIds()) {
+
                 if ("delete".equals(pid))
                     continue;
 
-                HeaderCell cell = filterRow.getCell(pid);
+                final HeaderCell cell = filterRow.getCell(pid);
 
                 // Have an input field to use for filter
                 TextField filterField = new TextField();
@@ -90,8 +88,8 @@ public class MapControl {
                     // Can't modify filters so need to replace
                     // data.removeContainerFilters(pid);
 
-
-                    Collection<SimpleStringFilter> containerFilters = (Collection) data1.getContainerFilters();
+                    final Collection<SimpleStringFilter> containerFilters = (Collection)
+                            data1.getContainerFilters();
 
                     Optional<SimpleStringFilter> first = containerFilters.stream().filter(x -> x.getPropertyId().equals(pid)).findFirst();
                     if (first.isPresent())
@@ -104,6 +102,7 @@ public class MapControl {
                                 new SimpleStringFilter(pid,
                                         change.getText(), true, false));
                 });
+
                 cell.setComponent(filterField);
             }
         }
@@ -158,9 +157,6 @@ public class MapControl {
             Jvm.rethrow(e);
         }
 
-        for (int i = 0; i < 1000; i++) {
-            container.addItem(new GridExampleBean("key=" + i, "value=" + i));
-        }
         return container;
     }
 
@@ -169,7 +165,6 @@ public class MapControl {
 
         gpc.addGeneratedProperty("delete",
                 new PropertyValueGenerator<String>() {
-
                     @Override
                     public String getValue(Item item, Object itemId, Object propertyId) {
                         return "Delete"; // The caption
