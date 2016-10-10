@@ -52,6 +52,7 @@ public class MapControl<K, V> {
         grid.setEditorEnabled(true);
         grid.setEditorBuffered(false);
         grid.setSizeFull();
+        grid.setSelectionMode(Grid.SelectionMode.NONE);
 
         mapView.registerSubscriber(mapEvent -> ((SQLContainer) data).refresh());
 
