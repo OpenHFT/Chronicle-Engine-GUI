@@ -12,14 +12,14 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Rob Austin.
  */
-public class TreeControl {
+public class TreeController {
 
     public static final String MAP_VIEW = "::map_view";
     public static final String QUEUE_VIEW = "::queue_view";
 
     final ItemClickEvent.ItemClickListener clickListener;
 
-    public TreeControl(AssetTree assetTree, TreeUI treeUI) {
+    public TreeController(AssetTree assetTree, TreeUI treeUI) {
 
         final Tree tree = treeUI.tree;
 
@@ -40,7 +40,7 @@ public class TreeControl {
                 final MapView<Object, Object> mapView =
                         assetTree.acquireMap(path, Object.class, Object.class);
 
-                MapControl MapControl = new MapControl(mapView, mapViewUI, path);
+                MapViewController MapControl = new MapViewController(mapView, mapViewUI, path);
                 MapControl.init();
 
             } else if (source.endsWith(MAP_VIEW)) {
@@ -71,7 +71,7 @@ public class TreeControl {
             tree.setParent(e.fullName(), e.assetName());
 
         tree.setItemIcon(e.fullName(), new StreamResource(
-                () -> TreeControl.class.getResourceAsStream("folder.png"), "folder"));
+                () -> TreeController.class.getResourceAsStream("folder.png"), "folder"));
 
         tree.setChildrenAllowed(e.fullName(), true);
 
@@ -80,7 +80,7 @@ public class TreeControl {
             tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
             tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
             tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
-                    () -> TreeControl.class.getResourceAsStream("map.png"), "map"));
+                    () -> TreeController.class.getResourceAsStream("map.png"), "map"));
             tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
         }
 
@@ -89,7 +89,7 @@ public class TreeControl {
             tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
             tree.setItemCaption(e.fullName() + QUEUE_VIEW, "queue");
             tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
-                    () -> TreeControl.class.getResourceAsStream("map.png"), "map"));
+                    () -> TreeController.class.getResourceAsStream("map.png"), "map"));
             tree.setChildrenAllowed(e.fullName() + QUEUE_VIEW, false);
         }
 

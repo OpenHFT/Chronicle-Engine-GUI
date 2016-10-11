@@ -10,11 +10,13 @@ import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
 import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.renderers.ImageRenderer;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.api.map.MapView;
+import net.openhft.chronicle.engine.map.ObjectSubscription;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -26,15 +28,34 @@ import static com.vaadin.ui.Grid.HeaderRow;
 /**
  * @author Rob Austin.
  */
-public class MapControl<K, V> {
+public class MapViewController<K, V> {
 
     private final MapView mapView;
     private MapViewUI view;
 
-    public MapControl(MapView mapView, MapViewUI view, String path) {
+    public MapViewController(MapView mapView, MapViewUI view, String path) {
         this.mapView = mapView;
         this.view = view;
         view.path.setValue(path);
+        view.recordCount.setValue(Long.toString(mapView.longSize()));
+        view.keyType.setValue(mapView.keyType().getSimpleName().toString());
+        view.valueType.setValue(mapView.valueType().getSimpleName().toString());
+        // view.valueType.setValue(mapView.g().getSimpleName().toString());
+        // mapView.
+
+        ObjectSubscription objectSubscription = mapView.asset().getView(ObjectSubscription.class);
+        view.topicSubscriberCount.setValue(Integer.toString(objectSubscription
+                .topicSubscriberCount()));
+        view.keySubscriberCount.setValue(Integer.toString(objectSubscription
+                .keySubscriberCount()));
+
+        view.entrySubscriberCount.setValue(Integer.toString(objectSubscription
+                .entrySubscriberCount()));
+
+        view.keyStoreValue.setValue(objectSubscription.getClass()
+                .getSimpleName().toString());
+
+
     }
 
     public void init() {
@@ -50,10 +71,17 @@ public class MapControl<K, V> {
 
         grid.getColumn("key").setMinimumWidth(100);
         grid.getColumn("value").setMinimumWidth(100);
+
         grid.setEditorEnabled(true);
         grid.setEditorBuffered(false);
         grid.setSizeFull();
         grid.setSelectionMode(Grid.SelectionMode.NONE);
+
+
+        view.addButton.addClickListener((Button.ClickListener) event -> {
+            mapView.put(view.addKey.getValue(), view.addValue.getValue());
+        });
+
 
         mapView.registerSubscriber(mapEvent -> ((SQLContainer) data).refresh());
 
@@ -71,12 +99,10 @@ public class MapControl<K, V> {
                 "delete".equals(cellRef.getPropertyId()) ? "rightalign" : null);
 
         ImageRenderer renderer = new ImageRenderer(e -> grid.getContainerDataSource().removeItem(e.getItemId()));
-
-        deleteColumn.setRenderer(
-                renderer);
-
+        deleteColumn.setRenderer(renderer);
 
         view.gridHolder.addComponent(grid);
+        grid.setHeight(100, Sizeable.Unit.PERCENTAGE);
 
         if (data instanceof Container.Filterable) {
 

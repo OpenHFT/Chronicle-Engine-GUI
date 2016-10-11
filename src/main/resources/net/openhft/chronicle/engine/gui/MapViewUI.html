@@ -8,7 +8,34 @@
   <vaadin-vertical-layout size-full> 
    <vaadin-horizontal-layout width-full margin-left margin-right margin-top> 
     <vaadin-image source="http://chronicle.software/wp-content/uploads/2014/03/ChronicleMap_100px_Rev2.png" style-name="myTableStyle" height="50px"></vaadin-image> 
-    <vaadin-grid-layout height="30px"> 
+    <vaadin-grid-layout spacing height="30px"> 
+     <row> 
+      <column> 
+       <vaadin-label style-name="bold" size-auto plain-text :middle>
+         EntrySubscriberCount 
+       </vaadin-label> 
+      </column> 
+      <column> 
+       <vaadin-label size-auto plain-text _id="entrySubscriberCount" :middle>
+         String 
+       </vaadin-label> 
+      </column> 
+     </row> 
+     <row> 
+      <column> 
+       <vaadin-label style-name="bold" size-auto plain-text :middle>
+         KeyStoreValue 
+       </vaadin-label> 
+      </column> 
+      <column> 
+       <vaadin-label size-auto plain-text _id="keyStoreValue" :middle>
+         String 
+       </vaadin-label> 
+      </column> 
+     </row> 
+     <row></row> 
+    </vaadin-grid-layout> 
+    <vaadin-grid-layout spacing height="30px"> 
      <row> 
       <column> 
        <vaadin-label style-name="bold" size-auto plain-text :middle>
@@ -35,15 +62,15 @@
      </row> 
      <row></row> 
     </vaadin-grid-layout> 
-    <vaadin-grid-layout height="30px"> 
+    <vaadin-grid-layout style-name="bold" spacing height="30px"> 
      <row> 
       <column> 
        <vaadin-label style-name="bold" size-auto plain-text :middle>
-         KeyType 
+         TopicSubscriberCount 
        </vaadin-label> 
       </column> 
       <column> 
-       <vaadin-label size-auto plain-text _id="path1" :middle>
+       <vaadin-label size-auto plain-text _id="topicSubscriberCount" :middle>
          String 
        </vaadin-label> 
       </column> 
@@ -51,18 +78,18 @@
      <row> 
       <column> 
        <vaadin-label style-name="bold" size-auto plain-text :middle>
-         ValueType 
+         KeySubscriberCount 
        </vaadin-label> 
       </column> 
       <column> 
-       <vaadin-label size-auto plain-text :middle>
+       <vaadin-label size-auto plain-text _id="keySubscriberCount" :middle>
          String 
        </vaadin-label> 
       </column> 
      </row> 
      <row></row> 
     </vaadin-grid-layout> 
-    <vaadin-grid-layout height="30px" :right> 
+    <vaadin-grid-layout spacing height="30px" :right> 
      <row> 
       <column> 
        <vaadin-label style-name="bold" size-auto plain-text :middle :right>
@@ -82,7 +109,7 @@
        </vaadin-label> 
       </column> 
       <column> 
-       <vaadin-label size-auto plain-text :middle :right>
+       <vaadin-label size-auto plain-text _id="recordCount" :middle :right>
          102,322 
        </vaadin-label> 
       </column> 
@@ -90,7 +117,16 @@
      <row></row> 
     </vaadin-grid-layout> 
    </vaadin-horizontal-layout> 
-   <vaadin-vertical-layout size-full margin _id="gridHolder" :expand></vaadin-vertical-layout> 
+   <vaadin-vertical-layout size-full :expand> 
+    <vaadin-vertical-layout style-name="bold" size-full margin _id="gridHolder" :expand></vaadin-vertical-layout> 
+    <vaadin-horizontal-layout spacing width-full margin-left margin-right margin-bottom :bottom :center> 
+     <vaadin-text-field width-full _id="addKey" :middle :expand></vaadin-text-field> 
+     <vaadin-text-field width-full _id="addValue" :middle :expand></vaadin-text-field> 
+     <vaadin-button plain-text _id="addButton">
+       Add 
+     </vaadin-button> 
+    </vaadin-horizontal-layout> 
+   </vaadin-vertical-layout> 
   </vaadin-vertical-layout>  
  </body>
 </html>

@@ -26,7 +26,7 @@ class MainControl {
 
 
         TreeUI treeUI = new TreeUI();
-        new TreeControl(assetTree, treeUI);
+        new TreeController(assetTree, treeUI);
 
         mainUI.treeButton.addClickListener(clickEvent -> {
             content.removeAllComponents();
