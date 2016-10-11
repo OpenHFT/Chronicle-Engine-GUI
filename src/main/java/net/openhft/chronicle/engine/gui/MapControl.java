@@ -2,16 +2,17 @@ package net.openhft.chronicle.engine.gui;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
+import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.renderers.ImageRenderer;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.api.map.MapView;
 
@@ -62,14 +63,18 @@ public class MapControl<K, V> {
 
         // Render a button that deletes the data row (item)
         final Grid.Column deleteColumn = grid.getColumn("delete");
-        deleteColumn.setWidth(100);
+        deleteColumn.setWidth(64);
         deleteColumn.setLastFrozenColumn();
+        deleteColumn.setHeaderCaption("");
 
         grid.setCellStyleGenerator(cellRef ->
                 "delete".equals(cellRef.getPropertyId()) ? "rightalign" : null);
 
+        ImageRenderer renderer = new ImageRenderer(e -> grid.getContainerDataSource().removeItem(e.getItemId()));
+
         deleteColumn.setRenderer(
-                new ButtonRenderer(e -> grid.getContainerDataSource().removeItem(e.getItemId())));
+                renderer);
+
 
         view.gridHolder.addComponent(grid);
 
@@ -118,45 +123,6 @@ public class MapControl<K, V> {
 
     }
 
-    public static class GridExampleBean {
-        private String key;
-        private String value;
-
-        public GridExampleBean() {
-        }
-
-        public GridExampleBean(String key, String value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public void setKey(String key) {
-            this.key = key;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-    }
-
-
-    public static Container.Indexed createContainer() {
-        BeanItemContainer<GridExampleBean> container = new BeanItemContainer<GridExampleBean>(
-                GridExampleBean.class);
-        for (int i = 0; i < 1000; i++) {
-            container.addItem(new GridExampleBean("key=" + i, "value=" + i));
-        }
-        return container;
-    }
-
 
     public static Container.Indexed createContainer(final QueryDelegate delegate) {
         Container.Indexed container = null;
@@ -173,15 +139,15 @@ public class MapControl<K, V> {
         final GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(container);
 
         gpc.addGeneratedProperty("delete",
-                new PropertyValueGenerator<String>() {
+                new PropertyValueGenerator<Resource>() {
                     @Override
-                    public String getValue(Item item, Object itemId, Object propertyId) {
-                        return "Delete"; // The caption
+                    public Resource getValue(Item item, Object itemId, Object propertyId) {
+                        return new ThemeResource("trash3.png");
                     }
 
                     @Override
-                    public Class<String> getType() {
-                        return String.class;
+                    public Class<Resource> getType() {
+                        return Resource.class;
                     }
                 });
 
