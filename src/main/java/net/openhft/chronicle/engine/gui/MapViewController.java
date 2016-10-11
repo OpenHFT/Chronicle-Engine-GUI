@@ -44,6 +44,15 @@ public class MapViewController<K, V> {
         // mapView.
 
         ObjectSubscription objectSubscription = mapView.asset().getView(ObjectSubscription.class);
+
+        onMapViewChange(view, objectSubscription);
+
+        objectSubscription.registerDownstream(changeEvent -> onMapViewChange(view, objectSubscription));
+
+
+    }
+
+    private void onMapViewChange(MapViewUI view, ObjectSubscription objectSubscription) {
         view.topicSubscriberCount.setValue(Integer.toString(objectSubscription
                 .topicSubscriberCount()));
         view.keySubscriberCount.setValue(Integer.toString(objectSubscription
@@ -54,8 +63,6 @@ public class MapViewController<K, V> {
 
         view.keyStoreValue.setValue(objectSubscription.getClass()
                 .getSimpleName().toString());
-
-
     }
 
     public void init() {
@@ -80,10 +87,15 @@ public class MapViewController<K, V> {
 
         view.addButton.addClickListener((Button.ClickListener) event -> {
             mapView.put(view.addKey.getValue(), view.addValue.getValue());
+            view.addKey.setValue("");
+            view.addValue.setValue("");
         });
 
 
-        mapView.registerSubscriber(mapEvent -> ((SQLContainer) data).refresh());
+        mapView.registerSubscriber(mapEvent -> {
+            ((SQLContainer) data).refresh();
+            view.recordCount.setValue(Long.toString(mapView.longSize()));
+        });
 
         if (data instanceof SQLContainer) {
             ((SQLContainer) data).setAutoCommit(true);

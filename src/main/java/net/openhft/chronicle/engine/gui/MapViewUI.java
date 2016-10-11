@@ -21,13 +21,13 @@ import com.vaadin.ui.TextField;
 @SuppressWarnings("serial")
 public class MapViewUI extends VerticalLayout {
     protected Label entrySubscriberCount;
-    protected Label keyStoreValue;
+    protected Label recordCount;
     protected Label keyType;
     protected Label valueType;
     protected Label topicSubscriberCount;
     protected Label keySubscriberCount;
     protected Label path;
-    protected Label recordCount;
+    protected Label keyStoreValue;
     protected VerticalLayout gridHolder;
     protected TextField addKey;
     protected TextField addValue;
