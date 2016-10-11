@@ -2,6 +2,7 @@ package net.openhft.chronicle.engine.gui;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
+import com.vaadin.data.Validator;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.filter.SimpleStringFilter;
@@ -15,6 +16,7 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.renderers.ImageRenderer;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.map.ObjectSubscription;
 
@@ -65,6 +67,9 @@ public class MapViewController<K, V> {
                 .getSimpleName().toString());
     }
 
+    boolean keyValid;
+    boolean valueValid;
+
     public void init() {
         view.gridHolder.removeAllComponents();
 
@@ -84,20 +89,75 @@ public class MapViewController<K, V> {
         grid.setSizeFull();
         grid.setSelectionMode(Grid.SelectionMode.NONE);
 
+        view.addKey.addValidator((Validator) value -> {
 
-        view.addButton.addClickListener((Button.ClickListener) event -> {
-            mapView.put(view.addKey.getValue(), view.addValue.getValue());
-            view.addKey.setValue("");
-            view.addValue.setValue("");
+            try {
+                if (value == "") {
+                    keyValid = false;
+                    return;
+                }
+                ObjectUtils.convertTo(mapView.keyType(), value);
+                keyValid = true;
+            } catch (ClassCastException e) {
+                keyValid = false;
+                throw new Validator.InvalidValueException("can not covert " + value + " to " + mapView.keyType());
+            } finally {
+                view.addButton.setEnabled(keyValid && valueValid);
+            }
+
         });
 
 
-        mapView.registerSubscriber(mapEvent -> {
+        view.addValue.addValidator((Validator) value -> {
+
+            try {
+                if (value == "") {
+                    valueValid = false;
+                    return;
+                }
+                ObjectUtils.convertTo(mapView.valueType(), value);
+                valueValid = true;
+            } catch (ClassCastException e) {
+                valueValid = false;
+                throw new Validator.InvalidValueException("can not covert " + value + " to " + mapView.valueType());
+
+            } finally {
+                view.addButton.setEnabled(keyValid && valueValid);
+            }
+
+        });
+
+
+        view.addButton.addClickListener((Button.ClickListener) event ->
+
+        {
+            String key = view.addKey.getValue();
+            String value = view.addValue.getValue();
+            Object k, v;
+            try {
+                k = ObjectUtils.convertTo(mapView.keyType(), key);
+                v = ObjectUtils.convertTo(mapView.valueType(), value);
+            } catch (ClassCastException e) {
+                return;
+            }
+
+            view.addKey.setValue("");
+            view.addValue.setValue("");
+
+            mapView.put(k, v);
+        });
+
+
+        mapView.registerSubscriber(mapEvent ->
+
+        {
             ((SQLContainer) data).refresh();
             view.recordCount.setValue(Long.toString(mapView.longSize()));
         });
 
-        if (data instanceof SQLContainer) {
+        if (data instanceof SQLContainer)
+
+        {
             ((SQLContainer) data).setAutoCommit(true);
         }
 
@@ -106,9 +166,13 @@ public class MapViewController<K, V> {
         deleteColumn.setWidth(64);
         deleteColumn.setLastFrozenColumn();
         deleteColumn.setHeaderCaption("");
+        deleteColumn.setEditable(false);
+        deleteColumn.setResizable(false);
 
         grid.setCellStyleGenerator(cellRef ->
-                "delete".equals(cellRef.getPropertyId()) ? "rightalign" : null);
+                "delete".
+
+                        equals(cellRef.getPropertyId()) ? "rightalign" : null);
 
         ImageRenderer renderer = new ImageRenderer(e -> grid.getContainerDataSource().removeItem(e.getItemId()));
         deleteColumn.setRenderer(renderer);
@@ -116,7 +180,9 @@ public class MapViewController<K, V> {
         view.gridHolder.addComponent(grid);
         grid.setHeight(100, Sizeable.Unit.PERCENTAGE);
 
-        if (data instanceof Container.Filterable) {
+        if (data instanceof Container.Filterable)
+
+        {
 
             // Create a header row to hold column filters
             final HeaderRow filterRow = grid.appendHeaderRow();

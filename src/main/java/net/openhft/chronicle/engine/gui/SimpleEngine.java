@@ -26,6 +26,15 @@ public class SimpleEngine {
             throw Jvm.rethrow(e);
         }
 
+
+        MapView<Integer, Double> intView = assetTree.acquireMap("/my/numbers", Integer.class, Double
+                .class);
+
+        for (int i = 0; i < 100; i++) {
+            intView.put(i, Double.valueOf(i));
+        }
+
+
         MapView<String, String> mapView = assetTree.acquireMap("/my/demo", String.class, String.class);
         mapView.put("AED", "United Arab Emirates dirham");
         mapView.put("AFN", "Afghan afghani");
@@ -354,7 +363,6 @@ public class SimpleEngine {
         mapView.put("WST", "Samoan tala");
         mapView.put("XAF", "CFA franc BEAC");
         mapView.put("XAG", "Silver (one troy ounce)");
-
 
 
         return assetTree;

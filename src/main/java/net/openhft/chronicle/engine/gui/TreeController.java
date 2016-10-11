@@ -6,6 +6,7 @@ import com.vaadin.ui.Tree;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
+import net.openhft.chronicle.engine.tree.QueueView;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,8 +38,8 @@ public class TreeController {
 
                 final String path = source.substring(0, source.length() - MAP_VIEW.length());
 
-                final MapView<Object, Object> mapView =
-                        assetTree.acquireMap(path, Object.class, Object.class);
+                final MapView<String, String> mapView =
+                        assetTree.acquireMap(path, String.class, String.class);
 
                 MapViewController MapControl = new MapViewController(mapView, mapViewUI, path);
                 MapControl.init();
@@ -84,7 +85,7 @@ public class TreeController {
             tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
         }
 
-        if (asset.getView(MapView.class) != null) {
+        if (asset.getView(QueueView.class) != null) {
             tree.addItem(e.fullName() + QUEUE_VIEW);
             tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
             tree.setItemCaption(e.fullName() + QUEUE_VIEW, "queue");
