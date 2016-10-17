@@ -8,6 +8,10 @@ import com.vaadin.data.util.sqlcontainer.query.OrderBy;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
 import net.openhft.chronicle.engine.api.column.Column;
 import net.openhft.chronicle.engine.api.column.ColumnView;
+import net.openhft.chronicle.engine.api.column.ColumnView.MarshableFilter;
+import net.openhft.chronicle.engine.api.column.ColumnView.MarshableOrderBy;
+import net.openhft.chronicle.engine.api.column.ColumnView.Query;
+import net.openhft.chronicle.engine.api.column.ColumnView.Type;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
@@ -18,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static net.openhft.chronicle.engine.map.VaadinLambda.*;
 
 /**
  * @author Rob Austin.
@@ -93,7 +96,8 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
         for (Container.Filter f : filters) {
             if (f instanceof SimpleStringFilter) {
                 SimpleStringFilter filter = (SimpleStringFilter) f;
-                Type type = Type.valueOf(filter.getPropertyId().toString().toLowerCase());
+                ColumnView.Type type = Type.valueOf(filter.getPropertyId().toString().toLowerCase
+                        ());
                 String filterString = filter.getFilterString();
                 query.marshableFilters.add(new MarshableFilter(type, filterString));
             }

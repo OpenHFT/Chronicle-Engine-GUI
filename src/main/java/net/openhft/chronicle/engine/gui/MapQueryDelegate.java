@@ -6,6 +6,10 @@ import com.vaadin.data.util.sqlcontainer.ColumnProperty;
 import com.vaadin.data.util.sqlcontainer.RowItem;
 import com.vaadin.data.util.sqlcontainer.query.OrderBy;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
+import net.openhft.chronicle.engine.api.column.ColumnView.MarshableFilter;
+import net.openhft.chronicle.engine.api.column.ColumnView.MarshableOrderBy;
+import net.openhft.chronicle.engine.api.column.ColumnView.Query;
+import net.openhft.chronicle.engine.api.column.ColumnView.Type;
 import net.openhft.chronicle.engine.api.map.MapView;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static net.openhft.chronicle.engine.map.VaadinLambda.*;
+import static net.openhft.chronicle.engine.map.VaadinLambda.countFunction;
+import static net.openhft.chronicle.engine.map.VaadinLambda.iteratorFunction;
 
 /**
  * @author Rob Austin.

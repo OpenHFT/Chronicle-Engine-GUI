@@ -160,7 +160,7 @@ public class ColumnViewController<K, V> {
             columnView.addRow(k, v);
         });
 
-        columnView.onCellChanged(mapEvent -> {
+        columnView.onRefresh(() -> {
             ((SQLContainer) data).refresh();
             view.recordCount.setValue(Long.toString(columnView.longSize()));
         });
