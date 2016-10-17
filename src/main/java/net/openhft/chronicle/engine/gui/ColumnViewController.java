@@ -6,7 +6,6 @@ import com.vaadin.data.Validator;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.filter.SimpleStringFilter;
-import com.vaadin.data.util.sqlcontainer.ColumnProperty;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
 import com.vaadin.server.Resource;
@@ -93,11 +92,7 @@ public class ColumnViewController<K, V> {
         grid.removeAllColumns();
         List<Column> columns = columnView.columns();
         for (Column column : columns) {
-            grid.addColumn(new ColumnProperty(column.name, column.readOnly, column
-                    .allowReadOnlyChange, column.nullable, column.primaryKey, null,
-                    column.type));
-
-
+            grid.addColumn(column.name);
         }
 
         grid.setEditorEnabled(true);
@@ -162,7 +157,7 @@ public class ColumnViewController<K, V> {
             view.addKey.setValue("");
             view.addValue.setValue("");
 
-            columnView.add(k, v);
+            columnView.addRow(k, v);
         });
 
         columnView.onCellChanged(mapEvent -> {
@@ -176,19 +171,21 @@ public class ColumnViewController<K, V> {
             ((SQLContainer) data).setAutoCommit(true);
         }
 
-        // Render a button that deletes the data row (item)
-        final Grid.Column deleteColumn = grid.getColumn("delete");
-        deleteColumn.setWidth(64);
-        deleteColumn.setLastFrozenColumn();
-        deleteColumn.setHeaderCaption("");
-        deleteColumn.setEditable(false);
-        deleteColumn.setResizable(false);
+        if (columnView.canDeleteRow()) {
+            // Render a button that deletes the data row (item)
+            final Grid.Column deleteColumn = grid.addColumn("delete");
+            deleteColumn.setWidth(64);
+            deleteColumn.setLastFrozenColumn();
+            deleteColumn.setHeaderCaption("");
+            deleteColumn.setEditable(false);
+            deleteColumn.setResizable(false);
 
-        grid.setCellStyleGenerator(cellRef ->
-                "delete".equals(cellRef.getPropertyId()) ? "rightalign" : null);
+            grid.setCellStyleGenerator(cellRef ->
+                    "delete".equals(cellRef.getPropertyId()) ? "rightalign" : null);
 
-        ImageRenderer renderer = new ImageRenderer(e -> grid.getContainerDataSource().removeItem(e.getItemId()));
-        deleteColumn.setRenderer(renderer);
+            ImageRenderer renderer = new ImageRenderer(e -> grid.getContainerDataSource().removeItem(e.getItemId()));
+            deleteColumn.setRenderer(renderer);
+        }
 
         view.gridHolder.addComponent(grid);
         grid.setHeight(100, Sizeable.Unit.PERCENTAGE);

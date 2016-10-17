@@ -3,6 +3,7 @@ package net.openhft.chronicle.engine.gui;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Tree;
+import net.openhft.chronicle.engine.api.column.ColumnView;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
@@ -38,15 +39,18 @@ public class TreeController {
 
                 final String path = source.substring(0, source.length() - MAP_VIEW.length());
 
-                final MapView<String, String> mapView =
-                        assetTree.acquireMap(path, String.class, String.class);
+                //   final MapView<String, String> view =
+                //         assetTree.acquireMap(path, String.class, String.class);
 
-                MapViewController MapControl = new MapViewController(mapView, mapViewUI, path);
-                MapControl.init();
+                Asset asset = assetTree.acquireAsset(path);
+                ColumnView view = asset.getView(ColumnView.class);
 
-            } else if (source.endsWith(MAP_VIEW)) {
+                ColumnViewController mapControl = new ColumnViewController(view, mapViewUI, path);
+                mapControl.init();
 
-                String path = source.substring(0, source.length() - MAP_VIEW.length());
+            } else if (source.endsWith(QUEUE_VIEW)) {
+
+                String path = source.substring(0, source.length() - QUEUE_VIEW.length());
                 treeUI.contents.addComponent(new MapViewUI());
             }
 
