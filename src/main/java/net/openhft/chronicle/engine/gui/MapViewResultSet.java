@@ -1,5 +1,6 @@
 package net.openhft.chronicle.engine.gui;
 
+import net.openhft.chronicle.engine.api.column.Row;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,6 +11,7 @@ import java.net.URL;
 import java.sql.*;
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,14 +19,16 @@ import java.util.Map;
  */
 public class MapViewResultSet<K, V> implements ResultSet {
 
-    private final Iterator<? extends Map.Entry<K, ?>>  iterator;
+    private final Iterator<Row> iterator;
     private final double pagelength;
-    private Map.Entry<K, ?> entry;
+    private Row entry;
     private int count = 0;
+    private List<String> columnNames;
 
-    MapViewResultSet(@NotNull Iterator<? extends Map.Entry<K, ?>> iterator, int pagelength) {
+    MapViewResultSet(@NotNull Iterator<Row> iterator, int pagelength, final List<String> columnNames) {
         this.iterator = iterator;
         this.pagelength = pagelength;
+        this.columnNames = columnNames;
     }
 
     @Override
@@ -49,11 +53,11 @@ public class MapViewResultSet<K, V> implements ResultSet {
 
     @Override
     public String getString(int columnIndex) throws SQLException {
-        if (columnIndex == 1)
+    /*    if (columnIndex == 1)
             return entry.getKey().toString();
         if (columnIndex == 2)
             return entry.getValue().toString();
-
+*/
         throw new UnsupportedOperationException();
     }
 
@@ -229,27 +233,17 @@ public class MapViewResultSet<K, V> implements ResultSet {
 
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
-        return new KeyValueResultSetMetaData("key", "value");
+        return new KeyValueResultSetMetaData(columnNames);
     }
 
     @Override
     public Object getObject(int columnIndex) throws SQLException {
-        if (columnIndex == 1)
-            return entry.getKey();
-        if (columnIndex == 2)
-            return entry.getValue();
-
-        throw new UnsupportedOperationException();
+        return entry.cell(columnIndex - 1);
     }
 
     @Override
     public Object getObject(String columnLabel) throws SQLException {
-        if ("key".equals(columnLabel))
-            return entry.getKey();
-        if ("value".equals(columnLabel))
-            return entry.getValue();
-
-        throw new UnsupportedOperationException();
+        return entry.cell(columnLabel);
     }
 
     @Override

@@ -2,7 +2,6 @@ package net.openhft.chronicle.engine.gui;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -12,8 +11,8 @@ public class KeyValueResultSetMetaData implements ResultSetMetaData {
 
     private final List<String> columns;
 
-    public KeyValueResultSetMetaData(String... columns) {
-        this.columns = Arrays.asList(columns);
+    public KeyValueResultSetMetaData(List<String> columnNames) {
+        this.columns = columnNames;
     }
 
     @Override

@@ -12,6 +12,7 @@ import net.openhft.chronicle.engine.api.column.ColumnView.MarshableFilter;
 import net.openhft.chronicle.engine.api.column.ColumnView.MarshableOrderBy;
 import net.openhft.chronicle.engine.api.column.ColumnView.Query;
 import net.openhft.chronicle.engine.api.column.ColumnView.Type;
+import net.openhft.chronicle.engine.api.column.Row;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
@@ -19,7 +20,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Collections.singletonList;
 
@@ -43,12 +43,11 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
             return (int) columnView.longSize();
 
         return columnView.size(newQuery(0, filters));
-
     }
 
     @Override
     public ResultSet getResults(int offset, int pageLength) throws SQLException {
-        Iterator<? extends Map.Entry<K, ?>> iterator = newIterator(offset);
+        Iterator<Row> iterator = newIterator(offset);
         int iteratorIndex = 0;
 
         while (offset > iteratorIndex && iterator.hasNext()) {
@@ -56,7 +55,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
             iteratorIndex++;
         }
 
-        return new MapViewResultSet<K, V>(iterator, pageLength);
+        return new MapViewResultSet<K, V>(iterator, pageLength,  columnView.columnNames());
     }
 
 
@@ -79,11 +78,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
     }
 
 
-    private Iterator<? extends Map.Entry<K, ?>> newIterator(int fromIndex) {
-        if (fromIndex == 0 && filters.isEmpty() && orderBys.isEmpty()) {
-            return columnView.entrySet().iterator();
-        }
-
+    private Iterator<Row> newIterator(int fromIndex) {
         Query<K> query = newQuery(fromIndex, filters);
         return columnView.iterator(query);
     }
@@ -145,7 +140,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
         final Object oldKey = column.getOldValue();
 
         for (Column c : columnView.columns()) {
-            final ColumnProperty cp = (ColumnProperty) row.getItemProperty(c);
+            final ColumnProperty cp = (ColumnProperty) row.getItemProperty(c.name);
             if (cp.isModified())
 
                 columnView.onCellChanged(
