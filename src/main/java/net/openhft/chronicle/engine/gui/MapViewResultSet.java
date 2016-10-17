@@ -17,12 +17,12 @@ import java.util.Map;
  */
 public class MapViewResultSet<K, V> implements ResultSet {
 
-    private final Iterator<Map.Entry<K, V>> iterator;
+    private final Iterator<? extends Map.Entry<K, ?>>  iterator;
     private final double pagelength;
-    private Map.Entry<K, V> entry;
+    private Map.Entry<K, ?> entry;
     private int count = 0;
 
-    MapViewResultSet(@NotNull Iterator<Map.Entry<K, V>> iterator, int pagelength) {
+    MapViewResultSet(@NotNull Iterator<? extends Map.Entry<K, ?>> iterator, int pagelength) {
         this.iterator = iterator;
         this.pagelength = pagelength;
     }
