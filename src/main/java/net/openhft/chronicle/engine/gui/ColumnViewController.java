@@ -123,7 +123,7 @@ class ColumnViewController<K, V> {
                     field = new TextField(column.name);
                 }
 
-                if (column.name.equals("key"))
+                if (column.primaryKey)
                     field.setRequired(true);
                 if (column.type == boolean.class) {
                     field.setValue(Boolean.FALSE.toString());
