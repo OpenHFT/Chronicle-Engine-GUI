@@ -11,7 +11,6 @@ import net.openhft.chronicle.engine.api.column.ColumnView;
 import net.openhft.chronicle.engine.api.column.ColumnView.MarshableFilter;
 import net.openhft.chronicle.engine.api.column.ColumnView.MarshableOrderBy;
 import net.openhft.chronicle.engine.api.column.ColumnView.Query;
-import net.openhft.chronicle.engine.api.column.ColumnView.Type;
 import net.openhft.chronicle.engine.api.column.Row;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,7 +41,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
         if (filters.isEmpty() && orderBys.isEmpty())
             return (int) columnView.longSize();
 
-        return columnView.size(newQuery(0, filters));
+        return columnView.size(toQuery(0, filters));
     }
 
     @Override
@@ -55,7 +54,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
             iteratorIndex++;
         }
 
-        return new MapViewResultSet<K, V>(iterator, pageLength,  columnView.columnNames());
+        return new MapViewResultSet<K, V>(iterator, pageLength, columnView.columnNames());
     }
 
 
@@ -79,22 +78,21 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
 
 
     private Iterator<Row> newIterator(int fromIndex) {
-        Query<K> query = newQuery(fromIndex, filters);
+        Query<K> query = toQuery(fromIndex, filters);
         return columnView.iterator(query);
     }
 
     @NotNull
-    private Query<K> newQuery(int fromIndex, List<Container.Filter> filters) {
+    private Query<K> toQuery(int fromIndex, List<Container.Filter> filters) {
         final Query<K> query = new Query<>();
         query.fromIndex = fromIndex;
 
-        for (Container.Filter f : filters) {
-            if (f instanceof SimpleStringFilter) {
-                SimpleStringFilter filter = (SimpleStringFilter) f;
-                ColumnView.Type type = Type.valueOf(filter.getPropertyId().toString().toLowerCase
-                        ());
-                String filterString = filter.getFilterString();
-                query.marshableFilters.add(new MarshableFilter(type, filterString));
+        for (Container.Filter filter0 : filters) {
+            if (filter0 instanceof SimpleStringFilter) {
+                SimpleStringFilter filter = (SimpleStringFilter) filter0;
+                query.marshableFilters.add(
+                        new MarshableFilter(filter.getPropertyId().toString(),
+                                filter.getFilterString()));
             }
         }
 
@@ -133,7 +131,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
     public int storeRow(RowItem row) throws UnsupportedOperationException, SQLException {
         int count = 0;
         if (!row.isModified())
-            return 0;
+            return count;
 
         final ColumnProperty column = (ColumnProperty) row.getItemProperty("key");
         final Object key = column.getValue();
@@ -141,7 +139,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
 
         for (Column c : columnView.columns()) {
             final ColumnProperty cp = (ColumnProperty) row.getItemProperty(c.name);
-            if (cp.isModified())
+            if (cp.isModified()) {
 
                 columnView.onCellChanged(
                         c.name,
@@ -149,7 +147,8 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
                         (K) oldKey,
                         cp.getValue(),
                         cp.getOldValue());
-            count++;
+                count = 1;
+            }
         }
 
         return count;
