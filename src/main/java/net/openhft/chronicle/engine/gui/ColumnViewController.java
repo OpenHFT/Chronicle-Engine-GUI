@@ -96,9 +96,8 @@ class ColumnViewController<K, V> {
 
         view.addButton.addClickListener((ClickListener) event -> {
 
-
             // Create a sub-window and set the content
-            Window subWindow = new Window("Add New Row");
+            Window subWindow = new Window("Add Row");
             subWindow.setClosable(false);
             subWindow.setModal(true);
             subWindow.setResizeLazy(true);
@@ -114,20 +113,19 @@ class ColumnViewController<K, V> {
             for (Column column : columns1) {
 
                 AbstractField field;
-                if (column.type == Date.class) {
+                if (column.type == Date.class)
                     field = new DateField(column.name);
-                }
-                if (column.type == boolean.class) {
+
+                if (column.type == boolean.class)
                     field = new CheckBox(column.name);
-                } else {
+                else
                     field = new TextField(column.name);
-                }
 
                 if (column.primaryKey)
                     field.setRequired(true);
-                if (column.type == boolean.class) {
-                    field.setValue(Boolean.FALSE.toString());
-                } else if (column.type.isPrimitive() || Number.class.isAssignableFrom(column.type))
+                if (column.type == boolean.class)
+                    field.setValue(false);
+                else if (column.type.isPrimitive() || Number.class.isAssignableFrom(column.type))
                     field.setValue(ObjectUtils.convertTo(column.type, 0).toString());
 
                 field.addValidator((Validator) value -> {
@@ -147,7 +145,7 @@ class ColumnViewController<K, V> {
             final Button cancel = new Button("Cancel");
             cancel.addClickListener((ClickListener) event1 -> subWindow.close());
             buttons.addComponent(cancel);
-            final Button ok = new Button("Ok");
+            final Button ok = new Button("Add");
             ok.addClickListener((ClickListener) event1 -> subWindow.close());
             buttons.addComponent(ok);
             buttons.setComponentAlignment(ok, Alignment.MIDDLE_RIGHT);
@@ -162,8 +160,6 @@ class ColumnViewController<K, V> {
             // Open it in the UI
             UI.getCurrent().addWindow(subWindow);
 
-
-            //    columnView.addRow(k, v);
         });
 
         columnView.registerChangeListener(() -> {
