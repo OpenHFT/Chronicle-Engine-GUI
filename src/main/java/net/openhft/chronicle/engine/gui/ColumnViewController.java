@@ -11,9 +11,8 @@ import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
 import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.TextField;
+import com.vaadin.ui.*;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.renderers.ImageRenderer;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -24,6 +23,7 @@ import net.openhft.chronicle.engine.map.ObjectSubscription;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,64 +93,77 @@ class ColumnViewController<K, V> {
         grid.setSizeFull();
         grid.setSelectionMode(Grid.SelectionMode.NONE);
 
-        view.addKey.addValidator((Validator) value -> {
 
-            try {
-                if (value == "") {
-                    keyValid = false;
-                    return;
+        view.addButton.addClickListener((ClickListener) event -> {
+
+
+            // Create a sub-window and set the content
+            Window subWindow = new Window("Add New Row");
+            subWindow.setClosable(false);
+            subWindow.setModal(true);
+            subWindow.setResizeLazy(true);
+            subWindow.setResizable(false);
+            subWindow.setSizeUndefined();
+            subWindow.setWidth(300, Sizeable.Unit.PIXELS);
+            subWindow.setDraggable(true);
+
+            FormLayout form = new FormLayout();
+            form.setMargin(true);
+
+            final List<Column> columns1 = columnView.columns();
+            for (Column column : columns1) {
+
+                AbstractField field;
+                if (column.type == Date.class) {
+                    field = new DateField(column.name);
+                }
+                if (column.type == boolean.class) {
+                    field = new CheckBox(column.name);
+                } else {
+                    field = new TextField(column.name);
                 }
 
-                ObjectUtils.convertTo(type("key"), value);
+                if (column.name.equals("key"))
+                    field.setRequired(true);
+                if (column.type == boolean.class) {
+                    field.setValue(Boolean.FALSE.toString());
+                } else if (column.type.isPrimitive() || Number.class.isAssignableFrom(column.type))
+                    field.setValue(ObjectUtils.convertTo(column.type, 0).toString());
 
-                keyValid = true;
-            } catch (ClassCastException e) {
-                keyValid = false;
-                throw new Validator.InvalidValueException("can not covert " + value + " to " + type("key"));
-            } finally {
-                view.addButton.setEnabled(keyValid && valueValid);
+                field.addValidator((Validator) value -> {
+                    try {
+                        ObjectUtils.convertTo(column.type, value);
+                    } catch (Exception e) {
+                        throw new Validator.InvalidValueException("can not convert to " + column.type.getSimpleName());
+                    }
+                });
+
+                form.addComponent(field);
             }
 
-        });
+            final HorizontalLayout buttons = new HorizontalLayout();
+            buttons.setMargin(true);
+            buttons.setSpacing(true);
+            final Button cancel = new Button("Cancel");
+            cancel.addClickListener((ClickListener) event1 -> subWindow.close());
+            buttons.addComponent(cancel);
+            final Button ok = new Button("Ok");
+            ok.addClickListener((ClickListener) event1 -> subWindow.close());
+            buttons.addComponent(ok);
+            buttons.setComponentAlignment(ok, Alignment.MIDDLE_RIGHT);
+            buttons.setComponentAlignment(cancel, Alignment.MIDDLE_RIGHT);
+            form.addComponent(buttons);
+            subWindow.setContent(form);
 
 
-        view.addValue.addValidator((Validator) value -> {
-            Class type = null;
-            try {
-                if (value == "") {
-                    valueValid = false;
-                    return;
-                }
-                ObjectUtils.convertTo(type("value"), value);
+            // Center it in the browser window
+            subWindow.center();
 
-                valueValid = true;
-            } catch (ClassCastException e) {
-                valueValid = false;
-                throw new Validator.InvalidValueException("can not covert " + value + " to " + type);
-            } finally {
-                view.addButton.setEnabled(keyValid && valueValid);
-            }
-
-        });
+            // Open it in the UI
+            UI.getCurrent().addWindow(subWindow);
 
 
-        view.addButton.addClickListener((Button.ClickListener) event ->
-
-        {
-            String key = view.addKey.getValue();
-            String value = view.addValue.getValue();
-            Object k, v;
-            try {
-                k = ObjectUtils.convertTo(type("value"), key);
-                v = ObjectUtils.convertTo(type("value"), value);
-            } catch (ClassCastException e) {
-                return;
-            }
-
-            view.addKey.setValue("");
-            view.addValue.setValue("");
-
-            columnView.addRow(k, v);
+            //    columnView.addRow(k, v);
         });
 
         columnView.registerChangeListener(() -> {
@@ -158,9 +171,7 @@ class ColumnViewController<K, V> {
             view.recordCount.setValue(Long.toString(columnView.longSize()));
         });
 
-        if (data instanceof SQLContainer)
-
-        {
+        if (data instanceof SQLContainer) {
             ((SQLContainer) data).setAutoCommit(true);
         }
 
@@ -275,3 +286,4 @@ class ColumnViewController<K, V> {
 
 
 }
+

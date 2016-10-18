@@ -35,33 +35,6 @@
      </row> 
      <row></row> 
     </vaadin-grid-layout> 
-    <vaadin-grid-layout spacing height="30px"> 
-     <row> 
-      <column> 
-       <vaadin-label style-name="bold" size-auto plain-text :middle>
-         KeyType 
-       </vaadin-label> 
-      </column> 
-      <column> 
-       <vaadin-label size-auto plain-text _id="keyType" :middle>
-         String 
-       </vaadin-label> 
-      </column> 
-     </row> 
-     <row> 
-      <column> 
-       <vaadin-label style-name="bold" size-auto plain-text :middle>
-         ValueType 
-       </vaadin-label> 
-      </column> 
-      <column> 
-       <vaadin-label size-auto plain-text _id="valueType" :middle>
-         String 
-       </vaadin-label> 
-      </column> 
-     </row> 
-     <row></row> 
-    </vaadin-grid-layout> 
     <vaadin-grid-layout style-name="bold" spacing height="30px"> 
      <row> 
       <column> 
@@ -120,9 +93,7 @@
    <vaadin-vertical-layout size-full :expand> 
     <vaadin-vertical-layout style-name="bold" size-full margin _id="gridHolder" :expand></vaadin-vertical-layout> 
     <vaadin-horizontal-layout spacing width-full margin-left margin-right margin-bottom :bottom :center> 
-     <vaadin-text-field width-full _id="addKey" :middle :expand></vaadin-text-field> 
-     <vaadin-text-field width-full _id="addValue" :middle :expand></vaadin-text-field> 
-     <vaadin-button plain-text _id="addButton">
+     <vaadin-button plain-text _id="addButton" :middle :right>
        Add 
      </vaadin-button> 
     </vaadin-horizontal-layout> 
