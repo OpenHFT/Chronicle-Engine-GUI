@@ -78,13 +78,13 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
 
 
     private Iterator<Row> newIterator(int fromIndex) {
-        Query<K> query = toQuery(fromIndex, filters);
+        Query query = toQuery(fromIndex, filters);
         return columnView.iterator(query);
     }
 
     @NotNull
-    private Query<K> toQuery(int fromIndex, List<Container.Filter> filters) {
-        final Query<K> query = new Query<>();
+    private Query toQuery(int fromIndex, List<Container.Filter> filters) {
+        final Query query = new Query();
         query.fromIndex = fromIndex;
 
         for (Container.Filter filter0 : filters) {

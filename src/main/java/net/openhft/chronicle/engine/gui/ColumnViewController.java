@@ -19,6 +19,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.engine.api.column.Column;
 import net.openhft.chronicle.engine.api.column.ColumnView;
+import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.map.ObjectSubscription;
 
 import java.sql.SQLException;
@@ -32,33 +33,25 @@ import static com.vaadin.ui.Grid.HeaderRow;
 /**
  * @author Rob Austin.
  */
-public class ColumnViewController<K, V> {
+class ColumnViewController<K, V> {
 
     private final ColumnView columnView;
     private MapViewUI view;
 
-    public ColumnViewController(ColumnView columnView, MapViewUI view, String path) {
+    ColumnViewController(ColumnView columnView, MapViewUI view, String path) {
         this.columnView = columnView;
         this.view = view;
         view.path.setValue(path);
         view.recordCount.setValue(Long.toString(columnView.longSize()));
 
+        if (columnView instanceof MapView) {
+            ObjectSubscription objectSubscription = ((MapView) columnView).asset().getView
+                    (ObjectSubscription.class);
 
-        // write the column types in the header
-        List<Column> columns = columnView.columns();
-        if (columns.size() > 0 && "key".equals(columns.get(0).name))
-            view.keyType.setValue(columns.get(0).type.getSimpleName().toString());
+            onMapViewChange(view, objectSubscription);
 
-        if (columns.size() > 1 && "value".equals(columnView.columns().get(1))) {
-            view.valueType.setValue(columns.get(1).type.getSimpleName().toString());
+            objectSubscription.registerDownstream(changeEvent -> onMapViewChange(view, objectSubscription));
         }
-
-        ObjectSubscription objectSubscription = columnView.asset().getView(ObjectSubscription.class);
-
-        onMapViewChange(view, objectSubscription);
-
-        objectSubscription.registerDownstream(changeEvent -> onMapViewChange(view, objectSubscription));
-
 
     }
 
@@ -71,8 +64,7 @@ public class ColumnViewController<K, V> {
         view.entrySubscriberCount.setValue(Integer.toString(objectSubscription
                 .entrySubscriberCount()));
 
-        view.keyStoreValue.setValue(objectSubscription.getClass()
-                .getSimpleName().toString());
+        view.keyStoreValue.setValue(objectSubscription.getClass().getSimpleName());
     }
 
     boolean keyValid;
@@ -93,7 +85,7 @@ public class ColumnViewController<K, V> {
         List<Column> columns = columnView.columns();
         for (Column column : columns) {
             final Grid.Column column1 = grid.addColumn(column.name);
-          //  column1.set(column.hi)
+            //  column1.set(column.hi)
         }
 
         grid.setEditorEnabled(true);
@@ -161,7 +153,7 @@ public class ColumnViewController<K, V> {
             columnView.addRow(k, v);
         });
 
-        columnView.onRefresh(() -> {
+        columnView.registerChangeListener(() -> {
             ((SQLContainer) data).refresh();
             view.recordCount.setValue(Long.toString(columnView.longSize()));
         });
@@ -251,12 +243,12 @@ public class ColumnViewController<K, V> {
     }
 
 
-    public static Container.Indexed createContainer(final QueryDelegate delegate) {
+    private static Container.Indexed createContainer(final QueryDelegate delegate) {
         Container.Indexed container = null;
         try {
             container = new SQLContainer(delegate);
         } catch (SQLException e) {
-            Jvm.rethrow(e);
+            throw Jvm.rethrow(e);
         }
 
         return container;

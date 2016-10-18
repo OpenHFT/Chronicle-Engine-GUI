@@ -238,12 +238,12 @@ public class MapViewResultSet<K, V> implements ResultSet {
 
     @Override
     public Object getObject(int columnIndex) throws SQLException {
-        return entry.cell(columnIndex - 1);
+        return entry.get(columnIndex - 1);
     }
 
     @Override
     public Object getObject(String columnLabel) throws SQLException {
-        return entry.cell(columnLabel);
+        return entry.get(columnLabel);
     }
 
     @Override
