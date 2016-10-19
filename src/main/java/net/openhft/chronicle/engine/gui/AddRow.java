@@ -12,6 +12,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import static java.util.Collections.EMPTY_MAP;
+
 /**
  * @author Rob Austin.
  */
@@ -97,7 +99,7 @@ public class AddRow {
                 row.put(field.getCaption(), ObjectUtils.convertTo((Class) field.getData(), field
                         .getValue()));
             }
-            columnView.addRow(row);
+            columnView.changedRow(row, EMPTY_MAP);
             subWindow.close();
         });
         buttons.addComponent(add);

@@ -16,11 +16,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import static java.util.Collections.singletonList;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Rob Austin.
@@ -39,7 +36,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
     public int getCount() throws SQLException {
 
         if (filters.isEmpty() && orderBys.isEmpty())
-            return (int) columnView.rowCount(null);
+            return columnView.rowCount(null);
 
         return columnView.rowCount(toQuery(0, filters));
     }
@@ -129,36 +126,30 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
      */
     @Override
     public int storeRow(RowItem row) throws UnsupportedOperationException, SQLException {
-        int count = 0;
-        if (!row.isModified())
-            return count;
 
-        final ColumnProperty column = (ColumnProperty) row.getItemProperty("key");
-        final Object key = column.getValue();
-        final Object oldKey = column.getOldValue();
+        final Map<String, Object> oldRow = new HashMap<>();
+        final Map<String, Object> newRow = new HashMap<>();
 
         for (Column c : columnView.columns()) {
             final ColumnProperty cp = (ColumnProperty) row.getItemProperty(c.name);
-            if (cp.isModified()) {
-
-                columnView.onRowChanged(
-                        c.name,
-                        (K) key,
-                        (K) oldKey,
-                        cp.getValue(),
-                        cp.getOldValue());
-                count = 1;
-            }
+            newRow.put(c.name, cp.getValue());
+            oldRow.put(c.name, cp.getOldValue());
         }
 
-        return count;
+        return columnView.changedRow(newRow, oldRow);
     }
 
     @Override
     public boolean removeRow(RowItem row) throws UnsupportedOperationException, SQLException {
-        ColumnProperty keyP = (ColumnProperty) row.getItemProperty("key");
-        final K key = (K) keyP.getValue();
-        return columnView.removeRow(Collections.singletonMap("key", key));
+
+        final Map<String, Object> oldRow = new HashMap<>();
+
+        for (Column c : columnView.columns()) {
+            final ColumnProperty cp = (ColumnProperty) row.getItemProperty(c.name);
+            oldRow.put(c.name, cp.getOldValue());
+        }
+
+        return columnView.changedRow(Collections.EMPTY_MAP, oldRow) == 1;
 
     }
 
@@ -179,13 +170,12 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
 
     @Override
     public List<String> getPrimaryKeyColumns() {
-        return singletonList("key");
+        return columnView.columns().stream()
+                .filter(c -> c.primaryKey).map(c -> c.name)
+                .collect(Collectors.toList());
     }
 
-
     public boolean containsRowWithKey(Object... keys) throws SQLException {
-        throw new UnsupportedOperationException();
-        //return columnView.containsRowWithKey(keys)
-
+        return columnView.containsRowWithKey(keys);
     }
 }
