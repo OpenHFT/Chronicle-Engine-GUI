@@ -43,7 +43,7 @@ public class TreeController {
                 //         assetTree.acquireMap(path, String.class, String.class);
 
                 Asset asset = assetTree.acquireAsset(path);
-                ColumnView view = asset.getView(ColumnView.class);
+                ColumnView view = asset.acquireView(ColumnView.class);
 
                 ColumnViewController mapControl = new ColumnViewController(view, mapViewUI, path);
                 mapControl.init();

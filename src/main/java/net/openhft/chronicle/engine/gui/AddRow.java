@@ -65,7 +65,6 @@ public class AddRow {
 
             field.addValidator((Validator) value -> {
                 try {
-
                     if (column.type == Date.class && (value == null || value.equals("")))
                         throw new Validator.InvalidValueException("can not convert to Date");
                     if (!(column.type.isAssignableFrom(value.getClass())))
