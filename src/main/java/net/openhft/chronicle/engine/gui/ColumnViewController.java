@@ -73,8 +73,7 @@ class ColumnViewController<K, V> {
         grid.removeAllColumns();
         List<Column> columns = columnView.columns();
         for (Column column : columns) {
-            final Grid.Column column1 = grid.addColumn(column.name);
-            //  column1.set(column.hi)
+            grid.addColumn(column.name);
         }
 
         grid.setEditorEnabled(true);
