@@ -25,10 +25,13 @@ class MapViewResultSet<K, V> implements ResultSet {
     private final double pagelength;
     private Row entry;
     private int count = 0;
+
+    @NotNull
     private List<Column> columns;
 
-    MapViewResultSet(@NotNull Iterator<Row> iterator, int pagelength, final List<Column>
-            columns) {
+    MapViewResultSet(@NotNull Iterator<Row> iterator,
+                     int pagelength,
+                     final @NotNull List<Column> columns) {
         this.iterator = iterator;
         this.pagelength = pagelength;
         this.columns = columns;

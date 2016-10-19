@@ -45,11 +45,11 @@ class ColumnViewController<K, V> {
         view.recordCount.setValue(Long.toString(columnView.rowCount(null)));
 
         final ObjectSubscription objectSubscription = columnView.objectSubscription();
-        onMapViewChange(view, objectSubscription);
-        objectSubscription.registerDownstream(changeEvent -> onMapViewChange(view, objectSubscription));
+        onChange(view, objectSubscription);
+        objectSubscription.registerDownstream(changeEvent -> onChange(view, objectSubscription));
     }
 
-    private void onMapViewChange(@NotNull MapViewUI view, @NotNull ObjectSubscription objectSubscription) {
+    private void onChange(@NotNull MapViewUI view, @NotNull ObjectSubscription objectSubscription) {
         view.topicSubscriberCount.setValue(Integer.toString(objectSubscription
                 .topicSubscriberCount()));
         view.keySubscriberCount.setValue(Integer.toString(objectSubscription
@@ -82,7 +82,6 @@ class ColumnViewController<K, V> {
         grid.setEditorBuffered(false);
         grid.setSizeFull();
         grid.setSelectionMode(Grid.SelectionMode.NONE);
-
 
         view.addButton.addClickListener((ClickListener) event -> new AddRow(columnView).init());
 
@@ -145,7 +144,6 @@ class ColumnViewController<K, V> {
                     Optional<SimpleStringFilter> first = containerFilters.stream().filter(x -> x.getPropertyId().equals(pid)).findFirst();
                     if (first.isPresent())
                         filterable.removeContainerFilter(first.get());
-
 
                     // (Re)create the filter if necessary
                     if (!change.getText().isEmpty())

@@ -27,9 +27,9 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
 
     @NotNull
     private final ColumnView columnView;
-    @Nullable
+    @NotNull
     private List<Container.Filter> filters = Collections.emptyList();
-    @Nullable
+    @NotNull
     private List<OrderBy> orderBys = Collections.emptyList();
 
     ColumnQueryDelegate(@NotNull ColumnView columnView) {

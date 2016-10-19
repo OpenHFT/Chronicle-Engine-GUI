@@ -10,11 +10,11 @@ import java.util.List;
 /**
  * @author Rob Austin.
  */
-public class KeyValueResultSetMetaData implements ResultSetMetaData {
+class KeyValueResultSetMetaData implements ResultSetMetaData {
 
     private final List<Column> columns;
 
-    public KeyValueResultSetMetaData(List<Column> columns) {
+    KeyValueResultSetMetaData(@NotNull List<Column> columns) {
         this.columns = columns;
     }
 
