@@ -1,6 +1,7 @@
 package net.openhft.chronicle.engine.gui;
 
 import org.intellij.lang.annotations.MagicConstant;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 
@@ -8,6 +9,7 @@ import java.sql.*;
  * @author Rob Austin.
  */
 public class MyStatement implements Statement {
+    @NotNull
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -63,6 +65,7 @@ public class MyStatement implements Statement {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public SQLWarning getWarnings() throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -83,6 +86,7 @@ public class MyStatement implements Statement {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public ResultSet getResultSet() throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -138,11 +142,13 @@ public class MyStatement implements Statement {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public int[] executeBatch() throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Connection getConnection() throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -153,6 +159,7 @@ public class MyStatement implements Statement {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -218,6 +225,7 @@ public class MyStatement implements Statement {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
         throw new UnsupportedOperationException("todo");

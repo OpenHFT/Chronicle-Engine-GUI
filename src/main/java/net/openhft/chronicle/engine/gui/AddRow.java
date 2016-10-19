@@ -6,6 +6,7 @@ import com.vaadin.ui.*;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.engine.api.column.Column;
 import net.openhft.chronicle.engine.api.column.ColumnView;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,7 +29,7 @@ public class AddRow {
     public void init() {
 
         // Create a sub-window and set the content
-        Window subWindow = new Window("Add Row");
+        @NotNull Window subWindow = new Window("Add Row");
         subWindow.setClosable(false);
         subWindow.setModal(true);
         subWindow.setResizeLazy(true);
@@ -37,11 +38,11 @@ public class AddRow {
         subWindow.setWidth(300, Sizeable.Unit.PIXELS);
         subWindow.setDraggable(true);
 
-        FormLayout form = new FormLayout();
+        @NotNull FormLayout form = new FormLayout();
         form.setMargin(true);
-        ArrayList<AbstractField> fields = new ArrayList<>();
+        @NotNull ArrayList<AbstractField> fields = new ArrayList<>();
         final List<Column> columns1 = columnView.columns();
-        for (Column column : columns1) {
+        for (@NotNull Column column : columns1) {
 
             AbstractField field;
 
@@ -77,18 +78,18 @@ public class AddRow {
             form.addComponent(field);
         }
 
-        final HorizontalLayout buttons = new HorizontalLayout();
+        @NotNull final HorizontalLayout buttons = new HorizontalLayout();
         buttons.setMargin(true);
         buttons.setSpacing(true);
-        final Button cancel = new Button("Cancel");
+        @NotNull final Button cancel = new Button("Cancel");
         cancel.addClickListener((Button.ClickListener) event1 -> subWindow.close());
         buttons.addComponent(cancel);
-        final Button add = new Button("Add");
+        @NotNull final Button add = new Button("Add");
         add.addClickListener((Button.ClickListener) event1 -> {
 
-            final HashMap<String, Object> row = new HashMap<>();
+            @NotNull final HashMap<String, Object> row = new HashMap<>();
 
-            for (AbstractField field : fields) {
+            for (@NotNull AbstractField field : fields) {
 
                 try {
                     field.validate();

@@ -18,6 +18,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.api.column.Column;
 import net.openhft.chronicle.engine.api.column.ColumnView;
 import net.openhft.chronicle.engine.map.ObjectSubscription;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -32,10 +33,12 @@ import static com.vaadin.ui.Grid.HeaderRow;
  */
 class ColumnViewController<K, V> {
 
+    @NotNull
     private final ColumnView columnView;
+    @NotNull
     private final MapViewUI view;
 
-    ColumnViewController(ColumnView columnView, MapViewUI view, String path) {
+    ColumnViewController(@NotNull ColumnView columnView, @NotNull MapViewUI view, String path) {
         this.columnView = columnView;
         this.view = view;
         view.path.setValue(path);
@@ -46,7 +49,7 @@ class ColumnViewController<K, V> {
         objectSubscription.registerDownstream(changeEvent -> onMapViewChange(view, objectSubscription));
     }
 
-    private void onMapViewChange(MapViewUI view, ObjectSubscription objectSubscription) {
+    private void onMapViewChange(@NotNull MapViewUI view, @NotNull ObjectSubscription objectSubscription) {
         view.topicSubscriberCount.setValue(Integer.toString(objectSubscription
                 .topicSubscriberCount()));
         view.keySubscriberCount.setValue(Integer.toString(objectSubscription
@@ -62,16 +65,16 @@ class ColumnViewController<K, V> {
         view.gridHolder.removeAllComponents();
 
         //final Container.Indexed data = createContainer();
-        final Container.Indexed data = createContainer(new ColumnQueryDelegate<>(columnView));
-        final GeneratedPropertyContainer generatedPropertyContainer = addDeleteButton(data);
+        @NotNull final Container.Indexed data = createContainer(new ColumnQueryDelegate<>(columnView));
+        @NotNull final GeneratedPropertyContainer generatedPropertyContainer = addDeleteButton(data);
 
-        final Grid grid = new Grid(generatedPropertyContainer);
+        @NotNull final Grid grid = new Grid(generatedPropertyContainer);
         grid.setWidth(100, Sizeable.Unit.PERCENTAGE);
         grid.setHeight(100, Sizeable.Unit.PERCENTAGE);
         grid.removeAllColumns();
 
         final List<Column> columns = columnView.columns();
-        for (Column column : columns) {
+        for (@NotNull Column column : columns) {
             grid.addColumn(column.name);
         }
 
@@ -115,7 +118,7 @@ class ColumnViewController<K, V> {
 
             // Create a header row to hold column filters
             final HeaderRow filterRow = grid.appendHeaderRow();
-            final Container.Filterable filterable = (Container.Filterable) data;
+            @NotNull final Container.Filterable filterable = (Container.Filterable) data;
 
             // Set up a filter for all columns
             for (Object pid : grid.getContainerDataSource()
@@ -127,7 +130,7 @@ class ColumnViewController<K, V> {
                 final HeaderCell cell = filterRow.getCell(pid);
 
                 // Have an input field to use for filter
-                TextField filterField = new TextField();
+                @NotNull TextField filterField = new TextField();
                 filterField.setHeight(24, Sizeable.Unit.PIXELS);
                 filterField.setWidth(100, Sizeable.Unit.PERCENTAGE);
 
@@ -136,7 +139,7 @@ class ColumnViewController<K, V> {
                     // Can't modify filters so need to replace
                     // data.removeContainerFilters(pid);
 
-                    final Collection<SimpleStringFilter> containerFilters = (Collection)
+                    @NotNull final Collection<SimpleStringFilter> containerFilters = (Collection)
                             filterable.getContainerFilters();
 
                     Optional<SimpleStringFilter> first = containerFilters.stream().filter(x -> x.getPropertyId().equals(pid)).findFirst();
@@ -156,7 +159,8 @@ class ColumnViewController<K, V> {
 
     }
 
-    private static Container.Indexed createContainer(final QueryDelegate delegate) {
+    @NotNull
+    private static Container.Indexed createContainer(@NotNull final QueryDelegate delegate) {
         try {
             return new SQLContainer(delegate);
         } catch (SQLException e) {
@@ -164,16 +168,19 @@ class ColumnViewController<K, V> {
         }
     }
 
+    @NotNull
     private static GeneratedPropertyContainer addDeleteButton(Container.Indexed container) {
-        final GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(container);
+        @NotNull final GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(container);
 
         gpc.addGeneratedProperty("delete",
                 new PropertyValueGenerator<Resource>() {
+                    @NotNull
                     @Override
                     public Resource getValue(Item item, Object itemId, Object propertyId) {
                         return new ThemeResource("trash3.png");
                     }
 
+                    @NotNull
                     @Override
                     public Class<Resource> getType() {
                         return Resource.class;

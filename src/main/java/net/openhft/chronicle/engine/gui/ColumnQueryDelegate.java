@@ -13,6 +13,7 @@ import net.openhft.chronicle.engine.api.column.ColumnView.MarshableOrderBy;
 import net.openhft.chronicle.engine.api.column.ColumnView.SortedFilter;
 import net.openhft.chronicle.engine.api.column.Row;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,9 +25,12 @@ import java.util.stream.Collectors;
  */
 class ColumnQueryDelegate<K, V> implements QueryDelegate {
 
+    @NotNull
     private final ColumnView columnView;
-    private List<Container.Filter> filters = Collections.EMPTY_LIST;
-    private List<OrderBy> orderBys = Collections.EMPTY_LIST;
+    @Nullable
+    private List<Container.Filter> filters = Collections.emptyList();
+    @Nullable
+    private List<OrderBy> orderBys = Collections.emptyList();
 
     ColumnQueryDelegate(@NotNull ColumnView columnView) {
         this.columnView = columnView;
@@ -41,6 +45,7 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
         return columnView.rowCount(toMarshables(filters));
     }
 
+    @NotNull
     @Override
     public ResultSet getResults(int offset, int pageLength) throws SQLException {
         Iterator<Row> iterator = newIterator(offset);
@@ -61,10 +66,10 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
     }
 
     @Override
-    public void setFilters(List<Container.Filter> filters) throws UnsupportedOperationException {
+    public void setFilters(@Nullable List<Container.Filter> filters) throws UnsupportedOperationException {
 
         if (filters == null)
-            filters = Collections.EMPTY_LIST;
+            filters = Collections.emptyList();
 
         if (this.filters.equals(filters))
             return;
@@ -73,18 +78,18 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
     }
 
     private Iterator<Row> newIterator(int fromIndex) {
-        SortedFilter sortedFilter = toQuery(fromIndex, filters);
+        @NotNull SortedFilter sortedFilter = toQuery(fromIndex, filters);
         return columnView.iterator(sortedFilter);
     }
 
     @NotNull
-    private SortedFilter toQuery(int fromIndex, List<Container.Filter> filters) {
-        final SortedFilter sortedFilter = new SortedFilter();
+    private SortedFilter toQuery(int fromIndex, @NotNull List<Container.Filter> filters) {
+        @NotNull final SortedFilter sortedFilter = new SortedFilter();
         sortedFilter.fromIndex = fromIndex;
         sortedFilter.marshableFilters.clear();
         sortedFilter.marshableFilters.addAll(toMarshables(filters));
 
-        for (OrderBy orderBy : orderBys) {
+        for (@NotNull OrderBy orderBy : orderBys) {
             sortedFilter.marshableOrderBy.add(toMarshables(orderBy));
         }
 
@@ -97,14 +102,14 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
      * @param filters the vaadin filter
      * @return the marshable filter
      */
-    private List<MarshableFilter> toMarshables(List<Container.Filter> filters) {
-        ArrayList<MarshableFilter> result = new ArrayList<>();
+    @NotNull
+    private List<MarshableFilter> toMarshables(@NotNull List<Container.Filter> filters) {
+        @NotNull ArrayList<MarshableFilter> result = new ArrayList<>();
         for (Container.Filter filter0 : filters) {
             if (filter0 instanceof SimpleStringFilter) {
-                SimpleStringFilter filter = (SimpleStringFilter) filter0;
-                result.add(
-                        new MarshableFilter(filter.getPropertyId().toString(),
-                                filter.getFilterString()));
+                @NotNull SimpleStringFilter filter = (SimpleStringFilter) filter0;
+                result.add(new MarshableFilter(filter.getPropertyId().toString(),
+                        filter.getFilterString()));
             }
         }
         return result;
@@ -112,15 +117,20 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
 
 
     @NotNull
-    private MarshableOrderBy toMarshables(OrderBy orderBy) {
+    private MarshableOrderBy toMarshables(@NotNull OrderBy orderBy) {
         return new MarshableOrderBy(orderBy.getColumn(), orderBy.isAscending());
     }
 
     @Override
-    public void setOrderBy(List<OrderBy> orderBys) throws UnsupportedOperationException {
-        final List<OrderBy> orderBys0 = (orderBys == null) ? Collections.EMPTY_LIST : orderBys;
+    public void setOrderBy(@Nullable List<OrderBy> orderBys) throws UnsupportedOperationException {
+        @Nullable final List<OrderBy> orderBys0 = (orderBys == null) ? Collections.EMPTY_LIST : orderBys;
 
-        if (this.orderBys.equals(orderBys0))
+        if (orderBys0 == null) {
+            this.orderBys = Collections.emptyList();
+            return;
+        }
+
+        if (orderBys0.equals(this.orderBys))
             return;
 
         this.orderBys = orderBys0;
@@ -136,13 +146,13 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
      * @throws UnsupportedOperationException if the implementation is read only.
      */
     @Override
-    public int storeRow(RowItem row) throws UnsupportedOperationException, SQLException {
+    public int storeRow(@NotNull RowItem row) throws UnsupportedOperationException, SQLException {
 
-        final Map<String, Object> oldRow = new HashMap<>();
-        final Map<String, Object> newRow = new HashMap<>();
+        @NotNull final Map<String, Object> oldRow = new HashMap<>();
+        @NotNull final Map<String, Object> newRow = new HashMap<>();
 
-        for (Column c : columnView.columns()) {
-            final ColumnProperty cp = (ColumnProperty) row.getItemProperty(c.name);
+        for (@NotNull Column c : columnView.columns()) {
+            @NotNull final ColumnProperty cp = (ColumnProperty) row.getItemProperty(c.name);
             newRow.put(c.name, cp.getValue());
             oldRow.put(c.name, cp.getOldValue());
         }
@@ -151,12 +161,12 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
     }
 
     @Override
-    public boolean removeRow(RowItem row) throws UnsupportedOperationException, SQLException {
+    public boolean removeRow(@NotNull RowItem row) throws UnsupportedOperationException, SQLException {
 
-        final Map<String, Object> oldRow = new HashMap<>();
+        @NotNull final Map<String, Object> oldRow = new HashMap<>();
 
-        for (Column c : columnView.columns()) {
-            final ColumnProperty cp = (ColumnProperty) row.getItemProperty(c.name);
+        for (@NotNull Column c : columnView.columns()) {
+            @NotNull final ColumnProperty cp = (ColumnProperty) row.getItemProperty(c.name);
             oldRow.put(c.name, cp.getOldValue());
         }
 

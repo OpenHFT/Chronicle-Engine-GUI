@@ -1,6 +1,7 @@
 package net.openhft.chronicle.engine.gui;
 
 import net.openhft.chronicle.engine.api.column.Column;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -67,6 +68,7 @@ public class KeyValueResultSetMetaData implements ResultSetMetaData {
         return columns.get(column - 1).name;
     }
 
+    @NotNull
     @Override
     public String getSchemaName(int column) throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -82,11 +84,13 @@ public class KeyValueResultSetMetaData implements ResultSetMetaData {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public String getTableName(int column) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public String getCatalogName(int column) throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -97,6 +101,7 @@ public class KeyValueResultSetMetaData implements ResultSetMetaData {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public String getColumnTypeName(int column) throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -117,11 +122,13 @@ public class KeyValueResultSetMetaData implements ResultSetMetaData {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public String getColumnClassName(int column) throws SQLException {
         return "java.lang.String";
     }
 
+    @NotNull
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
         throw new UnsupportedOperationException("todo");

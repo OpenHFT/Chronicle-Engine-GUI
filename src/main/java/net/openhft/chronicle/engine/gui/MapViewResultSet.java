@@ -20,6 +20,7 @@ import java.util.Map;
  */
 class MapViewResultSet<K, V> implements ResultSet {
 
+    @NotNull
     private final Iterator<Row> iterator;
     private final double pagelength;
     private Row entry;
@@ -53,6 +54,7 @@ class MapViewResultSet<K, V> implements ResultSet {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public String getString(int columnIndex) throws SQLException {
     /*    if (columnIndex == 1)
@@ -98,46 +100,55 @@ class MapViewResultSet<K, V> implements ResultSet {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public byte[] getBytes(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Date getDate(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Time getTime(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Timestamp getTimestamp(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public InputStream getAsciiStream(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public InputStream getUnicodeStream(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public InputStream getBinaryStream(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public String getString(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -178,46 +189,55 @@ class MapViewResultSet<K, V> implements ResultSet {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public byte[] getBytes(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Date getDate(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Time getTime(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Timestamp getTimestamp(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public InputStream getAsciiStream(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public InputStream getUnicodeStream(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public InputStream getBinaryStream(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public SQLWarning getWarnings() throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -228,11 +248,13 @@ class MapViewResultSet<K, V> implements ResultSet {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public String getCursorName() throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
         return new KeyValueResultSetMetaData(columns);
@@ -253,21 +275,25 @@ class MapViewResultSet<K, V> implements ResultSet {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Reader getCharacterStream(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Reader getCharacterStream(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public BigDecimal getBigDecimal(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -603,96 +629,115 @@ class MapViewResultSet<K, V> implements ResultSet {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Statement getStatement() throws SQLException {
         return new MyStatement();
     }
 
+    @NotNull
     @Override
     public Object getObject(int columnIndex, Map<String, Class<?>> map) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Ref getRef(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Blob getBlob(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Clob getClob(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Array getArray(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Object getObject(String columnLabel, Map<String, Class<?>> map) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Ref getRef(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Blob getBlob(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Clob getClob(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Array getArray(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Date getDate(int columnIndex, Calendar cal) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Date getDate(String columnLabel, Calendar cal) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Time getTime(int columnIndex, Calendar cal) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Time getTime(String columnLabel, Calendar cal) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Timestamp getTimestamp(String columnLabel, Calendar cal) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public URL getURL(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public URL getURL(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -738,11 +783,13 @@ class MapViewResultSet<K, V> implements ResultSet {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public RowId getRowId(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public RowId getRowId(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -788,21 +835,25 @@ class MapViewResultSet<K, V> implements ResultSet {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public NClob getNClob(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public NClob getNClob(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public SQLXML getSQLXML(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public SQLXML getSQLXML(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -818,21 +869,25 @@ class MapViewResultSet<K, V> implements ResultSet {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public String getNString(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public String getNString(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Reader getNCharacterStream(int columnIndex) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public Reader getNCharacterStream(String columnLabel) throws SQLException {
         throw new UnsupportedOperationException("todo");
@@ -978,16 +1033,19 @@ class MapViewResultSet<K, V> implements ResultSet {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
         throw new UnsupportedOperationException("todo");

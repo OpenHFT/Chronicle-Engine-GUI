@@ -6,6 +6,8 @@ import com.vaadin.addon.charts.model.style.SolidColor;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.UI;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -17,17 +19,19 @@ import java.util.concurrent.Future;
 class UserControl {
 
 
+    @NotNull
     Component newComponent() {
-        final UserUI components = new UserUI();
+        @NotNull final UserUI components = new UserUI();
         components.readBps.addComponent(newRandomChart("readBps"));
         components.writeBps.addComponent(newRandomChart("writeBps"));
         return components;
     }
 
+    @NotNull
     private Chart newRandomChart(final String text) {
-        final Random random = new Random();
+        @NotNull final Random random = new Random();
 
-        final Chart chart = new Chart();
+        @NotNull final Chart chart = new Chart();
         chart.setWidth("500px");
 
         final Configuration configuration = chart.getConfiguration();
@@ -46,13 +50,13 @@ class UserControl {
         configuration.getTooltip().setEnabled(false);
         configuration.getLegend().setEnabled(false);
 
-        final DataSeries series2 = new DataSeries();
+        @NotNull final DataSeries series2 = new DataSeries();
         {
-            PlotOptionsLine plotOptions = new PlotOptionsLine();
+            @NotNull PlotOptionsLine plotOptions = new PlotOptionsLine();
             series2.setPlotOptions(plotOptions);
         }
-        final DataSeries series = new DataSeries();
-        PlotOptionsColumn plotOptions = new PlotOptionsColumn();
+        @NotNull final DataSeries series = new DataSeries();
+        @NotNull PlotOptionsColumn plotOptions = new PlotOptionsColumn();
         plotOptions.setColor(new SolidColor("#F0F0F0"));
         series.setPlotOptions(plotOptions);
 
@@ -68,8 +72,8 @@ class UserControl {
         runWhileAttached(chart, () -> {
             final long x = System.currentTimeMillis();
             final double y = random.nextDouble();
-            DataSeriesItem item = new DataSeriesItem(x, y);
-            DataSeriesItem item1 = new DataSeriesItem(x, 0.5 + ((random.nextDouble() * 0.2) -
+            @NotNull DataSeriesItem item = new DataSeriesItem(x, y);
+            @NotNull DataSeriesItem item1 = new DataSeriesItem(x, 0.5 + ((random.nextDouble() * 0.2) -
                     0.1));
             series.add(item, true, true);
             series2.add(item1, true, true);
@@ -96,12 +100,14 @@ class UserControl {
      * @param interval
      * @param initialPause a timeout after tas is started
      */
-    private static void runWhileAttached(final Component component,
-                                         final Runnable task, final int interval, final int initialPause) {
+    private static void runWhileAttached(@NotNull final Component component,
+                                         final Runnable task,
+                                         final int interval,
+                                         final int initialPause) {
         // Until reliable push available in our demo servers
         UI.getCurrent().setPollInterval(interval);
 
-        final Thread thread = new Thread() {
+        @NotNull final Thread thread = new Thread() {
             @Override
             public void run() {
                 try {
@@ -111,11 +117,10 @@ class UserControl {
                         future.get();
                         Thread.sleep(interval);
                     }
-                } catch (InterruptedException e) {
+                } catch (@NotNull InterruptedException | com.vaadin.ui.UIDetachedException e) {
                 } catch (ExecutionException e) {
                     System.out.println("Stopping repeating command due to an exception");
 
-                } catch (com.vaadin.ui.UIDetachedException e) {
                 } catch (Exception e) {
                     System.out.println("Unexpected exception while running scheduled update");
                 }

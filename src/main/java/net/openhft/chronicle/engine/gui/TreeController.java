@@ -10,6 +10,7 @@ import net.openhft.chronicle.engine.api.tree.AssetTree;
 import net.openhft.chronicle.engine.tree.QueueView;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Rob Austin.
@@ -19,9 +20,10 @@ public class TreeController {
     public static final String MAP_VIEW = "::map_view";
     public static final String QUEUE_VIEW = "::queue_view";
 
+    @NotNull
     final ItemClickEvent.ItemClickListener clickListener;
 
-    public TreeController(AssetTree assetTree, TreeUI treeUI) {
+    public TreeController(@NotNull AssetTree assetTree, @NotNull TreeUI treeUI) {
 
         final Tree tree = treeUI.tree;
 
@@ -34,23 +36,23 @@ public class TreeController {
 
 
             if (source.endsWith(MAP_VIEW)) {
-                MapViewUI mapViewUI = new MapViewUI();
+                @NotNull MapViewUI mapViewUI = new MapViewUI();
                 treeUI.contents.addComponent(mapViewUI);
 
-                final String path = source.substring(0, source.length() - MAP_VIEW.length());
+                @NotNull final String path = source.substring(0, source.length() - MAP_VIEW.length());
 
                 //   final MapView<String, String> view =
                 //         assetTree.acquireMap(path, String.class, String.class);
 
-                Asset asset = assetTree.acquireAsset(path);
-                ColumnView view = asset.acquireView(ColumnView.class);
+                @NotNull Asset asset = assetTree.acquireAsset(path);
+                @NotNull ColumnView view = asset.acquireView(ColumnView.class);
 
-                ColumnViewController mapControl = new ColumnViewController(view, mapViewUI, path);
+                @NotNull ColumnViewController mapControl = new ColumnViewController(view, mapViewUI, path);
                 mapControl.init();
 
             } else if (source.endsWith(QUEUE_VIEW)) {
 
-                String path = source.substring(0, source.length() - QUEUE_VIEW.length());
+                @NotNull String path = source.substring(0, source.length() - QUEUE_VIEW.length());
                 treeUI.contents.addComponent(new MapViewUI());
             }
 
@@ -60,13 +62,13 @@ public class TreeController {
     }
 
 
-    private void updateTree(@NotNull AssetTree assetTree, Tree tree, TopologicalEvent e) {
+    private void updateTree(@NotNull AssetTree assetTree, @NotNull Tree tree, @NotNull TopologicalEvent e) {
         if (e.assetName() == null || !e.added())
             return;
 
         tree.markAsDirty();
 
-        Asset asset = assetTree.getAsset(e.fullName());
+        @Nullable Asset asset = assetTree.getAsset(e.fullName());
         assert asset != null;
 
         tree.addItem(e.fullName());

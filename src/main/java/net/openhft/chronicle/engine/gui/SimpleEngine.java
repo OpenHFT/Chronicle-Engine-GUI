@@ -5,6 +5,7 @@ import net.openhft.chronicle.engine.SimpleEngineMain;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.wire.AbstractMarshallable;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -43,7 +44,7 @@ public class SimpleEngine {
 
 
     private static VanillaAssetTree createEngine() {
-        VanillaAssetTree assetTree = null;
+        VanillaAssetTree assetTree ;
         try {
             assetTree = SimpleEngineMain.tree();
         } catch (IOException e) {
@@ -51,19 +52,19 @@ public class SimpleEngine {
         }
 
 
-        MapView<Integer, Double> intView = assetTree.acquireMap("/my/numbers", Integer.class, Double
+        @NotNull MapView<Integer, Double> intView = assetTree.acquireMap("/my/numbers", Integer.class, Double
                 .class);
 
         for (int i = 0; i < 100; i++) {
-            intView.put(i, Double.valueOf(i));
+            intView.put(i, (double) i);
         }
 
         {
-            MapView<Date, MarketData> map = assetTree.acquireMap("/shares/APPL", Date.class,
+            @NotNull MapView<Date, MarketData> map = assetTree.acquireMap("/shares/APPL", Date.class,
                     MarketData
                             .class);
 
-            SimpleDateFormat sd = new SimpleDateFormat("dd MMM yyyy");
+            @NotNull SimpleDateFormat sd = new SimpleDateFormat("dd MMM yyyy");
 
             try {
                 map.put(sd.parse("7 Oct 2016"), new MarketData(114.31, 114.56, 113.51, 114.06, 114.06, 24358400L));
@@ -118,8 +119,8 @@ public class SimpleEngine {
         }
 
         {
-            MapView<String, String> map = assetTree.acquireMap("/my/demo", String.class, String.class);
-            MapView<String, String> mapView = assetTree.acquireMap("/my/demo", String.class, String.class);
+
+            @NotNull MapView<String, String> mapView = assetTree.acquireMap("/my/demo", String.class, String.class);
             mapView.put("AED", "United Arab Emirates dirham");
             mapView.put("AFN", "Afghan afghani");
             mapView.put("ALL", "Albanian lek");
