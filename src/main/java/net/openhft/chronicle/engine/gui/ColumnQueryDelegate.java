@@ -41,7 +41,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
         if (filters.isEmpty() && orderBys.isEmpty())
             return (int) columnView.longSize();
 
-        return columnView.size(toQuery(0, filters));
+        return columnView.rowCount(toQuery(0, filters));
     }
 
     @Override
@@ -141,7 +141,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
             final ColumnProperty cp = (ColumnProperty) row.getItemProperty(c.name);
             if (cp.isModified()) {
 
-                columnView.onCellChanged(
+                columnView.onRowChanged(
                         c.name,
                         (K) key,
                         (K) oldKey,
@@ -158,8 +158,8 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
     public boolean removeRow(RowItem row) throws UnsupportedOperationException, SQLException {
         ColumnProperty keyP = (ColumnProperty) row.getItemProperty("key");
         final K key = (K) keyP.getValue();
-        Object old = columnView.remove(key);
-        return old != null;
+         return columnView.removeRow(Collections.singletonMap("key", key));
+
     }
 
     @Override

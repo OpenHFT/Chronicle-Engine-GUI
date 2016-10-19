@@ -2,7 +2,6 @@ package net.openhft.chronicle.engine.gui;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
-import com.vaadin.data.Validator;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.filter.SimpleStringFilter;
@@ -11,11 +10,11 @@ import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
 import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.renderers.ImageRenderer;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.engine.api.column.Column;
 import net.openhft.chronicle.engine.api.column.ColumnView;
 import net.openhft.chronicle.engine.api.map.MapView;
@@ -23,7 +22,6 @@ import net.openhft.chronicle.engine.map.ObjectSubscription;
 
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,8 +65,6 @@ class ColumnViewController<K, V> {
         view.keyStoreValue.setValue(objectSubscription.getClass().getSimpleName());
     }
 
-    boolean keyValid;
-    boolean valueValid;
 
     public void init() {
         view.gridHolder.removeAllComponents();
@@ -94,73 +90,7 @@ class ColumnViewController<K, V> {
         grid.setSelectionMode(Grid.SelectionMode.NONE);
 
 
-        view.addButton.addClickListener((ClickListener) event -> {
-
-            // Create a sub-window and set the content
-            Window subWindow = new Window("Add Row");
-            subWindow.setClosable(false);
-            subWindow.setModal(true);
-            subWindow.setResizeLazy(true);
-            subWindow.setResizable(false);
-            subWindow.setSizeUndefined();
-            subWindow.setWidth(300, Sizeable.Unit.PIXELS);
-            subWindow.setDraggable(true);
-
-            FormLayout form = new FormLayout();
-            form.setMargin(true);
-
-            final List<Column> columns1 = columnView.columns();
-            for (Column column : columns1) {
-
-                AbstractField field;
-                if (column.type == Date.class)
-                    field = new DateField(column.name);
-
-                if (column.type == boolean.class)
-                    field = new CheckBox(column.name);
-                else
-                    field = new TextField(column.name);
-
-                if (column.primaryKey)
-                    field.setRequired(true);
-                if (column.type == boolean.class)
-                    field.setValue(false);
-                else if (column.type.isPrimitive() || Number.class.isAssignableFrom(column.type))
-                    field.setValue(ObjectUtils.convertTo(column.type, 0).toString());
-
-                field.addValidator((Validator) value -> {
-                    try {
-                        ObjectUtils.convertTo(column.type, value);
-                    } catch (Exception e) {
-                        throw new Validator.InvalidValueException("can not convert to " + column.type.getSimpleName());
-                    }
-                });
-
-                form.addComponent(field);
-            }
-
-            final HorizontalLayout buttons = new HorizontalLayout();
-            buttons.setMargin(true);
-            buttons.setSpacing(true);
-            final Button cancel = new Button("Cancel");
-            cancel.addClickListener((ClickListener) event1 -> subWindow.close());
-            buttons.addComponent(cancel);
-            final Button ok = new Button("Add");
-            ok.addClickListener((ClickListener) event1 -> subWindow.close());
-            buttons.addComponent(ok);
-            buttons.setComponentAlignment(ok, Alignment.MIDDLE_RIGHT);
-            buttons.setComponentAlignment(cancel, Alignment.MIDDLE_RIGHT);
-            form.addComponent(buttons);
-            subWindow.setContent(form);
-
-
-            // Center it in the browser window
-            subWindow.center();
-
-            // Open it in the UI
-            UI.getCurrent().addWindow(subWindow);
-
-        });
+        view.addButton.addClickListener((ClickListener) event -> new AddRow(columnView).init());
 
         columnView.registerChangeListener(() -> {
             ((SQLContainer) data).refresh();
@@ -171,7 +101,7 @@ class ColumnViewController<K, V> {
             ((SQLContainer) data).setAutoCommit(true);
         }
 
-        if (columnView.canDeleteRow()) {
+        if (columnView.canDeleteRows()) {
             // Render a button that deletes the data row (item)
             final Grid.Column deleteColumn = grid.addColumn("delete");
             deleteColumn.setWidth(64);
