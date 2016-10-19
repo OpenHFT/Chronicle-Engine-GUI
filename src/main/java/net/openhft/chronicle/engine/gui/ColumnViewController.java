@@ -40,7 +40,7 @@ class ColumnViewController<K, V> {
         this.columnView = columnView;
         this.view = view;
         view.path.setValue(path);
-        view.recordCount.setValue(Long.toString(columnView.longSize()));
+        view.recordCount.setValue(Long.toString(columnView.rowCount(null)));
 
         if (columnView instanceof MapView) {
             ObjectSubscription objectSubscription = ((MapView) columnView).asset().getView
@@ -94,7 +94,7 @@ class ColumnViewController<K, V> {
 
         columnView.registerChangeListener(() -> {
             ((SQLContainer) data).refresh();
-            view.recordCount.setValue(Long.toString(columnView.longSize()));
+            view.recordCount.setValue(Long.toString(columnView.rowCount(null)));
         });
 
         if (data instanceof SQLContainer) {

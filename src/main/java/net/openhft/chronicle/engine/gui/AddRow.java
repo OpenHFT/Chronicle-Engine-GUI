@@ -17,9 +17,9 @@ import java.util.List;
  */
 public class AddRow {
 
-    private ColumnView<Object> columnView;
+    private ColumnView columnView;
 
-    public AddRow(ColumnView<Object> columnView) {
+    public AddRow(ColumnView columnView) {
         this.columnView = columnView;
     }
 
@@ -49,7 +49,7 @@ public class AddRow {
                 field = new CheckBox(column.name);
             else
                 field = new TextField(column.name);
-
+            field.setData(column.type);
             fields.add(field);
 
             if (column.primaryKey)
@@ -86,13 +86,16 @@ public class AddRow {
         add.addClickListener((Button.ClickListener) event1 -> {
 
             final HashMap<String, Object> row = new HashMap<>();
+
             for (AbstractField field : fields) {
-                row.put(field.getCaption(), field.getValue());
+
                 try {
                     field.validate();
                 } catch (Validator.InvalidValueException e) {
                     return;
                 }
+                row.put(field.getCaption(), ObjectUtils.convertTo((Class) field.getData(), field
+                        .getValue()));
             }
             columnView.addRow(row);
             subWindow.close();

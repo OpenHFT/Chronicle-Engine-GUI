@@ -1,5 +1,7 @@
 package net.openhft.chronicle.engine.gui;
 
+import net.openhft.chronicle.engine.api.column.Column;
+
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.List;
@@ -9,10 +11,10 @@ import java.util.List;
  */
 public class KeyValueResultSetMetaData implements ResultSetMetaData {
 
-    private final List<String> columns;
+    private final List<Column> columns;
 
-    public KeyValueResultSetMetaData(List<String> columnNames) {
-        this.columns = columnNames;
+    public KeyValueResultSetMetaData(List<Column> columns) {
+        this.columns = columns;
     }
 
     @Override
@@ -57,12 +59,12 @@ public class KeyValueResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public String getColumnLabel(int column) throws SQLException {
-        return columns.get(column - 1);
+        return columns.get(column - 1).name;
     }
 
     @Override
     public String getColumnName(int column) throws SQLException {
-        return columns.get(column - 1);
+        return columns.get(column - 1).name;
     }
 
     @Override

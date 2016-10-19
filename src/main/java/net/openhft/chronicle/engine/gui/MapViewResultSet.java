@@ -1,5 +1,6 @@
 package net.openhft.chronicle.engine.gui;
 
+import net.openhft.chronicle.engine.api.column.Column;
 import net.openhft.chronicle.engine.api.column.Row;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
@@ -17,18 +18,19 @@ import java.util.Map;
 /**
  * @author Rob Austin.
  */
-public class MapViewResultSet<K, V> implements ResultSet {
+class MapViewResultSet<K, V> implements ResultSet {
 
     private final Iterator<Row> iterator;
     private final double pagelength;
     private Row entry;
     private int count = 0;
-    private List<String> columnNames;
+    private List<Column> columns;
 
-    MapViewResultSet(@NotNull Iterator<Row> iterator, int pagelength, final List<String> columnNames) {
+    MapViewResultSet(@NotNull Iterator<Row> iterator, int pagelength, final List<Column>
+            columns) {
         this.iterator = iterator;
         this.pagelength = pagelength;
-        this.columnNames = columnNames;
+        this.columns = columns;
     }
 
     @Override
@@ -233,7 +235,7 @@ public class MapViewResultSet<K, V> implements ResultSet {
 
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
-        return new KeyValueResultSetMetaData(columnNames);
+        return new KeyValueResultSetMetaData(columns);
     }
 
     @Override

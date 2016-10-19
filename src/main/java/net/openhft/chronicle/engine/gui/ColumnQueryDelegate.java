@@ -27,19 +27,19 @@ import static java.util.Collections.singletonList;
  */
 public class ColumnQueryDelegate<K, V> implements QueryDelegate {
 
-    private final ColumnView<K> columnView;
+    private final ColumnView columnView;
     private List<Container.Filter> filters = Collections.EMPTY_LIST;
     private List<OrderBy> orderBys = Collections.EMPTY_LIST;
 
-    public ColumnQueryDelegate(@NotNull ColumnView<K> mapView) {
-        this.columnView = mapView;
+    public ColumnQueryDelegate(@NotNull ColumnView columnView) {
+        this.columnView = columnView;
     }
 
     @Override
     public int getCount() throws SQLException {
 
         if (filters.isEmpty() && orderBys.isEmpty())
-            return (int) columnView.longSize();
+            return (int) columnView.rowCount(null);
 
         return columnView.rowCount(toQuery(0, filters));
     }
@@ -54,7 +54,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
             iteratorIndex++;
         }
 
-        return new MapViewResultSet<K, V>(iterator, pageLength, columnView.columnNames());
+        return new MapViewResultSet<K, V>(iterator, pageLength, columnView.columns());
     }
 
 
@@ -158,7 +158,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
     public boolean removeRow(RowItem row) throws UnsupportedOperationException, SQLException {
         ColumnProperty keyP = (ColumnProperty) row.getItemProperty("key");
         final K key = (K) keyP.getValue();
-         return columnView.removeRow(Collections.singletonMap("key", key));
+        return columnView.removeRow(Collections.singletonMap("key", key));
 
     }
 
@@ -182,13 +182,10 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
         return singletonList("key");
     }
 
-    @Override
-    public boolean containsRowWithKey(Object... keys) throws SQLException {
-        for (Object k : keys) {
-            if (!columnView.containsKey((K) k))
-                return false;
-        }
 
-        return true;
+    public boolean containsRowWithKey(Object... keys) throws SQLException {
+        throw new UnsupportedOperationException();
+        //return columnView.containsRowWithKey(keys)
+
     }
 }
