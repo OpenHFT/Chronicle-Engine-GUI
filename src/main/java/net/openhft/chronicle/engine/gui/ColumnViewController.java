@@ -17,7 +17,6 @@ import com.vaadin.ui.renderers.ImageRenderer;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.api.column.Column;
 import net.openhft.chronicle.engine.api.column.ColumnView;
-import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.map.ObjectSubscription;
 
 import java.sql.SQLException;
@@ -42,15 +41,9 @@ class ColumnViewController<K, V> {
         view.path.setValue(path);
         view.recordCount.setValue(Long.toString(columnView.rowCount(null)));
 
-        if (columnView instanceof MapView) {
-            ObjectSubscription objectSubscription = ((MapView) columnView).asset().getView
-                    (ObjectSubscription.class);
-
-            onMapViewChange(view, objectSubscription);
-
-            objectSubscription.registerDownstream(changeEvent -> onMapViewChange(view, objectSubscription));
-        }
-
+        final ObjectSubscription objectSubscription = columnView.objectSubscription();
+        onMapViewChange(view, objectSubscription);
+        objectSubscription.registerDownstream(changeEvent -> onMapViewChange(view, objectSubscription));
     }
 
     private void onMapViewChange(MapViewUI view, ObjectSubscription objectSubscription) {
@@ -120,9 +113,7 @@ class ColumnViewController<K, V> {
         view.gridHolder.addComponent(grid);
         grid.setHeight(100, Sizeable.Unit.PERCENTAGE);
 
-        if (data instanceof Container.Filterable)
-
-        {
+        if (data instanceof Container.Filterable) {
 
             // Create a header row to hold column filters
             final HeaderRow filterRow = grid.appendHeaderRow();
@@ -167,7 +158,7 @@ class ColumnViewController<K, V> {
 
     }
 
-    private Class type(final String typeName) {
+ /*   private Class type(final String typeName) {
         Optional<Column> first = ((List<Column>) columnView.columns())
                 .stream().filter(c -> c.name.equals(typeName))
                 .findFirst();
@@ -177,7 +168,7 @@ class ColumnViewController<K, V> {
 
         return first.get().type;
 
-    }
+    }*/
 
 
     private static Container.Indexed createContainer(final QueryDelegate delegate) {
