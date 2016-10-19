@@ -33,7 +33,7 @@ import static com.vaadin.ui.Grid.HeaderRow;
 class ColumnViewController<K, V> {
 
     private final ColumnView columnView;
-    private MapViewUI view;
+    private final MapViewUI view;
 
     ColumnViewController(ColumnView columnView, MapViewUI view, String path) {
         this.columnView = columnView;
@@ -58,8 +58,7 @@ class ColumnViewController<K, V> {
         view.keyStoreValue.setValue(objectSubscription.getClass().getSimpleName());
     }
 
-
-    public void init() {
+    void init() {
         view.gridHolder.removeAllComponents();
 
         //final Container.Indexed data = createContainer();
@@ -69,9 +68,9 @@ class ColumnViewController<K, V> {
         final Grid grid = new Grid(generatedPropertyContainer);
         grid.setWidth(100, Sizeable.Unit.PERCENTAGE);
         grid.setHeight(100, Sizeable.Unit.PERCENTAGE);
-
         grid.removeAllColumns();
-        List<Column> columns = columnView.columns();
+
+        final List<Column> columns = columnView.columns();
         for (Column column : columns) {
             grid.addColumn(column.name);
         }
@@ -105,8 +104,8 @@ class ColumnViewController<K, V> {
             grid.setCellStyleGenerator(cellRef ->
                     "delete".equals(cellRef.getPropertyId()) ? "rightalign" : null);
 
-            ImageRenderer renderer = new ImageRenderer(e -> grid.getContainerDataSource().removeItem(e.getItemId()));
-            deleteColumn.setRenderer(renderer);
+            deleteColumn.setRenderer(new ImageRenderer(
+                    e -> grid.getContainerDataSource().removeItem(e.getItemId())));
         }
 
         view.gridHolder.addComponent(grid);
@@ -157,28 +156,12 @@ class ColumnViewController<K, V> {
 
     }
 
- /*   private Class type(final String typeName) {
-        Optional<Column> first = ((List<Column>) columnView.columns())
-                .stream().filter(c -> c.name.equals(typeName))
-                .findFirst();
-
-        if (!first.isPresent())
-            throw new IllegalStateException(typeName + " not found");
-
-        return first.get().type;
-
-    }*/
-
-
     private static Container.Indexed createContainer(final QueryDelegate delegate) {
-        Container.Indexed container = null;
         try {
-            container = new SQLContainer(delegate);
+            return new SQLContainer(delegate);
         } catch (SQLException e) {
             throw Jvm.rethrow(e);
         }
-
-        return container;
     }
 
     private static GeneratedPropertyContainer addDeleteButton(Container.Indexed container) {

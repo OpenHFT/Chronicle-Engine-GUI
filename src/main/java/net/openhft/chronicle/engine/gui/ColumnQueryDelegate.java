@@ -10,7 +10,7 @@ import net.openhft.chronicle.engine.api.column.Column;
 import net.openhft.chronicle.engine.api.column.ColumnView;
 import net.openhft.chronicle.engine.api.column.ColumnView.MarshableFilter;
 import net.openhft.chronicle.engine.api.column.ColumnView.MarshableOrderBy;
-import net.openhft.chronicle.engine.api.column.ColumnView.Query;
+import net.openhft.chronicle.engine.api.column.ColumnView.SortedFilter;
 import net.openhft.chronicle.engine.api.column.Row;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
 /**
  * @author Rob Austin.
  */
-public class ColumnQueryDelegate<K, V> implements QueryDelegate {
+class ColumnQueryDelegate<K, V> implements QueryDelegate {
 
     private final ColumnView columnView;
     private List<Container.Filter> filters = Collections.EMPTY_LIST;
     private List<OrderBy> orderBys = Collections.EMPTY_LIST;
 
-    public ColumnQueryDelegate(@NotNull ColumnView columnView) {
+    ColumnQueryDelegate(@NotNull ColumnView columnView) {
         this.columnView = columnView;
     }
 
@@ -38,7 +38,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
         if (filters.isEmpty() && orderBys.isEmpty())
             return columnView.rowCount(null);
 
-        return columnView.rowCount(toQuery(0, filters));
+        return columnView.rowCount(toMarshables(filters));
     }
 
     @Override
@@ -70,38 +70,49 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
             return;
 
         this.filters = filters;
-
     }
 
-
     private Iterator<Row> newIterator(int fromIndex) {
-        Query query = toQuery(fromIndex, filters);
-        return columnView.iterator(query);
+        SortedFilter sortedFilter = toQuery(fromIndex, filters);
+        return columnView.iterator(sortedFilter);
     }
 
     @NotNull
-    private Query toQuery(int fromIndex, List<Container.Filter> filters) {
-        final Query query = new Query();
-        query.fromIndex = fromIndex;
+    private SortedFilter toQuery(int fromIndex, List<Container.Filter> filters) {
+        final SortedFilter sortedFilter = new SortedFilter();
+        sortedFilter.fromIndex = fromIndex;
+        sortedFilter.marshableFilters.clear();
+        sortedFilter.marshableFilters.addAll(toMarshables(filters));
 
+        for (OrderBy orderBy : orderBys) {
+            sortedFilter.marshableOrderBy.add(toMarshables(orderBy));
+        }
+
+        return sortedFilter;
+    }
+
+    /**
+     * converts a vaadin filter to a marshable filter
+     *
+     * @param filters the vaadin filter
+     * @return the marshable filter
+     */
+    private List<MarshableFilter> toMarshables(List<Container.Filter> filters) {
+        ArrayList<MarshableFilter> result = new ArrayList<>();
         for (Container.Filter filter0 : filters) {
             if (filter0 instanceof SimpleStringFilter) {
                 SimpleStringFilter filter = (SimpleStringFilter) filter0;
-                query.marshableFilters.add(
+                result.add(
                         new MarshableFilter(filter.getPropertyId().toString(),
                                 filter.getFilterString()));
             }
         }
-
-        for (OrderBy orderBy : orderBys) {
-            query.marshableOrderBy.add(toMarshableOrderBy(orderBy));
-        }
-        return query;
+        return result;
     }
 
 
     @NotNull
-    private MarshableOrderBy toMarshableOrderBy(OrderBy orderBy) {
+    private MarshableOrderBy toMarshables(OrderBy orderBy) {
         return new MarshableOrderBy(orderBy.getColumn(), orderBy.isAscending());
     }
 
@@ -149,8 +160,7 @@ public class ColumnQueryDelegate<K, V> implements QueryDelegate {
             oldRow.put(c.name, cp.getOldValue());
         }
 
-        return columnView.changedRow(Collections.EMPTY_MAP, oldRow) == 1;
-
+        return columnView.changedRow(Collections.emptyMap(), oldRow) == 1;
     }
 
     @Override
