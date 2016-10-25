@@ -104,17 +104,17 @@ class KeyValueResultSetMetaData implements ResultSetMetaData {
     @NotNull
     @Override
     public String getColumnTypeName(int column) throws SQLException {
-        throw new UnsupportedOperationException("todo");
+        return columns.get(column - 1).type().getSimpleName();
     }
 
     @Override
     public boolean isReadOnly(int column) throws SQLException {
-        return false;
+        return columns.get(column - 1).isReadOnly();
     }
 
     @Override
     public boolean isWritable(int column) throws SQLException {
-        return true;
+        return !columns.get(column - 1).isReadOnly();
     }
 
     @Override

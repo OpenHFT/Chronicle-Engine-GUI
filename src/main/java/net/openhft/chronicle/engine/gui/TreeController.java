@@ -4,6 +4,8 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Tree;
 import net.openhft.chronicle.engine.api.column.ColumnView;
+import net.openhft.chronicle.engine.api.column.MapColumnView;
+import net.openhft.chronicle.engine.api.column.QueueColumnView;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
@@ -35,25 +37,28 @@ public class TreeController {
             treeUI.contents.removeAllComponents();
 
 
-            if (source.endsWith(MAP_VIEW)) {
+            if (source.endsWith(MAP_VIEW) || source.endsWith(QUEUE_VIEW)) {
                 @NotNull MapViewUI mapViewUI = new MapViewUI();
                 treeUI.contents.addComponent(mapViewUI);
 
-                @NotNull final String path = source.substring(0, source.length() - MAP_VIEW.length());
+                final int len = source.length();
 
-                //   final MapView<String, String> view =
-                //         assetTree.acquireMap(path, String.class, String.class);
+                @NotNull final String path = source.endsWith(MAP_VIEW) ?
+                        source.substring(0, len - MAP_VIEW.length()) :
+                        source.substring(0, len - QUEUE_VIEW.length());
 
-                @NotNull Asset asset = assetTree.acquireAsset(path);
-                @NotNull ColumnView view = asset.acquireView(ColumnView.class);
+                @NotNull
+                Asset asset = assetTree.acquireAsset(path);
 
-                @NotNull ColumnViewController mapControl = new ColumnViewController(view, mapViewUI, path);
+                @Nullable
+                final ColumnView view = source.endsWith(MAP_VIEW) ?
+                        asset.acquireView(MapColumnView.class) :
+                        asset.acquireView(QueueColumnView.class);
+
+                @NotNull
+                ColumnViewController mapControl = new ColumnViewController(view, mapViewUI, path);
                 mapControl.init();
 
-            } else if (source.endsWith(QUEUE_VIEW)) {
-
-                @NotNull String path = source.substring(0, source.length() - QUEUE_VIEW.length());
-                treeUI.contents.addComponent(new MapViewUI());
             }
 
         };

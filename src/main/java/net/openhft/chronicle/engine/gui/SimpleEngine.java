@@ -3,6 +3,7 @@ package net.openhft.chronicle.engine.gui;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.SimpleEngineMain;
 import net.openhft.chronicle.engine.api.map.MapView;
+import net.openhft.chronicle.engine.tree.QueueView;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.wire.AbstractMarshallable;
 import org.jetbrains.annotations.NotNull;
@@ -42,9 +43,29 @@ public class SimpleEngine {
         }
     }
 
+    static class MarketData2 extends AbstractMarshallable {
+        Date date;
+        double open;
+        double high;
+        double low;
+        double close;
+        double volume;
+        double adjClose;
+
+        public MarketData2(Date date, double open, double high, double low, double close,
+                           double adjClose, final double v) {
+            this.date = date;
+            this.open = open;
+            this.high = high;
+            this.low = low;
+            this.close = close;
+            this.volume = v;
+            this.adjClose = adjClose;
+        }
+    }
 
     private static VanillaAssetTree createEngine() {
-        VanillaAssetTree assetTree ;
+        VanillaAssetTree assetTree;
         try {
             assetTree = SimpleEngineMain.tree();
         } catch (IOException e) {
@@ -59,12 +80,13 @@ public class SimpleEngine {
             intView.put(i, (double) i);
         }
 
+        @NotNull SimpleDateFormat sd = new SimpleDateFormat("dd MMM yyyy");
+
         {
             @NotNull MapView<Date, MarketData> map = assetTree.acquireMap("/shares/APPL", Date.class,
                     MarketData
                             .class);
 
-            @NotNull SimpleDateFormat sd = new SimpleDateFormat("dd MMM yyyy");
 
             try {
                 map.put(sd.parse("7 Oct 2016"), new MarketData(114.31, 114.56, 113.51, 114.06, 114.06, 24358400L));
@@ -117,6 +139,62 @@ public class SimpleEngine {
                 e.printStackTrace();
             }
         }
+
+
+        QueueView<String, MarketData2> q = assetTree.acquireQueue
+                ("/queue/shares/APPL", String.class, MarketData2.class);
+
+        try {
+            q.publishAndIndex("", new MarketData2(sd.parse("7 Oct 2016"), 114.31, 114.56, 113.51, 114.06, 114.06, 24358400L));
+            q.publishAndIndex("", new MarketData2(sd.parse("6 Oct 2016"), 113.70, 114.34, 113.13, 113.89, 113.89, 28779300L));
+            q.publishAndIndex("", new MarketData2(sd.parse("5 Oct 2016"), 113.40, 113.66, 112.69, 113.05, 113.05, 21453100L));
+            q.publishAndIndex("", new MarketData2(sd.parse("4 Oct 2016"), 113.06, 114.31, 112.63, 113.00, 113.00, 29736800L));
+            q.publishAndIndex("", new MarketData2(sd.parse("3 Oct 2016"), 112.71, 113.05, 112.28, 112.52, 112.52, 21701800L));
+            q.publishAndIndex("", new MarketData2(sd.parse("30 Sep 2016"), 112.46, 113.37, 111.80, 113.05, 113.05, 36379100L));
+            q.publishAndIndex("", new MarketData2(sd.parse("29 Sep 2016"), 113.16, 113.80, 111.80, 112.18, 112.18, 35887000L));
+            q.publishAndIndex("", new MarketData2(sd.parse("28 Sep 2016"), 113.69, 114.64, 113.43, 113.95, 113.95, 29641100L));
+            q.publishAndIndex("", new MarketData2(sd.parse("27 Sep 2016"), 113.00, 113.18, 112.34, 113.09, 113.09, 24607400L));
+            q.publishAndIndex("", new MarketData2(sd.parse("26 Sep 2016"), 111.64, 113.39, 111.55, 112.88, 112.88, 29869400L));
+            q.publishAndIndex("", new MarketData2(sd.parse("23 Sep 2016"), 114.42, 114.79, 111.55, 112.71, 112.71, 52481200L));
+            q.publishAndIndex("", new MarketData2(sd.parse("22 Sep 2016"), 114.35, 114.94, 114.00, 114.62, 114.62, 31074000L));
+            q.publishAndIndex("", new MarketData2(sd.parse("21 Sep 2016"), 113.85, 113.99, 112.44, 113.55, 113.55, 36003200L));
+            q.publishAndIndex("", new MarketData2(sd.parse("20 Sep 2016"), 113.05, 114.12, 112.51, 113.57, 113.57, 34514300L));
+            q.publishAndIndex("", new MarketData2(sd.parse("19 Sep 2016"), 115.19, 116.18, 113.25, 113.58, 113.58, 47023000L));
+            q.publishAndIndex("", new MarketData2(sd.parse("16 Sep 2016"), 115.12, 116.13, 114.04, 114.92, 114.92, 79886900L));
+            q.publishAndIndex("", new MarketData2(sd.parse("15 Sep 2016"), 113.86, 115.73, 113.49, 115.57, 115.57, 89983600L));
+            q.publishAndIndex("", new MarketData2(sd.parse("14 Sep 2016"), 108.73, 113.03, 108.60, 111.77, 111.77, 110888700L));
+            q.publishAndIndex("", new MarketData2(sd.parse("13 Sep 2016"), 107.51, 108.79, 107.24, 107.95, 107.95, 62176200L));
+            q.publishAndIndex("", new MarketData2(sd.parse("12 Sep 2016"), 102.65, 105.72, 102.53, 105.44, 105.44, 45292800L));
+            q.publishAndIndex("", new MarketData2(sd.parse("9 Sep 2016"), 104.64, 105.72, 103.13, 103.13, 103.13, 46557000L));
+            q.publishAndIndex("", new MarketData2(sd.parse("8 Sep 2016"), 107.25, 107.27, 105.24, 105.52, 105.52, 53002000L));
+            q.publishAndIndex("", new MarketData2(sd.parse("7 Sep 2016"), 107.83, 108.76, 107.07, 108.36, 108.36, 42364300L));
+            q.publishAndIndex("", new MarketData2(sd.parse("6 Sep 2016"), 107.90, 108.30, 107.51, 107.70, 107.70, 26880400L));
+            q.publishAndIndex("", new MarketData2(sd.parse("2 Sep 2016"), 107.70, 108.00, 106.82, 107.73, 107.73, 26802500L));
+            q.publishAndIndex("", new MarketData2(sd.parse("1 Sep 2016"), 106.14, 106.80, 105.62, 106.73, 106.73, 26701500L));
+            q.publishAndIndex("", new MarketData2(sd.parse("31 Aug 2016"), 105.66, 106.57, 105.64, 106.10, 106.10, 29662400L));
+            q.publishAndIndex("", new MarketData2(sd.parse("30 Aug 2016"), 105.80, 106.50, 105.50, 106.00, 106.00, 24863900L));
+            q.publishAndIndex("", new MarketData2(sd.parse("29 Aug 2016"), 106.62, 107.44, 106.29, 106.82, 106.82, 24970300L));
+            q.publishAndIndex("", new MarketData2(sd.parse("26 Aug 2016"), 107.41, 107.95, 106.31, 106.94, 106.94, 27766300L));
+            q.publishAndIndex("", new MarketData2(sd.parse("25 Aug 2016"), 107.39, 107.88, 106.68, 107.57, 107.57, 25086200L));
+            q.publishAndIndex("", new MarketData2(sd.parse("24 Aug 2016"), 108.57, 108.75, 107.68, 108.03, 108.03, 23675100L));
+            q.publishAndIndex("", new MarketData2(sd.parse("23 Aug 2016"), 108.59, 109.32, 108.53, 108.85, 108.85, 21257700L));
+            q.publishAndIndex("", new MarketData2(sd.parse("22 Aug 2016"), 108.86, 109.10, 107.85, 108.51, 108.51, 25820200L));
+            q.publishAndIndex("", new MarketData2(sd.parse("19 Aug 2016"), 108.77, 109.69, 108.36, 109.36, 109.36, 25368100L));
+            q.publishAndIndex("", new MarketData2(sd.parse("18 Aug 2016"), 109.23, 109.60, 109.02, 109.08, 109.08, 21984700L));
+            q.publishAndIndex("", new MarketData2(sd.parse("17 Aug 2016"), 109.10, 109.37, 108.34, 109.22, 109.22, 25356000L));
+            q.publishAndIndex("", new MarketData2(sd.parse("16 Aug 2016"), 109.63, 110.23, 109.21, 109.38, 109.38, 33794400L));
+            q.publishAndIndex("", new MarketData2(sd.parse("15 Aug 2016"), 108.14, 109.54, 108.08, 109.48, 109.48, 25868200L));
+            q.publishAndIndex("", new MarketData2(sd.parse("12 Aug 2016"), 107.78, 108.44, 107.78, 108.18, 108.18, 18660400L));
+            q.publishAndIndex("", new MarketData2(sd.parse("11 Aug 2016"), 108.52, 108.93, 107.85, 107.93, 107.93, 27484500L));
+            q.publishAndIndex("", new MarketData2(sd.parse("10 Aug 2016"), 108.71, 108.90, 107.76, 108.00, 108.00, 24008500L));
+            q.publishAndIndex("", new MarketData2(sd.parse("9 Aug 2016"), 108.23, 108.94, 108.01, 108.81, 108.81, 26315200L));
+            q.publishAndIndex("", new MarketData2(sd.parse("8 Aug 2016"), 107.52, 108.37, 107.16, 108.37, 108.37, 28037200L));
+            q.publishAndIndex("", new MarketData2(sd.parse("5 Aug 2016"), 106.27, 107.65, 106.18, 107.48, 107.48, 40553400L));
+            q.publishAndIndex("", new MarketData2(sd.parse("4 Aug 2016"), 105.58, 106.00, 105.28, 105.87, 105.87, 27408700L));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
         {
 

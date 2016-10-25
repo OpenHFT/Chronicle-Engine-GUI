@@ -52,11 +52,21 @@ class ColumnViewController<K, V> {
     private void onChange(@NotNull MapViewUI view, @NotNull ObjectSubscription objectSubscription) {
         view.topicSubscriberCount.setValue(Integer.toString(objectSubscription
                 .topicSubscriberCount()));
-        view.keySubscriberCount.setValue(Integer.toString(objectSubscription
-                .keySubscriberCount()));
 
+        try {
+            view.keySubscriberCount.setValue(Integer.toString(objectSubscription
+                    .keySubscriberCount()));
+        } catch (UnsupportedOperationException e) {
+            view.keySubscriberCount.setValue("Unknown");
+        }
+
+        try {
         view.entrySubscriberCount.setValue(Integer.toString(objectSubscription
                 .entrySubscriberCount()));
+        } catch (UnsupportedOperationException e) {
+            view.entrySubscriberCount.setValue("Unknown");
+        }
+
 
         view.keyStoreValue.setValue(objectSubscription.getClass().getSimpleName());
     }
