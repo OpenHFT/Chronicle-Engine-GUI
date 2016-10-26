@@ -48,15 +48,7 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
     @NotNull
     @Override
     public ResultSet getResults(int offset, int pageLength) throws SQLException {
-        Iterator<Row> iterator = newIterator(offset);
-        int iteratorIndex = 0;
-
-        while (offset > iteratorIndex && iterator.hasNext()) {
-            iterator.next();
-            iteratorIndex++;
-        }
-
-        return new MapViewResultSet<K, V>(iterator, pageLength, columnView.columns());
+        return new ChronicleColumnViewResultSet<K, V>(newIterator(offset), pageLength, columnView.columns());
     }
 
 

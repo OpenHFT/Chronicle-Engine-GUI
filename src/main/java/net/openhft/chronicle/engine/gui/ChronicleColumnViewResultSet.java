@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * @author Rob Austin.
  */
-class MapViewResultSet<K, V> implements ResultSet {
+class ChronicleColumnViewResultSet<K, V> implements ResultSet {
 
     @NotNull
     private final Iterator<Row> iterator;
@@ -29,9 +29,10 @@ class MapViewResultSet<K, V> implements ResultSet {
     @NotNull
     private List<Column> columns;
 
-    MapViewResultSet(@NotNull Iterator<Row> iterator,
-                     int pagelength,
-                     final @NotNull List<Column> columns) {
+    ChronicleColumnViewResultSet(@NotNull Iterator<Row> iterator,
+                                 int pagelength,
+                                 final @NotNull List<Column> columns) {
+        assert iterator.hasNext();
         this.iterator = iterator;
         this.pagelength = pagelength;
         this.columns = columns;

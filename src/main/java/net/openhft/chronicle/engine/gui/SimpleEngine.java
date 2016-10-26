@@ -83,10 +83,9 @@ public class SimpleEngine {
         @NotNull SimpleDateFormat sd = new SimpleDateFormat("dd MMM yyyy");
 
         {
-            @NotNull MapView<Date, MarketData> map = assetTree.acquireMap("/shares/APPL", Date.class,
-                    MarketData
-                            .class);
-
+            @NotNull MapView<Date, MarketData> map = assetTree.acquireMap("/shares/APPL",
+                    Date.class,
+                    MarketData.class);
 
             try {
                 map.put(sd.parse("7 Oct 2016"), new MarketData(114.31, 114.56, 113.51, 114.06, 114.06, 24358400L));
