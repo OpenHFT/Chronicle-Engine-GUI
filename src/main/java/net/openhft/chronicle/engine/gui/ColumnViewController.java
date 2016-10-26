@@ -13,6 +13,7 @@ import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.renderers.ImageRenderer;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.api.column.Column;
@@ -24,6 +25,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.vaadin.ui.Grid.HeaderCell;
 import static com.vaadin.ui.Grid.HeaderRow;
@@ -61,8 +63,8 @@ class ColumnViewController<K, V> {
         }
 
         try {
-        view.entrySubscriberCount.setValue(Integer.toString(objectSubscription
-                .entrySubscriberCount()));
+            view.entrySubscriberCount.setValue(Integer.toString(objectSubscription
+                    .entrySubscriberCount()));
         } catch (UnsupportedOperationException e) {
             view.entrySubscriberCount.setValue("Unknown");
         }
@@ -71,44 +73,52 @@ class ColumnViewController<K, V> {
         view.keyStoreValue.setValue(objectSubscription.getClass().getSimpleName());
     }
 
+    private final AtomicBoolean refreshUI = new AtomicBoolean();
+
     void init() {
         view.gridHolder.removeAllComponents();
 
         //final Container.Indexed data = createContainer();
         @NotNull final Container.Indexed data = createContainer(new ColumnQueryDelegate<>(columnView));
         @NotNull final GeneratedPropertyContainer generatedPropertyContainer = addDeleteButton(data);
-
         @NotNull final Grid grid = new Grid(generatedPropertyContainer);
+
         grid.setWidth(100, Sizeable.Unit.PERCENTAGE);
         grid.setHeight(100, Sizeable.Unit.PERCENTAGE);
         grid.removeAllColumns();
 
         final List<Column> columns = columnView.columns();
         for (@NotNull Column column : columns) {
-            grid.addColumn(column.name);
+            final Grid.Column gridColumn = grid.addColumn(column.name);
+            gridColumn.setSortable(column.sortable);
+            gridColumn.setEditable(!column.isReadOnly());
         }
 
-        grid.setEditorEnabled(true);
-        grid.setEditorBuffered(false);
         grid.setSizeFull();
-        grid.setSelectionMode(Grid.SelectionMode.NONE);
 
         view.addButton.addClickListener((ClickListener) event -> new AddRow(columnView).init());
 
         columnView.registerChangeListener(() -> {
-            ((SQLContainer) data).refresh();
-            view.recordCount.setValue(Long.toString(columnView.rowCount(null)));
+            // the refresh has to be run on the UI thread !
+            refreshUI.set(true);
         });
+
+        UI.getCurrent().addPollListener(e -> refreshUI((SQLContainer) data));
 
         if (data instanceof SQLContainer) {
             ((SQLContainer) data).setAutoCommit(true);
         }
 
         if (columnView.canDeleteRows()) {
+
+            grid.setEditorEnabled(true);
+            grid.setEditorBuffered(false);
+            grid.setSelectionMode(Grid.SelectionMode.NONE);
+
             // Render a button that deletes the data row (item)
             final Grid.Column deleteColumn = grid.addColumn("delete");
             deleteColumn.setWidth(64);
-            deleteColumn.setLastFrozenColumn();
+            //     deleteColumn.setLastFrozenColumn();
             deleteColumn.setHeaderCaption("");
             deleteColumn.setEditable(false);
             deleteColumn.setResizable(false);
@@ -141,7 +151,7 @@ class ColumnViewController<K, V> {
                 // Have an input field to use for filter
                 @NotNull TextField filterField = new TextField();
                 filterField.setHeight(24, Sizeable.Unit.PIXELS);
-                filterField.setWidth(100, Sizeable.Unit.PERCENTAGE);
+                //      filterField.setWidth(100, Sizeable.Unit.PERCENTAGE);
 
                 // Update filter When the filter input is changed
                 filterField.addTextChangeListener(change -> {
@@ -165,6 +175,13 @@ class ColumnViewController<K, V> {
             }
         }
 
+    }
+
+    private void refreshUI(SQLContainer data) {
+        if (refreshUI.getAndSet(false)) {
+            data.refresh();
+            view.recordCount.setValue(Long.toString(columnView.rowCount(null)));
+        }
     }
 
     @NotNull
