@@ -1,0 +1,26 @@
+clusterTwo: {
+  context: !EngineClusterContext {
+    wireType: BINARY,
+    handlerFactory: !UberHandlerFactory {},
+    wireOutPublisherFactory: !VanillaWireOutPublisherFactory {},
+    networkContextFactory: !EngineWireNetworkContextFactory {},
+    connectionEventHandler:  !EngineConnectionManagerFactory {},
+    heartbeatTimeoutMs: 500_000L,
+    heartbeatIntervalMs: 300_000L,
+    heartbeatFactory: !HeartbeatHandlerFactory {},
+    connectionStrategy: !HostIdConnectionStrategy {},
+    serverThreadingStrategy: CONCURRENT
+  }
+  host1: {
+     hostId: 1,
+     tcpBufferSize: 65536,
+     connectUri: host.port1,
+     timeoutMs: 5000,
+  },
+  host2: {
+     hostId: 2,
+     tcpBufferSize: 65536,
+     connectUri: host.port2,
+     timeoutMs: 5000,
+  }
+}

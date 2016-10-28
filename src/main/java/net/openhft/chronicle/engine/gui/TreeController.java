@@ -71,10 +71,11 @@ public class TreeController {
         if (e.assetName() == null || !e.added())
             return;
 
-        tree.markAsDirty();
-
         @Nullable Asset asset = assetTree.getAsset(e.fullName());
-        assert asset != null;
+        if (asset == null)
+            return;
+
+        tree.markAsDirty();
 
         tree.addItem(e.fullName());
         tree.setItemCaption(e.fullName(), e.name());
