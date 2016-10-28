@@ -228,10 +228,6 @@ class SimpleEngine {
             }
         }, 0, 1, TimeUnit.SECONDS);
 
-        final ChronicleQueueView<String, Message> stringMessageQueueView = (ChronicleQueueView) tree2.acquireQueue(uri1, String.class, Message.class);
-        System.out.println(stringMessageQueueView.chronicleQueue
-                ().dump());
-
     }
 
     public static void deleteFile(@NotNull File element) {
@@ -718,9 +714,8 @@ class SimpleEngine {
 
     private boolean runThroughput() {
         try {
-            for (int i : new int[]{0, 60, 60}) {
-                throughput(i == 0 ? 100 : i, i == 0);
-            }
+
+            throughput(0, false);
         } catch (Throwable e) {
             e.printStackTrace();
             Map<ExceptionKey, Integer> ex = new HashMap<ExceptionKey, Integer>();
