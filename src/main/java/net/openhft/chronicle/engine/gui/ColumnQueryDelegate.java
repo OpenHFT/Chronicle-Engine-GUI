@@ -40,7 +40,7 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
     public int getCount() throws SQLException {
 
         if (filters.isEmpty() && orderBys.isEmpty())
-            return columnView.rowCount(null);
+            return columnView.rowCount(Collections.emptyList());
 
         return columnView.rowCount(toMarshables(filters));
     }
@@ -69,7 +69,7 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
         this.filters = filters;
     }
 
-    private Iterator<Row> newIterator(int fromIndex) {
+    private Iterator<? extends Row> newIterator(int fromIndex) {
         @NotNull SortedFilter sortedFilter = toQuery(fromIndex, filters);
         return columnView.iterator(sortedFilter);
     }

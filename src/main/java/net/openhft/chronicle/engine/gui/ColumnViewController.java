@@ -23,9 +23,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.vaadin.ui.Grid.HeaderCell;
 import static com.vaadin.ui.Grid.HeaderRow;
@@ -44,7 +45,7 @@ class ColumnViewController<K, V> {
         this.columnView = columnView;
         this.view = view;
         view.path.setValue(path);
-        view.recordCount.setValue(Long.toString(columnView.rowCount(null)));
+        view.recordCount.setValue(Long.toString(columnView.rowCount(Collections.emptyList())));
 
         final ObjectSubscription objectSubscription = columnView.objectSubscription();
         onChange(view, objectSubscription);
@@ -73,12 +74,11 @@ class ColumnViewController<K, V> {
         view.keyStoreValue.setValue(objectSubscription.getClass().getSimpleName());
     }
 
-    private final AtomicBoolean refreshUI = new AtomicBoolean();
+    private final AtomicLong refreshUI = new AtomicLong();
 
     void init() {
         view.gridHolder.removeAllComponents();
 
-        //final Container.Indexed data = createContainer();
         @NotNull final Container.Indexed data = createContainer(new ColumnQueryDelegate<>(columnView));
         @NotNull final GeneratedPropertyContainer generatedPropertyContainer = addDeleteButton(data);
         @NotNull final Grid grid = new Grid(generatedPropertyContainer);
@@ -100,7 +100,7 @@ class ColumnViewController<K, V> {
 
         columnView.registerChangeListener(() -> {
             // the refresh has to be run on the UI thread !
-            refreshUI.set(true);
+            refreshUI.compareAndSet(0, System.currentTimeMillis());
         });
 
         UI.getCurrent().addPollListener(e -> refreshUI((SQLContainer) data));
@@ -178,10 +178,14 @@ class ColumnViewController<K, V> {
     }
 
     private void refreshUI(SQLContainer data) {
-        if (refreshUI.getAndSet(false)) {
+        final long l = refreshUI.get();
+
+        if (l + 5_000 < System.currentTimeMillis()) {
+            refreshUI.set(0);
             data.refresh();
-            view.recordCount.setValue(Long.toString(columnView.rowCount(null)));
+            view.recordCount.setValue(Long.toString(columnView.rowCount(Collections.emptyList())));
         }
+
     }
 
     @NotNull

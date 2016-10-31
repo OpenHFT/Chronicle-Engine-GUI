@@ -21,15 +21,15 @@ import java.util.Map;
 class ChronicleColumnViewResultSet<K, V> implements ResultSet {
 
     @NotNull
-    private final Iterator<Row> iterator;
-    private final double pagelength;
+    private final Iterator<? extends Row> iterator;
+    private final int pagelength;
     private Row entry;
     private int count = 0;
 
     @NotNull
     private List<Column> columns;
 
-    ChronicleColumnViewResultSet(@NotNull Iterator<Row> iterator,
+    ChronicleColumnViewResultSet(@NotNull Iterator<? extends Row> iterator,
                                  int pagelength,
                                  final @NotNull List<Column> columns) {
         assert iterator.hasNext();
