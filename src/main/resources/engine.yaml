@@ -1,0 +1,45 @@
+--- !EngineCfg {
+  #
+  # Configuration files are being placed in /etc following the Unix convention, but could be anywhere
+  #
+  etc: {
+    monitoring: !MonitorCfg {
+        subscriptionMonitoringEnabled: true
+        userMonitoringEnabled: true
+    }
+    #
+    # Configure a group of node which form a local cluster.
+    #
+    # Configure a cluster of one for now.
+    clusters: !ClustersCfg {
+      clusterTwo: {
+        context: !EngineClusterContext {
+          wireType: BINARY,
+          handlerFactory: !UberHandlerFactory {},
+          wireOutPublisherFactory: !VanillaWireOutPublisherFactory {},
+          networkContextFactory: !EngineWireNetworkContextFactory {},
+          connectionEventHandler:  !EngineConnectionManagerFactory {},
+          networkStatsListenerFactory: !EngineNetworkStatsListenerFactory {},
+          heartbeatTimeoutMs: 500_000L,
+          heartbeatIntervalMs: 300_000L,
+          heartbeatFactory: !HeartbeatHandlerFactory {},
+          connectionStrategy: !HostIdConnectionStrategy {},
+          serverThreadingStrategy: CONCURRENT
+        },
+
+        host1: {
+           hostId: 1,
+           tcpBufferSize: 65536,
+           connectUri: host.port1,
+           timeoutMs: 5000,
+        },
+        host2: {
+           hostId: 2,
+           tcpBufferSize: 65536,
+           connectUri: host.port2,
+           timeoutMs: 5000,
+        }
+      }
+    }
+  }
+}

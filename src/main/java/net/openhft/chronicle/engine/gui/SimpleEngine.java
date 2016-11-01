@@ -7,10 +7,8 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.tree.Asset;
-import net.openhft.chronicle.engine.api.tree.RequestContext;
 import net.openhft.chronicle.engine.fs.ChronicleMapGroupFS;
 import net.openhft.chronicle.engine.fs.FilePerKeyGroupFS;
-import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.ChronicleQueueView;
 import net.openhft.chronicle.engine.tree.QueueView;
 import net.openhft.chronicle.engine.tree.VanillaAsset;
@@ -36,11 +34,7 @@ import java.util.concurrent.TimeUnit;
  * @author Rob Austin.
  */
 class SimpleEngine {
-
-
     static {
-        RequestContext.CLASS_ALIASES.toString();
-
         try {
             TCPRegistry.createServerSocketChannelFor(
                     "host.port1",
@@ -53,11 +47,11 @@ class SimpleEngine {
     private static final String NAME = "throughputTest";
 
     private static Map<ExceptionKey, Integer> exceptionKeyIntegerMap;
-    private static VanillaAssetTree tree1 = tree1(1, "host.port1");
-    private static VanillaAssetTree tree2 = tree1(2, "host.port2");
-    private static ServerEndpoint serverEndpoint1;
-    private static ServerEndpoint serverEndpoint2;
+    private static VanillaAssetTree tree2 = EngineMain.engineMain(2);
+    private static VanillaAssetTree tree1 = tree(1, "host.port1");
 
+    //    private static ServerEndpoint serverEndpoint1;
+    //   private static ServerEndpoint serverEndpoint2;
 
     static {
         try {
@@ -68,13 +62,14 @@ class SimpleEngine {
     }
 
     @NotNull
-    private static VanillaAssetTree tree1(final int hostId, final String hostPortDescription) {
+
+    private static VanillaAssetTree tree(final int hostId, final String hostPortDescription) {
         final VanillaAssetTree tree = create(hostId, WireType.BINARY, "clusterTwo");
-        try {
-            serverEndpoint1 = new ServerEndpoint(hostPortDescription, tree);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // try {
+        //     serverEndpoint1 = new ServerEndpoint(hostPortDescription, tree);
+        //  } catch (Exception e) {
+        ///       e.printStackTrace();
+        // }
 
         return tree;
     }
@@ -86,6 +81,7 @@ class SimpleEngine {
             e.printStackTrace();
         }
     }
+
 
     static VanillaAssetTree assetTree() {
         return tree2;
@@ -177,13 +173,13 @@ class SimpleEngine {
                 "host.port2");
 
 
-        serverEndpoint1 = new ServerEndpoint("host.port1", tree1);
+        //   serverEndpoint1 = new ServerEndpoint("host.port1", tree1);
 
     }
 
     public void after() {
-        if (serverEndpoint1 != null)
-            serverEndpoint1.close();
+        //     if (serverEndpoint1 != null)
+        //        serverEndpoint1.close();
 
         tree1.close();
         tree2.close();
