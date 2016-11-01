@@ -47,8 +47,8 @@ class SimpleEngine {
     private static final String NAME = "throughputTest";
 
     private static Map<ExceptionKey, Integer> exceptionKeyIntegerMap;
-    private static VanillaAssetTree tree2 = EngineMain.engineMain(2);
-    private static VanillaAssetTree tree1 = EngineMain.engineMain(1);
+    private static VanillaAssetTree tree2 = EngineMain.engineMain(2, "clusterTwo");
+    private static VanillaAssetTree tree1 = EngineMain.engineMain(1, "clusterTwo");
 
 
     static {
