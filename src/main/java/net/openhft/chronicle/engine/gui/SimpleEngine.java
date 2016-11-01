@@ -48,10 +48,8 @@ class SimpleEngine {
 
     private static Map<ExceptionKey, Integer> exceptionKeyIntegerMap;
     private static VanillaAssetTree tree2 = EngineMain.engineMain(2);
-    private static VanillaAssetTree tree1 = tree(1, "host.port1");
+    private static VanillaAssetTree tree1 = EngineMain.engineMain(1);
 
-    //    private static ServerEndpoint serverEndpoint1;
-    //   private static ServerEndpoint serverEndpoint2;
 
     static {
         try {
@@ -60,20 +58,6 @@ class SimpleEngine {
             e.printStackTrace();
         }
     }
-
-    @NotNull
-
-    private static VanillaAssetTree tree(final int hostId, final String hostPortDescription) {
-        final VanillaAssetTree tree = create(hostId, WireType.BINARY, "clusterTwo");
-        // try {
-        //     serverEndpoint1 = new ServerEndpoint(hostPortDescription, tree);
-        //  } catch (Exception e) {
-        ///       e.printStackTrace();
-        // }
-
-        return tree;
-    }
-
     static {
         try {
             before();

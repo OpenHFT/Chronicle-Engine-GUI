@@ -2,14 +2,15 @@ package net.openhft.chronicle.engine.gui;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.engine.api.management.mbean.ChronicleConfig;
 import net.openhft.chronicle.engine.api.tree.RequestContext;
 import net.openhft.chronicle.engine.cfg.*;
 import net.openhft.chronicle.engine.fs.Clusters;
 import net.openhft.chronicle.engine.fs.EngineCluster;
+import net.openhft.chronicle.engine.fs.EngineHostDetails;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.NetworkStats;
 import net.openhft.chronicle.network.NetworkStatsListener;
 import net.openhft.chronicle.network.cluster.HostDetails;
 import net.openhft.chronicle.wire.TextWire;
@@ -33,9 +34,9 @@ public class EngineMain {
 
     public static VanillaAssetTree engineMain(final int hostId) {
         try {
-            ChronicleConfig.init();
+             //ChronicleConfig.init();
             addClass(EngineCfg.class);
-            addClass(EngineClusterContext.class);
+          //  addClass(EngineClusterContext.class);
             addClass(JmxCfg.class);
             addClass(ServerCfg.class);
             addClass(ClustersCfg.class);
@@ -85,6 +86,20 @@ public class EngineMain {
             assetTree.root().addView(ServerEndpoint.class, serverEndpoint);
 
             assetTree.registerSubscriber("", TopologicalEvent.class, e -> LOGGER.info("Tree change " + e));
+
+
+            // the reason that we have to do this is to ensure that the network stats are
+            // replicated between all hosts, if you don't acquire a queue it wont exist and so
+            // will not act as a slave in replication
+            for (EngineHostDetails engineHostDetails : engineCluster.hostDetails()) {
+
+                final int id = engineHostDetails
+                        .hostId();
+
+                assetTree.acquireQueue("/proc/connections/cluster/throughput/" + id,
+                        String.class,
+                        NetworkStats.class);
+            }
 
             return assetTree;
         } catch (Exception e) {

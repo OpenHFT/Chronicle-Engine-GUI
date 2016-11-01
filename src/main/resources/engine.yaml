@@ -19,10 +19,17 @@
           wireOutPublisherFactory: !VanillaWireOutPublisherFactory {},
           networkContextFactory: !EngineWireNetworkContextFactory {},
           connectionEventHandler:  !EngineConnectionManagerFactory {},
+          #
+          # this listener will log to a chronicle queue
           networkStatsListenerFactory: !EngineNetworkStatsListenerFactory {},
           heartbeatTimeoutMs: 500_000L,
           heartbeatIntervalMs: 300_000L,
+          #
+          # controlls how the heartbeating works
           heartbeatFactory: !HeartbeatHandlerFactory {},
+          #
+          # connection are established origionally bi-directionlly, then the conneciton with the
+          # hostID is dropped
           connectionStrategy: !HostIdConnectionStrategy {},
           serverThreadingStrategy: CONCURRENT
         },
