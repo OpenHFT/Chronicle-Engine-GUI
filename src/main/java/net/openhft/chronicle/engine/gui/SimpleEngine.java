@@ -18,7 +18,6 @@ import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.network.connection.TcpChannelHub;
 import net.openhft.chronicle.wire.AbstractMarshallable;
 import net.openhft.chronicle.wire.WireType;
-import net.openhft.chronicle.wire.YamlLogging;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -42,7 +41,7 @@ class SimpleEngine {
 
 
     static {
-        YamlLogging.showServerReads(true);
+        //  YamlLogging.showServerReads(true);
         try {
             TCPRegistry.createServerSocketChannelFor(
                     "host.port1",
