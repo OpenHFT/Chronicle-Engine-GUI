@@ -37,14 +37,13 @@ public class EngineMain {
 
     static <I extends Installable> void addClass(Class<I>... iClasses) {
         ClassAliasPool.CLASS_ALIASES.addAlias(iClasses);
-        System.setProperty("ReplicationHandler3", "true");
+       // //System.setProperty("ReplicationHandler3", "true");
     }
 
-    public static VanillaAssetTree engineMain(final int hostId, String clusterName) {
+    public static VanillaAssetTree engineMain(final int hostId) {
         try {
-            //ChronicleConfig.init();
+
             addClass(EngineCfg.class);
-            //  addClass(EngineClusterContext.class);
             addClass(JmxCfg.class);
             addClass(ServerCfg.class);
             addClass(ClustersCfg.class);
@@ -57,7 +56,7 @@ public class EngineMain {
             TextWire yaml = TextWire.fromFile(name);
             EngineCfg installable = (EngineCfg) yaml.readObject();
 
-            VanillaAssetTree tree = new VanillaAssetTree(hostId).forServer(false);
+            final VanillaAssetTree tree = new VanillaAssetTree(hostId).forServer(false);
 
             final Asset connectivityMap = tree.acquireAsset("/proc/connections/cluster/connectivity");
             connectivityMap.addWrappingRule(MapView.class, "map directly to KeyValueStore",
@@ -66,7 +65,7 @@ public class EngineMain {
             connectivityMap.addLeafRule(EngineReplication.class, "Engine replication holder",
                     CMap2EngineReplicator::new);
             connectivityMap.addLeafRule(KeyValueStore.class, "KVS is Chronicle Map", (context, asset) ->
-                    new ChronicleMapKeyValueStore(context.cluster(clusterName), asset));
+                    new ChronicleMapKeyValueStore(context.cluster(firstClusterName(tree)), asset));
 
             try {
                 installable.install("/", tree);
@@ -89,23 +88,19 @@ public class EngineMain {
             }
 
             final EngineCluster engineCluster = clusters.firstCluster();
-
-
             final HostDetails hostDetails = engineCluster.findHostDetails(hostId);
             final String connectUri = hostDetails.connectUri();
             engineCluster.clusterContext().assetRoot(tree.root());
 
             final NetworkStatsListener networkStatsListener = engineCluster.clusterContext()
-                    .networkStatsListenerFactory().apply(engineCluster
-                            .clusterContext());
+                    .networkStatsListenerFactory()
+                    .apply(engineCluster.clusterContext());
 
             final ServerEndpoint serverEndpoint = new ServerEndpoint(connectUri, tree, networkStatsListener);
 
             // we add this as close will get called when the asset tree is closed
             tree.root().addView(ServerEndpoint.class, serverEndpoint);
-
             tree.registerSubscriber("", TopologicalEvent.class, e -> LOGGER.info("Tree change " + e));
-
 
             // the reason that we have to do this is to ensure that the network stats are
             // replicated between all hosts, if you don't acquire a queue it wont exist and so
@@ -117,7 +112,7 @@ public class EngineMain {
 
                 tree.acquireQueue("/proc/connections/cluster/throughput/" + id,
                         String.class,
-                        NetworkStats.class);
+                        NetworkStats.class, engineCluster.clusterName());
             }
 
             return tree;
@@ -128,8 +123,22 @@ public class EngineMain {
 
     }
 
+    /**
+     * @return the first cluster name
+     */
+    static String firstClusterName(VanillaAssetTree tree) {
+        final Clusters clusters = tree.root().getView(Clusters.class);
+        if (clusters == null)
+            return "";
+        final EngineCluster engineCluster = clusters.firstCluster();
+        if (engineCluster == null)
+            return "";
+        return engineCluster.clusterName();
+    }
+
+
     public static void main(String[] args) {
-        engineMain(2, "clusterTwo");
+        engineMain(2);
     }
 
 }

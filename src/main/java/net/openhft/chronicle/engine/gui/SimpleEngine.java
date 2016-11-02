@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.fs.ChronicleMapGroupFS;
+import net.openhft.chronicle.engine.fs.Clusters;
 import net.openhft.chronicle.engine.fs.FilePerKeyGroupFS;
 import net.openhft.chronicle.engine.tree.ChronicleQueueView;
 import net.openhft.chronicle.engine.tree.QueueView;
@@ -17,6 +18,7 @@ import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.network.connection.TcpChannelHub;
 import net.openhft.chronicle.wire.AbstractMarshallable;
 import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.YamlLogging;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -30,15 +32,24 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static net.openhft.chronicle.core.onoes.PrintExceptionHandler.DEBUG;
+import static net.openhft.chronicle.core.onoes.PrintExceptionHandler.WARN;
+
 /**
  * @author Rob Austin.
  */
 class SimpleEngine {
+
+
     static {
+        YamlLogging.showServerReads(true);
         try {
             TCPRegistry.createServerSocketChannelFor(
                     "host.port1",
                     "host.port2");
+
+            Jvm.setExceptionsHandlers(WARN, WARN, DEBUG);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -47,20 +58,21 @@ class SimpleEngine {
     private static final String NAME = "throughputTest";
 
     private static Map<ExceptionKey, Integer> exceptionKeyIntegerMap;
-    private static VanillaAssetTree tree2 = EngineMain.engineMain(2, "clusterTwo");
-    private static VanillaAssetTree tree1 = EngineMain.engineMain(1, "clusterTwo");
+    private static VanillaAssetTree TREE2 = EngineMain.engineMain(2);
+    private static VanillaAssetTree TREE1 = EngineMain.engineMain(1);
+    private static String CLUSTER_NAME = EngineMain.firstClusterName(TREE2);
 
 
     static {
+
         try {
-            addSampleDataToTree(tree2);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    static {
-        try {
-            before();
+            final Clusters view = TREE2.root().getView(Clusters.class);
+            ClassAliasPool.CLASS_ALIASES.addAlias(ChronicleMapGroupFS.class);
+            ClassAliasPool.CLASS_ALIASES.addAlias(FilePerKeyGroupFS.class);
+            //Delete any files from the last run
+            Files.deleteIfExists(Paths.get(OS.TARGET, NAME));
+
+            addSampleDataToTree(TREE2);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -68,7 +80,7 @@ class SimpleEngine {
 
 
     static VanillaAssetTree assetTree() {
-        return tree2;
+        return TREE2;
     }
 
 
@@ -143,30 +155,9 @@ class SimpleEngine {
     }
 
 
-    private static void before() throws IOException, InterruptedException {
-
-
-        exceptionKeyIntegerMap = Jvm.recordExceptions();
-        ClassAliasPool.CLASS_ALIASES.addAlias(ChronicleMapGroupFS.class);
-        ClassAliasPool.CLASS_ALIASES.addAlias(FilePerKeyGroupFS.class);
-        //Delete any files from the last run
-        Files.deleteIfExists(Paths.get(OS.TARGET, NAME));
-
-        TCPRegistry.createServerSocketChannelFor(
-                "host.port1",
-                "host.port2");
-
-
-        //   serverEndpoint1 = new ServerEndpoint("host.port1", tree1);
-
-    }
-
     public void after() {
-        //     if (serverEndpoint1 != null)
-        //        serverEndpoint1.close();
-
-        tree1.close();
-        tree2.close();
+        TREE1.close();
+        TREE2.close();
 
         TcpChannelHub.closeAllHubs();
         TCPRegistry.reset();
@@ -189,7 +180,7 @@ class SimpleEngine {
     }
 
 
-    private void throughput(int millionsPerMin, boolean warmup) {
+    private void throughput(int millionsPerMin, boolean warmup, final String cluster) {
 
         Jvm.resetExceptionHandlers();
         Jvm.disableDebugHandler();
@@ -198,9 +189,9 @@ class SimpleEngine {
 
         @NotNull
 
-        ChronicleQueueView qv1 = (ChronicleQueueView) tree1.acquireQueue(
-                uri1, String.class, Message.class);
-        tree2.acquireQueue(uri1, String.class, Message.class);
+        ChronicleQueueView qv1 = (ChronicleQueueView) TREE1.acquireQueue(
+                uri1, String.class, Message.class, cluster);
+        TREE2.acquireQueue(uri1, String.class, Message.class, cluster);
 
         Executors.newScheduledThreadPool(1).scheduleAtFixedRate(() -> {
             for (int i = 0; i < 100; i++) {
@@ -566,7 +557,7 @@ class SimpleEngine {
         @NotNull SimpleDateFormat sd = new SimpleDateFormat("dd MMM yyyy");
 
         QueueView<String, MarketData2> q = tree.acquireQueue
-                ("/queue/shares/APPL", String.class, MarketData2.class);
+                ("/queue/shares/APPL", String.class, MarketData2.class, CLUSTER_NAME);
 
         try {
             q.publishAndIndex("", new MarketData2(sd.parse("7 Oct 2016"), 114.31, 114.56, 113.51, 114.06, 114.06, 24358400L));
@@ -695,7 +686,7 @@ class SimpleEngine {
     private boolean runThroughput() {
         try {
 
-            throughput(0, false);
+            throughput(0, false, CLUSTER_NAME);
         } catch (Throwable e) {
             e.printStackTrace();
             Map<ExceptionKey, Integer> ex = new HashMap<ExceptionKey, Integer>();

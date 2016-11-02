@@ -124,6 +124,12 @@
         <dependency>
             <groupId>software.chronicle</groupId>
             <artifactId>chronicle-queue-enterprise</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>software.chronicle</groupId>
+                    <artifactId>chronicle-wire-enterprise</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
