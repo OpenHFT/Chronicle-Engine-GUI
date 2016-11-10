@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 /**
  * @author Rob Austin.
  */
-class ColumnQueryDelegate<K, V> implements QueryDelegate {
+class ColumnQueryDelegate implements QueryDelegate {
 
     @NotNull
     private final ColumnView columnView;
@@ -48,7 +48,7 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
     @NotNull
     @Override
     public ResultSet getResults(int offset, int pageLength) throws SQLException {
-        return new ChronicleColumnViewResultSet<K, V>(newIterator(offset), pageLength, columnView.columns());
+        return new ChronicleColumnViewResultSet(newIterator(offset), pageLength, columnView.columns());
     }
 
 

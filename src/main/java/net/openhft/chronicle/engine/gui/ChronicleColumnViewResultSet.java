@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * @author Rob Austin.
  */
-class ChronicleColumnViewResultSet<K, V> implements ResultSet {
+class ChronicleColumnViewResultSet implements ResultSet {
 
     @NotNull
     private final Iterator<? extends Row> iterator;

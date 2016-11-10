@@ -39,11 +39,15 @@ class ColumnViewController<K, V> {
     @NotNull
     private final ColumnView columnView;
     @NotNull
-    private final MapViewUI view;
+    private final net.openhft.chronicle.engine.gui.MapViewUI view;
+    private final String path;
+
 
     ColumnViewController(@NotNull ColumnView columnView, @NotNull MapViewUI view, String path) {
         this.columnView = columnView;
         this.view = view;
+        this.path = path;
+
         view.path.setValue(path);
         view.recordCount.setValue(Long.toString(columnView.rowCount(Collections.emptyList())));
 
@@ -79,7 +83,7 @@ class ColumnViewController<K, V> {
     void init() {
         view.gridHolder.removeAllComponents();
 
-        @NotNull final Container.Indexed data = createContainer(new ColumnQueryDelegate<>(columnView));
+        @NotNull final Container.Indexed data = createContainer(new ColumnQueryDelegate(columnView));
         @NotNull final GeneratedPropertyContainer generatedPropertyContainer = addDeleteButton(data);
         @NotNull final Grid grid = new Grid(generatedPropertyContainer);
 
