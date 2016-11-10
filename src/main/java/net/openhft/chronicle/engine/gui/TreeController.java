@@ -90,7 +90,7 @@ public class TreeController {
         tree.setChildrenAllowed(e.fullName(), true);
 
         MapView view = asset.getView(MapView.class);
-        if (view == null || (!(view instanceof ChronicleQueueView))) {
+        if (view != null && (!(view instanceof ChronicleQueueView))) {
             tree.addItem(e.fullName() + MAP_VIEW);
             tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
             tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
