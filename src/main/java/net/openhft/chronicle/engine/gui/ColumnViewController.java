@@ -39,7 +39,7 @@ class ColumnViewController<K, V> {
     @NotNull
     private final ColumnView columnView;
     @NotNull
-    private final net.openhft.chronicle.engine.gui.MapViewUI view;
+    private final MapViewUI view;
     private final String path;
 
 

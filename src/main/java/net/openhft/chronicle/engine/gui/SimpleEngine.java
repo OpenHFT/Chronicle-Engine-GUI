@@ -83,25 +83,6 @@ class SimpleEngine {
     }
 
 
-    public static class MarketData extends AbstractMarshallable {
-        double open;
-        double high;
-        double low;
-        double close;
-        double volume;
-        double adjClose;
-
-        public MarketData(double open, double high, double low, double close,
-                          double adjClose, final double v) {
-            this.open = open;
-            this.high = high;
-            this.low = low;
-            this.close = close;
-            this.volume = v;
-            this.adjClose = adjClose;
-        }
-    }
-
     public static class MarketData2 extends AbstractMarshallable {
         Date date;
         double open;
@@ -610,6 +591,24 @@ class SimpleEngine {
         }
     }
 
+    public static class MarketData extends AbstractMarshallable {
+        double open;
+        double high;
+        double low;
+        double close;
+        double volume;
+        double adjClose;
+
+        public MarketData(double open, double high, double low, double close,
+                          double adjClose, final double v) {
+            this.open = open;
+            this.high = high;
+            this.low = low;
+            this.close = close;
+            this.volume = v;
+            this.adjClose = adjClose;
+        }
+    }
 
     private static void addMyNumbers(VanillaAssetTree tree) {
         @NotNull MapView<Integer, Double> intView = tree.acquireMap(
