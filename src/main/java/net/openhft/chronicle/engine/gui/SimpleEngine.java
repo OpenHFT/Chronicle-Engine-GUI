@@ -6,18 +6,15 @@ import net.openhft.chronicle.core.onoes.ExceptionKey;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.engine.api.map.MapView;
-import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.fs.ChronicleMapGroupFS;
 import net.openhft.chronicle.engine.fs.Clusters;
 import net.openhft.chronicle.engine.fs.FilePerKeyGroupFS;
 import net.openhft.chronicle.engine.tree.ChronicleQueueView;
 import net.openhft.chronicle.engine.tree.QueueView;
-import net.openhft.chronicle.engine.tree.VanillaAsset;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.network.connection.TcpChannelHub;
 import net.openhft.chronicle.wire.AbstractMarshallable;
-import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -122,7 +119,7 @@ class SimpleEngine {
         return new File(path).getParentFile().getParentFile() + "/src/main/resources";
     }
 
-    @NotNull
+  /*  @NotNull
     private static VanillaAssetTree create(final int hostId, WireType wireType, final String clusterTwo) {
         @NotNull VanillaAssetTree tree = (VanillaAssetTree) new VanillaAssetTree((byte) hostId)
                 .forTesting(false)
@@ -132,7 +129,7 @@ class SimpleEngine {
                 ChronicleQueueView.create(context.wireType(wireType).cluster(clusterTwo)
                         .elementType(context.elementType()).messageType(context.messageType()), asset));
         return tree;
-    }
+    }*/
 
 
     public void after() {

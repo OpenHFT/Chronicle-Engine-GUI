@@ -80,6 +80,7 @@ class ColumnViewController<K, V> {
 
     private final AtomicLong refreshUI = new AtomicLong();
 
+
     void init() {
         view.gridHolder.removeAllComponents();
 
@@ -102,12 +103,15 @@ class ColumnViewController<K, V> {
 
         view.addButton.addClickListener((ClickListener) event -> new AddRow(columnView).init());
 
+
         columnView.registerChangeListener(() -> {
-            // the refresh has to be run on the UI thread !
             refreshUI.compareAndSet(0, System.currentTimeMillis());
         });
 
-        UI.getCurrent().addPollListener(e -> refreshUI((SQLContainer) data));
+        UI.getCurrent().addPollListener(e -> {
+            if (grid.isVisible())
+                refreshUI((SQLContainer) data);
+        });
 
         if (data instanceof SQLContainer) {
             ((SQLContainer) data).setAutoCommit(true);

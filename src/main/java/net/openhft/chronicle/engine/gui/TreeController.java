@@ -9,6 +9,7 @@ import net.openhft.chronicle.engine.api.column.QueueColumnView;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
+import net.openhft.chronicle.engine.tree.ChronicleQueueView;
 import net.openhft.chronicle.engine.tree.QueueView;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import org.jetbrains.annotations.NotNull;
@@ -88,7 +89,8 @@ public class TreeController {
 
         tree.setChildrenAllowed(e.fullName(), true);
 
-        if (asset.getView(MapView.class) != null) {
+        MapView view = asset.getView(MapView.class);
+        if (view == null || (!(view instanceof ChronicleQueueView))) {
             tree.addItem(e.fullName() + MAP_VIEW);
             tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
             tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
