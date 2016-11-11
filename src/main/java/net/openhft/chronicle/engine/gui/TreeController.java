@@ -3,7 +3,7 @@ package net.openhft.chronicle.engine.gui;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Tree;
-import net.openhft.chronicle.engine.api.column.ColumnView;
+import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
 import net.openhft.chronicle.engine.api.column.MapColumnView;
 import net.openhft.chronicle.engine.api.column.QueueColumnView;
 import net.openhft.chronicle.engine.api.map.MapView;
@@ -52,7 +52,7 @@ public class TreeController {
                 Asset asset = assetTree.acquireAsset(path);
 
                 @Nullable
-                final ColumnView view = source.endsWith(MAP_VIEW) ?
+                final ColumnViewInternal view = source.endsWith(MAP_VIEW) ?
                         asset.acquireView(MapColumnView.class) :
                         asset.acquireView(QueueColumnView.class);
 
@@ -90,14 +90,8 @@ public class TreeController {
         tree.setChildrenAllowed(e.fullName(), true);
 
         MapView view = asset.getView(MapView.class);
-        if (view != null && (!(view instanceof ChronicleQueueView))) {
-            tree.addItem(e.fullName() + MAP_VIEW);
-            tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
-            tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
-            tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
-                    () -> TreeController.class.getResourceAsStream("map.png"), "map"));
-            tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
-        }
+
+
 
         if (asset.getView(QueueView.class) != null) {
             tree.addItem(e.fullName() + QUEUE_VIEW);
@@ -106,7 +100,22 @@ public class TreeController {
             tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
                     () -> TreeController.class.getResourceAsStream("map.png"), "map"));
             tree.setChildrenAllowed(e.fullName() + QUEUE_VIEW, false);
+
+            System.out.println("queue at :" + e.fullName());
+            return;
         }
+
+        if (view != null && (!(view instanceof ChronicleQueueView))) {
+
+            tree.addItem(e.fullName() + MAP_VIEW);
+            tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
+            tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
+            tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
+                    () -> TreeController.class.getResourceAsStream("map.png"), "map"));
+            tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
+            System.out.println("map at :" + e.fullName());
+        }
+
 
     }
 

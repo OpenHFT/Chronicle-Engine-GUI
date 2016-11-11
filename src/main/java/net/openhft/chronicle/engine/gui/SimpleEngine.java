@@ -7,7 +7,6 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.fs.ChronicleMapGroupFS;
-import net.openhft.chronicle.engine.fs.Clusters;
 import net.openhft.chronicle.engine.fs.FilePerKeyGroupFS;
 import net.openhft.chronicle.engine.tree.ChronicleQueueView;
 import net.openhft.chronicle.engine.tree.QueueView;
@@ -57,26 +56,30 @@ class SimpleEngine {
     private static VanillaAssetTree TREE2 = EngineMain.engineMain(2);
     private static VanillaAssetTree TREE1 = EngineMain.engineMain(1);
     private static String CLUSTER_NAME = EngineMain.firstClusterName(TREE2);
-
+    private static VanillaAssetTree REMOTE = remote("host.port2");
 
     static {
 
         try {
-            final Clusters view = TREE2.root().getView(Clusters.class);
+
             ClassAliasPool.CLASS_ALIASES.addAlias(ChronicleMapGroupFS.class);
             ClassAliasPool.CLASS_ALIASES.addAlias(FilePerKeyGroupFS.class);
             //Delete any files from the last run
             Files.deleteIfExists(Paths.get(OS.TARGET, NAME));
 
-            addSampleDataToTree(TREE2);
+            addSampleDataToTree(REMOTE);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    static VanillaAssetTree remote(final String connectionDetails) {
+        return new VanillaAssetTree().forRemoteAccess(connectionDetails);
+    }
+
 
     static VanillaAssetTree assetTree() {
-        return TREE2;
+        return REMOTE;
     }
 
 
@@ -135,6 +138,7 @@ class SimpleEngine {
     public void after() {
         TREE1.close();
         TREE2.close();
+        REMOTE.close();
 
         TcpChannelHub.closeAllHubs();
         TCPRegistry.reset();
