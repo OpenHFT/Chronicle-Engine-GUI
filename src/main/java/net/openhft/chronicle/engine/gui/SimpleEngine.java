@@ -4,7 +4,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.fs.ChronicleMapGroupFS;
 import net.openhft.chronicle.engine.fs.FilePerKeyGroupFS;
@@ -66,8 +65,6 @@ class SimpleEngine {
             ClassAliasPool.CLASS_ALIASES.addAlias(FilePerKeyGroupFS.class);
             //Delete any files from the last run
             Files.deleteIfExists(Paths.get(OS.TARGET, NAME));
-
-            addSampleDataToTree(REMOTE);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -78,8 +75,12 @@ class SimpleEngine {
     }
 
 
-    static VanillaAssetTree assetTree() {
-        return REMOTE;
+    static VanillaAssetTree remoteTree() {
+        return TREE2;
+    }
+
+    static VanillaAssetTree serverTree() {
+        return TREE2;
     }
 
 
@@ -105,36 +106,6 @@ class SimpleEngine {
     }
 
 
-    private ThreadDump threadDump;
-
-    public void threadDump() {
-        threadDump = new ThreadDump();
-        threadDump.ignore("tree-1/Heartbeat");
-        threadDump.ignore("tree-2/Heartbeat");
-        threadDump.ignore("process reaper");
-    }
-
-    @NotNull
-    public static String resourcesDir() {
-        String path = SimpleEngine.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        if (path == null)
-            return ".";
-        return new File(path).getParentFile().getParentFile() + "/src/main/resources";
-    }
-
-  /*  @NotNull
-    private static VanillaAssetTree create(final int hostId, WireType wireType, final String clusterTwo) {
-        @NotNull VanillaAssetTree tree = (VanillaAssetTree) new VanillaAssetTree((byte) hostId)
-                .forTesting(false)
-                .withConfig(resourcesDir() + "/2way", OS.TARGET + "/" + hostId);
-        @NotNull final Asset queue = tree.root().acquireAsset("queue");
-        queue.addLeafRule(QueueView.class, VanillaAsset.LAST + "chronicle queue", (context, asset) ->
-                ChronicleQueueView.create(context.wireType(wireType).cluster(clusterTwo)
-                        .elementType(context.elementType()).messageType(context.messageType()), asset));
-        return tree;
-    }*/
-
-
     public void after() {
         TREE1.close();
         TREE2.close();
@@ -142,10 +113,6 @@ class SimpleEngine {
 
         TcpChannelHub.closeAllHubs();
         TCPRegistry.reset();
-        if (threadDump != null) {
-            threadDump.ignore("tree-1/closer");
-            threadDump.assertNoNewThreads();
-        }
         Jvm.dumpException(exceptionKeyIntegerMap);
         assert exceptionKeyIntegerMap.isEmpty();
         Jvm.resetExceptionHandlers();
@@ -191,17 +158,14 @@ class SimpleEngine {
         element.delete();
     }
 
-    private static void addSampleDataToTree(final VanillaAssetTree tree) throws Exception {
-
+    public static void addSampleDataToTree(final VanillaAssetTree tree) {
         new SimpleEngine().runThroughput();
         addMyNumbers(tree);
         addApplShares(tree);
-        addContryNumerics(tree);
-
-
+        addCountryNumerics(tree);
     }
 
-    private static void addContryNumerics(VanillaAssetTree tree) {
+    private static void addCountryNumerics(VanillaAssetTree tree) {
         @NotNull MapView<String, String> mapView = tree.acquireMap("/my/demo", String.class,
                 String.class);
         mapView.put("AED", "United Arab Emirates dirham");

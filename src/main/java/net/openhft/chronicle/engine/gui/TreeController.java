@@ -7,9 +7,11 @@ import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
 import net.openhft.chronicle.engine.api.column.MapColumnView;
 import net.openhft.chronicle.engine.api.column.QueueColumnView;
 import net.openhft.chronicle.engine.api.map.MapView;
+import net.openhft.chronicle.engine.api.pubsub.Subscriber;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
-import net.openhft.chronicle.engine.tree.ChronicleQueueView;
+import net.openhft.chronicle.engine.api.tree.RequestContext;
+import net.openhft.chronicle.engine.query.Filter;
 import net.openhft.chronicle.engine.tree.QueueView;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import org.jetbrains.annotations.NotNull;
@@ -26,12 +28,16 @@ public class TreeController {
     @NotNull
     final ItemClickEvent.ItemClickListener clickListener;
 
-    public TreeController(@NotNull AssetTree assetTree, @NotNull TreeUI treeUI) {
+    public TreeController(@NotNull AssetTree remoteAssertTree,AssetTree serverAssetTree, @NotNull
+            TreeUI treeUI) {
 
         final Tree tree = treeUI.tree;
 
-        assetTree.registerSubscriber("",
-                TopologicalEvent.class, e -> updateTree(assetTree, tree, e));
+        RequestContext rc = RequestContext.requestContext("").type2(TopologicalEvent.class).bootstrap(true);
+
+        final Subscriber<TopologicalEvent> sub = e -> updateTree(remoteAssertTree, tree, e);
+        serverAssetTree.acquireSubscription(rc).registerSubscriber(rc, sub, Filter.empty());
+
 
         clickListener = click -> {
             final String source = click.getItemId().toString();
@@ -49,7 +55,7 @@ public class TreeController {
                         source.substring(0, len - QUEUE_VIEW.length());
 
                 @NotNull
-                Asset asset = assetTree.acquireAsset(path);
+                Asset asset = remoteAssertTree.acquireAsset(path);
 
                 @Nullable
                 final ColumnViewInternal view = source.endsWith(MAP_VIEW) ?
@@ -69,8 +75,10 @@ public class TreeController {
 
 
     private void updateTree(@NotNull AssetTree assetTree, @NotNull Tree tree, @NotNull TopologicalEvent e) {
-        if (e.assetName() == null || !e.added())
+        if (e.assetName() == null)
             return;
+
+        System.out.println("*******************************     e.assetName()=" + e.fullName());
 
         @Nullable Asset asset = assetTree.getAsset(e.fullName());
         if (asset == null)
@@ -89,31 +97,35 @@ public class TreeController {
 
         tree.setChildrenAllowed(e.fullName(), true);
 
-        MapView view = asset.getView(MapView.class);
 
+        try {
+            if (asset.getView(QueueView.class) != null) {
+                tree.addItem(e.fullName() + QUEUE_VIEW);
+                tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
+                tree.setItemCaption(e.fullName() + QUEUE_VIEW, "queue");
+                tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
+                        () -> TreeController.class.getResourceAsStream("map.png"), "map"));
+                tree.setChildrenAllowed(e.fullName() + QUEUE_VIEW, false);
 
+                System.out.println("queue at :" + e.fullName());
+                return;
+            }
 
-        if (asset.getView(QueueView.class) != null) {
-            tree.addItem(e.fullName() + QUEUE_VIEW);
-            tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
-            tree.setItemCaption(e.fullName() + QUEUE_VIEW, "queue");
-            tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
-                    () -> TreeController.class.getResourceAsStream("map.png"), "map"));
-            tree.setChildrenAllowed(e.fullName() + QUEUE_VIEW, false);
+            if (asset.getView(MapView.class) != null  ) {
 
-            System.out.println("queue at :" + e.fullName());
-            return;
-        }
+                tree.addItem(e.fullName() + MAP_VIEW);
+                tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
+                tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
+                tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
+                        () -> TreeController.class.getResourceAsStream("map.png"), "map"));
+                tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
+                System.out.println("map at :" + e.fullName());
+            }
 
-        if (view != null && (!(view instanceof ChronicleQueueView))) {
-
-            tree.addItem(e.fullName() + MAP_VIEW);
-            tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
-            tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
-            tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
-                    () -> TreeController.class.getResourceAsStream("map.png"), "map"));
-            tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
-            System.out.println("map at :" + e.fullName());
+        } catch (Throwable t) {
+            t.printStackTrace();
+        } finally {
+            System.out.println("finished " + e.assetName());
         }
 
 

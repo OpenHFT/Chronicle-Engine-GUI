@@ -5,10 +5,12 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.UI;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 
 import javax.servlet.annotation.WebServlet;
 
-import static net.openhft.chronicle.engine.gui.SimpleEngine.assetTree;
+import static net.openhft.chronicle.engine.gui.SimpleEngine.remoteTree;
+import static net.openhft.chronicle.engine.gui.SimpleEngine.serverTree;
 
 
 /**
@@ -25,7 +27,11 @@ public class EntryPoint extends UI {
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        setContent(new MainControl().newComponent(assetTree()));
+        VanillaAssetTree remoteTree = remoteTree();
+        VanillaAssetTree serverTree = serverTree();
+
+        SimpleEngine.addSampleDataToTree(remoteTree);
+        setContent(new MainControl().newComponent(remoteTree, serverTree));
     }
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
