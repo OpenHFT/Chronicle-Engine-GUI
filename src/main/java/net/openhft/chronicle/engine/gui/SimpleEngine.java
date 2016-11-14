@@ -76,7 +76,7 @@ class SimpleEngine {
 
 
     static VanillaAssetTree remoteTree() {
-        return TREE2;
+        return REMOTE;
     }
 
     static VanillaAssetTree serverTree() {

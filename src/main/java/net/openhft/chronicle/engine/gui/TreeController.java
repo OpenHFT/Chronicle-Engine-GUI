@@ -28,16 +28,15 @@ public class TreeController {
     @NotNull
     final ItemClickEvent.ItemClickListener clickListener;
 
-    public TreeController(@NotNull AssetTree remoteAssertTree,AssetTree serverAssetTree, @NotNull
-            TreeUI treeUI) {
+    public TreeController(@NotNull AssetTree remoteTree,
+                          @NotNull TreeUI treeUI) {
 
         final Tree tree = treeUI.tree;
 
         RequestContext rc = RequestContext.requestContext("").type2(TopologicalEvent.class).bootstrap(true);
 
-        final Subscriber<TopologicalEvent> sub = e -> updateTree(remoteAssertTree, tree, e);
-        serverAssetTree.acquireSubscription(rc).registerSubscriber(rc, sub, Filter.empty());
-
+        final Subscriber<TopologicalEvent> sub = e -> updateTree(remoteTree, tree, e);
+        remoteTree.acquireSubscription(rc).registerSubscriber(rc, sub, Filter.empty());
 
         clickListener = click -> {
             final String source = click.getItemId().toString();
@@ -55,7 +54,7 @@ public class TreeController {
                         source.substring(0, len - QUEUE_VIEW.length());
 
                 @NotNull
-                Asset asset = remoteAssertTree.acquireAsset(path);
+                Asset asset = remoteTree.acquireAsset(path);
 
                 @Nullable
                 final ColumnViewInternal view = source.endsWith(MAP_VIEW) ?
@@ -74,13 +73,13 @@ public class TreeController {
     }
 
 
-    private void updateTree(@NotNull AssetTree assetTree, @NotNull Tree tree, @NotNull TopologicalEvent e) {
+    private void updateTree(@NotNull AssetTree remoteTree, @NotNull Tree tree, @NotNull TopologicalEvent e) {
         if (e.assetName() == null)
             return;
 
         System.out.println("*******************************     e.assetName()=" + e.fullName());
 
-        @Nullable Asset asset = assetTree.getAsset(e.fullName());
+        @Nullable Asset asset = remoteTree.getAsset(e.fullName());
         if (asset == null)
             return;
 
@@ -111,7 +110,7 @@ public class TreeController {
                 return;
             }
 
-            if (asset.getView(MapView.class) != null  ) {
+            if (asset.getView(MapView.class) != null) {
 
                 tree.addItem(e.fullName() + MAP_VIEW);
                 tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
