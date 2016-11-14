@@ -77,7 +77,6 @@ public class TreeController {
         if (e.assetName() == null)
             return;
 
-        System.out.println("*******************************     e.assetName()=" + e.fullName());
 
         @Nullable Asset asset = remoteTree.getAsset(e.fullName());
         if (asset == null)
@@ -97,28 +96,39 @@ public class TreeController {
         tree.setChildrenAllowed(e.fullName(), true);
 
 
+        System.out.println("*******************************     e.assetName()=" + e.fullName());
+
+        e.viewTypes().forEach(System.out::println);
+
         try {
-            if (asset.getView(QueueView.class) != null) {
-                tree.addItem(e.fullName() + QUEUE_VIEW);
-                tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
-                tree.setItemCaption(e.fullName() + QUEUE_VIEW, "queue");
-                tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
-                        () -> TreeController.class.getResourceAsStream("map.png"), "map"));
-                tree.setChildrenAllowed(e.fullName() + QUEUE_VIEW, false);
 
-                System.out.println("queue at :" + e.fullName());
-                return;
-            }
+            for (Class aClass : e.viewTypes()) {
 
-            if (asset.getView(MapView.class) != null) {
 
-                tree.addItem(e.fullName() + MAP_VIEW);
-                tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
-                tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
-                tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
-                        () -> TreeController.class.getResourceAsStream("map.png"), "map"));
-                tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
-                System.out.println("map at :" + e.fullName());
+                if (QueueView.class.isAssignableFrom(aClass)) {
+
+                    tree.addItem(e.fullName() + QUEUE_VIEW);
+                    tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
+                    tree.setItemCaption(e.fullName() + QUEUE_VIEW, "queue");
+                    tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
+                            () -> TreeController.class.getResourceAsStream("map.png"), "map"));
+                    tree.setChildrenAllowed(e.fullName() + QUEUE_VIEW, false);
+
+                    System.out.println("queue at :" + e.fullName());
+                    return;
+                }
+
+                if (MapView.class.isAssignableFrom(aClass)) {
+
+                    tree.addItem(e.fullName() + MAP_VIEW);
+                    tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
+                    tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
+                    tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
+                            () -> TreeController.class.getResourceAsStream("map.png"), "map"));
+                    tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
+                    System.out.println("map at :" + e.fullName());
+                    return;
+                }
             }
 
         } catch (Throwable t) {
