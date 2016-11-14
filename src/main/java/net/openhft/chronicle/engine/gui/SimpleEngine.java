@@ -24,8 +24,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static net.openhft.chronicle.core.onoes.PrintExceptionHandler.DEBUG;
 import static net.openhft.chronicle.core.onoes.PrintExceptionHandler.WARN;
@@ -141,12 +139,14 @@ class SimpleEngine {
         ChronicleQueueView qv1 = (ChronicleQueueView) TREE1.acquireQueue(
                 uri1, String.class, Message.class, cluster);
         TREE2.acquireQueue(uri1, String.class, Message.class, cluster);
+/*
 
         Executors.newScheduledThreadPool(1).scheduleAtFixedRate(() -> {
             for (int i = 0; i < 100; i++) {
                 qv1.publishAndIndex("", new Message("hello"));
             }
         }, 0, 1, TimeUnit.SECONDS);
+*/
 
     }
 

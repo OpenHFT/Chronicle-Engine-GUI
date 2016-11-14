@@ -186,13 +186,13 @@ class ColumnViewController<K, V> {
     }
 
     private void refreshUI(SQLContainer data) {
-        final long l = refreshUI.get();
+       /* final long l = refreshUI.get();
 
         if (l + 5_000 < System.currentTimeMillis()) {
             refreshUI.set(0);
             data.refresh();
             view.recordCount.setValue(Long.toString(columnView.rowCount(Collections.emptyList())));
-        }
+        }*/
 
     }
 
