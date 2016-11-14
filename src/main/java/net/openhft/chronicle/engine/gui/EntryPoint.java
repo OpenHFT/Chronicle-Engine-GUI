@@ -10,6 +10,7 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import javax.servlet.annotation.WebServlet;
 
 import static net.openhft.chronicle.engine.gui.SimpleEngine.remoteTree;
+import static net.openhft.chronicle.engine.gui.SimpleEngine.serverTree;
 
 
 /**
@@ -27,7 +28,7 @@ public class EntryPoint extends UI {
     protected void init(VaadinRequest vaadinRequest) {
         VanillaAssetTree remoteTree = remoteTree();
 
-        SimpleEngine.addSampleDataToTree(remoteTree);
+        SimpleEngine.addSampleDataToTree(serverTree());
         setContent(new MainControl().newComponent(remoteTree));
     }
 

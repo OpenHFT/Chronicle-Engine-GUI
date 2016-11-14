@@ -53,7 +53,7 @@ class ColumnViewController<K, V> {
 
         final ObjectSubscription objectSubscription = columnView.objectSubscription();
         onChange(view, objectSubscription);
-        objectSubscription.registerDownstream(changeEvent -> onChange(view, objectSubscription));
+      //  objectSubscription.registerDownstream(changeEvent -> onChange(view, objectSubscription));
     }
 
     private void onChange(@NotNull MapViewUI view, @NotNull ObjectSubscription objectSubscription) {

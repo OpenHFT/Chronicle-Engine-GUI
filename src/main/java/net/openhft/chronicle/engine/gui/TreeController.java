@@ -17,6 +17,8 @@ import net.openhft.chronicle.engine.tree.TopologicalEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
+
 /**
  * @author Rob Austin.
  */
@@ -33,9 +35,10 @@ public class TreeController {
 
         final Tree tree = treeUI.tree;
 
-        RequestContext rc = RequestContext.requestContext("").type2(TopologicalEvent.class).bootstrap(true);
+        RequestContext rc = RequestContext.requestContext("")
+                .elementType(TopologicalEvent.class).bootstrap(true);
 
-        final Subscriber<TopologicalEvent> sub = e -> updateTree(remoteTree, tree, e);
+        final Subscriber<TopologicalEvent> sub = e -> updateTree(tree, e);
         remoteTree.acquireSubscription(rc).registerSubscriber(rc, sub, Filter.empty());
 
         clickListener = click -> {
@@ -73,13 +76,9 @@ public class TreeController {
     }
 
 
-    private void updateTree(@NotNull AssetTree remoteTree, @NotNull Tree tree, @NotNull TopologicalEvent e) {
+    private void updateTree(@NotNull Tree tree, @NotNull TopologicalEvent e) {
+
         if (e.assetName() == null)
-            return;
-
-
-        @Nullable Asset asset = remoteTree.getAsset(e.fullName());
-        if (asset == null)
             return;
 
         tree.markAsDirty();
@@ -98,38 +97,36 @@ public class TreeController {
 
         System.out.println("*******************************     e.assetName()=" + e.fullName());
 
-        e.viewTypes().forEach(System.out::println);
+        Set<Class> viewTypes = e.viewTypes();
+        viewTypes.forEach(System.out::println);
+
 
         try {
+            if (viewTypes.stream().anyMatch(QueueView.class::isAssignableFrom)) {
 
-            for (Class aClass : e.viewTypes()) {
+                tree.addItem(e.fullName() + QUEUE_VIEW);
+                tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
+                tree.setItemCaption(e.fullName() + QUEUE_VIEW, "queue");
+                tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
+                        () -> TreeController.class.getResourceAsStream("map.png"), "map"));
+                tree.setChildrenAllowed(e.fullName() + QUEUE_VIEW, false);
 
-
-                if (QueueView.class.isAssignableFrom(aClass)) {
-
-                    tree.addItem(e.fullName() + QUEUE_VIEW);
-                    tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
-                    tree.setItemCaption(e.fullName() + QUEUE_VIEW, "queue");
-                    tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
-                            () -> TreeController.class.getResourceAsStream("map.png"), "map"));
-                    tree.setChildrenAllowed(e.fullName() + QUEUE_VIEW, false);
-
-                    System.out.println("queue at :" + e.fullName());
-                    return;
-                }
-
-                if (MapView.class.isAssignableFrom(aClass)) {
-
-                    tree.addItem(e.fullName() + MAP_VIEW);
-                    tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
-                    tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
-                    tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
-                            () -> TreeController.class.getResourceAsStream("map.png"), "map"));
-                    tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
-                    System.out.println("map at :" + e.fullName());
-                    return;
-                }
+                System.out.println("queue at :" + e.fullName());
+                return;
             }
+
+            if (viewTypes.stream().anyMatch(MapView.class::isAssignableFrom)) {
+
+                tree.addItem(e.fullName() + MAP_VIEW);
+                tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
+                tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
+                tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
+                        () -> TreeController.class.getResourceAsStream("map.png"), "map"));
+                tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
+                System.out.println("map at :" + e.fullName());
+                return;
+            }
+
 
         } catch (Throwable t) {
             t.printStackTrace();
@@ -139,6 +136,5 @@ public class TreeController {
 
 
     }
-
 
 }
