@@ -9,9 +9,6 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 
 import javax.servlet.annotation.WebServlet;
 
-import static net.openhft.chronicle.engine.gui.SimpleEngine.remoteTree;
-import static net.openhft.chronicle.engine.gui.SimpleEngine.serverTree;
-
 
 /**
  * This UI is the application entry point. A UI may either represent a browser window
@@ -24,12 +21,13 @@ import static net.openhft.chronicle.engine.gui.SimpleEngine.serverTree;
 @Theme("mytheme")
 public class EntryPoint extends UI {
 
+    private static VanillaAssetTree REMOTE = remote("localhost:8082");
+
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        VanillaAssetTree remoteTree = remoteTree();
 
-        SimpleEngine.addSampleDataToTree(serverTree());
-        setContent(new MainControl().newComponent(remoteTree));
+        // SimpleEngine.addSampleDataToTree(serverTree());
+        setContent(new MainControl().newComponent(REMOTE));
     }
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
@@ -38,5 +36,8 @@ public class EntryPoint extends UI {
 
     }
 
+    static VanillaAssetTree remote(final String connectionDetails) {
+        return new VanillaAssetTree().forRemoteAccess(connectionDetails);
+    }
 
 }
