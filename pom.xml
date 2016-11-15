@@ -260,4 +260,13 @@
         </profile>
     </profiles>
 
+
+    <scm>
+        <url>scm:git:git@github.com:OpenHFT/Chronicle-Engine-GUI.git</url>
+        <connection>scm:git:git@github.com:OpenHFT/Chronicle-Engine-GUI.git</connection>
+        <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Engine-GUI.git</developerConnection>
+        <tag>master</tag>
+    </scm>
+
+
 </project>
