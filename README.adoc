@@ -34,7 +34,10 @@ a web based client management console to start the jetty application server, ple
 mvn compile jetty:run
 ----
 
-then in you webbrower goto http://localhost:8080
+then in you web-brower go to http://localhost:8080
+
+then in your webbrowser fill in the the login form, providing the host:port of the server running
+ chronicle-engine
 
 ###  vaadin-charts
 

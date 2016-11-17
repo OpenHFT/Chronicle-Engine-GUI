@@ -16,8 +16,8 @@ class MainControl {
     @NotNull
     Component newComponent(final AssetTree remoteAssetTree) {
         @NotNull MainUI mainUI = new MainUI();
-        Component c = userUiManager.newComponent();
-        mainUI.content.addComponent(c);
+        Component userComponent = userUiManager.newComponent();
+
 
         VerticalLayout content = mainUI.content;
 
@@ -34,6 +34,8 @@ class MainControl {
             content.addComponent(treeUI);
         });
 
+
+        mainUI.content.addComponent(treeUI);
 
         return mainUI;
     }
