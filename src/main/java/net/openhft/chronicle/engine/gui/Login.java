@@ -84,7 +84,6 @@ public class Login extends CustomComponent implements View, Button.ClickListener
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event0) {
         // focus the username field when user arrives to the login view
-        user.focus();
         isConnected = null;
 
         UIEvents.PollListener eventListener0 = this.eventListener;
