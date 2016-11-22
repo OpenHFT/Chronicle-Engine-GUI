@@ -140,27 +140,8 @@ public class Login extends CustomComponent implements View, Button.ClickListener
     @Override
     public void buttonClick(Button.ClickEvent event) {
 
-        //
-        // Validate the fields using the navigator. By using validors for the
-        // fields we reduce the amount of queries we have to use to the database
-        // for wrongly entered passwords
-        //
-       /* if (!user.isValid() || !password.isValid()) {
-            return;
-        }*/
-
         String username = user.getValue();
         String password = this.password.getValue();
-
-        //
-        // Validate username and password with database here. For examples sake
-        // I use a dummy username and password.
-        //
-
-
-        // Store the current user in the service session
-        getSession().setAttribute("user", username);
-        getSession().setAttribute("password", password);
 
 
         // Navigate to main view
@@ -168,7 +149,8 @@ public class Login extends CustomComponent implements View, Button.ClickListener
         final String hostPort = this.hostPort.getValue();
 
         final VanillaSessionDetails sessionDetails = new VanillaSessionDetails();
-        sessionDetails.userId(username == null ? DEFAULT_USER : username);
+        String userId = username == null || username.isEmpty() ? DEFAULT_USER : username;
+        sessionDetails.userId(userId);
         sessionDetails.securityToken(password);
 
 

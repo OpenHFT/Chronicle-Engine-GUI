@@ -3,6 +3,8 @@ package net.openhft.chronicle.engine.gui;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Tree;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
 import net.openhft.chronicle.engine.api.column.MapColumnView;
 import net.openhft.chronicle.engine.api.column.QueueColumnView;
@@ -11,6 +13,9 @@ import net.openhft.chronicle.engine.api.pubsub.Subscriber;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
 import net.openhft.chronicle.engine.api.tree.RequestContext;
+import net.openhft.chronicle.engine.cfg.*;
+import net.openhft.chronicle.engine.fs.ChronicleMapGroupFS;
+import net.openhft.chronicle.engine.fs.FilePerKeyGroupFS;
 import net.openhft.chronicle.engine.query.Filter;
 import net.openhft.chronicle.engine.tree.QueueView;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
@@ -23,6 +28,28 @@ import java.util.Set;
  * @author Rob Austin.
  */
 public class TreeController {
+
+
+    static {
+
+        try {
+            ClassLookup classAliases = RequestContext.CLASS_ALIASES;
+            ClassAliasPool.CLASS_ALIASES.addAlias(ChronicleMapGroupFS.class,
+                    FilePerKeyGroupFS.class,
+                    EngineCfg.class,
+                    JmxCfg.class,
+                    ServerCfg.class,
+                    ClustersCfg.class,
+                    InMemoryMapCfg.class,
+                    FilePerKeyMapCfg.class,
+                    ChronicleMapCfg.class,
+                    MonitorCfg.class);
+
+        } catch (Exception e) {
+            System.exit(-1);
+        }
+    }
+
 
     public static final String MAP_VIEW = "::map_view";
     public static final String QUEUE_VIEW = "::queue_view";
