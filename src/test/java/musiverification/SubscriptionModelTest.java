@@ -34,6 +34,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import static java.util.Collections.singleton;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static net.openhft.chronicle.engine.Chassis.*;
 
@@ -869,7 +870,7 @@ public class SubscriptionModelTest {
 
         Subscriber<TopologicalEvent> mapEventKeySubscriber = EasyMock.createStrictMock("mapEventKeySubscriber", Subscriber.class);
         // expect a bootstrap event
-        mapEventKeySubscriber.onMessage(ExistingAssetEvent.of(parentUri, "maps"));
+        mapEventKeySubscriber.onMessage(ExistingAssetEvent.of(parentUri, "maps", singleton(Object.class)));
 
         EasyMock.replay(mapEventKeySubscriber);
 
@@ -879,12 +880,12 @@ public class SubscriptionModelTest {
         EasyMock.reset(mapEventKeySubscriber);
 
         //First the two maps will be inserted into
-        mapEventKeySubscriber.onMessage(AddedAssetEvent.of(mapBaseUri, mapName1));
-        mapEventKeySubscriber.onMessage(AddedAssetEvent.of(mapBaseUri, mapName2));
+        mapEventKeySubscriber.onMessage(AddedAssetEvent.of(mapBaseUri, mapName1, singleton(Object.class)));
+        mapEventKeySubscriber.onMessage(AddedAssetEvent.of(mapBaseUri, mapName2, singleton(Object.class)));
 
         //Second the two maps are removed
-        mapEventKeySubscriber.onMessage(RemovedAssetEvent.of(mapBaseUri, mapName1));
-        mapEventKeySubscriber.onMessage(RemovedAssetEvent.of(mapBaseUri, mapName2));
+        mapEventKeySubscriber.onMessage(RemovedAssetEvent.of(mapBaseUri, mapName1, singleton(Object.class)));
+        mapEventKeySubscriber.onMessage(RemovedAssetEvent.of(mapBaseUri, mapName2, singleton(Object.class)));
 
         EasyMock.replay(mapEventKeySubscriber);
 
