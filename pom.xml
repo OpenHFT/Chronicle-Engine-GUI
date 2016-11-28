@@ -39,7 +39,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.13.32</version>
+                <version>1.13.38</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -82,6 +82,11 @@
         <dependency>
             <groupId>software.chronicle</groupId>
             <artifactId>chronicle-engine-enterprise</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>software.chronicle</groupId>
+            <artifactId>chronicle-queue-enterprise</artifactId>
         </dependency>
 
         <dependency>
