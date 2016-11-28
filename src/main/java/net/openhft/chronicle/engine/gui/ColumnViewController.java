@@ -17,7 +17,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.renderers.ImageRenderer;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.api.column.Column;
-import net.openhft.chronicle.engine.api.column.ColumnView;
+import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
 import net.openhft.chronicle.engine.map.ObjectSubscription;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,23 +37,27 @@ import static com.vaadin.ui.Grid.HeaderRow;
 class ColumnViewController<K, V> {
 
     @NotNull
-    private final ColumnView columnView;
+    private final ColumnViewInternal columnView;
     @NotNull
     private final MapViewUI view;
+    private final String path;
 
-    ColumnViewController(@NotNull ColumnView columnView, @NotNull MapViewUI view, String path) {
+
+    ColumnViewController(@NotNull ColumnViewInternal columnView, @NotNull MapViewUI view, String path) {
         this.columnView = columnView;
         this.view = view;
+        this.path = path;
+
         view.path.setValue(path);
         view.recordCount.setValue(Long.toString(columnView.rowCount(Collections.emptyList())));
 
         final ObjectSubscription objectSubscription = columnView.objectSubscription();
         onChange(view, objectSubscription);
-        objectSubscription.registerDownstream(changeEvent -> onChange(view, objectSubscription));
+      //  objectSubscription.registerDownstream(changeEvent -> onChange(view, objectSubscription));
     }
 
     private void onChange(@NotNull MapViewUI view, @NotNull ObjectSubscription objectSubscription) {
-        view.topicSubscriberCount.setValue(Integer.toString(objectSubscription
+    /*    view.topicSubscriberCount.setValue(Integer.toString(objectSubscription
                 .topicSubscriberCount()));
 
         try {
@@ -71,15 +75,16 @@ class ColumnViewController<K, V> {
         }
 
 
-        view.keyStoreValue.setValue(objectSubscription.getClass().getSimpleName());
+        view.keyStoreValue.setValue(objectSubscription.getClass().getSimpleName());*/
     }
 
     private final AtomicLong refreshUI = new AtomicLong();
 
+
     void init() {
         view.gridHolder.removeAllComponents();
 
-        @NotNull final Container.Indexed data = createContainer(new ColumnQueryDelegate<>(columnView));
+        @NotNull final Container.Indexed data = createContainer(new ColumnQueryDelegate(columnView));
         @NotNull final GeneratedPropertyContainer generatedPropertyContainer = addDeleteButton(data);
         @NotNull final Grid grid = new Grid(generatedPropertyContainer);
 
@@ -98,12 +103,15 @@ class ColumnViewController<K, V> {
 
         view.addButton.addClickListener((ClickListener) event -> new AddRow(columnView).init());
 
+
         columnView.registerChangeListener(() -> {
-            // the refresh has to be run on the UI thread !
             refreshUI.compareAndSet(0, System.currentTimeMillis());
         });
 
-        UI.getCurrent().addPollListener(e -> refreshUI((SQLContainer) data));
+        UI.getCurrent().addPollListener(e -> {
+            if (grid.isVisible())
+                refreshUI((SQLContainer) data);
+        });
 
         if (data instanceof SQLContainer) {
             ((SQLContainer) data).setAutoCommit(true);
@@ -178,13 +186,13 @@ class ColumnViewController<K, V> {
     }
 
     private void refreshUI(SQLContainer data) {
-        final long l = refreshUI.get();
+       /* final long l = refreshUI.get();
 
         if (l + 5_000 < System.currentTimeMillis()) {
             refreshUI.set(0);
             data.refresh();
             view.recordCount.setValue(Long.toString(columnView.rowCount(Collections.emptyList())));
-        }
+        }*/
 
     }
 

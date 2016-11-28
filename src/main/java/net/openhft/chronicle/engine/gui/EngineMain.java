@@ -98,7 +98,7 @@ public class EngineMain {
 
             final ServerEndpoint serverEndpoint = new ServerEndpoint(connectUri, tree, networkStatsListener);
 
-            // we add this as close will get called when the asset tree is closed
+            // we add this as close will get called when the asset eventListener is closed
             tree.root().addView(ServerEndpoint.class, serverEndpoint);
             tree.registerSubscriber("", TopologicalEvent.class, e -> LOGGER.info("Tree change " + e));
 

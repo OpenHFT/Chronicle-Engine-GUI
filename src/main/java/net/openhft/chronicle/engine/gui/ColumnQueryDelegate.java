@@ -7,10 +7,7 @@ import com.vaadin.data.util.sqlcontainer.RowItem;
 import com.vaadin.data.util.sqlcontainer.query.OrderBy;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
 import net.openhft.chronicle.engine.api.column.Column;
-import net.openhft.chronicle.engine.api.column.ColumnView;
-import net.openhft.chronicle.engine.api.column.ColumnView.MarshableFilter;
-import net.openhft.chronicle.engine.api.column.ColumnView.MarshableOrderBy;
-import net.openhft.chronicle.engine.api.column.ColumnView.SortedFilter;
+import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
 import net.openhft.chronicle.engine.api.column.Row;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,19 +17,21 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static net.openhft.chronicle.engine.api.column.ColumnViewInternal.*;
+
 /**
  * @author Rob Austin.
  */
-class ColumnQueryDelegate<K, V> implements QueryDelegate {
+class ColumnQueryDelegate implements QueryDelegate {
 
     @NotNull
-    private final ColumnView columnView;
+    private final ColumnViewInternal columnView;
     @NotNull
     private List<Container.Filter> filters = Collections.emptyList();
     @NotNull
     private List<OrderBy> orderBys = Collections.emptyList();
 
-    ColumnQueryDelegate(@NotNull ColumnView columnView) {
+    ColumnQueryDelegate(@NotNull ColumnViewInternal columnView) {
         this.columnView = columnView;
     }
 
@@ -48,7 +47,7 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
     @NotNull
     @Override
     public ResultSet getResults(int offset, int pageLength) throws SQLException {
-        return new ChronicleColumnViewResultSet<K, V>(newIterator(offset), pageLength, columnView.columns());
+        return new ChronicleColumnViewResultSet(newIterator(offset), pageLength, columnView.columns());
     }
 
 
@@ -95,7 +94,8 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
      * @return the marshable filter
      */
     @NotNull
-    private List<MarshableFilter> toMarshables(@NotNull List<Container.Filter> filters) {
+    private List<ColumnViewInternal.MarshableFilter> toMarshables(@NotNull List<Container.Filter>
+                                                                          filters) {
         @NotNull ArrayList<MarshableFilter> result = new ArrayList<>();
         for (Container.Filter filter0 : filters) {
             if (filter0 instanceof SimpleStringFilter) {
@@ -188,6 +188,8 @@ class ColumnQueryDelegate<K, V> implements QueryDelegate {
     }
 
     public boolean containsRowWithKey(Object... keys) throws SQLException {
-        return columnView.containsRowWithKey(keys);
+        if (keys.length == 0)
+            return false;
+        return columnView.containsRowWithKey(Arrays.asList(keys));
     }
 }

@@ -34,7 +34,18 @@ a web based client management console to start the jetty application server, ple
 mvn compile jetty:run
 ----
 
-then in you webbrower goto http://localhost:8080
+You fist have to start a chroncile engine, for example, go to the chronicle engine project and run
+the main of :
+
+Chronicle-Engine/src/main/java/net/openhft/chronicle/engine/StartEngineWithDummyData.java
+
+
+then in you web-brower go to http://localhost:8080
+
+the click log-in you should not have to fill in any details, just use the defauls.
+
+then in your webbrowser fill in the the login form, providing the host:port of the server running
+ chronicle-engine
 
 ###  vaadin-charts
 

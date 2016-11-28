@@ -5,7 +5,7 @@ import com.vaadin.server.Sizeable;
 import com.vaadin.ui.*;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.engine.api.column.Column;
-import net.openhft.chronicle.engine.api.column.ColumnView;
+import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -20,9 +20,9 @@ import static java.util.Collections.EMPTY_MAP;
  */
 public class AddRow {
 
-    private ColumnView columnView;
+    private ColumnViewInternal columnView;
 
-    public AddRow(ColumnView columnView) {
+    public AddRow(ColumnViewInternal columnView) {
         this.columnView = columnView;
     }
 

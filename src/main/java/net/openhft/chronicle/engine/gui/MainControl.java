@@ -14,10 +14,10 @@ class MainControl {
 
 
     @NotNull
-    Component newComponent(final AssetTree assetTree) {
+    Component newComponent(final AssetTree remoteAssetTree) {
         @NotNull MainUI mainUI = new MainUI();
-        Component c = userUiManager.newComponent();
-        mainUI.content.addComponent(c);
+        Component userComponent = userUiManager.newComponent();
+
 
         VerticalLayout content = mainUI.content;
 
@@ -26,15 +26,16 @@ class MainControl {
             content.addComponent(userUiManager.newComponent());
         });
 
-
         @NotNull TreeUI treeUI = new TreeUI();
-        new TreeController(assetTree, treeUI);
+        new TreeController(remoteAssetTree, treeUI);
 
         mainUI.treeButton.addClickListener(clickEvent -> {
             content.removeAllComponents();
             content.addComponent(treeUI);
         });
 
+
+        mainUI.content.addComponent(treeUI);
 
         return mainUI;
     }

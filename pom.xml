@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -95,7 +95,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.13.33-SNAPSHOT</version>
+                <version>1.13.39-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -240,7 +240,6 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
 
-
             <pluginRepositories>
                 <pluginRepository>
                     <id>vaadin-prereleases</id>
@@ -259,5 +258,12 @@
             </pluginRepositories>
         </profile>
     </profiles>
+
+    <scm>
+        <url>scm:git:git@github.com:OpenHFT/Chronicle-Engine-GUI.git</url>
+        <connection>scm:git:git@github.com:OpenHFT/Chronicle-Engine-GUI.git</connection>
+        <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Engine-GUI.git</developerConnection>
+        <tag>master</tag>
+    </scm>
 
 </project>
