@@ -23,7 +23,7 @@ import static net.openhft.chronicle.engine.gui.EntryPoint.remote;
 public class Login extends CustomComponent implements View, Button.ClickListener {
 
     private static final String NAME = "login";
-    private static final String DEFAULT_HOSTPORT = "localhost:8080";
+    private static final String DEFAULT_HOSTPORT = "localhost:9090";
     private static final String DEFAULT_USER = "admin";
     private final TextField user;
     private final TextField hostPort;
@@ -32,6 +32,8 @@ public class Login extends CustomComponent implements View, Button.ClickListener
     private final Navigator navigator;
 
     private volatile UIEvents.PollListener eventListener;
+    private volatile VanillaAssetTree remoteTree = null;
+    private volatile Boolean isConnected = null;
 
     public Login(Navigator navigator, final String caption) {
         this.navigator = navigator;
@@ -114,29 +116,6 @@ public class Login extends CustomComponent implements View, Button.ClickListener
 
     }
 
-    // Validator for validating the passwords
-    private static final class PasswordValidator extends
-            AbstractValidator<String> {
-
-        private PasswordValidator() {
-            super("The password provided is not valid");
-        }
-
-        @Override
-        protected boolean isValidValue(String value) {
-            return true;
-        }
-
-        @Override
-        public Class<String> getType() {
-            return String.class;
-        }
-    }
-
-    private volatile VanillaAssetTree remoteTree = null;
-
-    private volatile Boolean isConnected = null;
-
     @Override
     public void buttonClick(Button.ClickEvent event) {
 
@@ -174,6 +153,25 @@ public class Login extends CustomComponent implements View, Button.ClickListener
 
         remoteTree = remote(remoteHost, sessionDetails, monitor);
 
+    }
+
+    // Validator for validating the passwords
+    private static final class PasswordValidator extends
+            AbstractValidator<String> {
+
+        private PasswordValidator() {
+            super("The password provided is not valid");
+        }
+
+        @Override
+        protected boolean isValidValue(String value) {
+            return true;
+        }
+
+        @Override
+        public Class<String> getType() {
+            return String.class;
+        }
     }
 
 
