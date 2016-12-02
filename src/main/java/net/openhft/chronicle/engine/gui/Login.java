@@ -67,6 +67,7 @@ public class Login extends CustomComponent implements View, Button.ClickListener
 
         // Create login button
         loginButton = new Button("Login", this);
+        loginButton.setDisableOnClick(true);
 
         // Add both to a panel
         VerticalLayout fields = new VerticalLayout(image, hostPort, user, password, loginButton);

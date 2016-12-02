@@ -66,6 +66,7 @@ public class EntryPoint extends UI {
             Component c = new MainControl().newComponent(tree);
             addComponent(c);
             setSizeFull();
+
         }
     }
 
@@ -77,8 +78,8 @@ public class EntryPoint extends UI {
 
         navigator.addView("", new LoginView(navigator));
         navigator.addView(MAINVIEW, new MainView());
-
-
+        /*VaadinServlet.getCurrent().getServletConfig().getCurrent().getConfiguration()
+                .getApplicationOrSystemProperty();*/
     }
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
