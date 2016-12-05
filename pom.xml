@@ -95,10 +95,11 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.13.41-SNAPSHOT</version>
+                <version>1.13.41</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
 
         </dependencies>
     </dependencyManagement>
@@ -124,7 +125,7 @@
         <dependency>
             <groupId>software.chronicle</groupId>
             <artifactId>chronicle-queue-enterprise</artifactId>
-          <exclusions>
+            <exclusions>
                 <exclusion>
                     <groupId>software.chronicle</groupId>
                     <artifactId>chronicle-wire-enterprise</artifactId>
@@ -262,7 +263,8 @@
     <scm>
         <url>scm:git:git@github.com:OpenHFT/Chronicle-Engine-GUI.git</url>
         <connection>scm:git:git@github.com:OpenHFT/Chronicle-Engine-GUI.git</connection>
-        <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Engine-GUI.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Engine-GUI.git
+        </developerConnection>
         <tag>master</tag>
     </scm>
 
