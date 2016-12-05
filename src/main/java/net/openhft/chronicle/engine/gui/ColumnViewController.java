@@ -15,6 +15,7 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.renderers.ImageRenderer;
+import com.vaadin.ui.renderers.NumberRenderer;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.api.column.Column;
 import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
@@ -22,6 +23,7 @@ import net.openhft.chronicle.engine.map.ObjectSubscription;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +43,7 @@ class ColumnViewController<K, V> {
     @NotNull
     private final MapViewUI view;
     private final String path;
+    private final DecimalFormat removeFormatting;
 
 
     ColumnViewController(@NotNull ColumnViewInternal columnView, @NotNull MapViewUI view, String path) {
@@ -53,7 +56,9 @@ class ColumnViewController<K, V> {
 
         final ObjectSubscription objectSubscription = columnView.objectSubscription();
         onChange(view, objectSubscription);
-      //  objectSubscription.registerDownstream(changeEvent -> onChange(view, objectSubscription));
+
+        removeFormatting = new DecimalFormat();
+        removeFormatting.setGroupingUsed(false);
     }
 
     private void onChange(@NotNull MapViewUI view, @NotNull ObjectSubscription objectSubscription) {
@@ -94,11 +99,25 @@ class ColumnViewController<K, V> {
 
         final List<Column> columns = columnView.columns();
 
-        boolean canEdit = columnView.canEditRows();
         for (@NotNull Column column : columns) {
             final Grid.Column gridColumn = grid.addColumn(column.name);
             gridColumn.setSortable(column.sortable);
             gridColumn.setEditable(!column.isReadOnly());
+
+            if (Number.class.isAssignableFrom(column.type) ||
+                    Boolean.class.isAssignableFrom(column.type)) {
+                gridColumn.setWidth(120);
+            }
+
+            if (column.type == Long.class || column.type == Integer.class) {
+                gridColumn.setRenderer(new NumberRenderer(removeFormatting));
+            }
+
+            if (column.type == Long.class) {
+                DecimalFormat df = new DecimalFormat();
+                df.setGroupingUsed(false);
+                gridColumn.setRenderer(new NumberRenderer(df));
+            }
         }
 
         grid.setSizeFull();
@@ -161,6 +180,9 @@ class ColumnViewController<K, V> {
                 // Have an input field to use for filter
                 @NotNull TextField filterField = new TextField();
                 filterField.setHeight(24, Sizeable.Unit.PIXELS);
+                filterField.setWidth(100, Sizeable.Unit.PIXELS);
+
+
                 //      filterField.setWidth(100, Sizeable.Unit.PERCENTAGE);
 
                 // Update filter When the filter input is changed
@@ -229,6 +251,13 @@ class ColumnViewController<K, V> {
         return gpc;
     }
 
+
+    public static void main(String[] args) {
+
+        DecimalFormat df = new DecimalFormat();
+        df.setGroupingUsed(false);
+        System.out.println(df.format(100000));
+    }
 
 }
 
