@@ -93,6 +93,8 @@ class ColumnViewController<K, V> {
         grid.removeAllColumns();
 
         final List<Column> columns = columnView.columns();
+
+        boolean canEdit = columnView.canEditRows();
         for (@NotNull Column column : columns) {
             final Grid.Column gridColumn = grid.addColumn(column.name);
             gridColumn.setSortable(column.sortable);
@@ -117,6 +119,7 @@ class ColumnViewController<K, V> {
             ((SQLContainer) data).setAutoCommit(true);
         }
 
+
         if (columnView.canDeleteRows()) {
 
             grid.setEditorEnabled(true);
@@ -126,7 +129,6 @@ class ColumnViewController<K, V> {
             // Render a button that deletes the data row (item)
             final Grid.Column deleteColumn = grid.addColumn("delete");
             deleteColumn.setWidth(64);
-            //     deleteColumn.setLastFrozenColumn();
             deleteColumn.setHeaderCaption("");
             deleteColumn.setEditable(false);
             deleteColumn.setResizable(false);
