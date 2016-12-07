@@ -24,7 +24,7 @@ public class BarChartUI {
     protected Component getChart(BarChart barChart) {
 
         ColumnViewInternal columnView = barChart.columnView();
-        ClosableIterator<? extends Row> iterator = columnView.iterator(orderBytKey());
+        ClosableIterator<? extends Row> iterator = columnView.iterator(orderBytKey(barChart.columnNameField()));
 
         PlotOptionsColumn plotOptions;
         Chart chart;
@@ -65,10 +65,10 @@ public class BarChartUI {
     }
 
     @NotNull
-    private ColumnViewInternal.SortedFilter orderBytKey() {
+    private ColumnViewInternal.SortedFilter orderBytKey(final String order) {
         ColumnViewInternal.SortedFilter sortedFilter = new ColumnViewInternal.SortedFilter();
         sortedFilter.marshableOrderBy = Collections.singletonList(new ColumnViewInternal
-                .MarshableOrderBy("order"));
+                .MarshableOrderBy(order));
         return sortedFilter;
     }
 
