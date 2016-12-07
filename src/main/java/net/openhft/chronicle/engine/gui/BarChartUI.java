@@ -3,10 +3,14 @@ package net.openhft.chronicle.engine.gui;
 import com.vaadin.addon.charts.Chart;
 import com.vaadin.addon.charts.model.*;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.server.Sizeable;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import net.openhft.chronicle.engine.api.column.*;
+import net.openhft.chronicle.engine.api.column.BarChart;
+import net.openhft.chronicle.engine.api.column.ClosableIterator;
+import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
+import net.openhft.chronicle.engine.api.column.Row;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -14,38 +18,44 @@ import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public class HistogramUI {
-
-    public String getDescription() {
-        return "Basic bar with point width and range set";
-    }
+public class BarChartUI {
 
 
-    protected Component getChart(MapColumnView mapColumnView) {
+    protected Component getChart(BarChart barChart) {
 
-        ClosableIterator<? extends Row> iterator = mapColumnView.iterator(orderBytKey());
-
+        ColumnViewInternal columnView = barChart.columnView();
+        ClosableIterator<? extends Row> iterator = columnView.iterator(orderBytKey());
 
         PlotOptionsColumn plotOptions;
         Chart chart;
         chart = new Chart(ChartType.COLUMN);
+        chart.setHeight(100, Sizeable.Unit.PERCENTAGE);
 
         Configuration conf = chart.getConfiguration();
-        conf.setTitle("Visualize point width and point range");
+        conf.setTitle(barChart.title());
+
+        XAxis x = new XAxis();
+        conf.addxAxis(x);
 
         plotOptions = new PlotOptionsColumn();
         // plotOptions.setPointRange(10);
         plotOptions.setPointWidth(100);
         conf.setPlotOptions(plotOptions);
 
-        HistogramBucket histogramBucket = new HistogramBucket();
 
+        List lables = new ArrayList();
         List<DataSeriesItem> data = new ArrayList<>();
         while (iterator.hasNext()) {
             Row row = iterator.next();
-            HistogramBucket histogramBucket1 = row.copyTo(histogramBucket);
-            data.add(new DataSeriesItem(histogramBucket1.label(), histogramBucket.count()));
+
+            String columnName = row.get(barChart.columnNameField()).toString();
+            lables.add(columnName);
+
+            Number number = (Number) row.get(barChart.columnValueField());
+            data.add(new DataSeriesItem(columnName, number));
         }
+        x.setCategories((String[]) lables.toArray(new String[lables.size()]));
+        conf.addxAxis(x);
 
         conf.setSeries(new DataSeries(data));
 
@@ -58,7 +68,7 @@ public class HistogramUI {
     private ColumnViewInternal.SortedFilter orderBytKey() {
         ColumnViewInternal.SortedFilter sortedFilter = new ColumnViewInternal.SortedFilter();
         sortedFilter.marshableOrderBy = Collections.singletonList(new ColumnViewInternal
-                .MarshableOrderBy("key"));
+                .MarshableOrderBy("order"));
         return sortedFilter;
     }
 

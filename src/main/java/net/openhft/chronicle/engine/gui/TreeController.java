@@ -3,6 +3,7 @@ package net.openhft.chronicle.engine.gui;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Tree;
+import net.openhft.chronicle.engine.api.column.BarChart;
 import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
 import net.openhft.chronicle.engine.api.column.MapColumnView;
 import net.openhft.chronicle.engine.api.column.QueueColumnView;
@@ -22,48 +23,47 @@ import java.util.Set;
 /**
  * @author Rob Austin.
  */
-public class TreeController {
-
+class TreeController {
 
     static {
         RequestContext.loadDefaultAliases();
     }
 
-
-    public static final String MAP_VIEW = "::map_view";
-    public static final String QUEUE_VIEW = "::queue_view";
-
+    private static final String MAP_VIEW = "::map_view";
+    private static final String QUEUE_VIEW = "::queue_view";
+    private static final String BAR_CHART_VIEW = "::barchart_view";
     @NotNull
     final ItemClickEvent.ItemClickListener clickListener;
+    @NotNull
+    private final BarChartUI histogramUI = new BarChartUI();
 
-    public TreeController(@NotNull AssetTree remoteTree,
-                          @NotNull TreeUI treeUI) {
+    TreeController(@NotNull final AssetTree remoteTree,
+                   @NotNull TreeUI treeUI) {
 
         final Tree tree = treeUI.tree;
 
         RequestContext rc = RequestContext.requestContext("")
                 .elementType(TopologicalEvent.class).bootstrap(true);
 
-        final Subscriber<TopologicalEvent> sub = e -> updateTree(tree, e);
+        final Subscriber<TopologicalEvent> sub = e -> updateTree(tree, e, remoteTree);
         remoteTree.acquireSubscription(rc).registerSubscriber(rc, sub, Filter.empty());
 
         clickListener = click -> {
             final String source = click.getItemId().toString();
             treeUI.contents.removeAllComponents();
 
+            if (source.endsWith(BAR_CHART_VIEW)) {
+                final Asset asset = findAsset(source, remoteTree);
+                BarChart mapColumnView = asset.acquireView(BarChart.class);
+                treeUI.contents.addComponent(histogramUI.getChart(mapColumnView));
+                return;
+            }
 
             if (source.endsWith(MAP_VIEW) || source.endsWith(QUEUE_VIEW)) {
                 @NotNull MapViewUI mapViewUI = new MapViewUI();
                 treeUI.contents.addComponent(mapViewUI);
 
-                final int len = source.length();
-
-                @NotNull final String path = source.endsWith(MAP_VIEW) ?
-                        source.substring(0, len - MAP_VIEW.length()) :
-                        source.substring(0, len - QUEUE_VIEW.length());
-
-                @NotNull
-                Asset asset = remoteTree.acquireAsset(path);
+                Asset asset = findAsset(source, remoteTree);
 
                 @Nullable
                 final ColumnViewInternal view = source.endsWith(MAP_VIEW) ?
@@ -71,7 +71,9 @@ public class TreeController {
                         asset.acquireView(QueueColumnView.class);
 
                 @NotNull
-                ColumnViewController mapControl = new ColumnViewController(view, mapViewUI, path);
+                ColumnViewController mapControl = new ColumnViewController(view,
+                        mapViewUI,
+                        path(source));
                 mapControl.init();
 
             }
@@ -82,7 +84,23 @@ public class TreeController {
     }
 
 
-    private void updateTree(@NotNull Tree tree, @NotNull TopologicalEvent e) {
+    public Asset findAsset(String source, AssetTree remoteTree) {
+        @NotNull final String path = path(source);
+        return remoteTree.acquireAsset(path);
+    }
+
+    private String path(String source) {
+        final int len = source.length();
+
+        for (String view : new String[]{MAP_VIEW, QUEUE_VIEW, BAR_CHART_VIEW}) {
+            if (source.endsWith(view))
+                return source.substring(0, len - view.length());
+        }
+
+        throw new IllegalStateException();
+    }
+
+    private void updateTree(@NotNull Tree tree, @NotNull TopologicalEvent e, AssetTree assetTree) {
 
         if (e.assetName() == null)
             return;
@@ -101,46 +119,56 @@ public class TreeController {
         tree.setChildrenAllowed(e.fullName(), true);
 
 
-        System.out.println("*******************************     e.assetName()=" + e.fullName());
-
         Set<Class> viewTypes = e.viewTypes();
         viewTypes.forEach(System.out::println);
 
-
         try {
+
+            if (viewTypes.stream().anyMatch(BarChart.class::isAssignableFrom))
+                addBarChart(tree, e, assetTree);
+
             if (viewTypes.stream().anyMatch(QueueView.class::isAssignableFrom)) {
-
-                tree.addItem(e.fullName() + QUEUE_VIEW);
-                tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
-                tree.setItemCaption(e.fullName() + QUEUE_VIEW, "queue");
-                tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
-                        () -> TreeController.class.getResourceAsStream("map.png"), "map"));
-                tree.setChildrenAllowed(e.fullName() + QUEUE_VIEW, false);
-
-                System.out.println("queue at :" + e.fullName());
+                addQueue(tree, e);
                 return;
             }
 
             if (viewTypes.stream().anyMatch(MapView.class::isAssignableFrom)) {
-
-                tree.addItem(e.fullName() + MAP_VIEW);
-                tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
-                tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
-                tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
-                        () -> TreeController.class.getResourceAsStream("map.png"), "map"));
-                tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
-                System.out.println("map at :" + e.fullName());
+                addMap(tree, e);
                 return;
             }
 
 
         } catch (Throwable t) {
             t.printStackTrace();
-        } finally {
-            System.out.println("finished " + e.assetName());
         }
+    }
 
+    private void addBarChart(@NotNull Tree tree, @NotNull TopologicalEvent e, AssetTree assetTree) {
+        tree.addItem(e.fullName() + BAR_CHART_VIEW);
+        tree.setParent(e.fullName() + BAR_CHART_VIEW, e.fullName());
 
+            tree.setItemCaption(e.fullName() + BAR_CHART_VIEW, "barChart");
+        tree.setItemIcon(e.fullName() + BAR_CHART_VIEW, new StreamResource(
+                () -> TreeController.class.getResourceAsStream("chart.png"), "chart"));
+        tree.setChildrenAllowed(e.fullName() + BAR_CHART_VIEW, false);
+    }
+
+    private void addMap(@NotNull Tree tree, @NotNull TopologicalEvent e) {
+        tree.addItem(e.fullName() + MAP_VIEW);
+        tree.setParent(e.fullName() + MAP_VIEW, e.fullName());
+        tree.setItemCaption(e.fullName() + MAP_VIEW, "map");
+        tree.setItemIcon(e.fullName() + MAP_VIEW, new StreamResource(
+                () -> TreeController.class.getResourceAsStream("map.png"), "map"));
+        tree.setChildrenAllowed(e.fullName() + MAP_VIEW, false);
+    }
+
+    private void addQueue(@NotNull Tree tree, @NotNull TopologicalEvent e) {
+        tree.addItem(e.fullName() + QUEUE_VIEW);
+        tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
+        tree.setItemCaption(e.fullName() + QUEUE_VIEW, "queue");
+        tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
+                () -> TreeController.class.getResourceAsStream("map.png"), "map"));
+        tree.setChildrenAllowed(e.fullName() + QUEUE_VIEW, false);
     }
 
 }
