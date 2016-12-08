@@ -7,10 +7,7 @@ import com.vaadin.server.Sizeable;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import net.openhft.chronicle.engine.api.column.BarChart;
-import net.openhft.chronicle.engine.api.column.ClosableIterator;
-import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
-import net.openhft.chronicle.engine.api.column.Row;
+import net.openhft.chronicle.engine.api.column.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -18,47 +15,82 @@ import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public class BarChartUI {
+public class ChartUI {
 
 
-    protected Component getChart(BarChart barChart) {
+    protected Component getChart(VaadinChart vaadinChart) {
 
-        ColumnViewInternal columnView = barChart.columnView();
-        ClosableIterator<? extends Row> iterator = columnView.iterator(orderBytKey(barChart.columnNameField()));
+        ColumnViewInternal columnView = vaadinChart.columnView();
 
-        PlotOptionsColumn plotOptions;
+        //  PlotOptionsColumn plotOptions;
         Chart chart;
         chart = new Chart(ChartType.COLUMN);
         chart.setHeight(100, Sizeable.Unit.PERCENTAGE);
 
         Configuration conf = chart.getConfiguration();
-        conf.setTitle(barChart.title());
-
-        XAxis x = new XAxis();
-        conf.addxAxis(x);
-
-        plotOptions = new PlotOptionsColumn();
-        // plotOptions.setPointRange(10);
-        plotOptions.setPointWidth(100);
-        conf.setPlotOptions(plotOptions);
+        BarChartProperties barChartProperties = vaadinChart.barChartProperties();
+        conf.setTitle(barChartProperties.title);
 
 
-        List lables = new ArrayList();
-        List<DataSeriesItem> data = new ArrayList<>();
-        while (iterator.hasNext()) {
-            Row row = iterator.next();
+        String yAxisLable = null;
 
-            String columnName = row.get(barChart.columnNameField()).toString();
-            lables.add(columnName);
+        boolean hasXAxis = false;
 
-            Number number = (Number) row.get(barChart.columnValueField());
-            data.add(new DataSeriesItem(columnName, number));
+        for (VaadinChartType vaadinChartType : vaadinChart.columnValueField()) {
+
+            List lables = new ArrayList();
+            List<DataSeriesItem> data = new ArrayList<>();
+
+            ClosableIterator<? extends Row> iterator = columnView.iterator(orderBytKey(vaadinChart.columnNameField()));
+
+            while (iterator.hasNext()) {
+                Row row = iterator.next();
+
+                String columnName = row.get(vaadinChart.columnNameField()).toString();
+                lables.add(columnName);
+
+                Number number = (Number) row.get(vaadinChartType.field);
+                data.add(new DataSeriesItem(columnName, number));
+            }
+
+            if (!hasXAxis) {
+                hasXAxis = true;
+                XAxis x = new XAxis();
+                x.setCategories((String[]) lables.toArray(new String[lables.size()]));
+                conf.addxAxis(x);
+            }
+
+            DataSeries dataSeries = new DataSeries(data);
+
+            switch (vaadinChartType.type()) {
+                case SPLINE: {
+                    dataSeries.setPlotOptions(new PlotOptionsSpline());
+                    break;
+                }
+
+                case COLUMN: {
+                    PlotOptionsColumn plotOptions = new PlotOptionsColumn();
+                    plotOptions.setPointWidth(barChartProperties.pointWidth);
+                    dataSeries.setPlotOptions(plotOptions);
+                    break;
+                }
+            }
+
+
+            final String ylabel = vaadinChartType.yAxisLabel();
+
+            if (ylabel != null && !ylabel.contentEquals("") && (yAxisLable == null || !yAxisLable
+                    .equals(ylabel))) {
+                YAxis yAxis = new YAxis();
+                yAxis.setTitle(ylabel);
+                conf.addyAxis(yAxis);
+                yAxisLable = ylabel;
+            }
+
+            dataSeries.setName(vaadinChartType.field);
+            conf.addSeries(dataSeries);
+
         }
-        x.setCategories((String[]) lables.toArray(new String[lables.size()]));
-        conf.addxAxis(x);
-
-        conf.setSeries(new DataSeries(data));
-
         chart.drawChart(conf);
 
         return chart;

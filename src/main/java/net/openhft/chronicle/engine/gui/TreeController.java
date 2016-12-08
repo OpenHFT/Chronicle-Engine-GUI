@@ -3,7 +3,7 @@ package net.openhft.chronicle.engine.gui;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Tree;
-import net.openhft.chronicle.engine.api.column.BarChart;
+import net.openhft.chronicle.engine.api.column.VaadinChart;
 import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
 import net.openhft.chronicle.engine.api.column.MapColumnView;
 import net.openhft.chronicle.engine.api.column.QueueColumnView;
@@ -35,7 +35,7 @@ class TreeController {
     @NotNull
     final ItemClickEvent.ItemClickListener clickListener;
     @NotNull
-    private final BarChartUI histogramUI = new BarChartUI();
+    private final ChartUI histogramUI = new ChartUI();
 
     TreeController(@NotNull final AssetTree remoteTree,
                    @NotNull TreeUI treeUI) {
@@ -54,7 +54,7 @@ class TreeController {
 
             if (source.endsWith(BAR_CHART_VIEW)) {
                 final Asset asset = findAsset(source, remoteTree);
-                BarChart mapColumnView = asset.acquireView(BarChart.class);
+                VaadinChart mapColumnView = asset.acquireView(VaadinChart.class);
                 treeUI.contents.addComponent(histogramUI.getChart(mapColumnView));
                 return;
             }
@@ -124,7 +124,7 @@ class TreeController {
 
         try {
 
-            if (viewTypes.stream().anyMatch(BarChart.class::isAssignableFrom))
+            if (viewTypes.stream().anyMatch(VaadinChart.class::isAssignableFrom))
                 addBarChart(tree, e, assetTree);
 
             if (viewTypes.stream().anyMatch(QueueView.class::isAssignableFrom)) {
@@ -136,7 +136,6 @@ class TreeController {
                 addMap(tree, e);
                 return;
             }
-
 
         } catch (Throwable t) {
             t.printStackTrace();
