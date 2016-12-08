@@ -3,10 +3,10 @@ package net.openhft.chronicle.engine.gui;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Tree;
-import net.openhft.chronicle.engine.api.column.VaadinChart;
 import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
 import net.openhft.chronicle.engine.api.column.MapColumnView;
 import net.openhft.chronicle.engine.api.column.QueueColumnView;
+import net.openhft.chronicle.engine.api.column.VaadinChart;
 import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.pubsub.Subscriber;
 import net.openhft.chronicle.engine.api.tree.Asset;
@@ -15,10 +15,13 @@ import net.openhft.chronicle.engine.api.tree.RequestContext;
 import net.openhft.chronicle.engine.query.Filter;
 import net.openhft.chronicle.engine.tree.QueueView;
 import net.openhft.chronicle.engine.tree.TopologicalEvent;
+import net.openhft.chronicle.threads.NamedThreadFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Rob Austin.
@@ -36,6 +39,8 @@ class TreeController {
     final ItemClickEvent.ItemClickListener clickListener;
     @NotNull
     private final ChartUI histogramUI = new ChartUI();
+    static ExecutorService executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory
+            ("scheduler", true));
 
     TreeController(@NotNull final AssetTree remoteTree,
                    @NotNull TreeUI treeUI) {
@@ -54,8 +59,8 @@ class TreeController {
 
             if (source.endsWith(BAR_CHART_VIEW)) {
                 final Asset asset = findAsset(source, remoteTree);
-                VaadinChart mapColumnView = asset.acquireView(VaadinChart.class);
-                treeUI.contents.addComponent(histogramUI.getChart(mapColumnView));
+                VaadinChart chart = asset.acquireView(VaadinChart.class);
+                treeUI.contents.addComponent(histogramUI.getChart(chart));
                 return;
             }
 
@@ -142,11 +147,19 @@ class TreeController {
         }
     }
 
-    private void addBarChart(@NotNull Tree tree, @NotNull TopologicalEvent e, AssetTree assetTree) {
+    private void addBarChart(@NotNull final Tree tree, @NotNull TopologicalEvent e, AssetTree
+            assetTree) {
         tree.addItem(e.fullName() + BAR_CHART_VIEW);
         tree.setParent(e.fullName() + BAR_CHART_VIEW, e.fullName());
 
-            tree.setItemCaption(e.fullName() + BAR_CHART_VIEW, "barChart");
+        // we can make an RPC call engine, while inside a TopologicalEvent
+        executorService.submit(() -> {
+            VaadinChart chart = assetTree.acquireAsset(e.fullName()).acquireView(VaadinChart.class);
+            final String menuLabel = chart.barChartProperties().menuLabel;
+            tree.setItemCaption(e.fullName() + BAR_CHART_VIEW, menuLabel == null ? "bar-chart" :
+                    menuLabel);
+        });
+
         tree.setItemIcon(e.fullName() + BAR_CHART_VIEW, new StreamResource(
                 () -> TreeController.class.getResourceAsStream("chart.png"), "chart"));
         tree.setChildrenAllowed(e.fullName() + BAR_CHART_VIEW, false);

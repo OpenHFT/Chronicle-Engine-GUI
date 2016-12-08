@@ -20,23 +20,21 @@ public class ChartUI {
 
     protected Component getChart(VaadinChart vaadinChart) {
 
-        ColumnViewInternal columnView = vaadinChart.columnView();
+        final ColumnViewInternal columnView = vaadinChart.columnView();
 
-        //  PlotOptionsColumn plotOptions;
-        Chart chart;
+        final Chart chart;
         chart = new Chart(ChartType.COLUMN);
         chart.setHeight(100, Sizeable.Unit.PERCENTAGE);
 
-        Configuration conf = chart.getConfiguration();
-        BarChartProperties barChartProperties = vaadinChart.barChartProperties();
+        final Configuration conf = chart.getConfiguration();
+        final BarChartProperties barChartProperties = vaadinChart.barChartProperties();
         conf.setTitle(barChartProperties.title);
 
-
-        String yAxisLable = null;
+        String yAxisLabel = null;
 
         boolean hasXAxis = false;
 
-        for (VaadinChartType vaadinChartType : vaadinChart.columnValueField()) {
+        for (VaadinChartSeries vaadinChartSeries : vaadinChart.series()) {
 
             List lables = new ArrayList();
             List<DataSeriesItem> data = new ArrayList<>();
@@ -49,7 +47,7 @@ public class ChartUI {
                 String columnName = row.get(vaadinChart.columnNameField()).toString();
                 lables.add(columnName);
 
-                Number number = (Number) row.get(vaadinChartType.field);
+                Number number = (Number) row.get(vaadinChartSeries.field);
                 data.add(new DataSeriesItem(columnName, number));
             }
 
@@ -62,7 +60,7 @@ public class ChartUI {
 
             DataSeries dataSeries = new DataSeries(data);
 
-            switch (vaadinChartType.type()) {
+            switch (vaadinChartSeries.type()) {
                 case SPLINE: {
                     dataSeries.setPlotOptions(new PlotOptionsSpline());
                     break;
@@ -70,24 +68,24 @@ public class ChartUI {
 
                 case COLUMN: {
                     PlotOptionsColumn plotOptions = new PlotOptionsColumn();
-                    plotOptions.setPointWidth(barChartProperties.pointWidth);
+                    plotOptions.setPointWidth(vaadinChartSeries.width());
                     dataSeries.setPlotOptions(plotOptions);
                     break;
                 }
             }
 
 
-            final String ylabel = vaadinChartType.yAxisLabel();
+            final String ylabel = vaadinChartSeries.yAxisLabel();
 
-            if (ylabel != null && !ylabel.contentEquals("") && (yAxisLable == null || !yAxisLable
+            if (ylabel != null && !ylabel.contentEquals("") && (yAxisLabel == null || !yAxisLabel
                     .equals(ylabel))) {
                 YAxis yAxis = new YAxis();
                 yAxis.setTitle(ylabel);
                 conf.addyAxis(yAxis);
-                yAxisLable = ylabel;
+                yAxisLabel = ylabel;
             }
 
-            dataSeries.setName(vaadinChartType.field);
+            dataSeries.setName(vaadinChartSeries.field);
             conf.addSeries(dataSeries);
 
         }
