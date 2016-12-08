@@ -2,17 +2,15 @@ package net.openhft.chronicle.engine.gui;
 
 import com.vaadin.addon.charts.Chart;
 import com.vaadin.addon.charts.model.*;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.Sizeable;
-import com.vaadin.ui.*;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Component;
 import net.openhft.chronicle.engine.api.column.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+
+import static java.util.Collections.singletonList;
 
 @SuppressWarnings("serial")
 public class ChartUI {
@@ -39,7 +37,7 @@ public class ChartUI {
             List lables = new ArrayList();
             List<DataSeriesItem> data = new ArrayList<>();
 
-            ClosableIterator<? extends Row> iterator = columnView.iterator(orderBytKey(vaadinChart.columnNameField()));
+            ClosableIterator<? extends Row> iterator = columnView.iterator(sortedFilter(vaadinChart));
 
             while (iterator.hasNext()) {
                 Row row = iterator.next();
@@ -95,57 +93,14 @@ public class ChartUI {
     }
 
     @NotNull
-    private ColumnViewInternal.SortedFilter orderBytKey(final String order) {
+    private ColumnViewInternal.SortedFilter sortedFilter(final VaadinChart vaadinChart) {
         ColumnViewInternal.SortedFilter sortedFilter = new ColumnViewInternal.SortedFilter();
-        sortedFilter.marshableOrderBy = Collections.singletonList(new ColumnViewInternal
-                .MarshableOrderBy(order));
+        sortedFilter.marshableOrderBy = singletonList(new ColumnViewInternal
+                .MarshableOrderBy(vaadinChart.columnNameField()));
+        BarChartProperties barChartProperties = vaadinChart.barChartProperties();
+        if (barChartProperties.filter != null)
+            sortedFilter.marshableFilters = singletonList(barChartProperties.filter);
         return sortedFilter;
     }
-
-
-    protected void setup(PlotOptionsColumn plotOptions, Chart chart) {
-
-        HorizontalLayout horizontalLayout = new HorizontalLayout();
-        horizontalLayout.setMargin(true);
-        horizontalLayout.setSpacing(true);
-        final Slider slider = new Slider("Value (1-100)", 1, 100);
-        slider.setWidth("200px");
-        slider.setValue(100d);
-
-        final NativeSelect option = new NativeSelect();
-        option.setCaption("Option");
-        option.setNullSelectionAllowed(true);
-        option.addItem("pointWidth");
-        option.addItem("pointRange");
-        option.setValue("pointWidth");
-        option.setImmediate(true);
-        option.addValueChangeListener((ValueChangeListener) event -> slider.setEnabled(event.getProperty().getValue() != null));
-
-        horizontalLayout.addComponent(option);
-        horizontalLayout.addComponent(slider);
-        Button button = new Button("Apply");
-        button.addClickListener(new ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                if (slider.isEnabled()) {
-                    if (option.getValue().equals("pointWidth")) {
-                        plotOptions.setPointWidth(slider.getValue());
-                        plotOptions.setPointRange(null);
-                    } else {
-                        plotOptions.setPointRange(slider.getValue());
-                        plotOptions.setPointWidth(null);
-                    }
-                } else {
-                    plotOptions.setPointRange(null);
-                    plotOptions.setPointWidth(null);
-                }
-                chart.drawChart();
-            }
-        });
-        horizontalLayout.addComponent(button);
-
-
-    }
-
 
 }
