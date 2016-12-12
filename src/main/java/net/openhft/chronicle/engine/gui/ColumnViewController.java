@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -52,7 +51,7 @@ class ColumnViewController<K, V> {
         this.path = path;
 
         view.path.setValue(path);
-        view.recordCount.setValue(Long.toString(columnView.rowCount(Collections.emptyList())));
+        view.recordCount.setValue(Long.toString(columnView.rowCount(new ColumnViewInternal.SortedFilter())));
 
         final ObjectSubscription objectSubscription = columnView.objectSubscription();
         onChange(view, objectSubscription);

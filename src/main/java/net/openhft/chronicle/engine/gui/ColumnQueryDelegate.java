@@ -39,9 +39,11 @@ class ColumnQueryDelegate implements QueryDelegate {
     public int getCount() throws SQLException {
 
         if (filters.isEmpty() && orderBys.isEmpty())
-            return columnView.rowCount(Collections.emptyList());
+            return columnView.rowCount(new SortedFilter());
 
-        return columnView.rowCount(toMarshables(filters));
+        final SortedFilter sortedFilter = new SortedFilter();
+        sortedFilter.marshableFilters = toMarshables(filters);
+        return columnView.rowCount(sortedFilter);
     }
 
     @NotNull
@@ -94,8 +96,8 @@ class ColumnQueryDelegate implements QueryDelegate {
      * @return the marshable filter
      */
     @NotNull
-    private List<ColumnViewInternal.MarshableFilter> toMarshables(@NotNull List<Container.Filter>
-                                                                          filters) {
+    private List<MarshableFilter> toMarshables(@NotNull List<Container.Filter>
+                                                       filters) {
         @NotNull ArrayList<MarshableFilter> result = new ArrayList<>();
         for (Container.Filter filter0 : filters) {
             if (filter0 instanceof SimpleStringFilter) {
@@ -104,6 +106,7 @@ class ColumnQueryDelegate implements QueryDelegate {
                         filter.getFilterString()));
             }
         }
+
         return result;
     }
 

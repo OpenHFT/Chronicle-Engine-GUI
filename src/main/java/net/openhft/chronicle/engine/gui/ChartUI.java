@@ -94,9 +94,17 @@ public class ChartUI {
 
     @NotNull
     private ColumnViewInternal.SortedFilter sortedFilter(final VaadinChart vaadinChart) {
+
         ColumnViewInternal.SortedFilter sortedFilter = new ColumnViewInternal.SortedFilter();
+
+        long countFromEnd = vaadinChart.barChartProperties().countFromEnd;
+        if (countFromEnd > 0) {
+            sortedFilter.countFromEnd = countFromEnd;
+        }
+
         sortedFilter.marshableOrderBy = singletonList(new ColumnViewInternal
                 .MarshableOrderBy(vaadinChart.columnNameField()));
+
         BarChartProperties barChartProperties = vaadinChart.barChartProperties();
         if (barChartProperties.filter != null)
             sortedFilter.marshableFilters = singletonList(barChartProperties.filter);
