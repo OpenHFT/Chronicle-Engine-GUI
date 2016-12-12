@@ -40,12 +40,10 @@ A web based client management console to start the jetty application server, ple
 mvn compile jetty:run
 ----
 
-Then in your web-brower go to http://localhost:8080
-
-then click log-in, if you are running using "StartEngineWithDummyData" ( see above ) 
+Then in your web-brower go to http://localhost:8080, if you are running using "StartEngineWithDummyData" ( see above ) 
 
 image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/login.png[]
-you should just be able to use the defaults.
+you should be able to just use the defaults.
 
 ###  vaadin-charts
 
