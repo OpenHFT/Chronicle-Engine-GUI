@@ -41,7 +41,12 @@ mvn compile jetty:run
 
 Then in your web-brower go to http://localhost:8080
 
-the click log-in you should not have to fill in any details, just use the defauls.
+then click log-in, if you are running using Chronicle-Engine/src/test/java/net/openhft/chronicle/engine/StartEngineWithDummyData.java
+
+
+
+
+you should not have to fill in any details, just use the defauls.
 
 then in your webbrowser fill in the the login form, providing the host:port of the server running
  chronicle-engine
