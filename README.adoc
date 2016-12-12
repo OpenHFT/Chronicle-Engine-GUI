@@ -68,5 +68,6 @@ image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src
 ### Chronicle Map
 image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/map.png[]
 
-
+image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources
+/readme-images/network-latency.png[]
 
