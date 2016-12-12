@@ -41,7 +41,12 @@ mvn compile jetty:run
 
 Then in your web-brower go to http://localhost:8080
 
-the click log-in you should not have to fill in any details, just use the defauls.
+then click log-in, if you are running using Chronicle-Engine/src/test/java/net/openhft/chronicle/engine/StartEngineWithDummyData.java
+
+image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/login.png[]
+
+
+you should not have to fill in any details, just use the defaults.
 
 then in your webbrowser fill in the the login form, providing the host:port of the server running
  chronicle-engine
@@ -79,6 +84,12 @@ message acknowledged, see
 net.openhft.chronicle.queue.impl.WireStore.lastAcknowledgedIndexReplicated()
 ----
 
+Queue-Replication is required to create data that can produce network traffic statistics, you can run StartEngineWithDummyData, from the chronicle-queue-enterprise project ( note : chronicle-queue-enterprise is a licensed project, if you wish to purchase a licence please contact sales@chronicle.software) 
 
-image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/network-latency.png[]
+[source, console]
+----
+Chronicle-Queue-Enterprise/src/test/java/net/openhft/chronicle/engine/StartEngineWithDummyData.java
+----
+
+image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/network-latency.png[]
 
