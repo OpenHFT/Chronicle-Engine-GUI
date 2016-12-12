@@ -80,6 +80,5 @@ net.openhft.chronicle.queue.impl.WireStore.lastAcknowledgedIndexReplicated()
 ----
 
 
-image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources
-/readme-images/network-latency.png[]
+image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/network-latency.png[]
 
