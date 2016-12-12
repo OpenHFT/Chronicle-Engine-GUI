@@ -45,10 +45,6 @@ Then in your web-brower go to http://localhost:8080, if you are running using "S
 image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/login.png[]
 you should be able to just use the defaults. Click on "Login".
 
-
-
-A licenced version of this artifact can be obtained from https://vaadin.com/framework
-
 ## Screenshots
 ### Chart
 
@@ -80,6 +76,9 @@ image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src
 ###  vaadin-charts
 
 WARNING: this project requires the following artifact
+
+A licenced version of this artifact can be obtained from https://vaadin.com/framework
+
 [source, console]
 ----
 <dependency>
