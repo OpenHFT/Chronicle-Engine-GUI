@@ -60,5 +60,13 @@ WARNING: this project requires the following artifact
 
 A licenced version of this artifact can be obtained from https://vaadin.com/framework
 
+## Screenshots
+### Chart
+
+image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/chart.png[]
+
+### Chronicle Map
+image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/map.png[]
+
 
 
