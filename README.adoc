@@ -45,17 +45,7 @@ Then in your web-brower go to http://localhost:8080, if you are running using "S
 image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/login.png[]
 you should be able to just use the defaults. Click on "Login".
 
-###  vaadin-charts
 
-WARNING: this project requires the following artifact
-[source, console]
-----
-<dependency>
-	<groupId>com.vaadin.addon</groupId>
-	<artifactId>vaadin-charts</artifactId>
-	<version>3.2.0</version>
-</dependency>
-----
 
 A licenced version of this artifact can be obtained from https://vaadin.com/framework
 
@@ -87,3 +77,14 @@ Chronicle-Queue-Enterprise/src/test/java/net/openhft/chronicle/engine/StartEngin
 
 image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/network-latency.png[]
 
+###  vaadin-charts
+
+WARNING: this project requires the following artifact
+[source, console]
+----
+<dependency>
+	<groupId>com.vaadin.addon</groupId>
+	<artifactId>vaadin-charts</artifactId>
+	<version>3.2.0</version>
+</dependency>
+----
