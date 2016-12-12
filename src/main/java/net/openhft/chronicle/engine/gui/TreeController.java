@@ -179,7 +179,7 @@ class TreeController {
         tree.setParent(e.fullName() + QUEUE_VIEW, e.fullName());
         tree.setItemCaption(e.fullName() + QUEUE_VIEW, "queue");
         tree.setItemIcon(e.fullName() + QUEUE_VIEW, new StreamResource(
-                () -> TreeController.class.getResourceAsStream("map.png"), "map"));
+                () -> TreeController.class.getResourceAsStream("queue.png"), "queue"));
         tree.setChildrenAllowed(e.fullName() + QUEUE_VIEW, false);
     }
 
