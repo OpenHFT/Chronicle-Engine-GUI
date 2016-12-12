@@ -55,14 +55,14 @@ image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src
 
 ### Network Latency
 
-Network latency charts are only available when using queue replication, to measure network latency requires measuring the round trip time of thereplication event. Hence, network latency is only recorded for messages that are acknowledged. To see more about chronicle-queue message acknowledged, see :
+Network latency charts are only available when using queue replication, to measure network latency requires measuring the round trip time of replication events. Hence, network latency is only recorded for messages that are acknowledged. To see more about chronicle-queue message acknowledgement, see :
 
 [source, java]
 ----
 net.openhft.chronicle.queue.impl.WireStore.lastAcknowledgedIndexReplicated()
 ----
 
-Queue-Replication is required to create data that can produce network traffic statistics, you can run StartEngineWithDummyData, from the chronicle-queue-enterprise project ( note : chronicle-queue-enterprise is a licensed project, if you wish to purchase a licence please contact sales@chronicle.software) 
+Queue-Replication is required to create data that can produce network traffic, you can run StartEngineWithDummyData, from the chronicle-queue-enterprise project ( Note: chronicle-queue-enterprise is a licensed project, if you wish to purchase a licence please contact sales@chronicle.software) 
 
 [source, console]
 ----
