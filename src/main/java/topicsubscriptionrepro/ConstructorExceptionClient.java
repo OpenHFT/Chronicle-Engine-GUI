@@ -4,7 +4,6 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.VanillaSessionDetails;
 import net.openhft.chronicle.network.connection.ClientConnectionMonitor;
 import net.openhft.chronicle.wire.WireType;
-import net.openhft.chronicle.wire.YamlLogging;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -19,7 +18,7 @@ public class ConstructorExceptionClient {
     private static String _throwInConstructorMapName = "/throw/in/constructor/map";
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        YamlLogging.setAll(true);
+      //  YamlLogging.setAll(true);
         _assetTree = new VanillaAssetTree();
 
         _assetTree.root().forRemoteAccess(
