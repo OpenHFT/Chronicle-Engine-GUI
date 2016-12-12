@@ -63,9 +63,9 @@ A licenced version of this artifact can be obtained from https://vaadin.com/fram
 
 ### Screenshorts
 
-https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/chart.png
+image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/chart.png[]
 
-https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/map.png
+image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/map.png[]
 
 
 
