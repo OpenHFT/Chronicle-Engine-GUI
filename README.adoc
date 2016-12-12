@@ -79,7 +79,7 @@ message acknowledged, see
 net.openhft.chronicle.queue.impl.WireStore.lastAcknowledgedIndexReplicated()
 ----
 
-because Queue-Replication.jar is requried to run queueue repliaction, give this is not inlcuded in chronicle-engine, there is also a copy of StartEngineWithDummyData, that will produce some dummy network trafic
+Queue-Replication is required to create data that can produce network traffic statistics, you can run StartEngineWithDummyData, from the chronicle-queue-enterprise project ( note : chronicle-queue-enterprise is a licensed project, if you wish to purchase a licence please contact sales@chronicle.software) 
 
 [source, console]
 ----
