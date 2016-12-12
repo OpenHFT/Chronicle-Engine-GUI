@@ -79,6 +79,12 @@ message acknowledged, see
 net.openhft.chronicle.queue.impl.WireStore.lastAcknowledgedIndexReplicated()
 ----
 
+because Queue-Replication.jar is requried to run queueue repliaction, give this is not inlcuded in chronicle-engine, there is also a copy of StartEngineWithDummyData, that will produce some dummy network trafic
+
+[source, console]
+----
+Chronicle-Queue-Enterprise/src/test/java/net/openhft/chronicle/engine/StartEngineWithDummyData.java
+----
 
 image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/network-latency.png[]
 
