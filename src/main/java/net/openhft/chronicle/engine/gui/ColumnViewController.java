@@ -137,7 +137,7 @@ class ColumnViewController<K, V> {
                         return String.class;
                     }
                 });
-                gridColumn.setWidth(300);
+                gridColumn.setWidth(250);
 
             } else if (column.type == Long.class || column.type == Integer.class) {
                 gridColumn.setRenderer(new NumberRenderer(removeFormatting));
