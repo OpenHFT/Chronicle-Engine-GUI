@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import static java.util.Collections.singletonList;
 
@@ -25,8 +26,8 @@ public class ChartUI {
         chart.setHeight(100, Sizeable.Unit.PERCENTAGE);
 
         final Configuration conf = chart.getConfiguration();
-        final BarChartProperties barChartProperties = vaadinChart.barChartProperties();
-        conf.setTitle(barChartProperties.title);
+        final ChartProperties chartProperties = vaadinChart.chartProperties();
+        conf.setTitle(chartProperties.title);
 
         String yAxisLabel = null;
 
@@ -43,13 +44,17 @@ public class ChartUI {
 
                 final Object o = row.get(vaadinChart.columnNameField());
 
-                final String columnName = (barChartProperties.xAxisLableRender == null) ?
-                        o.toString() : barChartProperties.xAxisLableRender.apply(o);
+                final Function<Object, String> xAxisLableRender = chartProperties.xAxisLabelRender;
 
-                lables.add(columnName);
+                if (o != null) {
+                    final String columnName = (xAxisLableRender == null) ? o.toString() : xAxisLableRender
+                            .apply(o);
 
-                Number number = (Number) row.get(vaadinChartSeries.field);
-                data.add(new DataSeriesItem(columnName, number));
+                    lables.add(columnName);
+
+                    Number number = (Number) row.get(vaadinChartSeries.field);
+                    data.add(new DataSeriesItem(columnName, number));
+                }
             }
 
             if (!hasXAxis) {
@@ -100,7 +105,7 @@ public class ChartUI {
 
         ColumnViewInternal.SortedFilter sortedFilter = new ColumnViewInternal.SortedFilter();
 
-        long countFromEnd = vaadinChart.barChartProperties().countFromEnd;
+        long countFromEnd = vaadinChart.chartProperties().countFromEnd;
         if (countFromEnd > 0) {
             sortedFilter.countFromEnd = countFromEnd;
         }
@@ -108,9 +113,9 @@ public class ChartUI {
         sortedFilter.marshableOrderBy = singletonList(new ColumnViewInternal
                 .MarshableOrderBy(vaadinChart.columnNameField()));
 
-        BarChartProperties barChartProperties = vaadinChart.barChartProperties();
-        if (barChartProperties.filter != null)
-            sortedFilter.marshableFilters = singletonList(barChartProperties.filter);
+        ChartProperties chartProperties = vaadinChart.chartProperties();
+        if (chartProperties.filter != null)
+            sortedFilter.marshableFilters = singletonList(chartProperties.filter);
         return sortedFilter;
     }
 

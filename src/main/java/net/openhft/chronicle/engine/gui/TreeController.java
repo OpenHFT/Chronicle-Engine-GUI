@@ -155,7 +155,7 @@ class TreeController {
         // we can make an RPC call engine, while inside a TopologicalEvent
         executorService.submit(() -> {
             VaadinChart chart = assetTree.acquireAsset(e.fullName()).acquireView(VaadinChart.class);
-            final String menuLabel = chart.barChartProperties().menuLabel;
+            final String menuLabel = chart.chartProperties().menuLabel;
             tree.setItemCaption(e.fullName() + BAR_CHART_VIEW, menuLabel == null ? "bar-chart" :
                     menuLabel);
         });

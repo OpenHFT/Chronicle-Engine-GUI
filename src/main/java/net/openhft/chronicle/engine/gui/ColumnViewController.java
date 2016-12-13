@@ -4,6 +4,7 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
+import com.vaadin.data.util.converter.Converter;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
@@ -16,6 +17,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.renderers.ImageRenderer;
 import com.vaadin.ui.renderers.NumberRenderer;
+import com.vaadin.ui.renderers.TextRenderer;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.api.column.Column;
 import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
@@ -24,9 +26,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.vaadin.ui.Grid.HeaderCell;
@@ -103,19 +106,41 @@ class ColumnViewController<K, V> {
             gridColumn.setSortable(column.sortable);
             gridColumn.setEditable(!column.isReadOnly());
 
-            if (Number.class.isAssignableFrom(column.type) ||
-                    Boolean.class.isAssignableFrom(column.type)) {
+            if (Number.class.isAssignableFrom(column.type) || Boolean.class.isAssignableFrom
+                    (column.type)) {
                 gridColumn.setWidth(120);
             }
 
-            if (column.type == Long.class || column.type == Integer.class) {
-                gridColumn.setRenderer(new NumberRenderer(removeFormatting));
-            }
+            if (column.type == Long.class && column.name.equalsIgnoreCase("TimeStamp")) {
+                gridColumn.setRenderer(new TextRenderer(), new Converter<String, Long>() {
 
-            if (column.type == Long.class) {
-                DecimalFormat df = new DecimalFormat();
-                df.setGroupingUsed(false);
-                gridColumn.setRenderer(new NumberRenderer(df));
+                    @Override
+                    public Long convertToModel(String value, Class<? extends Long> targetType, Locale locale) throws ConversionException {
+                        final LocalDateTime dt = LocalDateTime.parse(value);
+                        return Date.from(dt.toInstant(ZoneOffset.UTC)).getTime();
+                    }
+
+                    @Override
+                    public String convertToPresentation(Long value, Class<? extends String> targetType, Locale locale) throws ConversionException {
+                        final Instant instant = Instant.ofEpochMilli(value);
+                        final LocalDateTime ldt = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+                        return ldt.toString();
+                    }
+
+                    @Override
+                    public Class<Long> getModelType() {
+                        return Long.class;
+                    }
+
+                    @Override
+                    public Class<String> getPresentationType() {
+                        return String.class;
+                    }
+                });
+                gridColumn.setWidth(300);
+
+            } else if (column.type == Long.class || column.type == Integer.class) {
+                gridColumn.setRenderer(new NumberRenderer(removeFormatting));
             }
         }
 
