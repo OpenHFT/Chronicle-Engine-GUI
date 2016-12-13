@@ -19,8 +19,8 @@ public class ChartUI {
     protected Component getChart(VaadinChart vaadinChart) {
 
         final ColumnViewInternal columnView = vaadinChart.columnView();
-
         final Chart chart;
+
         chart = new Chart(ChartType.COLUMN);
         chart.setHeight(100, Sizeable.Unit.PERCENTAGE);
 
@@ -34,15 +34,18 @@ public class ChartUI {
 
         for (VaadinChartSeries vaadinChartSeries : vaadinChart.series()) {
 
-            List lables = new ArrayList();
-            List<DataSeriesItem> data = new ArrayList<>();
-
-            ClosableIterator<? extends Row> iterator = columnView.iterator(sortedFilter(vaadinChart));
+            final List lables = new ArrayList();
+            final List<DataSeriesItem> data = new ArrayList<>();
+            final ClosableIterator<? extends Row> iterator = columnView.iterator(sortedFilter(vaadinChart));
 
             while (iterator.hasNext()) {
                 Row row = iterator.next();
 
-                String columnName = row.get(vaadinChart.columnNameField()).toString();
+                final Object o = row.get(vaadinChart.columnNameField());
+
+                final String columnName = (barChartProperties.xAxisLableRender == null) ?
+                        o.toString() : barChartProperties.xAxisLableRender.apply(o);
+
                 lables.add(columnName);
 
                 Number number = (Number) row.get(vaadinChartSeries.field);
