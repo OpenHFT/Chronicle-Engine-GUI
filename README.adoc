@@ -25,7 +25,6 @@ endif::[]
 // Aliases:
 :project-name: Asciidoctor PDF
 :project-handle: asciidoctor-pdf
-:images-dir: images
  
 toc::[]
 
@@ -49,10 +48,10 @@ you should be able to just use the defaults. Click on "Login".
 ## Screenshots
 ### Chart
 
-image::chart.png[]
+image::images/chart.png[]
 
 ### Chronicle Map
-image::map.png[]
+image::images/map.png[]
 
 ### Network Latency
 
@@ -72,7 +71,7 @@ Chronicle-Queue-Enterprise/src/test/java/net/openhft/chronicle/engine/StartEngin
 
 This has to be run from the chronicle-queue-enterprise project ( Note: chronicle-queue-enterprise is a licensed project, if you wish to purchase a licence please contact sales@chronicle.software) 
 
-image::network-latency.png[]
+image::images/network-latency.png[]
 
 ###  vaadin-charts
 
