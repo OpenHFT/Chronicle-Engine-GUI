@@ -63,7 +63,7 @@ class ColumnViewController<K, V> {
         removeFormatting.setGroupingUsed(false);
     }
 
-    private void onChange(@NotNull MapViewUI view, @NotNull ObjectSubscription objectSubscription) {
+    private void onChange(@NotNull MapViewUI view,  ObjectSubscription objectSubscription) {
     /*    view.topicSubscriberCount.setValue(Integer.toString(objectSubscription
                 .topicSubscriberCount()));
 
