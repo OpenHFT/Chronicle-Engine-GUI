@@ -43,7 +43,7 @@ mvn compile jetty:run
 
 Then in your web-brower go to http://localhost:8080, if you are running using "StartEngineWithDummyData" ( see above ) 
 
-image::login.png[]
+image::images/login.png[]
 you should be able to just use the defaults. Click on "Login".
 
 ## Screenshots
