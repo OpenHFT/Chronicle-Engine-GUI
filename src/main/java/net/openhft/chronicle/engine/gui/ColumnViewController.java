@@ -63,7 +63,7 @@ class ColumnViewController<K, V> {
         removeFormatting.setGroupingUsed(false);
     }
 
-    private void onChange(@NotNull MapViewUI view,  ObjectSubscription objectSubscription) {
+    private void onChange(@NotNull MapViewUI view, ObjectSubscription objectSubscription) {
     /*    view.topicSubscriberCount.setValue(Integer.toString(objectSubscription
                 .topicSubscriberCount()));
 
@@ -206,6 +206,15 @@ class ColumnViewController<K, V> {
                 filterField.setHeight(24, Sizeable.Unit.PIXELS);
                 filterField.setWidth(100, Sizeable.Unit.PIXELS);
 
+                filterField.addFocusListener(event -> {
+                            System.out.println(event);
+                        }
+                );
+
+                filterField.addContextClickListener(event -> {
+                            System.out.println(event);
+                        }
+                );
 
                 //      filterField.setWidth(100, Sizeable.Unit.PERCENTAGE);
 

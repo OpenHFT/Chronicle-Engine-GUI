@@ -12,7 +12,6 @@ class MainControl {
 
     private final UserControl userUiManager = new UserControl();
 
-
     @NotNull
     Component newComponent(final AssetTree remoteAssetTree) {
         @NotNull MainUI mainUI = new MainUI();
