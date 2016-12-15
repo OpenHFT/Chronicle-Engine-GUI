@@ -52,7 +52,7 @@ you should be able to just use the defaults. Click on "Login".
 image::chart.png[]
 
 ### Chronicle Map
-image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/map.png[]
+image::map.png[]
 
 ### Network Latency
 
