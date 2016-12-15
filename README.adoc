@@ -25,6 +25,7 @@ endif::[]
 // Aliases:
 :project-name: Asciidoctor PDF
 :project-handle: asciidoctor-pdf
+:images-dir: images
  
 toc::[]
 
@@ -42,13 +43,13 @@ mvn compile jetty:run
 
 Then in your web-brower go to http://localhost:8080, if you are running using "StartEngineWithDummyData" ( see above ) 
 
-image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/login.png[]
+image::login.png[]
 you should be able to just use the defaults. Click on "Login".
 
 ## Screenshots
 ### Chart
 
-image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/chart.png[]
+image::chart.png[]
 
 ### Chronicle Map
 image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/map.png[]
@@ -71,7 +72,7 @@ Chronicle-Queue-Enterprise/src/test/java/net/openhft/chronicle/engine/StartEngin
 
 This has to be run from the chronicle-queue-enterprise project ( Note: chronicle-queue-enterprise is a licensed project, if you wish to purchase a licence please contact sales@chronicle.software) 
 
-image::https://raw.githubusercontent.com/OpenHFT/Chronicle-Engine-GUI/master/src/main/resources/readme-images/network-latency.png[]
+image::network-latency.png[]
 
 ###  vaadin-charts
 
