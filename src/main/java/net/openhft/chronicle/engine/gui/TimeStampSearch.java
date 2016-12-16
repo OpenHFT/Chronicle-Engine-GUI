@@ -28,11 +28,30 @@ public class TimeStampSearch {
     public TimeStampSearch(@NotNull TextField filterField, FieldEvents.TextChangeListener textChangeListener) {
         this.filterField = filterField;
         this.textChangeListener = textChangeListener;
-
     }
 
     public boolean hasFocus() {
         return hasFocus;
+    }
+
+    private class MyTextChangeEvent extends FieldEvents.TextChangeEvent {
+
+        private final String newValue;
+
+        public MyTextChangeEvent(String newValue) {
+            super(filterField);
+            this.newValue = newValue;
+        }
+
+        @Override
+        public String getText() {
+            return newValue;
+        }
+
+        @Override
+        public int getCursorPosition() {
+            throw new UnsupportedOperationException("todo");
+        }
     }
 
     public void doSeach() {
@@ -44,29 +63,24 @@ public class TimeStampSearch {
         subWindow.setResizeLazy(true);
         subWindow.setResizable(false);
         subWindow.setSizeUndefined();
-        subWindow.setWidth(850, Sizeable.Unit.PIXELS);
+        subWindow.setWidth(920, Sizeable.Unit.PIXELS);
         subWindow.setDraggable(true);
         hasFocus = true;
 
-        @NotNull final Button search = new Button("Search");
-        search.addClickListener((Button.ClickListener) event1 -> {
+        @NotNull final Button doneButton = new Button("Done");
+        doneButton.addClickListener((Button.ClickListener) event1 -> {
             subWindow.close();
             String newValue = ">" + (System.currentTimeMillis() - (900L * 1000L));
             filterField.setValue(newValue);
+            textChangeListener.textChange(new MyTextChangeEvent(newValue));
+        });
 
-            textChangeListener.textChange(new FieldEvents.TextChangeEvent(filterField) {
-
-                @Override
-                public String getText() {
-                    return newValue;
-                }
-
-                @Override
-                public int getCursorPosition() {
-                    throw new UnsupportedOperationException("todo");
-                }
-            });
-
+        @NotNull final Button clearButton = new Button("Clear");
+        clearButton.addClickListener((Button.ClickListener) event1 -> {
+            subWindow.close();
+            String newValue = "";
+            filterField.setValue(newValue);
+            textChangeListener.textChange(new MyTextChangeEvent(""));
         });
 
 
@@ -84,14 +98,24 @@ public class TimeStampSearch {
         form.addComponent(timeLayout);
         form.setComponentAlignment(timeLayout, Alignment.MIDDLE_LEFT);
 
-        HorizontalLayout searchLayout = new HorizontalLayout();
-        searchLayout.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        searchLayout.addComponent(search);
-        searchLayout.setMargin(true);
-        searchLayout.setComponentAlignment(search, Alignment.MIDDLE_RIGHT);
+        HorizontalLayout buttonParentLayout = new HorizontalLayout();
+        buttonParentLayout.setWidth(100, Sizeable.Unit.PERCENTAGE);
 
-        form.addComponent(searchLayout);
-        form.setComponentAlignment(searchLayout, Alignment.MIDDLE_RIGHT);
+        buttonParentLayout.setMargin(true);
+        HorizontalLayout padding = new HorizontalLayout();
+        padding.setWidth(100, Sizeable.Unit.PERCENTAGE);
+        buttonParentLayout.addComponent(padding);
+        buttonParentLayout.setComponentAlignment(padding, Alignment.MIDDLE_LEFT);
+
+        HorizontalLayout buttons = new HorizontalLayout();
+        buttons.setSpacing(true);
+        buttons.addComponent(clearButton);
+        buttons.addComponent(doneButton);
+        buttonParentLayout.addComponent(buttons);
+        buttonParentLayout.setComponentAlignment(buttons, Alignment.MIDDLE_RIGHT);
+
+        form.addComponent(buttonParentLayout);
+        form.setComponentAlignment(buttonParentLayout, Alignment.MIDDLE_RIGHT);
 
         subWindow.setContent(form);
 
@@ -116,7 +140,7 @@ public class TimeStampSearch {
         ComboBox day = dayComboBox();
         ComboBox month = monthComboBox();
         ComboBox year = yearCombBox();
-
+        dayLayout.setSpacing(true);
         dayLayout.addComponent(day);
         dayLayout.addComponent(month);
         dayLayout.addComponent(year);
@@ -128,7 +152,7 @@ public class TimeStampSearch {
         ComboBox min = minCombBox();
         ComboBox seconds = secCombBox();
         ComboBox milliseconds = millisecondsCombBox();
-
+        timelayout.setSpacing(true);
         timelayout.addComponent(hour);
         timelayout.addComponent(min);
         timelayout.addComponent(seconds);
