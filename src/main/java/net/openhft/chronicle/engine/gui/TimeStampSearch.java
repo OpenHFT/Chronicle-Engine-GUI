@@ -1,15 +1,19 @@
 package net.openhft.chronicle.engine.gui;
 
+import com.vaadin.data.Property;
 import com.vaadin.event.FieldEvents;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DateFormatSymbols;
-import java.util.ArrayList;
+import java.time.DateTimeException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static java.util.Arrays.asList;
 
@@ -18,6 +22,9 @@ import static java.util.Arrays.asList;
  */
 public class TimeStampSearch {
 
+    private final static String[] MONTHS_ARRAY = Arrays.copyOf(new DateFormatSymbols().getMonths
+            (), 12);
+    public static final List<String> MONTHS = asList(MONTHS_ARRAY);
 
     public static final int COMBO_BOX_WIDTH = 80;
     private final TextField filterField;
@@ -54,7 +61,7 @@ public class TimeStampSearch {
         }
     }
 
-    public void doSeach() {
+    public void doSearch() {
 
         // Create a sub-window and set the content
         @NotNull Window subWindow = new Window("Search - Date Time Range");
@@ -67,36 +74,41 @@ public class TimeStampSearch {
         subWindow.setDraggable(true);
         hasFocus = true;
 
-        @NotNull final Button doneButton = new Button("Done");
-        doneButton.addClickListener((Button.ClickListener) event1 -> {
-            subWindow.close();
-            String newValue = ">" + (System.currentTimeMillis() - (900L * 1000L));
-            filterField.setValue(newValue);
-            textChangeListener.textChange(new MyTextChangeEvent(newValue));
-        });
-
-        @NotNull final Button clearButton = new Button("Clear");
-        clearButton.addClickListener((Button.ClickListener) event1 -> {
-            subWindow.close();
-            String newValue = "";
-            filterField.setValue(newValue);
-            textChangeListener.textChange(new MyTextChangeEvent(""));
-        });
-
 
         @NotNull FormLayout form = new FormLayout();
         form.setMargin(false);
 
-        Layout dateLayout = dateLayout();
-        form.addComponent(new Label("From (inclusive):"));
-        form.addComponent(dateLayout);
-        form.setComponentAlignment(dateLayout, Alignment.MIDDLE_LEFT);
+        AbstractOrderedLayout fromLayout = new HorizontalLayout();
 
+        Label fromMillisLabel = new Label("fromMillisLabel");
+        Supplier<Long> supplyFromMillisUtc = addComboBoxes(fromLayout, s -> fromMillisLabel
+                .setValue(s.toString() + " milliseconds UTC"));
 
-        Layout timeLayout = dateLayout();
-        form.addComponent(new Label("To (exclusive):"));
-        form.addComponent(timeLayout);
-        form.setComponentAlignment(timeLayout, Alignment.MIDDLE_LEFT);
+        {
+            HorizontalLayout components0 = new HorizontalLayout();
+            components0.addComponent(new Label("From (inclusive):"));
+            components0.addComponent(fromMillisLabel);
+            form.addComponent(components0);
+        }
+
+        form.addComponent(fromLayout);
+        form.setComponentAlignment(fromLayout, Alignment.MIDDLE_LEFT);
+
+        AbstractOrderedLayout toLayout = new HorizontalLayout();
+        Label toMillisLabel = new Label("toMillisLabel");
+        Supplier<Long> supplyToMillisUtc = addComboBoxes(toLayout, s -> toMillisLabel.setValue
+                (s.toString() + " milliseconds UTC"));
+        {
+            HorizontalLayout components0 = new HorizontalLayout();
+            components0.addComponent(new Label("To (exclusive):"));
+            components0.addComponent(toMillisLabel);
+            form.addComponent(components0);
+        }
+
+        form.addComponent(toLayout);
+        form.setComponentAlignment(toLayout, Alignment.MIDDLE_LEFT);
+
+        // buttons layout ---------------
 
         HorizontalLayout buttonParentLayout = new HorizontalLayout();
         buttonParentLayout.setWidth(100, Sizeable.Unit.PERCENTAGE);
@@ -109,6 +121,32 @@ public class TimeStampSearch {
 
         HorizontalLayout buttons = new HorizontalLayout();
         buttons.setSpacing(true);
+
+        //   ---------------
+
+
+        @NotNull final Button doneButton = new Button("Done");
+        doneButton.addClickListener((Button.ClickListener) event1 -> {
+            subWindow.close();
+
+            String newValue = ">" + (System.currentTimeMillis() - (900L * 1000L));
+
+            long fromMillis = supplyFromMillisUtc.get();
+            long toMillis = supplyToMillisUtc.get();
+
+            filterField.setValue(">" + fromMillis + ",<" + toMillis);
+            textChangeListener.textChange(new MyTextChangeEvent(newValue));
+        });
+
+        @NotNull final Button clearButton = new Button("Clear");
+        clearButton.addClickListener((Button.ClickListener) event1 -> {
+            subWindow.close();
+            String newValue = "";
+            filterField.setValue(newValue);
+            textChangeListener.textChange(new MyTextChangeEvent(""));
+        });
+
+
         buttons.addComponent(clearButton);
         buttons.addComponent(doneButton);
         buttonParentLayout.addComponent(buttons);
@@ -128,18 +166,18 @@ public class TimeStampSearch {
     }
 
 
-    public Layout dateLayout() {
-
-
-        AbstractOrderedLayout result = new HorizontalLayout();
+    private Supplier<Long> addComboBoxes(final AbstractOrderedLayout result, Consumer<Long> onChange) {
 
         AbstractOrderedLayout dayLayout = new HorizontalLayout();
         dayLayout.setMargin(true);
 
-
         ComboBox day = dayComboBox();
+        day.setNullSelectionAllowed(false);
         ComboBox month = monthComboBox();
+        month.setNullSelectionAllowed(false);
         ComboBox year = yearCombBox();
+        year.setNullSelectionAllowed(false);
+
         dayLayout.setSpacing(true);
         dayLayout.addComponent(day);
         dayLayout.addComponent(month);
@@ -147,34 +185,94 @@ public class TimeStampSearch {
         result.addComponent(dayLayout);
         result.setComponentAlignment(dayLayout, Alignment.MIDDLE_LEFT);
 
-        AbstractOrderedLayout timelayout = new HorizontalLayout();
+        AbstractOrderedLayout timeLayout = new HorizontalLayout();
         ComboBox hour = hourCombBox();
+        hour.setNullSelectionAllowed(false);
         ComboBox min = minCombBox();
+        min.setNullSelectionAllowed(false);
+
         ComboBox seconds = secCombBox();
+        seconds.setNullSelectionAllowed(false);
+
         ComboBox milliseconds = millisecondsCombBox();
-        timelayout.setSpacing(true);
-        timelayout.addComponent(hour);
-        timelayout.addComponent(min);
-        timelayout.addComponent(seconds);
-        timelayout.addComponent(milliseconds);
-        result.addComponent(timelayout);
-        result.setComponentAlignment(timelayout, Alignment.MIDDLE_RIGHT);
-        return result;
+        milliseconds.setNullSelectionAllowed(false);
+
+        timeLayout.setSpacing(true);
+        timeLayout.addComponent(hour);
+        timeLayout.addComponent(min);
+        timeLayout.addComponent(seconds);
+        timeLayout.addComponent(milliseconds);
+        result.addComponent(timeLayout);
+        result.setComponentAlignment(timeLayout, Alignment.MIDDLE_RIGHT);
+
+        final Supplier<Long> utcMillisSupplier = () -> {
+            for (int i = 0; i < 5; i++) {
+
+                int year0 = Integer.valueOf(year.getValue().toString());
+
+                int month0 = monthSelected(month);
+                int dayOfMonth0 = Integer.valueOf(day.getValue().toString());
+                int hour0 = Integer.valueOf(hour.getValue().toString());
+                int minute0 = Integer.valueOf(min.getValue().toString());
+                int second0 = Integer.valueOf(seconds.getValue().toString());
+                int milliseconds0 = Integer.valueOf(milliseconds.getValue().toString());
+                int nanoOfSecond0 = milliseconds0 * 1_000_000;
+
+                try {
+                    ZonedDateTime time = ZonedDateTime.of(year0, month0, dayOfMonth0, hour0, minute0,
+                            second0,
+                            nanoOfSecond0, ZoneOffset.UTC);
+                    return (time.toEpochSecond() * 1000) + milliseconds0;
+                } catch (DateTimeException e) {
+                    day.setValue(Integer.toString(dayOfMonth0 - 1));
+                }
+
+            }
+            throw new IllegalStateException();
+        };
+
+        Property.ValueChangeListener listener = new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                onChange.accept(utcMillisSupplier.get());
+            }
+
+        };
+
+
+        day.addValueChangeListener(listener);
+        month.addValueChangeListener(listener);
+        year.addValueChangeListener(listener);
+        hour.addValueChangeListener(listener);
+        min.addValueChangeListener(listener);
+        seconds.addValueChangeListener(listener);
+        milliseconds.addValueChangeListener(listener);
+
+        return utcMillisSupplier;
+
+    }
+
+    private int monthSelected(ComboBox month) {
+        int i = MONTHS.indexOf(month.getValue());
+        if (i == -1)
+            i = 0;
+        return i + 1;
     }
 
     @NotNull
     private ComboBox monthComboBox() {
-        String[] months = new DateFormatSymbols().getMonths();
-        ComboBox month = new ComboBox("month", asList(months));
+
+        ComboBox month = new ComboBox("month", MONTHS);
 
 
         month.setInvalidAllowed(false);
         month.setNullSelectionAllowed(false);
-        month.addItems(months);
+        month.addItems(MONTHS);
         month.setWidth(150, Sizeable.Unit.PIXELS);
         Calendar instance = Calendar.getInstance();
         instance.setTime(new Date());
-        month.setValue(months[instance.get(Calendar.MONTH)]);
+        month.setValue(MONTHS_ARRAY[instance.get(Calendar.MONTH)]);
+
         return month;
     }
 

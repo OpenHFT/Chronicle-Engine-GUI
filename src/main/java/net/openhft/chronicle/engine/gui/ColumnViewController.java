@@ -111,7 +111,7 @@ class ColumnViewController<K, V> {
         public void focus(FieldEvents.FocusEvent event) {
 
             if (!timeStampSearch.hasFocus()) {
-                timeStampSearch.doSeach();
+                timeStampSearch.doSearch();
             } else {
                 timeStampSearch.hasFocus(false);
             }
