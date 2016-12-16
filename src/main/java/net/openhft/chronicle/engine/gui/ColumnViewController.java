@@ -266,8 +266,7 @@ class ColumnViewController<K, V> {
                 filterField.addTextChangeListener(listener1);
                 filterField.setTextChangeEventMode(EAGER);
 
-
-                if ("timestamp".equalsIgnoreCase(pid.toString())) {
+                if (pid.toString().toUpperCase().endsWith("TIMESTAMP")) {
                     FocusListener listener = new FocusListener(filterField, listener1);
                     filterField.addFocusListener(listener);
                     filterField.setWidth(200, Sizeable.Unit.PIXELS);

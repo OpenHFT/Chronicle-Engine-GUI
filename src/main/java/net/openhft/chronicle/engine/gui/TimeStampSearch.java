@@ -87,7 +87,11 @@ public class TimeStampSearch {
         {
             HorizontalLayout components0 = new HorizontalLayout();
             components0.addComponent(new Label("From (inclusive):"));
+            HorizontalLayout c = new HorizontalLayout();
+            c.setWidth(100, Sizeable.Unit.PERCENTAGE);
+            components0.addComponent(c);
             components0.addComponent(fromMillisLabel);
+            components0.setWidth(100, Sizeable.Unit.PERCENTAGE);
             form.addComponent(components0);
         }
 
@@ -101,7 +105,11 @@ public class TimeStampSearch {
         {
             HorizontalLayout components0 = new HorizontalLayout();
             components0.addComponent(new Label("To (exclusive):"));
+            HorizontalLayout c = new HorizontalLayout();
+            c.setWidth(100, Sizeable.Unit.PERCENTAGE);
+            components0.addComponent(c);
             components0.addComponent(toMillisLabel);
+            components0.setWidth(100, Sizeable.Unit.PERCENTAGE);
             form.addComponent(components0);
         }
 
@@ -238,7 +246,6 @@ public class TimeStampSearch {
             }
 
         };
-
 
         day.addValueChangeListener(listener);
         month.addValueChangeListener(listener);
