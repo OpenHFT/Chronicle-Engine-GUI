@@ -8,5 +8,8 @@
 .mytheme {
   @include addons;
   @include mytheme;
+}
 
+.layout-with-border {
+  border: 1px solid black;
 }

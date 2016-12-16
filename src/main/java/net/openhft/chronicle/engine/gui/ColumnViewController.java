@@ -8,6 +8,7 @@ import com.vaadin.data.util.converter.Converter;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
+import com.vaadin.event.FieldEvents;
 import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.ThemeResource;
@@ -23,6 +24,7 @@ import net.openhft.chronicle.engine.api.column.Column;
 import net.openhft.chronicle.engine.api.column.ColumnViewInternal;
 import net.openhft.chronicle.engine.map.ObjectSubscription;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -32,6 +34,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.vaadin.ui.AbstractTextField.TextChangeEventMode.EAGER;
 import static com.vaadin.ui.Grid.HeaderCell;
 import static com.vaadin.ui.Grid.HeaderRow;
 
@@ -44,14 +47,13 @@ class ColumnViewController<K, V> {
     private final ColumnViewInternal columnView;
     @NotNull
     private final MapViewUI view;
-    private final String path;
-    private final DecimalFormat removeFormatting;
 
+    private final DecimalFormat removeFormatting;
 
     ColumnViewController(@NotNull ColumnViewInternal columnView, @NotNull MapViewUI view, String path) {
         this.columnView = columnView;
         this.view = view;
-        this.path = path;
+
 
         view.path.setValue(path);
         view.recordCount.setValue(Long.toString(columnView.rowCount(new ColumnViewInternal.SortedFilter())));
@@ -61,6 +63,59 @@ class ColumnViewController<K, V> {
 
         removeFormatting = new DecimalFormat();
         removeFormatting.setGroupingUsed(false);
+    }
+
+    class TextChangeListener implements FieldEvents.TextChangeListener {
+
+        private Container.Filterable filterable;
+        private Object pid;
+
+        public TextChangeListener(Container.Filterable filterable, Object pid, final TextField filterField) {
+            this.filterable = filterable;
+            this.pid = pid;
+        }
+
+        @Override
+        public void textChange(FieldEvents.TextChangeEvent change) {
+            // Can't modify filters so need to replace
+            // data.removeContainerFilters(pid);
+
+            @NotNull final Collection<SimpleStringFilter> containerFilters = (Collection)
+                    filterable.getContainerFilters();
+
+            Optional<SimpleStringFilter> first = containerFilters.stream().filter(x -> x.getPropertyId().equals(pid)).findFirst();
+            if (first.isPresent())
+                filterable.removeContainerFilter(first.get());
+
+            // (Re)create the filter if necessary
+            if (!change.getText().isEmpty()) {
+                filterable.addContainerFilter(
+                        new SimpleStringFilter(pid, change.getText(), true, false));
+
+            }
+        }
+    }
+
+    class FocusListener implements FieldEvents.FocusListener {
+
+
+        @Nullable
+        private final TimeStampSearch timeStampSearch;
+
+        public FocusListener(final TextField filterField,
+                             FieldEvents.TextChangeListener textChangeListener) {
+            timeStampSearch = new TimeStampSearch(filterField, textChangeListener);
+        }
+
+        @Override
+        public void focus(FieldEvents.FocusEvent event) {
+
+            if (!timeStampSearch.hasFocus()) {
+                timeStampSearch.doSeach();
+            } else {
+                timeStampSearch.hasFocus(false);
+            }
+        }
     }
 
     private void onChange(@NotNull MapViewUI view, ObjectSubscription objectSubscription) {
@@ -204,37 +259,20 @@ class ColumnViewController<K, V> {
                 // Have an input field to use for filter
                 @NotNull TextField filterField = new TextField();
                 filterField.setHeight(24, Sizeable.Unit.PIXELS);
-                filterField.setWidth(100, Sizeable.Unit.PIXELS);
 
-                filterField.addFocusListener(event -> {
-                            System.out.println(event);
-                        }
-                );
-
-                filterField.addContextClickListener(event -> {
-                            System.out.println(event);
-                        }
-                );
-
-                //      filterField.setWidth(100, Sizeable.Unit.PERCENTAGE);
 
                 // Update filter When the filter input is changed
-                filterField.addTextChangeListener(change -> {
-                    // Can't modify filters so need to replace
-                    // data.removeContainerFilters(pid);
+                final TextChangeListener listener1 = new TextChangeListener(filterable, pid, filterField);
+                filterField.addTextChangeListener(listener1);
+                filterField.setTextChangeEventMode(EAGER);
 
-                    @NotNull final Collection<SimpleStringFilter> containerFilters = (Collection)
-                            filterable.getContainerFilters();
 
-                    Optional<SimpleStringFilter> first = containerFilters.stream().filter(x -> x.getPropertyId().equals(pid)).findFirst();
-                    if (first.isPresent())
-                        filterable.removeContainerFilter(first.get());
-
-                    // (Re)create the filter if necessary
-                    if (!change.getText().isEmpty())
-                        filterable.addContainerFilter(
-                                new SimpleStringFilter(pid, change.getText(), true, false));
-                });
+                if ("timestamp".equalsIgnoreCase(pid.toString())) {
+                    FocusListener listener = new FocusListener(filterField, listener1);
+                    filterField.addFocusListener(listener);
+                    filterField.setWidth(200, Sizeable.Unit.PIXELS);
+                } else
+                    filterField.setWidth(100, Sizeable.Unit.PIXELS);
 
                 cell.setComponent(filterField);
             }
