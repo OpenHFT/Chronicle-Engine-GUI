@@ -1,6 +1,5 @@
 package net.openhft.chronicle.engine.gui;
 
-import com.vaadin.data.Property;
 import com.vaadin.event.FieldEvents;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.*;
@@ -15,12 +14,13 @@ import java.util.Calendar;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static com.vaadin.data.Property.ValueChangeListener;
 import static java.util.Arrays.asList;
 
 /**
  * @author Rob Austin.
  */
-public class TimeStampSearch {
+class TimeStampSearch {
 
     private final static String[] MONTHS_ARRAY = Arrays.copyOf(new DateFormatSymbols().getMonths
             (), 12);
@@ -37,7 +37,7 @@ public class TimeStampSearch {
         this.textChangeListener = textChangeListener;
     }
 
-    public boolean hasFocus() {
+    boolean hasFocus() {
         return hasFocus;
     }
 
@@ -45,7 +45,7 @@ public class TimeStampSearch {
 
         private final String newValue;
 
-        public MyTextChangeEvent(String newValue) {
+        MyTextChangeEvent(String newValue) {
             super(filterField);
             this.newValue = newValue;
         }
@@ -61,7 +61,33 @@ public class TimeStampSearch {
         }
     }
 
-    public void doSearch() {
+    void doSearch() {
+
+        final String value = filterField.getValue().trim();
+
+        long lower = System.currentTimeMillis();
+        long upper = System.currentTimeMillis();
+
+        if ((value.startsWith("[") || value.startsWith("("))
+                && (value.endsWith("]") || value.endsWith(")"))) {
+
+            boolean startExclusive = value.startsWith("(");
+            boolean endInclusive = value.startsWith("]");
+
+            String substring = value.substring(1, value.length() - 1);
+            String[] split = substring.split("\\,");
+
+            if (split.length == 2) {
+                lower = Long.parseLong(split[0].trim());
+                upper = Long.parseLong(split[1].trim());
+            }
+
+            if (startExclusive) lower++;
+
+            if (endInclusive) upper++;
+
+        }
+
 
         // Create a sub-window and set the content
         @NotNull Window subWindow = new Window("Search - Date Time Range");
@@ -81,12 +107,13 @@ public class TimeStampSearch {
         AbstractOrderedLayout fromLayout = new HorizontalLayout();
 
         Label fromMillisLabel = new Label("fromMillisLabel");
+        fromMillisLabel.setValue("" + lower + " milliseconds UTC");
         Supplier<Long> supplyFromMillisUtc = addComboBoxes(fromLayout, s -> fromMillisLabel
-                .setValue(s.toString() + " milliseconds UTC"));
+                .setValue(s.toString() + " milliseconds UTC"), lower);
 
         {
             HorizontalLayout components0 = new HorizontalLayout();
-            components0.addComponent(new Label("From (inclusive):"));
+            components0.addComponent(new Label("From: UTC time [inclusive]:"));
             HorizontalLayout c = new HorizontalLayout();
             c.setWidth(100, Sizeable.Unit.PERCENTAGE);
             components0.addComponent(c);
@@ -100,11 +127,12 @@ public class TimeStampSearch {
 
         AbstractOrderedLayout toLayout = new HorizontalLayout();
         Label toMillisLabel = new Label("toMillisLabel");
+        toMillisLabel.setValue("" + upper + " milliseconds UTC");
         Supplier<Long> supplyToMillisUtc = addComboBoxes(toLayout, s -> toMillisLabel.setValue
-                (s.toString() + " milliseconds UTC"));
+                (s.toString() + " milliseconds UTC"), upper);
         {
             HorizontalLayout components0 = new HorizontalLayout();
-            components0.addComponent(new Label("To (exclusive):"));
+            components0.addComponent(new Label("To: UTC time (exclusive):"));
             HorizontalLayout c = new HorizontalLayout();
             c.setWidth(100, Sizeable.Unit.PERCENTAGE);
             components0.addComponent(c);
@@ -142,7 +170,7 @@ public class TimeStampSearch {
             long fromMillis = supplyFromMillisUtc.get();
             long toMillis = supplyToMillisUtc.get();
 
-            filterField.setValue(">" + fromMillis + ",<" + toMillis);
+            filterField.setValue("[" + fromMillis + "," + toMillis + ")");
             textChangeListener.textChange(new MyTextChangeEvent(newValue));
         });
 
@@ -165,7 +193,6 @@ public class TimeStampSearch {
 
         subWindow.setContent(form);
 
-
         // Center it in the browser window
         subWindow.center();
 
@@ -174,16 +201,17 @@ public class TimeStampSearch {
     }
 
 
-    private Supplier<Long> addComboBoxes(final AbstractOrderedLayout result, Consumer<Long> onChange) {
+    private Supplier<Long> addComboBoxes(final AbstractOrderedLayout result, Consumer<Long>
+            onChange, long milliSecondsUtc) {
 
-        AbstractOrderedLayout dayLayout = new HorizontalLayout();
+        final AbstractOrderedLayout dayLayout = new HorizontalLayout();
         dayLayout.setMargin(true);
 
-        ComboBox day = dayComboBox();
+        final ComboBox day = dayComboBox(milliSecondsUtc);
         day.setNullSelectionAllowed(false);
-        ComboBox month = monthComboBox();
+        ComboBox month = monthComboBox(milliSecondsUtc);
         month.setNullSelectionAllowed(false);
-        ComboBox year = yearCombBox();
+        ComboBox year = yearCombBox(milliSecondsUtc);
         year.setNullSelectionAllowed(false);
 
         dayLayout.setSpacing(true);
@@ -193,16 +221,16 @@ public class TimeStampSearch {
         result.addComponent(dayLayout);
         result.setComponentAlignment(dayLayout, Alignment.MIDDLE_LEFT);
 
-        AbstractOrderedLayout timeLayout = new HorizontalLayout();
-        ComboBox hour = hourCombBox();
+        final AbstractOrderedLayout timeLayout = new HorizontalLayout();
+        final ComboBox hour = hourCombBox(milliSecondsUtc);
         hour.setNullSelectionAllowed(false);
-        ComboBox min = minCombBox();
+        ComboBox min = minCombBox(milliSecondsUtc);
         min.setNullSelectionAllowed(false);
 
-        ComboBox seconds = secCombBox();
+        final ComboBox seconds = secCombBox(milliSecondsUtc);
         seconds.setNullSelectionAllowed(false);
 
-        ComboBox milliseconds = millisecondsCombBox();
+        final ComboBox milliseconds = millisecondsCombBox(milliSecondsUtc);
         milliseconds.setNullSelectionAllowed(false);
 
         timeLayout.setSpacing(true);
@@ -227,8 +255,8 @@ public class TimeStampSearch {
                 int nanoOfSecond0 = milliseconds0 * 1_000_000;
 
                 try {
-                    ZonedDateTime time = ZonedDateTime.of(year0, month0, dayOfMonth0, hour0, minute0,
-                            second0,
+                    final ZonedDateTime time = ZonedDateTime.of(year0,
+                            month0, dayOfMonth0, hour0, minute0, second0,
                             nanoOfSecond0, ZoneOffset.UTC);
                     return (time.toEpochSecond() * 1000) + milliseconds0;
                 } catch (DateTimeException e) {
@@ -239,14 +267,7 @@ public class TimeStampSearch {
             throw new IllegalStateException();
         };
 
-        Property.ValueChangeListener listener = new Property.ValueChangeListener() {
-            @Override
-            public void valueChange(Property.ValueChangeEvent event) {
-                onChange.accept(utcMillisSupplier.get());
-            }
-
-        };
-
+        final ValueChangeListener listener = event -> onChange.accept(utcMillisSupplier.get());
         day.addValueChangeListener(listener);
         month.addValueChangeListener(listener);
         year.addValueChangeListener(listener);
@@ -267,24 +288,23 @@ public class TimeStampSearch {
     }
 
     @NotNull
-    private ComboBox monthComboBox() {
+    private ComboBox monthComboBox(long utcTime) {
 
-        ComboBox month = new ComboBox("month", MONTHS);
-
+        final ComboBox month = new ComboBox("month", MONTHS);
 
         month.setInvalidAllowed(false);
         month.setNullSelectionAllowed(false);
         month.addItems(MONTHS);
         month.setWidth(150, Sizeable.Unit.PIXELS);
         Calendar instance = Calendar.getInstance();
-        instance.setTime(new Date());
+        instance.setTime(new Date(utcTime));
         month.setValue(MONTHS_ARRAY[instance.get(Calendar.MONTH)]);
 
         return month;
     }
 
     @NotNull
-    private ComboBox dayComboBox() {
+    private ComboBox dayComboBox(long utcTime) {
 
         ComboBox result = new ComboBox("day");
 
@@ -299,14 +319,14 @@ public class TimeStampSearch {
         result.addItems(days);
 
         final Calendar instance = Calendar.getInstance();
-        instance.setTime(new Date());
+        instance.setTime(new Date(utcTime));
         result.setValue(Integer.toString(instance.get(Calendar.DAY_OF_MONTH)));
         return result;
     }
 
 
     @NotNull
-    private ComboBox yearCombBox() {
+    private ComboBox yearCombBox(long utcTime) {
 
         ComboBox result = new ComboBox("year");
 
@@ -321,14 +341,14 @@ public class TimeStampSearch {
         result.addItems(years);
 
         final Calendar instance = Calendar.getInstance();
-        instance.setTime(new Date());
+        instance.setTime(new Date(utcTime));
         result.setValue(Integer.toString(instance.get(Calendar.YEAR)));
         return result;
     }
 
 
     @NotNull
-    private ComboBox hourCombBox() {
+    private ComboBox hourCombBox(long utcTime) {
 
         ComboBox result = new ComboBox("hour");
 
@@ -343,13 +363,13 @@ public class TimeStampSearch {
         result.addItems(hour);
 
         final Calendar instance = Calendar.getInstance();
-        instance.setTime(new Date());
+        instance.setTime(new Date(utcTime));
         result.setValue(Integer.toString(instance.get(Calendar.HOUR_OF_DAY)));
         return result;
     }
 
     @NotNull
-    private ComboBox minCombBox() {
+    private ComboBox minCombBox(long utcTime) {
 
         ComboBox result = new ComboBox("min");
 
@@ -364,13 +384,13 @@ public class TimeStampSearch {
         result.addItems(min);
 
         final Calendar instance = Calendar.getInstance();
-        instance.setTime(new Date());
+        instance.setTime(new Date(utcTime));
         result.setValue(Integer.toString(instance.get(Calendar.MINUTE)));
         return result;
     }
 
     @NotNull
-    private ComboBox secCombBox() {
+    private ComboBox secCombBox(long utcTime) {
 
         ComboBox result = new ComboBox("second");
 
@@ -385,13 +405,13 @@ public class TimeStampSearch {
         result.addItems(min);
 
         final Calendar instance = Calendar.getInstance();
-        instance.setTime(new Date());
+        instance.setTime(new Date(utcTime));
         result.setValue(Integer.toString(instance.get(Calendar.SECOND)));
         return result;
     }
 
     @NotNull
-    private ComboBox millisecondsCombBox() {
+    private ComboBox millisecondsCombBox(long utcTime) {
 
         ComboBox result = new ComboBox("milli-second");
 
@@ -406,10 +426,13 @@ public class TimeStampSearch {
         result.addItems(min);
 
         final Calendar instance = Calendar.getInstance();
-        instance.setTime(new Date());
-        result.setValue("0");
+        instance.setTime(new Date(utcTime));
+        long l = utcTime % 1000L;
+
+        result.setValue("" + l);
         return result;
     }
+
 
     public void hasFocus(boolean hasFocus) {
         this.hasFocus = hasFocus;
