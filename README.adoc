@@ -73,11 +73,49 @@ This has to be run from the chronicle-queue-enterprise project ( Note: chronicle
 
 image::images/network-latency.png[]
 
+
+###  range searching
+
+Below are some examples for range searching
+
+
+image::images/EQ-value.png[]
+a short hand for the above is  :
+
+image::images/exact-value.png[]
+
+if you want to find all values greater than say " 107.9", you can write this
+
+image::images/gt_value.png[]
+
+if you want to also filter it to only show values greater than "107.9"  and less than "110"
+
+image::images/range.png[]
+
+another way to write the same thing is :
+
+image::images/range-brackets.png[]
+
+we also support this inclusive "[" and exclusive "(" formats like below )
+
+image::images/inclusive-exclusive.png[]
+
+The time sample columns that feature a Long ( which is time in UTC milliseconds since epoch ),
+can be edited by clicking of the filter box, the following search dialog will appear :
+
+image::images/timestamp-range-dialog.png[]
+
+once you click done you will see the  UTC milliseconds range that this generates, for example
+
+image::images/time-stamp-range.png[]
+
 ###  vaadin-charts
 
 WARNING: this project requires the following artifact
 
 A licenced version of this artifact can be obtained from https://vaadin.com/framework
+
+
 
 [source, console]
 ----
