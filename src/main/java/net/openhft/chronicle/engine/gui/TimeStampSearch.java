@@ -165,12 +165,11 @@ class TimeStampSearch {
         doneButton.addClickListener((Button.ClickListener) event1 -> {
             subWindow.close();
 
-            String newValue = ">" + (System.currentTimeMillis() - (900L * 1000L));
-
             long fromMillis = supplyFromMillisUtc.get();
             long toMillis = supplyToMillisUtc.get();
 
-            filterField.setValue("[" + fromMillis + "," + toMillis + ")");
+            String newValue = "[" + fromMillis + "," + toMillis + ")";
+            filterField.setValue(newValue);
             textChangeListener.textChange(new MyTextChangeEvent(newValue));
         });
 
