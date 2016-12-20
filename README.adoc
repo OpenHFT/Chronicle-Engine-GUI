@@ -74,7 +74,7 @@ This has to be run from the chronicle-queue-enterprise project ( Note: chronicle
 image::images/network-latency.png[]
 
 
-###  range searching
+###  Data Filtering
 
 Below are some examples for range searching
 
@@ -108,6 +108,18 @@ image::images/timestamp-range-dialog.png[]
 once you click done you will see the  UTC milliseconds range that this generates, for example
 
 image::images/time-stamp-range.png[]
+
+###  Data Ordering
+
+If you click on the title this will order the data in your chart, click the title for second time
+ will rerver the order of the data
+
+image::images/simple-ordering.png[]
+
+further more if you click on another title and hold down the SIFT key, you get set up ordering on
+ both titles at the same time, you can repeat this process across as many columns as you have
+
+image::images/secondary-orering.png[]
 
 ###  vaadin-charts
 
