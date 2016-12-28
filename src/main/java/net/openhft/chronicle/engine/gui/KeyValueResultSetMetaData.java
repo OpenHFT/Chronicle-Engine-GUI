@@ -12,6 +12,7 @@ import java.util.List;
  */
 class KeyValueResultSetMetaData implements ResultSetMetaData {
 
+    @NotNull
     private final List<Column> columns;
 
     KeyValueResultSetMetaData(@NotNull List<Column> columns) {

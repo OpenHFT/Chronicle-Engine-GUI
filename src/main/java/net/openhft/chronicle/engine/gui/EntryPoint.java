@@ -58,12 +58,12 @@ public class EntryPoint extends UI {
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
             removeAllComponents();
-            VanillaAssetTree tree = (VanillaAssetTree) getSession().getAttribute("tree");
+            @NotNull VanillaAssetTree tree = (VanillaAssetTree) getSession().getAttribute("tree");
             if (tree == null) {
                 navigator.navigateTo("");
                 return;
             }
-            Component c = new MainControl().newComponent(tree);
+            @NotNull Component c = new MainControl().newComponent(tree);
             addComponent(c);
             setSizeFull();
 
@@ -90,10 +90,11 @@ public class EntryPoint extends UI {
         return new VanillaAssetTree().forRemoteAccess(connectionDetails);
     }
 
+    @NotNull
     static VanillaAssetTree remote(@NotNull final String connectionDetails,
                                    @NotNull VanillaSessionDetails sessionDetails,
                                    @NotNull ClientConnectionMonitor cm) {
-        final VanillaAssetTree tree = new VanillaAssetTree();
+        @NotNull final VanillaAssetTree tree = new VanillaAssetTree();
         tree.root().forRemoteAccess(new String[]{connectionDetails}, BINARY, sessionDetails, cm);
         return tree;
     }

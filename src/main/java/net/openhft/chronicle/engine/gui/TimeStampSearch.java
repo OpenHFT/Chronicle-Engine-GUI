@@ -27,6 +27,7 @@ class TimeStampSearch {
     public static final List<String> MONTHS = asList(MONTHS_ARRAY);
 
     public static final int COMBO_BOX_WIDTH = 80;
+    @NotNull
     private final TextField filterField;
     private final FieldEvents.TextChangeListener textChangeListener;
 
@@ -63,7 +64,7 @@ class TimeStampSearch {
 
     void doSearch() {
 
-        final String value = filterField.getValue().trim();
+        @NotNull final String value = filterField.getValue().trim();
 
         long lower = System.currentTimeMillis();
         long upper = System.currentTimeMillis();
@@ -74,8 +75,8 @@ class TimeStampSearch {
             boolean startExclusive = value.startsWith("(");
             boolean endInclusive = value.startsWith("]");
 
-            String substring = value.substring(1, value.length() - 1);
-            String[] split = substring.split("\\,");
+            @NotNull String substring = value.substring(1, value.length() - 1);
+            @NotNull String[] split = substring.split("\\,");
 
             if (split.length == 2) {
                 lower = Long.parseLong(split[0].trim());
@@ -104,17 +105,17 @@ class TimeStampSearch {
         @NotNull FormLayout form = new FormLayout();
         form.setMargin(false);
 
-        AbstractOrderedLayout fromLayout = new HorizontalLayout();
+        @NotNull AbstractOrderedLayout fromLayout = new HorizontalLayout();
 
-        Label fromMillisLabel = new Label("fromMillisLabel");
+        @NotNull Label fromMillisLabel = new Label("fromMillisLabel");
         fromMillisLabel.setValue("" + lower + " milliseconds UTC");
-        Supplier<Long> supplyFromMillisUtc = addComboBoxes(fromLayout, s -> fromMillisLabel
+        @NotNull Supplier<Long> supplyFromMillisUtc = addComboBoxes(fromLayout, s -> fromMillisLabel
                 .setValue(s.toString() + " milliseconds UTC"), lower);
 
         {
-            HorizontalLayout components0 = new HorizontalLayout();
+            @NotNull HorizontalLayout components0 = new HorizontalLayout();
             components0.addComponent(new Label("From: UTC time [inclusive]:"));
-            HorizontalLayout c = new HorizontalLayout();
+            @NotNull HorizontalLayout c = new HorizontalLayout();
             c.setWidth(100, Sizeable.Unit.PERCENTAGE);
             components0.addComponent(c);
             components0.addComponent(fromMillisLabel);
@@ -125,15 +126,15 @@ class TimeStampSearch {
         form.addComponent(fromLayout);
         form.setComponentAlignment(fromLayout, Alignment.MIDDLE_LEFT);
 
-        AbstractOrderedLayout toLayout = new HorizontalLayout();
-        Label toMillisLabel = new Label("toMillisLabel");
+        @NotNull AbstractOrderedLayout toLayout = new HorizontalLayout();
+        @NotNull Label toMillisLabel = new Label("toMillisLabel");
         toMillisLabel.setValue("" + upper + " milliseconds UTC");
-        Supplier<Long> supplyToMillisUtc = addComboBoxes(toLayout, s -> toMillisLabel.setValue
+        @NotNull Supplier<Long> supplyToMillisUtc = addComboBoxes(toLayout, s -> toMillisLabel.setValue
                 (s.toString() + " milliseconds UTC"), upper);
         {
-            HorizontalLayout components0 = new HorizontalLayout();
+            @NotNull HorizontalLayout components0 = new HorizontalLayout();
             components0.addComponent(new Label("To: UTC time (exclusive):"));
-            HorizontalLayout c = new HorizontalLayout();
+            @NotNull HorizontalLayout c = new HorizontalLayout();
             c.setWidth(100, Sizeable.Unit.PERCENTAGE);
             components0.addComponent(c);
             components0.addComponent(toMillisLabel);
@@ -146,16 +147,16 @@ class TimeStampSearch {
 
         // buttons layout ---------------
 
-        HorizontalLayout buttonParentLayout = new HorizontalLayout();
+        @NotNull HorizontalLayout buttonParentLayout = new HorizontalLayout();
         buttonParentLayout.setWidth(100, Sizeable.Unit.PERCENTAGE);
 
         buttonParentLayout.setMargin(true);
-        HorizontalLayout padding = new HorizontalLayout();
+        @NotNull HorizontalLayout padding = new HorizontalLayout();
         padding.setWidth(100, Sizeable.Unit.PERCENTAGE);
         buttonParentLayout.addComponent(padding);
         buttonParentLayout.setComponentAlignment(padding, Alignment.MIDDLE_LEFT);
 
-        HorizontalLayout buttons = new HorizontalLayout();
+        @NotNull HorizontalLayout buttons = new HorizontalLayout();
         buttons.setSpacing(true);
 
         //   ---------------
@@ -168,7 +169,7 @@ class TimeStampSearch {
             long fromMillis = supplyFromMillisUtc.get();
             long toMillis = supplyToMillisUtc.get();
 
-            String newValue = "[" + fromMillis + "," + toMillis + ")";
+            @NotNull String newValue = "[" + fromMillis + "," + toMillis + ")";
             filterField.setValue(newValue);
             textChangeListener.textChange(new MyTextChangeEvent(newValue));
         });
@@ -176,7 +177,7 @@ class TimeStampSearch {
         @NotNull final Button clearButton = new Button("Clear");
         clearButton.addClickListener((Button.ClickListener) event1 -> {
             subWindow.close();
-            String newValue = "";
+            @NotNull String newValue = "";
             filterField.setValue(newValue);
             textChangeListener.textChange(new MyTextChangeEvent(""));
         });
@@ -200,17 +201,18 @@ class TimeStampSearch {
     }
 
 
-    private Supplier<Long> addComboBoxes(final AbstractOrderedLayout result, Consumer<Long>
+    @NotNull
+    private Supplier<Long> addComboBoxes(@NotNull final AbstractOrderedLayout result, @NotNull Consumer<Long>
             onChange, long milliSecondsUtc) {
 
-        final AbstractOrderedLayout dayLayout = new HorizontalLayout();
+        @NotNull final AbstractOrderedLayout dayLayout = new HorizontalLayout();
         dayLayout.setMargin(true);
 
-        final ComboBox day = dayComboBox(milliSecondsUtc);
+        @NotNull final ComboBox day = dayComboBox(milliSecondsUtc);
         day.setNullSelectionAllowed(false);
-        ComboBox month = monthComboBox(milliSecondsUtc);
+        @NotNull ComboBox month = monthComboBox(milliSecondsUtc);
         month.setNullSelectionAllowed(false);
-        ComboBox year = yearCombBox(milliSecondsUtc);
+        @NotNull ComboBox year = yearCombBox(milliSecondsUtc);
         year.setNullSelectionAllowed(false);
 
         dayLayout.setSpacing(true);
@@ -220,16 +222,16 @@ class TimeStampSearch {
         result.addComponent(dayLayout);
         result.setComponentAlignment(dayLayout, Alignment.MIDDLE_LEFT);
 
-        final AbstractOrderedLayout timeLayout = new HorizontalLayout();
-        final ComboBox hour = hourCombBox(milliSecondsUtc);
+        @NotNull final AbstractOrderedLayout timeLayout = new HorizontalLayout();
+        @NotNull final ComboBox hour = hourCombBox(milliSecondsUtc);
         hour.setNullSelectionAllowed(false);
-        ComboBox min = minCombBox(milliSecondsUtc);
+        @NotNull ComboBox min = minCombBox(milliSecondsUtc);
         min.setNullSelectionAllowed(false);
 
-        final ComboBox seconds = secCombBox(milliSecondsUtc);
+        @NotNull final ComboBox seconds = secCombBox(milliSecondsUtc);
         seconds.setNullSelectionAllowed(false);
 
-        final ComboBox milliseconds = millisecondsCombBox(milliSecondsUtc);
+        @NotNull final ComboBox milliseconds = millisecondsCombBox(milliSecondsUtc);
         milliseconds.setNullSelectionAllowed(false);
 
         timeLayout.setSpacing(true);
@@ -240,7 +242,7 @@ class TimeStampSearch {
         result.addComponent(timeLayout);
         result.setComponentAlignment(timeLayout, Alignment.MIDDLE_RIGHT);
 
-        final Supplier<Long> utcMillisSupplier = () -> {
+        @NotNull final Supplier<Long> utcMillisSupplier = () -> {
             for (int i = 0; i < 5; i++) {
 
                 int year0 = Integer.valueOf(year.getValue().toString());
@@ -266,7 +268,7 @@ class TimeStampSearch {
             throw new IllegalStateException();
         };
 
-        final ValueChangeListener listener = event -> onChange.accept(utcMillisSupplier.get());
+        @NotNull final ValueChangeListener listener = event -> onChange.accept(utcMillisSupplier.get());
         day.addValueChangeListener(listener);
         month.addValueChangeListener(listener);
         year.addValueChangeListener(listener);
@@ -279,7 +281,7 @@ class TimeStampSearch {
 
     }
 
-    private int monthSelected(ComboBox month) {
+    private int monthSelected(@NotNull ComboBox month) {
         int i = MONTHS.indexOf(month.getValue());
         if (i == -1)
             i = 0;
@@ -289,7 +291,7 @@ class TimeStampSearch {
     @NotNull
     private ComboBox monthComboBox(long utcTime) {
 
-        final ComboBox month = new ComboBox("month", MONTHS);
+        @NotNull final ComboBox month = new ComboBox("month", MONTHS);
 
         month.setInvalidAllowed(false);
         month.setNullSelectionAllowed(false);
@@ -305,12 +307,12 @@ class TimeStampSearch {
     @NotNull
     private ComboBox dayComboBox(long utcTime) {
 
-        ComboBox result = new ComboBox("day");
+        @NotNull ComboBox result = new ComboBox("day");
 
         result.setInvalidAllowed(false);
         result.setNullSelectionAllowed(false);
         result.setWidth(COMBO_BOX_WIDTH, Sizeable.Unit.PIXELS);
-        List days = new ArrayList<>();
+        @NotNull List days = new ArrayList<>();
         for (int i = 1; i <= 31; i++) {
             days.add(Integer.toString(i));
         }
@@ -327,12 +329,12 @@ class TimeStampSearch {
     @NotNull
     private ComboBox yearCombBox(long utcTime) {
 
-        ComboBox result = new ComboBox("year");
+        @NotNull ComboBox result = new ComboBox("year");
 
         result.setInvalidAllowed(false);
         result.setNullSelectionAllowed(false);
         result.setWidth(100, Sizeable.Unit.PIXELS);
-        List years = new ArrayList<>();
+        @NotNull List years = new ArrayList<>();
         for (int i = 1970; i < 2070; i++) {
             years.add(Integer.toString(i));
         }
@@ -349,12 +351,12 @@ class TimeStampSearch {
     @NotNull
     private ComboBox hourCombBox(long utcTime) {
 
-        ComboBox result = new ComboBox("hour");
+        @NotNull ComboBox result = new ComboBox("hour");
 
         result.setInvalidAllowed(false);
         result.setNullSelectionAllowed(false);
         result.setWidth(COMBO_BOX_WIDTH, Sizeable.Unit.PIXELS);
-        List hour = new ArrayList<>();
+        @NotNull List hour = new ArrayList<>();
         for (int i = 0; i <= 23; i++) {
             hour.add(Integer.toString(i));
         }
@@ -370,12 +372,12 @@ class TimeStampSearch {
     @NotNull
     private ComboBox minCombBox(long utcTime) {
 
-        ComboBox result = new ComboBox("min");
+        @NotNull ComboBox result = new ComboBox("min");
 
         result.setInvalidAllowed(false);
         result.setNullSelectionAllowed(false);
         result.setWidth(COMBO_BOX_WIDTH, Sizeable.Unit.PIXELS);
-        List min = new ArrayList<>();
+        @NotNull List min = new ArrayList<>();
         for (int i = 0; i <= 59; i++) {
             min.add(Integer.toString(i));
         }
@@ -391,12 +393,12 @@ class TimeStampSearch {
     @NotNull
     private ComboBox secCombBox(long utcTime) {
 
-        ComboBox result = new ComboBox("second");
+        @NotNull ComboBox result = new ComboBox("second");
 
         result.setInvalidAllowed(false);
         result.setNullSelectionAllowed(false);
         result.setWidth(COMBO_BOX_WIDTH, Sizeable.Unit.PIXELS);
-        List min = new ArrayList<>();
+        @NotNull List min = new ArrayList<>();
         for (int i = 0; i <= 59; i++) {
             min.add(Integer.toString(i));
         }
@@ -412,12 +414,12 @@ class TimeStampSearch {
     @NotNull
     private ComboBox millisecondsCombBox(long utcTime) {
 
-        ComboBox result = new ComboBox("milli-second");
+        @NotNull ComboBox result = new ComboBox("milli-second");
 
         result.setInvalidAllowed(false);
         result.setNullSelectionAllowed(false);
         result.setWidth(120, Sizeable.Unit.PIXELS);
-        List min = new ArrayList<>();
+        @NotNull List min = new ArrayList<>();
         for (int i = 0; i <= 1000; i++) {
             min.add(Integer.toString(i));
         }

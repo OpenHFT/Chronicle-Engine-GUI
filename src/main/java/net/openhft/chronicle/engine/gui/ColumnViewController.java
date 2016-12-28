@@ -48,6 +48,7 @@ class ColumnViewController<K, V> {
     @NotNull
     private final MapViewUI view;
 
+    @NotNull
     private final DecimalFormat removeFormatting;
 
     ColumnViewController(@NotNull ColumnViewInternal columnView, @NotNull MapViewUI view, String path) {
@@ -76,7 +77,7 @@ class ColumnViewController<K, V> {
         }
 
         @Override
-        public void textChange(FieldEvents.TextChangeEvent change) {
+        public void textChange(@NotNull FieldEvents.TextChangeEvent change) {
             // Can't modify filters so need to replace
             // data.removeContainerFilters(pid);
 
@@ -102,7 +103,7 @@ class ColumnViewController<K, V> {
         @Nullable
         private final TimeStampSearch timeStampSearch;
 
-        public FocusListener(final TextField filterField,
+        public FocusListener(@NotNull final TextField filterField,
                              FieldEvents.TextChangeListener textChangeListener) {
             timeStampSearch = new TimeStampSearch(filterField, textChangeListener);
         }
@@ -182,11 +183,13 @@ class ColumnViewController<K, V> {
                         return ldt.toString();
                     }
 
+                    @NotNull
                     @Override
                     public Class<Long> getModelType() {
                         return Long.class;
                     }
 
+                    @NotNull
                     @Override
                     public Class<String> getPresentationType() {
                         return String.class;
@@ -248,7 +251,7 @@ class ColumnViewController<K, V> {
             @NotNull final Container.Filterable filterable = (Container.Filterable) data;
 
             // Set up a filter for all columns
-            for (Object pid : grid.getContainerDataSource()
+            for (@NotNull Object pid : grid.getContainerDataSource()
                     .getContainerPropertyIds()) {
 
                 if ("delete".equals(pid))
@@ -262,12 +265,12 @@ class ColumnViewController<K, V> {
 
 
                 // Update filter When the filter input is changed
-                final TextChangeListener listener1 = new TextChangeListener(filterable, pid, filterField);
+                @NotNull final TextChangeListener listener1 = new TextChangeListener(filterable, pid, filterField);
                 filterField.addTextChangeListener(listener1);
                 filterField.setTextChangeEventMode(EAGER);
 
                 if (pid.toString().toUpperCase().endsWith("TIMESTAMP")) {
-                    FocusListener listener = new FocusListener(filterField, listener1);
+                    @NotNull FocusListener listener = new FocusListener(filterField, listener1);
                     filterField.addFocusListener(listener);
                     filterField.setWidth(200, Sizeable.Unit.PIXELS);
                 } else
@@ -324,7 +327,7 @@ class ColumnViewController<K, V> {
 
     public static void main(String[] args) {
 
-        DecimalFormat df = new DecimalFormat();
+        @NotNull DecimalFormat df = new DecimalFormat();
         df.setGroupingUsed(false);
         System.out.println(df.format(100000));
     }

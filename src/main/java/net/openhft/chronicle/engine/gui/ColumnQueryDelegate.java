@@ -41,7 +41,7 @@ class ColumnQueryDelegate implements QueryDelegate {
         if (filters.isEmpty() && orderBys.isEmpty())
             return columnView.rowCount(new SortedFilter());
 
-        final SortedFilter sortedFilter = new SortedFilter();
+        @NotNull final SortedFilter sortedFilter = new SortedFilter();
         sortedFilter.marshableFilters = toMarshables(filters);
         return columnView.rowCount(sortedFilter);
     }
@@ -190,7 +190,7 @@ class ColumnQueryDelegate implements QueryDelegate {
                 .collect(Collectors.toList());
     }
 
-    public boolean containsRowWithKey(Object... keys) throws SQLException {
+    public boolean containsRowWithKey(@NotNull Object... keys) throws SQLException {
         if (keys.length == 0)
             return false;
         return columnView.containsRowWithKey(Arrays.asList(keys));

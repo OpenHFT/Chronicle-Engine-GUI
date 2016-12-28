@@ -6,6 +6,7 @@ import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Component;
 import net.openhft.chronicle.engine.api.column.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +18,11 @@ import static java.util.Collections.singletonList;
 public class ChartUI {
 
 
-    protected Component getChart(VaadinChart vaadinChart) {
+    @NotNull
+    protected Component getChart(@NotNull VaadinChart vaadinChart) {
 
         final ColumnViewInternal columnView = vaadinChart.columnView();
-        final Chart chart;
+        @NotNull final Chart chart;
 
         chart = new Chart(ChartType.COLUMN);
         chart.setHeight(100, Sizeable.Unit.PERCENTAGE);
@@ -29,14 +31,14 @@ public class ChartUI {
         final ChartProperties chartProperties = vaadinChart.chartProperties();
         conf.setTitle(chartProperties.title);
 
-        String yAxisLabel = null;
+        @Nullable String yAxisLabel = null;
 
         boolean hasXAxis = false;
 
-        for (VaadinChartSeries vaadinChartSeries : vaadinChart.series()) {
+        for (@NotNull VaadinChartSeries vaadinChartSeries : vaadinChart.series()) {
 
-            final List lables = new ArrayList();
-            final List<DataSeriesItem> data = new ArrayList<>();
+            @NotNull final List lables = new ArrayList();
+            @NotNull final List<DataSeriesItem> data = new ArrayList<>();
             final ClosableIterator<? extends Row> iterator = columnView.iterator(sortedFilter(vaadinChart));
 
             while (iterator.hasNext()) {
@@ -52,19 +54,19 @@ public class ChartUI {
 
                     lables.add(columnName);
 
-                    Number number = (Number) row.get(vaadinChartSeries.field);
+                    @NotNull Number number = (Number) row.get(vaadinChartSeries.field);
                     data.add(new DataSeriesItem(columnName, number));
                 }
             }
 
             if (!hasXAxis) {
                 hasXAxis = true;
-                XAxis x = new XAxis();
+                @NotNull XAxis x = new XAxis();
                 x.setCategories((String[]) lables.toArray(new String[lables.size()]));
                 conf.addxAxis(x);
             }
 
-            DataSeries dataSeries = new DataSeries(data);
+            @NotNull DataSeries dataSeries = new DataSeries(data);
 
             switch (vaadinChartSeries.type()) {
                 case SPLINE: {
@@ -73,7 +75,7 @@ public class ChartUI {
                 }
 
                 case COLUMN: {
-                    PlotOptionsColumn plotOptions = new PlotOptionsColumn();
+                    @NotNull PlotOptionsColumn plotOptions = new PlotOptionsColumn();
                     plotOptions.setPointWidth(vaadinChartSeries.width());
                     dataSeries.setPlotOptions(plotOptions);
                     break;
@@ -85,7 +87,7 @@ public class ChartUI {
 
             if (ylabel != null && !ylabel.contentEquals("") && (yAxisLabel == null || !yAxisLabel
                     .equals(ylabel))) {
-                YAxis yAxis = new YAxis();
+                @NotNull YAxis yAxis = new YAxis();
                 yAxis.setTitle(ylabel);
                 conf.addyAxis(yAxis);
                 yAxisLabel = ylabel;
@@ -101,9 +103,9 @@ public class ChartUI {
     }
 
     @NotNull
-    private ColumnViewInternal.SortedFilter sortedFilter(final VaadinChart vaadinChart) {
+    private ColumnViewInternal.SortedFilter sortedFilter(@NotNull final VaadinChart vaadinChart) {
 
-        ColumnViewInternal.SortedFilter sortedFilter = new ColumnViewInternal.SortedFilter();
+        @NotNull ColumnViewInternal.SortedFilter sortedFilter = new ColumnViewInternal.SortedFilter();
 
         long countFromEnd = vaadinChart.chartProperties().countFromEnd;
         if (countFromEnd > 0) {

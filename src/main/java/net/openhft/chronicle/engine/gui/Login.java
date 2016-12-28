@@ -25,14 +25,21 @@ public class Login extends CustomComponent implements View, Button.ClickListener
     private static final String NAME = "login";
     private static final String DEFAULT_HOSTPORT = "localhost:9090";
     private static final String DEFAULT_USER = "admin";
+    @NotNull
     private final TextField user;
+    @NotNull
     private final TextField hostPort;
+    @NotNull
     private final PasswordField password;
+    @NotNull
     private final Button loginButton;
     private final Navigator navigator;
 
+    @org.jetbrains.annotations.Nullable
     private volatile UIEvents.PollListener eventListener;
+    @org.jetbrains.annotations.Nullable
     private volatile VanillaAssetTree remoteTree = null;
+    @org.jetbrains.annotations.Nullable
     private volatile Boolean isConnected = null;
 
     public Login(Navigator navigator, final String caption) {
@@ -47,9 +54,9 @@ public class Login extends CustomComponent implements View, Button.ClickListener
         hostPort.setInputPrompt(DEFAULT_HOSTPORT);
         hostPort.setInvalidAllowed(false);
 
-        StreamResource streamResource = new StreamResource((StreamResource.StreamSource) () -> Login.class.getResourceAsStream("Chronicle-Engine_200px.png"), "Chronicle-Engine_200px.png");
+        @NotNull StreamResource streamResource = new StreamResource((StreamResource.StreamSource) () -> Login.class.getResourceAsStream("Chronicle-Engine_200px.png"), "Chronicle-Engine_200px.png");
 
-        Image image = new Image("", streamResource);
+        @NotNull Image image = new Image("", streamResource);
 
         // Create the user input field
         user = new TextField("User:");
@@ -70,14 +77,14 @@ public class Login extends CustomComponent implements View, Button.ClickListener
         loginButton.setDisableOnClick(true);
 
         // Add both to a panel
-        VerticalLayout fields = new VerticalLayout(image, hostPort, user, password, loginButton);
+        @NotNull VerticalLayout fields = new VerticalLayout(image, hostPort, user, password, loginButton);
         fields.setCaption(caption);
         fields.setSpacing(true);
         fields.setMargin(new MarginInfo(true, true, true, false));
         fields.setSizeUndefined();
 
         // The view root layout
-        VerticalLayout viewLayout = new VerticalLayout(fields);
+        @NotNull VerticalLayout viewLayout = new VerticalLayout(fields);
         viewLayout.setSizeFull();
         viewLayout.setComponentAlignment(fields, Alignment.MIDDLE_CENTER);
         viewLayout.setStyleName(Reindeer.LAYOUT_BLUE);
@@ -89,7 +96,7 @@ public class Login extends CustomComponent implements View, Button.ClickListener
         // focus the username field when user arrives to the login view
         isConnected = null;
 
-        UIEvents.PollListener eventListener0 = this.eventListener;
+        @org.jetbrains.annotations.Nullable UIEvents.PollListener eventListener0 = this.eventListener;
         if (eventListener0 != null)
             getUI().getCurrent().removePollListener(eventListener0);
 
@@ -128,16 +135,16 @@ public class Login extends CustomComponent implements View, Button.ClickListener
         //getUI().getNavigator().navigateTo(NAME);
         final String hostPort = this.hostPort.getValue();
 
-        final VanillaSessionDetails sessionDetails = new VanillaSessionDetails();
-        String userId = username == null || username.isEmpty() ? DEFAULT_USER : username;
+        @NotNull final VanillaSessionDetails sessionDetails = new VanillaSessionDetails();
+        @NotNull String userId = username == null || username.isEmpty() ? DEFAULT_USER : username;
         sessionDetails.userId(userId);
         sessionDetails.securityToken(password);
 
 
-        final String remoteHost = "".isEmpty() ? DEFAULT_HOSTPORT : hostPort;
+        @NotNull final String remoteHost = "".isEmpty() ? DEFAULT_HOSTPORT : hostPort;
 
 
-        final ClientConnectionMonitor monitor = new ClientConnectionMonitor() {
+        @NotNull final ClientConnectionMonitor monitor = new ClientConnectionMonitor() {
 
             @Override
             public void onConnected(@Nullable String name,
@@ -169,6 +176,7 @@ public class Login extends CustomComponent implements View, Button.ClickListener
             return true;
         }
 
+        @NotNull
         @Override
         public Class<String> getType() {
             return String.class;

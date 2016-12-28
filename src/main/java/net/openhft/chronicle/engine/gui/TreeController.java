@@ -39,6 +39,7 @@ class TreeController {
     final ItemClickEvent.ItemClickListener clickListener;
     @NotNull
     private final ChartUI histogramUI = new ChartUI();
+    @NotNull
     static ExecutorService executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory
             ("scheduler", true));
 
@@ -47,10 +48,10 @@ class TreeController {
 
         final Tree tree = treeUI.tree;
 
-        RequestContext rc = RequestContext.requestContext("")
+        @NotNull RequestContext rc = RequestContext.requestContext("")
                 .elementType(TopologicalEvent.class).bootstrap(true);
 
-        final Subscriber<TopologicalEvent> sub = e -> updateTree(tree, e, remoteTree);
+        @NotNull final Subscriber<TopologicalEvent> sub = e -> updateTree(tree, e, remoteTree);
         remoteTree.acquireSubscription(rc).registerSubscriber(rc, sub, Filter.empty());
 
         clickListener = click -> {
@@ -58,8 +59,8 @@ class TreeController {
             treeUI.contents.removeAllComponents();
 
             if (source.endsWith(BAR_CHART_VIEW)) {
-                final Asset asset = findAsset(source, remoteTree);
-                VaadinChart chart = asset.acquireView(VaadinChart.class);
+                @NotNull final Asset asset = findAsset(source, remoteTree);
+                @NotNull VaadinChart chart = asset.acquireView(VaadinChart.class);
                 treeUI.contents.addComponent(histogramUI.getChart(chart));
                 return;
             }
@@ -68,7 +69,7 @@ class TreeController {
                 @NotNull MapViewUI mapViewUI = new MapViewUI();
                 treeUI.contents.addComponent(mapViewUI);
 
-                Asset asset = findAsset(source, remoteTree);
+                @NotNull Asset asset = findAsset(source, remoteTree);
 
                 @Nullable
                 final ColumnViewInternal view = source.endsWith(MAP_VIEW) ?
@@ -89,15 +90,16 @@ class TreeController {
     }
 
 
-    public Asset findAsset(String source, AssetTree remoteTree) {
+    @NotNull
+    public Asset findAsset(@NotNull String source, @NotNull AssetTree remoteTree) {
         @NotNull final String path = path(source);
         return remoteTree.acquireAsset(path);
     }
 
-    private String path(String source) {
+    private String path(@NotNull String source) {
         final int len = source.length();
 
-        for (String view : new String[]{MAP_VIEW, QUEUE_VIEW, BAR_CHART_VIEW}) {
+        for (@NotNull String view : new String[]{MAP_VIEW, QUEUE_VIEW, BAR_CHART_VIEW}) {
             if (source.endsWith(view))
                 return source.substring(0, len - view.length());
         }
@@ -105,7 +107,7 @@ class TreeController {
         throw new IllegalStateException();
     }
 
-    private void updateTree(@NotNull Tree tree, @NotNull TopologicalEvent e, AssetTree assetTree) {
+    private void updateTree(@NotNull Tree tree, @NotNull TopologicalEvent e, @NotNull AssetTree assetTree) {
 
         if (e.assetName() == null)
             return;
@@ -147,14 +149,14 @@ class TreeController {
         }
     }
 
-    private void addBarChart(@NotNull final Tree tree, @NotNull TopologicalEvent e, AssetTree
+    private void addBarChart(@NotNull final Tree tree, @NotNull TopologicalEvent e, @NotNull AssetTree
             assetTree) {
         tree.addItem(e.fullName() + BAR_CHART_VIEW);
         tree.setParent(e.fullName() + BAR_CHART_VIEW, e.fullName());
 
         // we can make an RPC call engine, while inside a TopologicalEvent
         executorService.submit(() -> {
-            VaadinChart chart = assetTree.acquireAsset(e.fullName()).acquireView(VaadinChart.class);
+            @NotNull VaadinChart chart = assetTree.acquireAsset(e.fullName()).acquireView(VaadinChart.class);
             final String menuLabel = chart.chartProperties().menuLabel;
             tree.setItemCaption(e.fullName() + BAR_CHART_VIEW, menuLabel == null ? "bar-chart" :
                     menuLabel);

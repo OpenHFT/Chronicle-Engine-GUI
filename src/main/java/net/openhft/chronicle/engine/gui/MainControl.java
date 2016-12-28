@@ -13,9 +13,9 @@ class MainControl {
     private final UserControl userUiManager = new UserControl();
 
     @NotNull
-    Component newComponent(final AssetTree remoteAssetTree) {
+    Component newComponent(@NotNull final AssetTree remoteAssetTree) {
         @NotNull MainUI mainUI = new MainUI();
-        Component userComponent = userUiManager.newComponent();
+        @NotNull Component userComponent = userUiManager.newComponent();
 
 
         VerticalLayout content = mainUI.content;
