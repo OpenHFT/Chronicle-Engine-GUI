@@ -1,4 +1,4 @@
-``## Chronicle-Engine-GUI
+## Chronicle-Engine-GUI
 
 ********* THIS IS WORK IN PROGRESS  *********
 
