@@ -31,7 +31,7 @@ the main of :
 ----
 Chronicle-Engine/src/test/java/net/openhft/chronicle/engine/StartEngineWithDummyData.java
 ----
-Now from the Chronicle-Engine-GUI this project, start the web based client management console, by starting a jetty application server:
+Now from the Chronicle-Engine-GUI project, start the web based client management console, by starting a jetty application server:
 [source, console]
 ----
 mvn compile jetty:run
