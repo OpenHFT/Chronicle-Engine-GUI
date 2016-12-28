@@ -1,8 +1,5 @@
 ## Chronicle-Engine-GUI
 
-********* THIS IS WORK IN PROGRESS  *********
-
-
 // Settings:
 :experimental:
 :idprefix:
