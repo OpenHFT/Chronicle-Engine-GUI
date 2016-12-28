@@ -37,10 +37,11 @@ Now from the Chronicle-Engine-GUI project, start the web based client management
 mvn compile jetty:run
 ----
 
-Then in your web-browser go to http://localhost:8080, if you are running using "StartEngineWithDummyData" ( see above ), you should be able to just use the defaults.
+Then in your web-browser go to http://localhost:8080, if you are running using "StartEngineWithDummyData" ( see above ), you should be able to just use the defaults below :
 
 image::images/login.png[]
- Click on "Login".
+
+click on "Login".
 
 ## Screenshots
 ### Chart
