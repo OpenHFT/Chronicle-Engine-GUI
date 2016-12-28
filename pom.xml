@@ -11,7 +11,7 @@
 
     <artifactId>chronicle-engine-gui</artifactId>
     <packaging>war</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Engine-GUI</name>
 
     <dependencyManagement>
@@ -269,7 +269,7 @@
         <connection>scm:git:git@github.com:OpenHFT/Chronicle-Engine-GUI.git</connection>
         <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Engine-GUI.git
         </developerConnection>
-        <tag>chronicle-engine-gui-1.0.0</tag>
+        <tag>master</tag>
     </scm>
 
 </project>
