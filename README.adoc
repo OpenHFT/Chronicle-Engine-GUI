@@ -1,7 +1,4 @@
-``## Chronicle-Engine-GUI
-
-********* THIS IS WORK IN PROGRESS  *********
-
+## Chronicle-Engine-GUI
 
 // Settings:
 :experimental:
@@ -34,16 +31,17 @@ the main of :
 ----
 Chronicle-Engine/src/test/java/net/openhft/chronicle/engine/StartEngineWithDummyData.java
 ----
-A web based client management console to start the jetty application server, please
+Now from the Chronicle-Engine-GUI project, start the web based client management console, by starting a jetty application server:
 [source, console]
 ----
 mvn compile jetty:run
 ----
 
-Then in your web-brower go to http://localhost:8080, if you are running using "StartEngineWithDummyData" ( see above ) 
+Then in your web-browser go to http://localhost:8080, if you are running using "StartEngineWithDummyData" ( see above ), you should be able to just use the defaults below :
 
 image::images/login.png[]
-you should be able to just use the defaults. Click on "Login".
+
+click on "Login".
 
 ## Screenshots
 ### Chart
