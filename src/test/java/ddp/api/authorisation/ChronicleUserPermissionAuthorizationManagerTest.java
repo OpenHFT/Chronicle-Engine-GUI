@@ -1,27 +1,33 @@
 package ddp.api.authorisation;
 
 import ddp.api.ConfigurationException;
+import net.openhft.chronicle.engine.api.tree.Asset;
+import net.openhft.chronicle.engine.api.tree.AssetTree;
+import net.openhft.chronicle.engine.query.QueueConfig;
+import net.openhft.chronicle.engine.server.ServerEndpoint;
+import net.openhft.chronicle.engine.tree.VanillaAsset;
+import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.VanillaSessionDetails;
+import net.openhft.chronicle.wire.WireType;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.*;
-
-import net.openhft.chronicle.engine.api.tree.*;
-import net.openhft.chronicle.engine.server.*;
-import net.openhft.chronicle.engine.tree.*;
-import net.openhft.chronicle.network.*;
-import net.openhft.chronicle.wire.*;
-import org.junit.*;
-import org.junit.runner.*;
-import org.junit.runners.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * Tests for ChronicleUserPermissionAuthorizationManager.
  */
 @RunWith(Parameterized.class)
-public class ChronicleUserPermissionAuthorizationManagerTest
-{
+public class ChronicleUserPermissionAuthorizationManagerTest {
     private final static int TIMEOUT = 2;
     private static WireType _wireType;
     private static String _configUri = "/etc";
@@ -46,8 +52,7 @@ public class ChronicleUserPermissionAuthorizationManagerTest
      *
      * @param wireType Wire type to use for tests.
      */
-    public ChronicleUserPermissionAuthorizationManagerTest(WireType wireType)
-    {
+    public ChronicleUserPermissionAuthorizationManagerTest(WireType wireType) {
         _wireType = wireType;
     }
 
@@ -56,8 +61,7 @@ public class ChronicleUserPermissionAuthorizationManagerTest
      * Parameters to run an instance with. An instance of this class is run for each parameter set.
      */
     @Parameterized.Parameters
-    public static Collection<Object[]> data()
-    {
+    public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {WireType.TEXT},
                 {WireType.BINARY}
@@ -69,8 +73,7 @@ public class ChronicleUserPermissionAuthorizationManagerTest
      * Set up necessary mocks and create servers and endpoints.
      */
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         _server1 = createServer(1);
         _serverEndpoint1 = createServerEndpoint(_port1, _server1, _wireType);
 
@@ -83,25 +86,20 @@ public class ChronicleUserPermissionAuthorizationManagerTest
      * Shut down server endpoints and close servers (asset trees).
      */
     @After
-    public void tearDown() throws Exception
-    {
-        if (_serverEndpoint1 != null)
-        {
+    public void tearDown() throws Exception {
+        if (_serverEndpoint1 != null) {
             _serverEndpoint1.close();
         }
 
-        if (_server1 != null)
-        {
+        if (_server1 != null) {
             _server1.close();
         }
 
-        if (_serverEndpoint2 != null)
-        {
+        if (_serverEndpoint2 != null) {
             _serverEndpoint2.close();
         }
 
-        if (_server2 != null)
-        {
+        if (_server2 != null) {
             _server2.close();
         }
     }
@@ -113,12 +111,12 @@ public class ChronicleUserPermissionAuthorizationManagerTest
      * @param hostId Host id of server
      * @return Asset Tree (server) instance created and configured.
      */
-    private AssetTree createServer(int hostId) throws ConfigurationException, IOException
-    {
+    private AssetTree createServer(int hostId) throws ConfigurationException, IOException {
         //Create asset tree and configure root
         AssetTree server = new VanillaAssetTree(hostId);
-        ChronicleRuleFactory.applyChronicleBasicRootAssetRules(server.root(), true);
+        server.root().addView(QueueConfig.class, new QueueConfig(s -> 1, true, null, WireType.BINARY));
 
+        ChronicleRuleFactory.applyChronicleBasicRootAssetRules(server.root(), true);
         VanillaSessionDetails sessionDetails = VanillaSessionDetails.of(_userId, null, _domain);
 
         ChronicleRuleFactory.setAdminSessionDetails(server.root(), sessionDetails);
@@ -134,8 +132,9 @@ public class ChronicleUserPermissionAuthorizationManagerTest
         ChronicleRuleFactory.applySecurityAssetRules(securityAsset, _cluster, _wireType, _domain, _userId);
 
         // Apply monitoring rules to urls which store monitoring information
-        VanillaAsset clusterConnections = (VanillaAsset) server.acquireAsset( "/proc/connections/cluster/throughput");
+        VanillaAsset clusterConnections = (VanillaAsset) server.acquireAsset("/proc/connections/cluster/throughput");
         clusterConnections.configQueueServer();
+
 
         return server;
     }
@@ -144,11 +143,9 @@ public class ChronicleUserPermissionAuthorizationManagerTest
     /**
      * Create a server endpoint on the given port
      */
-    private ServerEndpoint createServerEndpoint(int port, AssetTree server, WireType wireType) throws IOException
-    {
+    private ServerEndpoint createServerEndpoint(int port, AssetTree server, WireType wireType) throws IOException {
         return new ServerEndpoint("*:" + port, server);
     }
-
 
 
     /**
@@ -157,8 +154,7 @@ public class ChronicleUserPermissionAuthorizationManagerTest
      * Test that granting permissions on server2 are replicated to server1.
      */
     @Test
-        public void testGrantUserPermissions() throws Exception
-    {
+    public void testGrantUserPermissions() throws Exception {
         String testSourceUri = "/test/ddp/live/data/grantuserpermissions";
         DataPermission dataPermission1 = DataPermission.ADD;
         DataPermission dataPermission2 = DataPermission.DELETE;
@@ -215,11 +211,7 @@ public class ChronicleUserPermissionAuthorizationManagerTest
     }
 
 
-
-
-
-    private void waitReplication(BlockingQueue<String> waitOn, BlockingQueue<String> ... subscriptions) throws InterruptedException
-    {
+    private void waitReplication(BlockingQueue<String> waitOn, BlockingQueue<String>... subscriptions) throws InterruptedException {
         waitOn.poll(TIMEOUT, TimeUnit.SECONDS);
         Stream.of(subscriptions).forEach(s -> s.clear());
     }
@@ -229,8 +221,7 @@ public class ChronicleUserPermissionAuthorizationManagerTest
      * @param testSourceUri Uri for which to apply PUBLISH permissions.
      * @return Map with PUBLISH permissions applied for the test user.
      */
-    private Map<String, Map<String, Map<String, Set<DataPermission>>>> getTestPermissionsMap(String testSourceUri)
-    {
+    private Map<String, Map<String, Map<String, Set<DataPermission>>>> getTestPermissionsMap(String testSourceUri) {
         Set<DataPermission> permissionsSet = new HashSet<>();
         permissionsSet.add(DataPermission.ADD);
 
@@ -249,8 +240,7 @@ public class ChronicleUserPermissionAuthorizationManagerTest
     /**
      * @return Get the file path for the Chronicle engine configuration
      */
-    private static String getChronicleConfigFilePath()
-    {
+    private static String getChronicleConfigFilePath() {
         String path = ChronicleUserPermissionAuthorizationManagerTest.class.getProtectionDomain()
                 .getCodeSource().getLocation().getPath();
 
