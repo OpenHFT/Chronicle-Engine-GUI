@@ -157,7 +157,7 @@ public class ChronicleUserPermissionAuthorizationManagerTest
      * Test that granting permissions on server2 are replicated to server1.
      */
     @Test
-    public void testGrantUserPermissions() throws Exception
+        public void testGrantUserPermissions() throws Exception
     {
         String testSourceUri = "/test/ddp/live/data/grantuserpermissions";
         DataPermission dataPermission1 = DataPermission.ADD;

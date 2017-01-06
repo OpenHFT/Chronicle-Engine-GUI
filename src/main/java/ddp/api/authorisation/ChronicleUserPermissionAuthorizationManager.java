@@ -16,23 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implementation of {@link PermissionAuthorizationManager} using a Chronicle replicated map to store permissions. Updates are
- * replicated to other servers (assuming asset trees are configured correctly).
- * <p>
- * The current implementation uses a ChronicleMap<domain, Map<permissions...> which means all permissions for each
- * domain is serialized as replicated as one event to all servers. This causes an obvious race condition if two servers
- * make changes at the same time one of the changes will not be applied. Therefore, with this implementation the map
- * should only be updated from one server and let that server replicate the changes to all other servers.
- * <p>
- * This is lazily thread-safe, meaning synchronization is performed when changing permissions (grant/revoke), but not
- * on checking permissions. This means there is potential for a race condition where one thread is checking whether the
- * user is authorized on a given data source while another thread is granting the permissions resulting in a false
- * negative of the authorization check. Similarly there could be a false positive if one thread is checking permissions
- * while another thread is revoking it. It is guaranteed though, that there are no race conditions between
- * granting/revoking permissions.
- * <p>
- * All granting/revoking of permissions are synchronized on the same object so there is a potential for contention if
- * there are MANY of these actions, but it is highly unlikely.
  */
 public class ChronicleUserPermissionAuthorizationManager
 {
