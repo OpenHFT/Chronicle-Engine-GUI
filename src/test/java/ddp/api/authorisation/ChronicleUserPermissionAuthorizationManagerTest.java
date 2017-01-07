@@ -3,12 +3,18 @@ package ddp.api.authorisation;
 import ddp.api.ConfigurationException;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
+import net.openhft.chronicle.engine.fs.Clusters;
+import net.openhft.chronicle.engine.fs.EngineCluster;
+import net.openhft.chronicle.engine.fs.EngineHostDetails;
 import net.openhft.chronicle.engine.query.QueueConfig;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAsset;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.NetworkStats;
 import net.openhft.chronicle.network.VanillaSessionDetails;
 import net.openhft.chronicle.wire.WireType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -134,11 +140,30 @@ public class ChronicleUserPermissionAuthorizationManagerTest {
         // Apply monitoring rules to urls which store monitoring information
         VanillaAsset clusterConnections = (VanillaAsset) server.acquireAsset("/proc/connections/cluster/throughput");
         clusterConnections.configQueueServer();
+        @Nullable final Clusters clusters = clusterConnections.root().getView(Clusters.class);
+
+        final EngineCluster cluster = clusters.firstCluster();
+
+        // the reason that we have to do this is to ensure that the network stats are
+        // replicated between all hosts, if you don't acquire a queue it wont exist and so
+        // will not act as a slave in replication
+        for (@NotNull EngineHostDetails engineHostDetails : cluster.hostDetails()) {
+
+            final int id = engineHostDetails
+                    .hostId();
+            Asset asset = server.acquireAsset("/proc/connections/cluster/throughput/" + id);
+
+            // sets the master of each of the queues
+            asset.addView(new QueueConfig(x -> id, false, null, WireType.BINARY));
+
+            server.acquireQueue("/proc/connections/cluster/throughput/" + id,
+                    String.class,
+                    NetworkStats.class, cluster.clusterName());
+        }
 
 
         return server;
     }
-
 
     /**
      * Create a server endpoint on the given port
