@@ -352,7 +352,7 @@ public class SubscriptionModelTest {
 
     @Test
     public void testThrottlingForTopicSubscription() throws Exception {
-        YamlLogging.setAll(true);
+
         String topic = "Hello";
         //Create the Topic Subscriber
         BlockingQueue<MapEvent> eventsQueue = new LinkedBlockingQueue<>();

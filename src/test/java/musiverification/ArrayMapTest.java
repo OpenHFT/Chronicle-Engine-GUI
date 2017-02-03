@@ -16,7 +16,6 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.network.connection.TcpChannelHub;
 import net.openhft.chronicle.wire.WireType;
-import net.openhft.chronicle.wire.YamlLogging;
 import org.jetbrains.annotations.NotNull;
 import org.junit.*;
 import org.junit.rules.TestName;
@@ -98,7 +97,7 @@ public class ArrayMapTest {
         }
 
         map = assetTree.acquireMap(NAME, String.class, byte[].class);
-        YamlLogging.setAll(true);
+
     }
 
     @After
