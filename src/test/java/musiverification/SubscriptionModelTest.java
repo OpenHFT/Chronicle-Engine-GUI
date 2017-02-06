@@ -758,6 +758,7 @@ public class SubscriptionModelTest {
      * trigger ordered events where the value is null
      */
     @Test
+    @Ignore
     public void testSubscriptionOnMap() throws InvalidSubscriberException {
         //Using a strict mock as we want to verify that events come in in the right order
         TopicSubscriber<String, String> topicSubscriberMock = EasyMock.createStrictMock(TopicSubscriber.class);
