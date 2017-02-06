@@ -9,6 +9,8 @@ import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.Wire;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 import queue4.chronicle.FromChronicle;
@@ -64,9 +66,27 @@ public class SingleChronicleQueueExternalizableTest {
         file.delete();
     }
 
+
+    static void deleteDir(@NotNull File dir) {
+        if (dir.isDirectory()) {
+            @Nullable File[] files = dir.listFiles();
+            if (files != null) {
+                for (@NotNull File file : files) {
+                    if (file.isDirectory()) {
+                        deleteDir(file);
+                    } else
+                        //noinspection ResultOfMethodCallIgnored
+                        file.delete();
+                }
+            }
+        }
+
+        dir.delete();
+    }
+
     @Test
     public void testExternalizable() throws Exception {
-        deleteChronicle(chronicleQueueBase1);
+        deleteDir(new File(chronicleQueueBase1));
 
         try (SingleChronicleQueue queue1 = SingleChronicleQueueBuilder.binary(chronicleQueueBase1).build()) {
             ClassAliasPool.CLASS_ALIASES.addAlias(MarketDataKey.class, MarketDataSource.class,
@@ -138,12 +158,13 @@ public class SingleChronicleQueueExternalizableTest {
             fromChronicle.readOne();
             queue1.close();
         }
+        deleteDir(new File(chronicleQueueBase1));
     }
 
 
     @Test
     public void miscellaneousTypeConfigTest() throws Exception {
-        deleteChronicle(chronicleQueueBase2);
+        deleteDir(new File(chronicleQueueBase2));
         try (SingleChronicleQueue queue2 = SingleChronicleQueueBuilder.binary(chronicleQueueBase2).build()) {
 
             // Instantiate a MiscellaneousTypesConfig
@@ -185,6 +206,7 @@ public class SingleChronicleQueueExternalizableTest {
             fromChronicle.readOne();
             queue2.close();
         }
+        deleteDir(new File(chronicleQueueBase2));
     }
 
 
