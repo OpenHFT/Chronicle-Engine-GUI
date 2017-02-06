@@ -722,7 +722,7 @@ public class SubscriptionModelTest {
         //Removes
         testChronicleKeyEventSubscriber.onMessage(testKey1);
         testChronicleKeyEventSubscriber.onMessage(testKey5);
-        testChronicleKeyEventSubscriber.onEndOfSubscription();
+        //testChronicleKeyEventSubscriber.onEndOfSubscription();
         EasyMock.replay(testChronicleKeyEventSubscriber);
 
         //Register as subscriber on map to get keys
@@ -779,6 +779,7 @@ public class SubscriptionModelTest {
         for (int i = 0; i < noOfKeys; i++) {
             topicSubscriberMock.onMessage(TestUtils.getKey(_mapName, i), null);
         }
+        topicSubscriberMock.onEndOfSubscription();
 
         EasyMock.replay(topicSubscriberMock);
 
