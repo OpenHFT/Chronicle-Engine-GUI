@@ -20,8 +20,6 @@ import static net.openhft.chronicle.engine.Chassis.resetChassis;
 
 public class KeySubscriberTest
 {
-    public static final WireType WIRE_TYPE = WireType.BINARY;
-    private static int _port = 6677;
 
     private static int expectedNoOfEvents = 2;
     private static int maxWait = 5;
