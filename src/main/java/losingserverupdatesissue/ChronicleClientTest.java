@@ -2,6 +2,7 @@ package losingserverupdatesissue;
 
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.VanillaSessionDetails;
+import net.openhft.chronicle.network.connection.FatalFailureConnectionStrategy;
 import net.openhft.chronicle.wire.WireType;
 import topicsubscriptionrepro.ConstructorExceptionClient;
 
@@ -28,7 +29,7 @@ public class ChronicleClientTest
         _assetTree.root().forRemoteAccess(
                 new String[]{_serverAddress}, _wireType,
                 VanillaSessionDetails.of("mfil-cliveh", null, ""), ConstructorExceptionClient
-                        .clientConnectionMonitor());
+                        .clientConnectionMonitor(),new FatalFailureConnectionStrategy(3));
 
         List<String> marketDataSubscriptions = createMarketDataKeys();
         //This works

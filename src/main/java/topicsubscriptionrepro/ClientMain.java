@@ -3,6 +3,7 @@ package topicsubscriptionrepro;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.VanillaSessionDetails;
+import net.openhft.chronicle.network.connection.FatalFailureConnectionStrategy;
 import net.openhft.chronicle.wire.WireType;
 
 import java.io.IOException;
@@ -22,7 +23,7 @@ public class ClientMain
         _assetTree.root().forRemoteAccess(
                 new String[]{_serverAddress}, _wireType,
                 VanillaSessionDetails.of("mfil-daniels", null, ""), ConstructorExceptionClient
-                        .clientConnectionMonitor());
+                        .clientConnectionMonitor(),new FatalFailureConnectionStrategy(3));
 
         //This works
         _assetTree.registerSubscriber(_mapUri, String.class, message -> System.out.println("Subscriber 1: " + message));

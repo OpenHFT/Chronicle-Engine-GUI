@@ -3,6 +3,7 @@ package topicsubscriptionrepro;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.VanillaSessionDetails;
 import net.openhft.chronicle.network.connection.ClientConnectionMonitor;
+import net.openhft.chronicle.network.connection.FatalFailureConnectionStrategy;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +24,7 @@ public class ConstructorExceptionClient {
 
         _assetTree.root().forRemoteAccess(
                 new String[]{_serverAddress}, _wireType,
-                VanillaSessionDetails.of("mfil-daniels", null, ""), clientConnectionMonitor());
+                VanillaSessionDetails.of("mfil-daniels", null, ""), clientConnectionMonitor(),new FatalFailureConnectionStrategy(3));
 
         try {
             //Constructor is called at this point on server and exception thrown!

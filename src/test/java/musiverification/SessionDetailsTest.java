@@ -10,6 +10,7 @@ import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.network.VanillaSessionDetails;
+import net.openhft.chronicle.network.connection.FatalFailureConnectionStrategy;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
@@ -63,7 +64,7 @@ public class SessionDetailsTest {
 
         remoteAssetTree = new VanillaAssetTree();
         remoteAssetTree.root().forRemoteAccess(new String[]{"host.port1"}, WIRE_TYPE,
-                VanillaSessionDetails.of("java-client", null, "java-domain"), null);
+                VanillaSessionDetails.of("java-client", null, "java-domain"), null  ,new FatalFailureConnectionStrategy(3));
 
         serverEndpoint = new ServerEndpoint("host.port1", serverAssetTree);
     }
