@@ -37,7 +37,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.13.50</version>
+                <version>1.13.51-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -127,7 +127,10 @@
             <scope>provided</scope>
         </dependency>
 
-
+        <dependency>
+            <groupId>software.chronicle</groupId>
+            <artifactId>chronicle-queue-enterprise</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>

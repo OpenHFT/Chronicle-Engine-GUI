@@ -14,6 +14,7 @@ import com.vaadin.ui.VerticalLayout;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.VanillaSessionDetails;
 import net.openhft.chronicle.network.connection.ClientConnectionMonitor;
+import net.openhft.chronicle.network.connection.FatalFailureConnectionStrategy;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.annotation.WebServlet;
@@ -95,7 +96,7 @@ public class EntryPoint extends UI {
                                    @NotNull VanillaSessionDetails sessionDetails,
                                    @NotNull ClientConnectionMonitor cm) {
         @NotNull final VanillaAssetTree tree = new VanillaAssetTree();
-        tree.root().forRemoteAccess(new String[]{connectionDetails}, BINARY, sessionDetails, cm);
+        tree.root().forRemoteAccess(new String[]{connectionDetails}, BINARY, sessionDetails, cm, new FatalFailureConnectionStrategy(3));
         return tree;
     }
 
