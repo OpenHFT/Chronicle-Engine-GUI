@@ -44,7 +44,7 @@ import static net.openhft.chronicle.engine.Chassis.*;
 @RunWith(Parameterized.class)
 public class SubscriptionModelTest {
 
-    public static final Double EXPECTED = 1.23;
+
     private static Map<String, String> _stringStringMap;
     private static String _mapName = "/chronicleMapString";
     private static String _mapArgs = "putReturnsNull=true";
@@ -74,7 +74,7 @@ public class SubscriptionModelTest {
         _stringStringMap.clear();
 
         _clientAssetTree = assetTree();
-
+        TCPRegistry.reset();
         TCPRegistry.createServerSocketChannelFor(_serverAddress);
         _serverEndpoint = new ServerEndpoint(_serverAddress, _clientAssetTree);
         exceptionKeyIntegerMap = Jvm.recordExceptions();
@@ -84,9 +84,13 @@ public class SubscriptionModelTest {
     public void tearDown() {
         assetTree().close();
 
+        if (_clientAssetTree != null)
+            _clientAssetTree.close();
+
         if (_serverEndpoint != null) {
             _serverEndpoint.close();
         }
+
 
         TCPRegistry.reset();
 
@@ -99,99 +103,102 @@ public class SubscriptionModelTest {
     public void testSubscriptionStringStringMap() throws InterruptedException {
         YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                wireType, onThrowable::add);
+        try (VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
+                wireType, onThrowable::add)) {
 
-        String mapName = "/test/maps/string/double/test";
-        String mapNameSubscriber = mapName + "?bootstrap=false";
+            String mapName = "/test/maps/string/double/test";
+            String mapNameSubscriber = mapName + "?bootstrap=false";
 
-        Map<String, String> stringDoubleMapView = remoteClient.acquireMap(mapName, String.class, String.class);
-        int size = stringDoubleMapView.size();
+            Map<String, String> stringDoubleMapView = remoteClient.acquireMap(mapName, String.class, String.class);
+            int size = stringDoubleMapView.size();
 
-        Assert.assertEquals(0, size);
+            Assert.assertEquals(0, size);
 
-        BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
+            BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
 
-        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
+            remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
 
-        String key = "k1";
-        String value = "1.23";
+            String key = "k1";
+            String value = "1.23";
 
-        stringDoubleMapView.put(key, value);
-        MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
+            stringDoubleMapView.put(key, value);
+            MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
 
-        Assert.assertEquals(key, mapEvent.getKey());
-        //Assert.assertEquals(value,mapEvent.getValue(),0.0);
+            Assert.assertEquals(key, mapEvent.getKey());
+            //Assert.assertEquals(value,mapEvent.getValue(),0.0);
 
-        //No throwables expected
-        Assert.assertNull(onThrowable.poll());
+            //No throwables expected
+            Assert.assertNull(onThrowable.poll());
+        }
     }
 
     @Test
     public void testSubscriptionFloatFloatMap() throws InterruptedException {
         YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                wireType);
+        try (VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
+                wireType)) {
 
-        String mapName = "/test/maps/string/double/test";
-        String mapNameSubscriber = mapName + "?bootstrap=false";
+            String mapName = "/test/maps/string/double/test";
+            String mapNameSubscriber = mapName + "?bootstrap=false";
 
-        Map<Float, Float> stringDoubleMapView = remoteClient.acquireMap(mapName, Float.class,
-                Float.class);
-        int size = stringDoubleMapView.size();
+            Map<Float, Float> stringDoubleMapView = remoteClient.acquireMap(mapName, Float.class,
+                    Float.class);
+            int size = stringDoubleMapView.size();
 
-        Assert.assertEquals(0, size);
+            Assert.assertEquals(0, size);
 
-        BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
+            BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
 
-        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
+            remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
 
-        Float key = 1.23f;
-        Float value = 1.23f;
+            Float key = 1.23f;
+            Float value = 1.23f;
 
-        stringDoubleMapView.put(key, value);
-        MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
+            stringDoubleMapView.put(key, value);
+            MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
 
-        Assert.assertEquals(key, (float) mapEvent.getKey(), 0.001);
-        //Assert.assertEquals(value,mapEvent.getValue(),0.0);
+            Assert.assertEquals(key, (float) mapEvent.getKey(), 0.001);
+            //Assert.assertEquals(value,mapEvent.getValue(),0.0);
 
-        //No throwables expected
-        Assert.assertNull(onThrowable.poll());
+            //No throwables expected
+            Assert.assertNull(onThrowable.poll());
+        }
     }
 
     @Test
     public void testSubscriptionIntegerIntegerMap() throws InterruptedException {
         YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                wireType);
+        try (VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
+                wireType)) {
 
-        String mapName = "/test/maps/string/double/test";
-        String mapNameSubscriber = mapName + "?bootstrap=false";
+            String mapName = "/test/maps/string/double/test";
+            String mapNameSubscriber = mapName + "?bootstrap=false";
 
-        Map<Integer, Integer> stringDoubleMapView = remoteClient.acquireMap(mapName, Integer.class,
-                Integer.class);
-        int size = stringDoubleMapView.size();
+            Map<Integer, Integer> stringDoubleMapView = remoteClient.acquireMap(mapName, Integer.class,
+                    Integer.class);
+            int size = stringDoubleMapView.size();
 
-        Assert.assertEquals(0, size);
+            Assert.assertEquals(0, size);
 
-        BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
+            BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
 
-        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, (e) ->
-                mapEvents.add(e));
+            remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, (e) ->
+                    mapEvents.add(e));
 
-        Integer key = 1;
-        Integer value = 2;
+            Integer key = 1;
+            Integer value = 2;
 
-        stringDoubleMapView.put(key, value);
-        MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
+            stringDoubleMapView.put(key, value);
+            MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
 
-        Assert.assertEquals(key, mapEvent.getKey());
-        //Assert.assertEquals(value,mapEvent.getValue(),0.0);
+            Assert.assertEquals(key, mapEvent.getKey());
+            //Assert.assertEquals(value,mapEvent.getValue(),0.0);
 
-        //No throwables expected
-        Assert.assertNull(onThrowable.poll());
+            //No throwables expected
+            Assert.assertNull(onThrowable.poll());
+        }
     }
 
     @Test
@@ -199,64 +206,66 @@ public class SubscriptionModelTest {
         YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
 
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, wireType);
-        String mapName = "/test/maps/string/double/test";
-        String mapNameSubscriber = mapName + "?bootstrap=false";
+        try (VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, wireType)) {
+            String mapName = "/test/maps/string/double/test";
+            String mapNameSubscriber = mapName + "?bootstrap=false";
 
-        Map<Long, Long> stringDoubleMapView = remoteClient.acquireMap(mapName, Long.class,
-                Long.class);
-        int size = stringDoubleMapView.size();
+            Map<Long, Long> stringDoubleMapView = remoteClient.acquireMap(mapName, Long.class,
+                    Long.class);
+            int size = stringDoubleMapView.size();
 
-        Assert.assertEquals(0, size);
+            Assert.assertEquals(0, size);
 
-        BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
+            BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
 
-        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
+            remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
 
-        Long key = 1L;
-        Long value = 2L;
+            Long key = 1L;
+            Long value = 2L;
 
-        stringDoubleMapView.put(key, value);
-        MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
+            stringDoubleMapView.put(key, value);
+            MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
 
-        Assert.assertEquals(key, mapEvent.getKey());
-        //Assert.assertEquals(value,mapEvent.getValue(),0.0);
+            Assert.assertEquals(key, mapEvent.getKey());
+            //Assert.assertEquals(value,mapEvent.getValue(),0.0);
 
-        //No throwables expected
-        Assert.assertNull(onThrowable.poll());
+            //No throwables expected
+            Assert.assertNull(onThrowable.poll());
+        }
     }
 
     @Test
     public void testStringValueThrottled() throws InterruptedException {
 
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                wireType, onThrowable::add);
+        try (VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
+                wireType, onThrowable::add)) {
 
-        long throttlePeriod = 100;
-        String mapName = "/test/maps/string/double/test";
-        String mapNameSubscriber = mapName + "/hello?throttlePeriodMs=" + throttlePeriod;
+            long throttlePeriod = 100;
+            String mapName = "/test/maps/string/double/test";
+            String mapNameSubscriber = mapName + "/hello?throttlePeriodMs=" + throttlePeriod;
 
-        Map<String, String> stringStringMapView = remoteClient.acquireMap(mapName, String.class, String.class);
+            Map<String, String> stringStringMapView = remoteClient.acquireMap(mapName, String.class, String.class);
 
-        Assert.assertEquals(0, stringStringMapView.size());
+            Assert.assertEquals(0, stringStringMapView.size());
 
-        String key = "hello";
-        String value = "world";
-        //   stringStringMapView.put(key, value);
-        final AtomicLong lastTime = new AtomicLong();
-        final AtomicLong count = new AtomicLong();
-        remoteClient.registerSubscriber(mapNameSubscriber, String.class,
-                v -> check(v, throttlePeriod, lastTime, count));
+            String key = "hello";
+            String value = "world";
+            //   stringStringMapView.put(key, value);
+            final AtomicLong lastTime = new AtomicLong();
+            final AtomicLong count = new AtomicLong();
+            remoteClient.registerSubscriber(mapNameSubscriber, String.class,
+                    v -> check(v, throttlePeriod, lastTime, count));
 
-        // this will take about 1 second
-        for (int i = 0; i < 1000; i++) {
-            stringStringMapView.put(key, value + i);
-            Jvm.pause(1);
+            // this will take about 1 second
+            for (int i = 0; i < 1000; i++) {
+                stringStringMapView.put(key, value + i);
+                Jvm.pause(1);
+            }
+
+            // check a value was received about 10 time
+            Assert.assertTrue(count.get() >= 5 && count.get() <= 20);
         }
-
-        // check a value was received about 10 time
-        Assert.assertTrue(count.get() >= 5 && count.get() <= 20);
     }
 
     @Ignore
@@ -266,88 +275,89 @@ public class SubscriptionModelTest {
         String topic = "hello";
         BlockingQueue<String> eventsQueue = new ArrayBlockingQueue<>(1000);
 
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, wireType);
+        try (VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, wireType)) {
 
-        long throttlePeriod = 100;
-        String mapName = "/test/maps/string/double/test";
-        String mapNameSubscriber = mapName + "/" + topic + "?throttlePeriodMs=" + throttlePeriod;
+            long throttlePeriod = 100;
+            String mapName = "/test/maps/string/double/test";
+            String mapNameSubscriber = mapName + "/" + topic + "?throttlePeriodMs=" + throttlePeriod;
 
-        Map<String, String> stringStringMapView = remoteClient.acquireMap(mapName, String.class, String.class);
+            Map<String, String> stringStringMapView = remoteClient.acquireMap(mapName, String.class, String.class);
 
-        Assert.assertEquals(0, stringStringMapView.size());
+            Assert.assertEquals(0, stringStringMapView.size());
 
-        //Register subscriber and sleep to allow the async event to take effect
-        remoteClient.registerSubscriber(mapNameSubscriber, String.class, new Subscriber<String>() {
-            @Override
-            public void onMessage(String s) throws InvalidSubscriberException {
-                eventsQueue.add(s);
+            //Register subscriber and sleep to allow the async event to take effect
+            remoteClient.registerSubscriber(mapNameSubscriber, String.class, new Subscriber<String>() {
+                @Override
+                public void onMessage(String s) throws InvalidSubscriberException {
+                    eventsQueue.add(s);
+                }
+            });
+
+            String lastValue = "";
+            for (int i = 0; i < 100; i++) {
+                stringStringMapView.put(topic, lastValue = "World" + i);
+                Thread.sleep(1);
             }
-        });
 
-        String lastValue = "";
-        for (int i = 0; i < 100; i++) {
-            stringStringMapView.put(topic, lastValue = "World" + i);
-            Thread.sleep(1);
+            long timeLastReceived = 0;
+            String last = null;
+
+            for (; ; ) {
+                long t1 = System.currentTimeMillis();
+                String actual = eventsQueue.poll(2, SECONDS);
+                long t2 = System.currentTimeMillis();
+                System.out.println(String.format("t1 and t2:  %s %s  %s %s", t1, t2, t2 - t1, actual == null ? "" : actual));
+                if (actual == null)
+                    break;
+
+                final long timeSinceLastMessage = System.currentTimeMillis() - timeLastReceived;
+                timeLastReceived = System.currentTimeMillis();
+                // check that the timeSinceLastMessage is 90% of the  throttlePeriod
+                System.out.println(String.format("timeSinceLastMessage and throttlePeriod %s %s", timeSinceLastMessage, throttlePeriod));
+                Assert.assertTrue(timeSinceLastMessage >= (throttlePeriod * .9));
+                last = actual;
+            }
+
+            Thread.sleep(500);
+
+            Assert.assertEquals(lastValue, last);
+
+            stringStringMapView.put(topic, "World10");
+
+            for (; ; ) {
+                String actual = eventsQueue.poll(2, SECONDS);
+
+                if (actual == null)
+                    break;
+
+                final long timeSinceLastMessage = System.currentTimeMillis() - timeLastReceived;
+                timeLastReceived = System.currentTimeMillis();
+                // check that the  timeSinceLastMessage is 90% of the  throttlePeriod
+                Assert.assertTrue(timeSinceLastMessage >= throttlePeriod * .9);
+                last = actual;
+
+            }
+
+            // the last message should be the latest
+            Assert.assertEquals("World10", last);
+
+            //Put KvP and expect event
+            String key1 = "k1";
+            String value1 = "v1";
+            stringStringMapView.put(key1, value1);
+
+            String event = eventsQueue.poll(200, TimeUnit.MILLISECONDS);
+            Assert.assertEquals(value1, event);
+
+            //Unregister subscriber and sleep to allow the async event to take effect
+            //_dataStorePublisher.unregisterTopicSubscriber(topicSubscriber);
+            Thread.sleep(20);
+
+            String value2 = "v2";
+            stringStringMapView.put(key1, value2);
+            event = eventsQueue.poll(100, TimeUnit.MILLISECONDS);
+            Assert.assertNull(event); //should not receive event thus null test
         }
-
-        long timeLastReceived = 0;
-        String last = null;
-
-        for (; ; ) {
-            long t1 = System.currentTimeMillis();
-            String actual = eventsQueue.poll(2, SECONDS);
-            long t2 = System.currentTimeMillis();
-            System.out.println(String.format("t1 and t2:  %s %s  %s %s", t1, t2, t2 - t1, actual == null ? "" : actual));
-            if (actual == null)
-                break;
-
-            final long timeSinceLastMessage = System.currentTimeMillis() - timeLastReceived;
-            timeLastReceived = System.currentTimeMillis();
-            // check that the timeSinceLastMessage is 90% of the  throttlePeriod
-            System.out.println(String.format("timeSinceLastMessage and throttlePeriod %s %s", timeSinceLastMessage, throttlePeriod));
-            Assert.assertTrue(timeSinceLastMessage >= (throttlePeriod * .9));
-            last = actual;
-        }
-
-        Thread.sleep(500);
-
-        Assert.assertEquals(lastValue, last);
-
-        stringStringMapView.put(topic, "World10");
-
-        for (; ; ) {
-            String actual = eventsQueue.poll(2, SECONDS);
-
-            if (actual == null)
-                break;
-
-            final long timeSinceLastMessage = System.currentTimeMillis() - timeLastReceived;
-            timeLastReceived = System.currentTimeMillis();
-            // check that the  timeSinceLastMessage is 90% of the  throttlePeriod
-            Assert.assertTrue(timeSinceLastMessage >= throttlePeriod * .9);
-            last = actual;
-
-        }
-
-        // the last message should be the latest
-        Assert.assertEquals("World10", last);
-
-        //Put KvP and expect event
-        String key1 = "k1";
-        String value1 = "v1";
-        stringStringMapView.put(key1, value1);
-
-        String event = eventsQueue.poll(200, TimeUnit.MILLISECONDS);
-        Assert.assertEquals(value1, event);
-
-        //Unregister subscriber and sleep to allow the async event to take effect
-        //_dataStorePublisher.unregisterTopicSubscriber(topicSubscriber);
-        Thread.sleep(20);
-
-        String value2 = "v2";
-        stringStringMapView.put(key1, value2);
-        event = eventsQueue.poll(100, TimeUnit.MILLISECONDS);
-        Assert.assertNull(event); //should not receive event thus null test
     }
 
     @Test
@@ -362,78 +372,79 @@ public class SubscriptionModelTest {
         TopicSubscriber<String, MapEvent> topicSubscriber = (k, v) -> eventsQueue.add(v);
         long throttlePeriod = 1000;
 
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, wireType);
-        String mapName = "/test/maps/string/double/test";
-        String mapNameSubscriber = mapName + "?throttlePeriodMs=" + throttlePeriod;
-        Map<String, String> stringStringMapView = remoteClient.acquireMap(mapName, String.class, String.class);
-        int size = stringStringMapView.size();
+        try (VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress, wireType)) {
+            String mapName = "/test/maps/string/double/test";
+            String mapNameSubscriber = mapName + "?throttlePeriodMs=" + throttlePeriod;
+            Map<String, String> stringStringMapView = remoteClient.acquireMap(mapName, String.class, String.class);
+            int size = stringStringMapView.size();
 
-        //Register subscriber and sleep to allow the async event to take effect
-        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, subscriber);
-        Thread.sleep(200);
+            //Register subscriber and sleep to allow the async event to take effect
+            remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, subscriber);
+            Thread.sleep(200);
 
-        for (int i = 0; i < 10; i++) {
-            stringStringMapView.put(topic, "World" + i);
+            for (int i = 0; i < 10; i++) {
+                stringStringMapView.put(topic, "World" + i);
+            }
+
+            long timeLastReceived = 0;
+            MapEvent last = null;
+
+            for (; ; ) {
+                long t1 = System.currentTimeMillis();
+                MapEvent actual = eventsQueue.poll(2, SECONDS);
+                long t2 = System.currentTimeMillis();
+                System.out.println(String.format("t1 and t2:  %s %s  %s %s", t1, t2, t2 - t1, actual == null ? "" : actual.getValue()));
+                if (actual == null)
+                    break;
+
+                final long timeSinceLastMessage = System.currentTimeMillis() - timeLastReceived;
+                timeLastReceived = System.currentTimeMillis();
+                // check that the timeSinceLastMessage is 90% of the  throttlePeriod
+                System.out.println(String.format("timeSinceLastMessage and throttlePeriod %s %s", timeSinceLastMessage, throttlePeriod));
+                Assert.assertTrue(timeSinceLastMessage >= (throttlePeriod * .9));
+                last = actual;
+
+            }
+
+            Assert.assertEquals("World9", last.getValue());
+
+            stringStringMapView.put(topic, "World10");
+
+            for (; ; ) {
+                MapEvent actual = eventsQueue.poll(2, SECONDS);
+
+                if (actual == null)
+                    break;
+
+                final long timeSinceLastMessage = System.currentTimeMillis() - timeLastReceived;
+                timeLastReceived = System.currentTimeMillis();
+                // check that the  timeSinceLastMessage is 90% of the  throttlePeriod
+                Assert.assertTrue(timeSinceLastMessage >= throttlePeriod * .9);
+                last = actual;
+
+            }
+
+            // the last message should be the latest
+            Assert.assertEquals("World10", last.getValue());
+
+            //Put KvP and expect event
+            String key1 = "k1";
+            String value1 = "v1";
+            stringStringMapView.put(key1, value1);
+
+            MapEvent event = eventsQueue.poll(200, TimeUnit.MILLISECONDS);
+            Assert.assertEquals(key1, event.getKey());
+            Assert.assertEquals(value1, event.getValue());
+
+            //Unregister subscriber and sleep to allow the async event to take effect
+            //_dataStorePublisher.unregisterTopicSubscriber(topicSubscriber);
+            Thread.sleep(20);
+
+            String value2 = "v2";
+            stringStringMapView.put(key1, value2);
+            event = eventsQueue.poll(100, TimeUnit.MILLISECONDS);
+            Assert.assertNull(event); //should not receive event thus null test
         }
-
-        long timeLastReceived = 0;
-        MapEvent last = null;
-
-        for (; ; ) {
-            long t1 = System.currentTimeMillis();
-            MapEvent actual = eventsQueue.poll(2, SECONDS);
-            long t2 = System.currentTimeMillis();
-            System.out.println(String.format("t1 and t2:  %s %s  %s %s", t1, t2, t2 - t1, actual == null ? "" : actual.getValue()));
-            if (actual == null)
-                break;
-
-            final long timeSinceLastMessage = System.currentTimeMillis() - timeLastReceived;
-            timeLastReceived = System.currentTimeMillis();
-            // check that the timeSinceLastMessage is 90% of the  throttlePeriod
-            System.out.println(String.format("timeSinceLastMessage and throttlePeriod %s %s", timeSinceLastMessage, throttlePeriod));
-            Assert.assertTrue(timeSinceLastMessage >= (throttlePeriod * .9));
-            last = actual;
-
-        }
-
-        Assert.assertEquals("World9", last.getValue());
-
-        stringStringMapView.put(topic, "World10");
-
-        for (; ; ) {
-            MapEvent actual = eventsQueue.poll(2, SECONDS);
-
-            if (actual == null)
-                break;
-
-            final long timeSinceLastMessage = System.currentTimeMillis() - timeLastReceived;
-            timeLastReceived = System.currentTimeMillis();
-            // check that the  timeSinceLastMessage is 90% of the  throttlePeriod
-            Assert.assertTrue(timeSinceLastMessage >= throttlePeriod * .9);
-            last = actual;
-
-        }
-
-        // the last message should be the latest
-        Assert.assertEquals("World10", last.getValue());
-
-        //Put KvP and expect event
-        String key1 = "k1";
-        String value1 = "v1";
-        stringStringMapView.put(key1, value1);
-
-        MapEvent event = eventsQueue.poll(200, TimeUnit.MILLISECONDS);
-        Assert.assertEquals(key1, event.getKey());
-        Assert.assertEquals(value1, event.getValue());
-
-        //Unregister subscriber and sleep to allow the async event to take effect
-        //_dataStorePublisher.unregisterTopicSubscriber(topicSubscriber);
-        Thread.sleep(20);
-
-        String value2 = "v2";
-        stringStringMapView.put(key1, value2);
-        event = eventsQueue.poll(100, TimeUnit.MILLISECONDS);
-        Assert.assertNull(event); //should not receive event thus null test
     }
 
     @Test
@@ -443,96 +454,99 @@ public class SubscriptionModelTest {
 
         Consumer<Throwable> t = onThrowable::add;
 
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                wireType, t);
+        try (VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
+                wireType, t)) {
 
-        String mapName = "/test/maps/string/double/test";
-        String mapNameSubscriber = mapName + "?bootstrap=false";
+            String mapName = "/test/maps/string/double/test";
+            String mapNameSubscriber = mapName + "?bootstrap=false";
 
-        Map<String, Double> stringDoubleMapView = remoteClient.acquireMap(mapName, String.class, Double.class);
-        int size = stringDoubleMapView.size();
+            Map<String, Double> stringDoubleMapView = remoteClient.acquireMap(mapName, String.class, Double.class);
+            int size = stringDoubleMapView.size();
 
-        Assert.assertEquals(0, size);
+            Assert.assertEquals(0, size);
 
-        BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
+            BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
 
-        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
+            remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
 
-        String key = "k1";
-        double value = 1.23;
+            String key = "k1";
+            double value = 1.23;
 
-        stringDoubleMapView.put(key, value);
-        MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
+            stringDoubleMapView.put(key, value);
+            MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
 
-        Assert.assertEquals(key, mapEvent.getKey());
-        //Assert.assertEquals(value,mapEvent.getValue(),0.0);
+            Assert.assertEquals(key, mapEvent.getKey());
+            //Assert.assertEquals(value,mapEvent.getValue(),0.0);
 
-        //No throwables expected
-        Assert.assertNull(onThrowable.poll());
+            //No throwables expected
+            Assert.assertNull(onThrowable.poll());
+        }
     }
 
     @Test
     public void testSubscriptionDoubleDoubleMap() throws InterruptedException {
         YamlLogging.setAll(YamlLogging.YamlLoggingLevel.DEBUG_ONLY);
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                wireType, onThrowable::add);
+        try (VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
+                wireType, onThrowable::add)) {
 
-        String mapName = "/test/maps/string/double/test";
-        String mapNameSubscriber = mapName + "?bootstrap=false";
+            String mapName = "/test/maps/string/double/test";
+            String mapNameSubscriber = mapName + "?bootstrap=false";
 
-        Map<Double, Double> stringDoubleMapView = remoteClient.acquireMap(mapName, Double.class, Double.class);
-        int size = stringDoubleMapView.size();
+            Map<Double, Double> stringDoubleMapView = remoteClient.acquireMap(mapName, Double.class, Double.class);
+            int size = stringDoubleMapView.size();
 
-        Assert.assertEquals(0, size);
+            Assert.assertEquals(0, size);
 
-        BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
+            BlockingQueue<MapEvent> mapEvents = new ArrayBlockingQueue<>(1);
 
-        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
+            remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class, mapEvents::add);
 
-        double key = 1.0;
-        double value = 1.23;
+            double key = 1.0;
+            double value = 1.23;
 
-        stringDoubleMapView.put(key, value);
-        MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
+            stringDoubleMapView.put(key, value);
+            MapEvent mapEvent = mapEvents.poll(2000, TimeUnit.MILLISECONDS);
 
-        Assert.assertEquals(key, (double) mapEvent.getKey(), 0.001);
-        //Assert.assertEquals(value,mapEvent.getValue(),0.0);
+            Assert.assertEquals(key, (double) mapEvent.getKey(), 0.001);
+            //Assert.assertEquals(value,mapEvent.getValue(),0.0);
 
-        //No throwables expected
-        Assert.assertNull(onThrowable.poll());
+            //No throwables expected
+            Assert.assertNull(onThrowable.poll());
+        }
     }
 
     @Test
     public void testMapEventThrottled() throws InterruptedException {
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                wireType, onThrowable::add);
+        try (VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
+                wireType, onThrowable::add)) {
 
-        long throttlePeriod = 100;
-        String mapName = "/test/maps/string/double/test";
-        String mapNameSubscriber = mapName + "?throttlePeriodMs=" + throttlePeriod;
+            long throttlePeriod = 100;
+            String mapName = "/test/maps/string/double/test";
+            String mapNameSubscriber = mapName + "?throttlePeriodMs=" + throttlePeriod;
 
-        Map<String, String> map = remoteClient.acquireMap(mapName, String.class, String.class);
+            Map<String, String> map = remoteClient.acquireMap(mapName, String.class, String.class);
 
-        Assert.assertEquals(0, map.size());
+            Assert.assertEquals(0, map.size());
 
-        final AtomicLong lastTime = new AtomicLong();
-        final AtomicLong count = new AtomicLong();
-        remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class,
-                mapEvent -> check(mapEvent, throttlePeriod, lastTime, count));
+            final AtomicLong lastTime = new AtomicLong();
+            final AtomicLong count = new AtomicLong();
+            remoteClient.registerSubscriber(mapNameSubscriber, MapEvent.class,
+                    mapEvent -> check(mapEvent, throttlePeriod, lastTime, count));
 
-        String key = "hello";
-        String value = "world";
+            String key = "hello";
+            String value = "world";
 
-        // this will take about 1 second
-        for (int i = 0; i < 1000; i++) {
-            map.put(key, value + i);
-            Jvm.pause(1);
+            // this will take about 1 second
+            for (int i = 0; i < 1000; i++) {
+                map.put(key, value + i);
+                Jvm.pause(1);
+            }
+
+            // check a value was received about 10 time
+            Assert.assertTrue(count.get() >= 5 && count.get() <= 20);
         }
-
-        // check a value was received about 10 time
-        Assert.assertTrue(count.get() >= 5 && count.get() <= 20);
     }
 
     private void check(Object v, long throttlePeriod, AtomicLong lastTime, AtomicLong count) {
@@ -549,30 +563,31 @@ public class SubscriptionModelTest {
     public void testTopicSubscriptionStringDoubleMap() throws InterruptedException {
 
         BlockingQueue<Throwable> onThrowable = new ArrayBlockingQueue<>(1);
-        VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
-                wireType, onThrowable::add);
+        try (VanillaAssetTree remoteClient = new VanillaAssetTree().forRemoteAccess(_serverAddress,
+                wireType, onThrowable::add)) {
 
-        String mapName = "/test/maps/string/double/test";
-        String mapNameSubscriber = mapName + "?bootstrap=false";
+            String mapName = "/test/maps/string/double/test";
+            String mapNameSubscriber = mapName + "?bootstrap=false";
 
-        Map<String, Double> stringDoubleMapView = remoteClient.acquireMap(mapName, String.class, Double.class);
-        int size = stringDoubleMapView.size();
+            Map<String, Double> stringDoubleMapView = remoteClient.acquireMap(mapName, String.class, Double.class);
+            int size = stringDoubleMapView.size();
 
-        Assert.assertEquals(0, size);
+            Assert.assertEquals(0, size);
 
-        BlockingQueue<Double> mapEvents = new ArrayBlockingQueue<>(1);
+            BlockingQueue<Double> mapEvents = new ArrayBlockingQueue<>(1);
 
-        remoteClient.registerTopicSubscriber(mapNameSubscriber, String.class, Double.class, (k, v) -> mapEvents.add(v));
+            remoteClient.registerTopicSubscriber(mapNameSubscriber, String.class, Double.class, (k, v) -> mapEvents.add(v));
 
-        String key = "k1";
-        double value = 1.23;
+            String key = "k1";
+            double value = 1.23;
 
-        stringDoubleMapView.put(key, value);
-        Assert.assertEquals(value, mapEvents.poll(200, TimeUnit.MILLISECONDS), 0.0);
+            stringDoubleMapView.put(key, value);
+            Assert.assertEquals(value, mapEvents.poll(200, TimeUnit.MILLISECONDS), 0.0);
 //        Assert.assertEquals(value, (double)mapEvent.getValue(), 0.0);
 
-        //No throwables expected
-        Assert.assertNull(onThrowable.poll());
+            //No throwables expected
+            Assert.assertNull(onThrowable.poll());
+        }
     }
 
     /**
