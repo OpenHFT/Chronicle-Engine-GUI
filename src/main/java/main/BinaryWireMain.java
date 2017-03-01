@@ -35,7 +35,7 @@ public class BinaryWireMain {
 
     public static final net.openhft.chronicle.wire.WireType WIRE_TYPE = WireType.BINARY;
     public static final boolean PERSIST_TO_CHRONICLE = Boolean.parseBoolean(System.getProperty("persisted", "true"));
-    public static final int PORT = 8080;
+    public static final int PORT = 9090;
 
     public static void main(String[] args) throws IOException {
         int port = PORT;

@@ -18,7 +18,7 @@
                   <id>chronicle-enterprise-snapshots</id>
                   <username>mufg</username>
                   <password>CrA6AmKkBQCEWvTJJca67</password>
-              </server>
+              </server>           
         </servers>
   <settings>   -->
     <groupId>jp.mufg</groupId>
