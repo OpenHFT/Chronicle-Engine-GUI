@@ -162,8 +162,8 @@ class ColumnViewController<K, V> {
             gridColumn.setSortable(column.sortable);
             gridColumn.setEditable(!column.isReadOnly());
 
-            if (Number.class.isAssignableFrom(column.type) || Boolean.class.isAssignableFrom
-                    (column.type)) {
+            if (column.type != null && (Number.class.isAssignableFrom(column.type) || Boolean.class.isAssignableFrom
+                    (column.type))) {
                 gridColumn.setWidth(120);
             }
 
