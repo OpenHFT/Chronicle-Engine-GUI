@@ -26,6 +26,8 @@ import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 
+import org.apache.commons.cli.*;
+
 import java.io.IOException;
 
 /**
@@ -39,6 +41,38 @@ public class BinaryWireMain {
 
     public static void main(String[] args) throws IOException {
         int port = PORT;
+
+        CommandLine commandLine;
+        Options options = new Options();
+        options.addOption("d", "debug", false, "Debug enabled");
+        Option portOpt = Option.builder("p")
+                .longOpt( "port" )
+                .desc( "port number to use instead of the default"  )
+                .hasArg()
+                .build();
+        options.addOption(portOpt);
+        CommandLineParser parser = new DefaultParser();
+        try {
+            // parse the command line arguments
+            CommandLine line = parser.parse( options, args );
+            if (line.hasOption(portOpt.getOpt()))
+            {
+                port = Integer.parseInt(line.getOptionValue(portOpt.getOpt()));
+                System.out.println("Overriding port with " + port);
+            }
+            if (line.hasOption("debug")) {
+                System.out.println("Enabling message logging");
+                YamlLogging.showServerReads(true);
+                YamlLogging.showServerWrites(true);
+            }
+        }
+        catch( ParseException exp ) {
+            // oops, something went wrong
+            System.err.println( "Parsing failed.  Reason: " + exp.getMessage() );
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp( "MUFG", options );
+            System.exit(1);
+        }
 
         VanillaAssetTree assetTree = new VanillaAssetTree().forTesting(false);
 
@@ -60,12 +94,6 @@ public class BinaryWireMain {
 
         final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree);
 
-        if (args.length == 1 && args[0].compareTo("-debug") == 0)
-        {
-            System.out.println("Enabling message logging");
-            YamlLogging.showServerReads(true);
-            YamlLogging.showServerWrites(true);
-        }
         System.out.println("Server port seems to be " + port);
     }
 }
