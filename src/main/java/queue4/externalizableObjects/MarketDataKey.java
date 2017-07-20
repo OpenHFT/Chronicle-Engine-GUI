@@ -22,6 +22,40 @@ public class MarketDataKey implements Externalizable {
     private String _marketDataId;
     private MarketDataField _field;
 
+    public MarketDataKey() {
+    }
+
+    /**
+     * @param producer     The producer.
+     * @param supplier     The supplier.
+     * @param source       The source.
+     * @param type         The type.
+     * @param marketDataId The market identifier.
+     * @param field        The field.
+     */
+    public MarketDataKey(String producer, MarketDataSupplier supplier, MarketDataSource source, MarketDataType type, String marketDataId, MarketDataField field) {
+        updateValues(producer, supplier, source, type, marketDataId, field);
+    }
+
+    /**
+     * Sets the values and re-calculates the hash code.
+     *
+     * @param producer     The producer.
+     * @param supplier     The supplier.
+     * @param source       The source.
+     * @param type         The type.
+     * @param marketDataId The ID.
+     * @param field        The field.
+     */
+    public final void updateValues(String producer, MarketDataSupplier supplier, MarketDataSource source, MarketDataType type, String marketDataId, MarketDataField field) {
+        _producer = (producer == null) ? "" : producer;
+        _source = source;
+        _supplier = supplier;
+        _type = type;
+        _marketDataId = marketDataId;
+        _field = field;
+    }
+
     public String get_producer() {
         return _producer;
     }
@@ -74,8 +108,7 @@ public class MarketDataKey implements Externalizable {
      * @see java.io.Externalizable
      */
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException
-    {
+    public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(_producer);
         out.writeObject(_source);
         out.writeObject(_supplier);
@@ -88,8 +121,7 @@ public class MarketDataKey implements Externalizable {
      * @see java.io.Externalizable
      */
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException
-    {
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         _producer = in.readUTF();
         _source = (MarketDataSource) in.readObject();
         _supplier = (MarketDataSupplier) in.readObject();
