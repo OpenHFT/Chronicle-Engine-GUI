@@ -17,7 +17,10 @@ public enum MarketDataSupplier
     BLOOMBERG(1),
     REUTERS(2),
     BROADWAY(3),
-    ADEPT(4);
+    ADEPT(4),
+    DDP(5),
+    ION(6),
+    FILE(7);
 
     /**
      * Cache mapping the custom ids with the Eum types to ensure fast reverse lookup.

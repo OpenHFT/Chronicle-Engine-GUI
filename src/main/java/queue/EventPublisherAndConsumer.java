@@ -1,6 +1,7 @@
 package queue;
 
 import net.openhft.chronicle.*;
+import queue4.EventManager;
 
 public class EventPublisherAndConsumer
 {
@@ -28,7 +29,7 @@ public class EventPublisherAndConsumer
 
     public void start()
     {
-        _eventPublisher.start(_componentName);
+        //_eventPublisher.start(_componentName);
 
         _running = true;
 

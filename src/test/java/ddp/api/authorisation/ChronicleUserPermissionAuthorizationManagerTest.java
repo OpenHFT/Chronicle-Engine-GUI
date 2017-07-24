@@ -1,6 +1,7 @@
 package ddp.api.authorisation;
 
 import ddp.api.ConfigurationException;
+import net.openhft.chronicle.engine.api.map.MapView;
 import net.openhft.chronicle.engine.api.tree.Asset;
 import net.openhft.chronicle.engine.api.tree.AssetTree;
 import net.openhft.chronicle.engine.fs.Clusters;
@@ -15,10 +16,7 @@ import net.openhft.chronicle.network.VanillaSessionDetails;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -26,8 +24,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Tests for ChronicleUserPermissionAuthorizationManager.
@@ -234,6 +236,98 @@ public class ChronicleUserPermissionAuthorizationManagerTest {
         isUserAuthorized = permissionAuthorizationManager1.isUserAuthorized(testSourceUri, _domain, _userId, dataPermission2, null);
         Assert.assertTrue(isUserAuthorized);
     }
+
+
+    /**
+     * Test that revoking permissions on Server1 are replicated (revoked) on Server2, without removing other permissions.
+     * Test that revoking permissions on Server2 are replicated (revoked) on Server1, without removing other permissions.
+     */
+    @Test
+    //@Ignore("Ignoring while waiting for chronicle answer on replication bug")
+    public void testRevokeUserPermissions() throws Exception
+    {
+        String testSourceUri = "/test/ddp/live/data/revokeuserpermissions";
+        DataPermission dataPermission1 = DataPermission.ADD;
+        DataPermission dataPermission2 = DataPermission.DELETE;
+        BlockingQueue<String>[] subscriptions = getSubscriptions(_server1, _server2);
+        //Create the two authorization managers
+        ChronicleUserPermissionAuthorizationManager permissionAuthorizationManager1 = new ChronicleUserPermissionAuthorizationManager(_server1, _dataSourcePermissionsUri, null);
+        ChronicleUserPermissionAuthorizationManager permissionAuthorizationManager2 = new ChronicleUserPermissionAuthorizationManager(_server2, _dataSourcePermissionsUri, null);
+
+        //Grant permissions to be revoked
+        permissionAuthorizationManager1.grantUserPermissions(testSourceUri, _domain, _userId, dataPermission1);
+        permissionAuthorizationManager1.grantUserPermissions(testSourceUri, _domain, _userId, dataPermission2);
+
+//        waitReplication(subscriptions[1], subscriptions);
+        Thread.sleep(2000);
+
+        //Check that replication is successful
+        boolean isUserAuthorized = permissionAuthorizationManager2.isUserAuthorized(testSourceUri, _domain, _userId, dataPermission1, null);
+        Assert.assertTrue(isUserAuthorized);
+        isUserAuthorized = permissionAuthorizationManager2.isUserAuthorized(testSourceUri, _domain, _userId, dataPermission2, null);
+        Assert.assertTrue(isUserAuthorized);
+
+
+        //Test that revoking permissions on Server1 are replicated (revoked) on Server2, without removing other permissions.
+        permissionAuthorizationManager1.revokeUserPermissions(testSourceUri, _domain, _userId, dataPermission1);
+//        waitReplication(subscriptions[1], subscriptions);
+        Thread.sleep(2000);
+
+        isUserAuthorized = permissionAuthorizationManager1.isUserAuthorized(testSourceUri, _domain, _userId, dataPermission1, null);
+        Assert.assertFalse(isUserAuthorized);
+
+        isUserAuthorized = permissionAuthorizationManager2.isUserAuthorized(testSourceUri, _domain, _userId, dataPermission1, null);
+        Assert.assertFalse(isUserAuthorized);
+
+        //Check that the other permissions has NOT been removed
+        isUserAuthorized = permissionAuthorizationManager1.isUserAuthorized(testSourceUri, _domain, _userId, dataPermission2, null);
+        Assert.assertTrue(isUserAuthorized);
+
+        isUserAuthorized = permissionAuthorizationManager2.isUserAuthorized(testSourceUri, _domain, _userId, dataPermission2, null);
+        Assert.assertTrue(isUserAuthorized);
+
+
+        //Test that revoking permissions on Server2 are replicated (revoked) on Server1, without removing other permissions.
+        permissionAuthorizationManager2.revokeUserPermissions(testSourceUri, _domain, _userId, dataPermission2);
+//        waitReplication(subscriptions[0], subscriptions);
+        Thread.sleep(2000);
+        isUserAuthorized = permissionAuthorizationManager2.isUserAuthorized(testSourceUri, _domain, _userId, dataPermission2, null);
+        Assert.assertFalse(isUserAuthorized);
+
+        isUserAuthorized = permissionAuthorizationManager1.isUserAuthorized(testSourceUri, _domain, _userId, dataPermission2, null);
+        Assert.assertFalse(isUserAuthorized);
+    }
+
+    private BlockingQueue<String>[] getSubscriptions(AssetTree ... assetTrees){
+        return map(assetTrees, a -> {
+            LinkedBlockingDeque<String> subscription = new LinkedBlockingDeque<>(100);
+            MapView<String, Map> map = a.acquireMap(_dataSourcePermissionsUri, String.class, Map.class);
+            map.registerSubscriber(s -> {}
+//                subscription.add(""); }
+            );
+            return subscription;
+        }).toArray(new LinkedBlockingDeque[0]);
+    }
+
+    public static <TSource, TDest> List<TDest> map(TSource[] array, Function<TSource, TDest> mapFunction)
+    {
+        return map(Stream.of(array), mapFunction);
+    }
+
+    /**
+     * Maps a Stream<TSource> to a List<TDest>
+     *
+     * @param stream      the source stream
+     * @param mapFunction a function that transforms TSource to TDest
+     * @param <TSource>   the source type
+     * @param <TDest>     the destination type
+     * @return a List<TDest>
+     */
+    public static <TSource, TDest> List<TDest> map(Stream<TSource> stream, Function<TSource, TDest> mapFunction)
+    {
+        return stream.map(mapFunction::apply).collect(toList());
+    }
+
 
 
     private void waitReplication(BlockingQueue<String> waitOn, BlockingQueue<String>... subscriptions) throws InterruptedException {

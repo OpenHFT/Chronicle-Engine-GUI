@@ -12,7 +12,7 @@ public enum MarketDataSource
 
     CME(1),
     CBOT(2),
-    ICAP_RCM(3),
+    ICAP_19901(3),
     IBA(4),
     TULLETT_PREBON_SMKR(5),
     ESPEED(6),
@@ -21,7 +21,7 @@ public enum MarketDataSource
     FEDERAL_RESERVE_BANK_NY(9),
     REUTERS(10),
     PCA_MODEL(11),
-    SWAP_CURVE_MODEL(12),
+    SWAP_RATE_MODEL(12),
     BUTTERFLY_MODEL(13),
     TREASURY_SPREAD_MODEL(14),
     TRADER(15),
@@ -39,16 +39,45 @@ public enum MarketDataSource
     TD_SECURITIES(27),
     CITADEL(28),
     BMO_CAPITAL_MARKETS(29),
-    MARKET_SWAP_CURVE_MODEL(30),
+    MARKET_STANDARD_SWAP_CURVE_MODEL(30),
     TRADEWEB(31),
     MANUAL(32),
-    SWAP_RATE_SPREAD_MODEL(33),
+    BROKER_SWAP_RATE_MODEL(33),
     BROADWAY(34),
     TRADX(35),
     SWAP_BOX(36),
-    OFF_THE_RUN_PRICER(37),
-    CME_MODEL(38),
-    ADEPT(39);
+    CME_MODEL(37),
+    ADEPT(38),
+    TRADEWEB_IMPLIED_YIELD_SPREAD_MODEL(39),
+    SWAP_BOX_SPREAD_MODEL(40),
+    TRADEWEB_SINGLE_YIELD_SPREAD_MODEL(41),
+    BLOOMBERG_CBBT(42),
+    MORNING_SETUP(43),
+    LIVE_MORNING_SETUP(44),
+    TRADITION(45),
+    ICAP_GCMN(46),
+    ICAP_ICAP(47),
+    EMMI(48), // European Money Markets Institute
+    BLOOMBERG_CMPN(49),
+    BLOOMBERG_TPRA(50),
+    BLOOMBERG_TRPU(51),
+    WMBA(52),
+    DRIVER_SWAP_RATE_MODEL(53),
+    TULLETT_PREBON_TTKL(54),
+    ICE_FUTURES_EUROPE(55),
+    TENOR_CURVE(56),
+    ECB(57),
+    LIBOR_SWAP_RATE_MODEL(58),
+    ION(59),
+    FORWARD_SPREAD_MODEL(60),
+    EUREX(61),
+    LIBOR_OIS_FULL_FUT_MODEL(62),
+    LIBOR_OIS_SHORT_FUT_MODEL(63),
+    LIBOR_LIBOR_FULL_FUT_MODEL(64),
+    LIBOR_LIBOR_SHORT_FUT_MODEL(65),
+    OUTPUT_VALUATION_ENVIRONMENT(66),
+    FORT(67);
+
 
     /**
      * Cache mapping the custom ids with the Eum types to ensure fast reverse lookup.
@@ -56,11 +85,13 @@ public enum MarketDataSource
      */
     private static Map<Integer, MarketDataSource> _idMappings;
 
+
     /**
-     * Custom id value (byte because we are unlikely to exceed 127 enum types).
+     * Custom id value.
      * Custom ids should never change, but enum declaration order can change.
      */
     private final int _id;
+
 
     /**
      * Creates a new MarketDataSource with the given id. Id must be unique.
@@ -72,6 +103,7 @@ public enum MarketDataSource
     {
         _id = id;
     }
+
 
     /**
      * Initialise the id mapping map with all MarketDataSource; returns immediately if the map has already been initialised.
@@ -104,6 +136,7 @@ public enum MarketDataSource
         }
     }
 
+
     /**
      * Returns the MarketDataSource with the given id.
      * If no such MarketDataSource exist null is returned.
@@ -117,6 +150,7 @@ public enum MarketDataSource
 
         return _idMappings.get(id);
     }
+
 
     /**
      * @return Id for the MarketDataSource

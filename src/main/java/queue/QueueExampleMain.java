@@ -2,6 +2,7 @@ package queue;
 
 import com.sun.jna.platform.win32.*;
 import net.openhft.chronicle.*;
+import queue4.EventManager;
 
 import java.io.*;
 import java.nio.file.*;

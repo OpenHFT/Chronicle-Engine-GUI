@@ -21,8 +21,21 @@ public enum MarketDataType {
     CONFIGURATION(10),
     SWAP_BUTTERFLY(11),
     SWAP_CURVE_SPREAD(12),
-    SWAP_VALUATION_ENVIRONMENT(13);
-
+    VALUATION_ENVIRONMENT(13),
+    FX_SPOT_RATE(14),
+    FX_FORWARD_RATE(15),
+    EURIBOR_FUTURES(16),
+    MARKET_DATA_STORE(17),
+    ZERO_CURVE(18),
+    ZERO_CURVE_BUILDER(19),
+    RESETS_CURVE(20),
+    COMPOSITE_FORECAST_CURVE(21),
+    GBP_LIBOR_FUTURES(22),
+    LONG_GILT_FUTURES(23),
+    XCCY_BASIS_SWAP_RATE(24),
+    FORWARD_BASIS_SWAP_RATE(25),
+    FORWARD_RATE(26),
+    BOND_FUTURE(27);
     /**
      * Cache mapping the custom ids with the Eum types to ensure fast reverse lookup; lazily loaded.
      */
