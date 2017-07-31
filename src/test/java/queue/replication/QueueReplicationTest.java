@@ -54,8 +54,7 @@ public class QueueReplicationTest {
                     try (DocumentContext dc = tailer.readingDocument()) {
                         if (!dc.isPresent())
                             continue;
-                        if (!dc.isData()
-                                )
+                        if (!dc.isData())
                             continue;
                         String actual = dc.wire().getValueIn().text();
                         assertEquals(expected, actual);
