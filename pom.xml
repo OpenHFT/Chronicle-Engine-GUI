@@ -11,7 +11,7 @@
 
     <artifactId>chronicle-engine-gui</artifactId>
     <packaging>war</packaging>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.5-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Engine-GUI</name>
 
     <dependencyManagement>
@@ -27,16 +27,16 @@
 
             <dependency>
                 <groupId>net.openhft</groupId>
-                <artifactId>third-party-bom</artifactId>
+                  <artifactId>third-party-bom</artifactId> <!-- PLEASE DON'T LEAVE THIS ON A SNAPSHOT because they get missed in a release  -->
                 <type>pom</type>
-                <version>3.5.4</version>
+                <version>3.5.9</version>
                 <scope>import</scope>
             </dependency>
 
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.13.51</version>
+                <version>1.14.51</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
