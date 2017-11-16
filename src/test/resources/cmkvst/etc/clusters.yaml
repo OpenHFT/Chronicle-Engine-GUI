@@ -1,5 +1,6 @@
 cluster: {
   context: !EngineClusterContext {
+    networkStatsListenerFactory: !NoopStatsListenerFactory {}
   }
   host1: {
     hostId: 1,

@@ -5,6 +5,7 @@ import musiverification.helpers.CheckSessionDetailsSubscription;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.engine.EngineInstance;
 import net.openhft.chronicle.engine.api.EngineReplication;
 import net.openhft.chronicle.engine.api.map.KeyValueStore;
 import net.openhft.chronicle.engine.api.map.MapView;
@@ -17,9 +18,14 @@ import net.openhft.chronicle.engine.fs.FilePerKeyGroupFS;
 import net.openhft.chronicle.engine.map.*;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
+import net.openhft.chronicle.network.NetworkContext;
+import net.openhft.chronicle.network.NetworkStatsListener;
 import net.openhft.chronicle.network.TCPRegistry;
 import net.openhft.chronicle.network.VanillaSessionDetails;
 import net.openhft.chronicle.network.api.session.SessionProvider;
+import net.openhft.chronicle.network.cluster.ClusterContext;
+import net.openhft.chronicle.wire.Demarshallable;
+import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlLogging;
 import net.openhft.lang.thread.NamedThreadFactory;
@@ -37,6 +43,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Created by Rob Austin
@@ -77,7 +84,7 @@ public class ReplicationTest {
         return tree;
     }
 
-    public static String resourcesDir() {
+    private static String resourcesDir() {
         String path = ReplicationTest.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         if (path == null) {
             return ".";
@@ -95,11 +102,12 @@ public class ReplicationTest {
 //        YamlLogging.clientReads = true;
 
         //YamlLogging.showServerWrites = true;
-
-        ClassAliasPool.CLASS_ALIASES.addAlias(ChronicleMapGroupFS.class);
-        ClassAliasPool.CLASS_ALIASES.addAlias(FilePerKeyGroupFS.class);
         //Delete any files from the last run
         TestUtils.deleteRecursive(new File(OS.TARGET, NAME));
+        TestUtils.deleteRecursive(new File("proc"));
+        TestUtils.deleteRecursive(new File("proc-1"));
+        TestUtils.deleteRecursive(new File("proc-2"));
+        TestUtils.deleteRecursive(new File("proc-3"));
 
         TCPRegistry.createServerSocketChannelFor("host.port1", "host.port2", "host.port3");
 
@@ -422,5 +430,42 @@ public class ReplicationTest {
                 CheckSessionDetailsSubscription::new, MapKVSSubscription.class);
 
         assetTree.root().addLeafRule(MapKVSSubscription.class, "Chronicle vanilla subscription", MapKVSSubscription::new);
+    }
+
+    static {
+        ClassAliasPool.CLASS_ALIASES.addAlias(NoopStatsListenerFactory.class);
+    }
+
+    public static class NoopStatsListenerFactory implements Function<ClusterContext, NetworkStatsListener>, Marshallable {
+
+        @Override
+        public NetworkStatsListener apply(ClusterContext clusterContext) {
+            return new NetworkStatsListener() {
+                @Override
+                public void networkContext(NetworkContext networkContext) {
+
+                }
+
+                @Override
+                public void onNetworkStats(long writeBps, long readBps, long socketPollCountPerSecond) {
+
+                }
+
+                @Override
+                public void onHostPort(String hostName, int port) {
+
+                }
+
+                @Override
+                public void onRoundTripLatency(long nanosecondLatency) {
+
+                }
+
+                @Override
+                public void close() {
+
+                }
+            };
+        }
     }
 }

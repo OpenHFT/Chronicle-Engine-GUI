@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import queue.replication.Application;
 
 import java.io.File;
 import java.io.IOException;
@@ -83,6 +84,9 @@ public class ChronicleUserPermissionAuthorizationManagerTest {
      */
     @Before
     public void setUp() throws Exception {
+        Application.deleteFile(new File("proc"));
+        Application.deleteFile(new File("proc-1"));
+        Application.deleteFile(new File("proc-2"));
         _server1 = createServer(1);
         _serverEndpoint1 = createServerEndpoint(_port1, _server1, _wireType);
 
@@ -161,7 +165,7 @@ public class ChronicleUserPermissionAuthorizationManagerTest {
 
             server.acquireQueue("/proc/connections/cluster/throughput/" + id,
                     String.class,
-                    NetworkStats.class, cluster.clusterName());
+                    NetworkStats.class, cluster.clusterName(), "proc-" + hostId + "/connections/cluster/throughput/" + id);
         }
 
 
