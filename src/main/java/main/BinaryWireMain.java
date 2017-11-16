@@ -92,7 +92,7 @@ public class BinaryWireMain {
             });
         }
 
-        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree);
+        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + port, assetTree, "cluster");
 
         System.out.println("Server port seems to be " + port);
     }

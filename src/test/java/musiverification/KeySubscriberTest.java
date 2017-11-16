@@ -42,7 +42,7 @@ public class KeySubscriberTest
 //                new ChronicleMapKeyValueStore(context.basePath(OS.TARGET).entries(20).averageValueSize(10_000), asset));
 
         TCPRegistry.createServerSocketChannelFor("SubscriptionModelOnKeyTest.port");
-        ServerEndpoint serverEndpoint = new ServerEndpoint("SubscriptionModelOnKeyTest.port", serverAssetTree);
+        ServerEndpoint serverEndpoint = new ServerEndpoint("SubscriptionModelOnKeyTest.port", serverAssetTree, "cluster");
 
         _clientAssetTree = new VanillaAssetTree(89).forRemoteAccess("SubscriptionModelOnKeyTest" +
                 ".port", WireType.BINARY, Throwable::printStackTrace);

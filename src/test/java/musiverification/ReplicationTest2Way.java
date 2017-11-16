@@ -69,12 +69,12 @@ public class ReplicationTest2Way {
 
     private static void createServer1() throws IOException {
         tree1 = create(1, WIRE_TYPE, "clusterTwo");
-        serverEndpoint1 = new ServerEndpoint("host.port1", tree1);
+        serverEndpoint1 = new ServerEndpoint("host.port1", tree1, "cluster");
     }
 
     private static void createServer2() throws IOException {
         tree2 = create(2, WIRE_TYPE, "clusterTwo");
-        serverEndpoint2 = new ServerEndpoint("host.port2", tree2);
+        serverEndpoint2 = new ServerEndpoint("host.port2", tree2, "cluster");
     }
 
     private static void closeServer1() {

@@ -24,20 +24,27 @@ public class QueueReplicationTest {
 
     public static final String expected = "hello world";
 
-    @Test
+    @Test(timeout = 30_000L)
     public void test() throws IOException {
         TCPRegistry.createServerSocketChannelFor("host.port");// allocates random port
         TCPRegistry.createServerSocketChannelFor("host.port2");// allocates random port
 
-        Application.deleteFile(new File("queue/data1"));
-        Application.deleteFile(new File("queue/data2"));
+        Application.deleteFile(new File("queue"));
+        Application.deleteFile(new File("proc"));
+        Application.deleteFile(new File("proc-1"));
+        Application.deleteFile(new File("proc-2"));
 
         Application.addClass(EngineClusterContext.class);
         //  Application.addClass(SampleEntity.class);
 
-        try (VanillaAssetTree tree1 = EngineInstance.engineMain(1, "src/test/resources/engineConfig-Q1.yaml")) {
+        //VanillaAssetTree tree1 = EngineInstance.engineMain(1, "src/test/resources/engineConfig-Q1.yaml");
+        int hostId = 1;
+        String clusterName = "clusterTwo2";
+        VanillaAssetTree tree = EngineInstance.createAssetTree("src/test/resources/engineConfig-Q1.yaml", null, hostId, clusterName, "proc-1");
 
-            ChronicleQueueView qv1 = (ChronicleQueueView) tree1.acquireQueue("/queue/data", String.class, String.class, "clusterTwo2");
+        try (VanillaAssetTree tree1 = EngineInstance.setUpEndpoint(hostId, clusterName, tree)) {
+
+            ChronicleQueueView qv1 = (ChronicleQueueView) tree1.acquireQueue("/queue/data", String.class, String.class, clusterName);
             RollingChronicleQueue rollingChronicleQueue1 = qv1.chronicleQueue();
             ExcerptAppender appender = rollingChronicleQueue1.acquireAppender();
 
@@ -46,7 +53,7 @@ public class QueueReplicationTest {
             }
 
             try (VanillaAssetTree tree2 = EngineInstance.engineMain(2, "src/test/resources/engineConfig-Q2.yaml")) {
-                ChronicleQueueView qv2 = (ChronicleQueueView) tree2.acquireQueue("/queue/data", String.class, String.class, "clusterTwo2");
+                ChronicleQueueView qv2 = (ChronicleQueueView) tree2.acquireQueue("/queue/data", String.class, String.class, clusterName);
                 RollingChronicleQueue rollingChronicleQueue2 = qv2.chronicleQueue();
                 ExcerptTailer tailer = rollingChronicleQueue2.createTailer();
 

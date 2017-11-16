@@ -51,7 +51,7 @@ public class FastMapEventListenerStatelessClientTest {
         root.addLeafRule(AuthenticatedKeyValueStore.class, "use File Per Key",
                 (context, asset) -> new FilePerKeyValueStore(context.basePath(_mapBasePath), asset));
 
-        serverEndpoint = new ServerEndpoint("FastMapEventListenerStatelessClientTest", serverAssetTree);
+        serverEndpoint = new ServerEndpoint("FastMapEventListenerStatelessClientTest", serverAssetTree, "cluster");
 
         _StringStringMap = serverAssetTree.acquireMap("chronicleMapString?putReturnsNull=true", String.class, BytesStore.class);
 

@@ -63,7 +63,7 @@ public class TestTimeoutOnDirectMapAccessAndSubscriptionExample
             _port = port;
             _wireType = wireType;
 
-            _serverEndpoint = new ServerEndpoint("*:" + _port, _assetTree);
+            _serverEndpoint = new ServerEndpoint("*:" + _port, _assetTree, "cluster");
         }
 
         public <K, V> Map<K, V> getMap(String uri, Class<K> keyClass, Class<V> valueClass)

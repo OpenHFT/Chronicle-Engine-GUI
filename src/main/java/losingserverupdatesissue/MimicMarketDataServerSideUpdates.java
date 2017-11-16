@@ -35,7 +35,7 @@ public class MimicMarketDataServerSideUpdates {
         final String assetTreeErrorMessage = "Error occurred in VanillaAssetTree: ";
         _assetTree = new VanillaAssetTree().forServer(false);
 
-        _serverEndpoint = new ServerEndpoint("*:" + port, _assetTree);
+        _serverEndpoint = new ServerEndpoint("*:" + port, _assetTree, "cluster");
         Map<String, String> marketDataMap = _assetTree.acquireMap("/adept/marketdata", String.class, String.class);
 
         for (; ; ) {

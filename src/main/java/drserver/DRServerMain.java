@@ -20,7 +20,7 @@ public class DRServerMain {
             System.out.println("Starting Main Server");
             VanillaAssetTree assetTreeMain = new VanillaAssetTree().forServer();
             VanillaAsset rootMain = assetTreeMain.root();
-            final ServerEndpoint serverEndpointMain = new ServerEndpoint("*:" + _portMain, assetTreeMain);
+            final ServerEndpoint serverEndpointMain = new ServerEndpoint("*:" + _portMain, assetTreeMain, "cluster");
         }
         /**
          * Start DR server
@@ -29,7 +29,7 @@ public class DRServerMain {
             System.out.println("Starting Dr Server");
             VanillaAssetTree assetTreeDr = new VanillaAssetTree().forServer();
             VanillaAsset rootDr = assetTreeDr.root();
-            final ServerEndpoint serverEndpointDr = new ServerEndpoint("*:" + _portDr, assetTreeDr);
+            final ServerEndpoint serverEndpointDr = new ServerEndpoint("*:" + _portDr, assetTreeDr, "cluster");
         }
 
 

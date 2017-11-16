@@ -54,9 +54,9 @@ public class FailoverBinaryWireMain {
         _assetTree3.acquireMap(_mapUri, String.class, String.class).size();
 
         //Start endpoints
-        final ServerEndpoint serverEndpoint1 = new ServerEndpoint("*:" + 9088, _assetTree1);
-        final ServerEndpoint serverEndpoint2 = new ServerEndpoint("*:" + 9089, _assetTree2);
-        final ServerEndpoint serverEndpoint3 = new ServerEndpoint("*:" + 9090, _assetTree3);
+        final ServerEndpoint serverEndpoint1 = new ServerEndpoint("*:" + 9088, _assetTree1, "cluster");
+        final ServerEndpoint serverEndpoint2 = new ServerEndpoint("*:" + 9089, _assetTree2, "cluster");
+        final ServerEndpoint serverEndpoint3 = new ServerEndpoint("*:" + 9090, _assetTree3, "cluster");
 
         //Register server stop subscribers
         _assetTree1.registerSubscriber(_mapUri + "/" + _server1StopKey + "?bootstrap=false", String.class, v -> {

@@ -39,19 +39,18 @@ public class ReplicatedServerMain {
     private ServerEndpoint serverEndpoint;
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        ReplicatedServerMain replicatedServerMain = new ReplicatedServerMain ();
+        ReplicatedServerMain replicatedServerMain = new ReplicatedServerMain();
         replicatedServerMain.start();
 
         //if (_addValuesAndSubscriber) {
-            replicatedServerMain.addValuesAndSubscriber();
+        replicatedServerMain.addValuesAndSubscriber();
         //}
 
         System.in.read();
     }
 
     public void start() {
-        try
-        {
+        try {
             //TODO DS move to constructor
             int port = 8088;
 
@@ -66,11 +65,9 @@ public class ReplicatedServerMain {
             tree2 = create(2, WIRE_TYPE, null);
             tree3 = create(3, WIRE_TYPE, null);
 
-            serverEndpoint1 = new ServerEndpoint("host.port1", tree1);
+            serverEndpoint1 = new ServerEndpoint("host.port1", tree1, "cluster");
 
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -107,7 +104,7 @@ public class ReplicatedServerMain {
 
     public void addValuesAndSubscriber() throws InterruptedException {
         SessionProvider sessionProvider = tree1.root().findView(SessionProvider.class);
-        sessionProvider.set(VanillaSessionDetails.of("java-daniels", "secretPwd",""));
+        sessionProvider.set(VanillaSessionDetails.of("java-daniels", "secretPwd", ""));
 
         MapView<String, String> testMap = tree1.acquireMap(_mapName, String.class, String.class);
 

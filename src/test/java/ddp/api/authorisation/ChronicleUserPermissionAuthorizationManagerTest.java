@@ -10,6 +10,7 @@ import net.openhft.chronicle.engine.fs.EngineHostDetails;
 import net.openhft.chronicle.engine.query.QueueConfig;
 import net.openhft.chronicle.engine.server.ServerEndpoint;
 import net.openhft.chronicle.engine.tree.VanillaAsset;
+import net.openhft.chronicle.engine.tree.VanillaAssetRuleProvider;
 import net.openhft.chronicle.engine.tree.VanillaAssetTree;
 import net.openhft.chronicle.network.NetworkStats;
 import net.openhft.chronicle.network.VanillaSessionDetails;
@@ -121,7 +122,7 @@ public class ChronicleUserPermissionAuthorizationManagerTest {
      */
     private AssetTree createServer(int hostId) throws ConfigurationException, IOException {
         //Create asset tree and configure root
-        AssetTree server = new VanillaAssetTree(hostId);
+        VanillaAssetTree server = new VanillaAssetTree(hostId);
         server.root().addView(QueueConfig.class, new QueueConfig(s -> 1, true, null, WireType.BINARY));
 
         ChronicleRuleFactory.applyChronicleBasicRootAssetRules(server.root(), true);
@@ -141,7 +142,7 @@ public class ChronicleUserPermissionAuthorizationManagerTest {
 
         // Apply monitoring rules to urls which store monitoring information
         VanillaAsset clusterConnections = (VanillaAsset) server.acquireAsset("/proc/connections/cluster/throughput");
-        clusterConnections.configQueueServer();
+        server.root().getRuleProvider().configQueueServer(clusterConnections);
         @Nullable final Clusters clusters = clusterConnections.root().getView(Clusters.class);
 
         final EngineCluster cluster = clusters.firstCluster();
@@ -171,7 +172,7 @@ public class ChronicleUserPermissionAuthorizationManagerTest {
      * Create a server endpoint on the given port
      */
     private ServerEndpoint createServerEndpoint(int port, AssetTree server, WireType wireType) throws IOException {
-        return new ServerEndpoint("*:" + port, server);
+        return new ServerEndpoint("*:" + port, server, _cluster);
     }
 
 

@@ -18,7 +18,7 @@ public class ServerMain {
 
         VanillaAsset root = assetTree.root();
 
-        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + _port, assetTree);
+        final ServerEndpoint serverEndpoint = new ServerEndpoint("*:" + _port, assetTree, "cluster");
 
         //FIXME remove these rules and it still won't work.
         //Add wrapping rules for authorization and authentication

@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
+import net.openhft.chronicle.core.onoes.LogLevel;
 import net.openhft.chronicle.engine.api.map.MapEvent;
 import net.openhft.chronicle.engine.api.map.MapEventListener;
 import net.openhft.chronicle.engine.api.pubsub.InvalidSubscriberException;
@@ -115,7 +116,7 @@ public class SubscriptionModelTest {
         _clientAssetTree = assetTree();
 
         TCPRegistry.createServerSocketChannelFor(_serverAddress);
-        _serverEndpoint = new ServerEndpoint(_serverAddress, _clientAssetTree);
+        _serverEndpoint = new ServerEndpoint(_serverAddress, _clientAssetTree, "cluster");
         exceptionKeyIntegerMap = Jvm.recordExceptions();
     }
 
@@ -127,6 +128,8 @@ public class SubscriptionModelTest {
 
         exceptionKeyIntegerMap.keySet().removeIf(k -> k.message.contains("Not connected"));
         exceptionKeyIntegerMap.keySet().removeIf(k -> k.message.contains("unable to connected"));
+        exceptionKeyIntegerMap.keySet().removeIf(k -> k.message.contains("Timed out attempting to connect"));
+        exceptionKeyIntegerMap.keySet().removeIf(k -> k.level.equals(LogLevel.DEBUG));
 
 
         if (exceptionKeyIntegerMap.size() > 0) {

@@ -123,9 +123,9 @@ public class ReplicationTest {
         System.out.println("#Rules for the root of tree3");
         //System.out.println(tree3.root().dumpRules());
 
-        serverEndpoint1 = new ServerEndpoint("host.port1", tree1);
-        serverEndpoint2 = new ServerEndpoint("host.port2", tree2);
-        serverEndpoint3 = new ServerEndpoint("host.port3", tree3);
+        serverEndpoint1 = new ServerEndpoint("host.port1", tree1, "cluster");
+        serverEndpoint2 = new ServerEndpoint("host.port2", tree2, "cluster");
+        serverEndpoint3 = new ServerEndpoint("host.port3", tree3, "cluster");
     }
 
     public void dumpAllRulesFor(Asset asset) throws InvalidSubscriberException
@@ -379,7 +379,7 @@ public class ReplicationTest {
         serverEndpoint2.close();
         tree2 = create(2, WIRE_TYPE, null);
 
-        serverEndpoint2 = new ServerEndpoint("host.port2", tree2);
+        serverEndpoint2 = new ServerEndpoint("host.port2", tree2, "cluster");
 
         map1.put("Map1NonRep", "NonRepValue");
 
