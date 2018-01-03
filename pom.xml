@@ -39,9 +39,16 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.14.125-SNAPSHOT</version>
+                <version>1.15.24</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <!-- forces engine to use an older version of map, until it has been updated -->
+            <dependency>
+                <groupId>net.openhft</groupId>
+                <artifactId>chronicle-map</artifactId>
+                <version>2.4.17</version>
             </dependency>
 
         </dependencies>
