@@ -128,6 +128,7 @@ public class SubscriptionModelTest {
 
         exceptionKeyIntegerMap.keySet().removeIf(k -> k.message.contains("Not connected"));
         exceptionKeyIntegerMap.keySet().removeIf(k -> k.message.contains("unable to connected"));
+        exceptionKeyIntegerMap.keySet().removeIf(k -> k.message.contains("reconnecting"));
         exceptionKeyIntegerMap.keySet().removeIf(k -> k.message.contains("Timed out attempting to connect"));
         exceptionKeyIntegerMap.keySet().removeIf(k -> k.level.equals(LogLevel.DEBUG));
 
