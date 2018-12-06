@@ -1,3 +1,5 @@
+proc-1/
+proc-2/
 *.class
 
 # Package Files #
@@ -6,10 +8,10 @@
 *.ear
 
 # IntelliJ
-.idea
 *.iml
 *.ipr
 *.iws
+.idea
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
@@ -21,5 +23,44 @@ hs_err_pid*
 
 # maven
 target
-#jmh
 
+.attach_pid*
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Visual Studio
+*.user
+*.ncb
+*.suo
+*.tlb
+*.tlh
+[Oo]bj/
+[Bb]in
+[Dd]ebug*/
+[Rr]elease*/
+[Tt]est[Rr]esult*
+packages/
+[Pp]ublish/
+*.nupkg

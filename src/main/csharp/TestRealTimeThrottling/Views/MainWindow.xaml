@@ -1,0 +1,17 @@
+﻿<Window x:Class="TestRealTimeThrottling.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid>
+        <ListView ItemsSource="{Binding DataRowCollection}">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Key" Width="120" DisplayMemberBinding="{Binding Key}" />
+                    <GridViewColumn Header="Value" Width="50" DisplayMemberBinding="{Binding Value}" />
+                </GridView>
+            </ListView.View>
+
+        </ListView>
+        
+    </Grid>
+</Window>

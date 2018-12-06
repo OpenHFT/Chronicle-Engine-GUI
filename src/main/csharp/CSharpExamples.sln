@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestTimeoutOnDirectMapAccessAndSubscription", "TestTimeoutOnDirectMapAccessAndSubscription\TestTimeoutOnDirectMapAccessAndSubscription.csproj", "{3680110D-B1A9-4288-9C71-561734100FAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSubscriberLostConnection", "TestSubscriberLostConnection\TestSubscriberLostConnection.csproj", "{D8D97C7F-0788-4E23-9370-13A49643CBC7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRealTimeThrottling", "TestRealTimeThrottling\TestRealTimeThrottling.csproj", "{DDD0D8B4-5EE5-44CA-9B47-B11E792CE233}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3680110D-B1A9-4288-9C71-561734100FAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3680110D-B1A9-4288-9C71-561734100FAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3680110D-B1A9-4288-9C71-561734100FAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3680110D-B1A9-4288-9C71-561734100FAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8D97C7F-0788-4E23-9370-13A49643CBC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8D97C7F-0788-4E23-9370-13A49643CBC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8D97C7F-0788-4E23-9370-13A49643CBC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8D97C7F-0788-4E23-9370-13A49643CBC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDD0D8B4-5EE5-44CA-9B47-B11E792CE233}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDD0D8B4-5EE5-44CA-9B47-B11E792CE233}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDD0D8B4-5EE5-44CA-9B47-B11E792CE233}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDD0D8B4-5EE5-44CA-9B47-B11E792CE233}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
