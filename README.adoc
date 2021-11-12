@@ -125,8 +125,6 @@ WARNING: this project requires the following artifact
 
 A licenced version of this artifact can be obtained from https://vaadin.com/framework
 
-
-
 [source, console]
 ----
 <dependency>
