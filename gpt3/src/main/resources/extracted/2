@@ -1,0 +1,27 @@
+1.2 Defining a Chronicle Service
+Problem
+You want to define a Chronicle Service.
+Solution
+Define the service's public input and output interface, then provide an implementation class.
+Discussion
+A Chronicle Service accepts input messages/events from one or more sources, and outputs messages/events to one 
+sink. To define a service, you need to specify the message types expected as input and those generated as output as 
+Java interface types. Let's consider a simple example, where a service performs a simple addition of two numbers and 
+posts the result:
+ 
+The service has one input and one output, these are defined as Java interfaces:
+Listing 3. Service Input Interface
+ 
+Listing 4. Service Output Interface
+ 
+1.2 Defining a Chronicle Service
+The service implementation is defined in the following class:
+Listing 5. Service Implementation Class
+ 
+The implementation class implements the SumServiceIn interface, indicating that it will accept messages/events 
+defined in this interface. A reference is maintained to an instance of the output interface, SumServiceOut, 
+providing a channel to output messages from the service. This reference is injected into the implementation class 
+during construction.
+The project can be laid out following standard rule for a Maven project, shown here being managed using IntelliJ Idea:
+ 
+1.2 Defining a Chronicle Service

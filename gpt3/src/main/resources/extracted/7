@@ -1,0 +1,148 @@
+2.3 Using DTOs in an Application
+Problem
+You want to run a DTO based service in an application.
+Solution
+Use declarative configuration from the services.yaml file.
+Discussion
+There is no difference in running a DTO based service, such as the Transaction Service described in this section as an 
+application, from the previous section where the Sum Service was run as an application.
+In order to run the application completely within the Chronicle Services runtime, it is necessary to provide two 
+additional components. The main service receives messages/events from an upstream service, and resulting 
+messages/events are passed to a downstrean service. These additional components serve purely as a source and a sink 
+for messages, and introduce no additional processing.
+The architecture of the application can be seen in the following diagram:
+ 
+The transactionSink Queue represents output for the transactionDownstream service, even although the 
+service does not produce any output. It is a requirement of the API, however, that every service has one and only one 
+output queue.
+The main service remains unchanged from that shown in Recipe 2.1.
+The Upstream Service
+The transactionUpstream service exists as a source of messages that are sent via the transactionIn queue 
+to the transactionService. Its implementation is straightforward:
+Listing 24. Upstream service for Transaction Service application
+public class TransactionSvcUpstream implements ServiceLifecycleListener {
+  private static final Logger LOG = 
+LoggerFactory.getLogger(TransactionSvcUpstream.class);
+  private TransactionSvcIn out;
+  private final Transaction transaction = new Transaction();
+  public TransactionSvcUpstream(TransactionSvcIn out) {
+    this.out = out;
+
+
+  }
+  @Override
+  public void start() {
+    List<Account> initAccounts = Arrays.asList(
+        new Account("currentAccount", 34343434, 100.0),
+        new Account("savingsAccount", 45454545, 200.0)
+    );
+    out.accounts(initAccounts);
+    
+out.transaction(transaction.accountNumber(34343434).entry(Entry.DEBIT).amount(100));
+    
+out.transaction(transaction.accountNumber(34343434).entry(Entry.DEBIT).amount(50));
+    
+out.transaction(transaction.accountNumber(45454545).entry(Entry.CREDIT).amount(10));
+  }
+}
+By implementing the ServiceLifecycleListener interface, the service will receive a callback from the 
+Chronicle Services runtime, via the start() method, once initialisation is complete. Inside this method, a short list of 
+Account objects is created, and passed to the service via the accounts() method, in order to create the accounts 
+on which the transactions will be applied. Three transaction() events are then posted to the service's input 
+queue, from where they will be read and processed.
+The Downstream Service
+The transactionDownstream service receives output messages that are posted by the transactionService 
+to the transactionServiceOut queue. It will simply log details of these messages, and not post any further 
+output.
+Once again, its implementation is straightforward:
+Listing 25. Downstream service to consume messages output by Transaction Service
+ 
+Application Configuration
+Details of the orchestration of the services is in the services.yaml file:
+Listing 26. Configuration file
+ 
+Running the Application
+The following class acts as an entrypoint for the application:
+Listing 27. Driver program for Transaction Service
+ 
+1.	As this is a demo, the application ensures that all previous queues deleted, to avoid any stale data from previous 
+runs.
+2.	All resources defined in the services.yaml file are created and initialised. Each service will, by default, run in 
+its own thread.
+3.	The upstream service will have sent messages to the service. The driver waits for 3 seconds to ensure they are all 
+processed and the results can be examined, and then closes down. Since the service threads are daemon threads, 
+they will all shut down at this point.
+Log messages will indicate the progress of the application.
+Run this yourself by clicking the button below:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example2 && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+ ...
+  _____ _                     _      _        _____                 _
+/  __ \ |                   (_)    | |      /  ___|               (_)
+| /  \/ |__  _ __ ___  _ __  _  ___| | ___  \ `--.  ___ _ ____   ___  ___ ___  
+___
+| |   | '_ \| '__/ _ \| '_ \| |/ __| |/ _ \  `--. \/ _ \ '__\ \ / / |/ __/ _ \/ 
+__|
+| \__/\ | | | | | (_) | | | | | (__| |  __/ /\__/ /  __/ |   \ V /| | (_|  __/\__ 
+\
+ \____/_| |_|_|  \___/|_| |_|_|\___|_|\___| \____/ \___|_|    \_/ 
+|_|\___\___||___/
+:: Chronicle Services ::             (3.23ea37) Running under Java(TM) SE 
+Runtime Environment 1.8.0_162-b12 with 16 processors reported.
+Process id: 
+36171 ...
+[main/transactionUpstream] INFO Runner - runInitializationComplete 
+[main/transactionUpstream] INFO RunLoopControllerMain - running 
+transactionUpstream... ...
+[main/transactionDownstream] INFO Runner - runInitializationComplete 
+[main/transactionDownstream] INFO RunLoopControllerMain - running 
+transactionDownstream... ...
+[main/transactionSvc] INFO Runner - runInitializationComplete 
+[main/transactionSvc] INFO RunLoopControllerMain - running transactionSvc... 
+[main/transactionSvc] INFO TransactionSvcImpl - Adding account 34343434 with 
+initial balance:
+100.0 [main/transactionSvc] INFO TransactionSvcImpl - Adding account 45454545 
+with initial balance:
+200.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 100.0 to 
+account 34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Balance of account 34343434 is 
+now 0.0
+[main/transactionSvc] INFO DiskSpaceMonitor - Took 0.322 ms to pollDiskSpace for
+/Users/george/work/Chronicle/Chronicle-Services-Demo/target/data/transactionOut
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 50.0 to account 
+34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Balance of account 34343434 is 
+now -50.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying CREDIT of 10.0 to 
+account 45454545
+[main/transactionSvc] INFO TransactionSvcImpl - Balance of account 45454545 is 
+now 210.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - Account 34343434 has 
+balance 0.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - Account 34343434 has 
+balance -50.0 [main/transactionDownstream] INFO TransactionSvcDownstream - 
+Account 45454545 has balance 210.0 Process finished with exit code 0
+
+
+3. Error Handling
+Overview
+Not all messages can be processed successfully, and therefore part of the contract for a service should specify how 
+errors are handled. Chronicle Services considers two broad types of errors that are divided into expected errors and 
+unexpected errors.
+Broadly speaking, an expected error is one whose possibility is known about beforehand, and from which it may be 
+possible to recover without restarting a service and invoking failover or other High Availability (HA) behaviour. An 
+unexpected error is essentially tied to the occurrence of a Java exception in the service, and will normally result in the 
+service being unable to continue handling requests.
+In Chronicle Services there are no hard rules about how to deal with errors. However, there are some patterns that will 
+help in making applications more robust in their presence. These patterns are described in this section.
+Recipes
+3.1 Using DTOs to Indicate Success
+You want to indicate whether a message was successfully processed or not using the same response DTO.
+3.2 Testing a Service with Success or Failure in Output DTOs
+You want to test a service that uses the pattern of returning success/failure indication in output DTOs.
+3.3 Separating Success and Error Handling
+You want to process errors from a service in a completely separate path to successful results.
+3.4 Testing Separate Error Handling
+You want to test a service that uses a separate error message with its own DTO.
+34 of 134 | Overview

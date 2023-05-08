@@ -1,0 +1,145 @@
+7.2 Filtering Events Based On DTO Contents
+Problem
+You want to ignore certain events based on the contents of the contained DTO.
+Solution
+Use the method ignoreMethodBasedOnFirstArg() from the interface MethodFilterOnFirstArg<T>.
+Discussion
+Sometimes you wish to filter requests being handled by an handler method, in other words ignore the event. There are 
+various reasons for this, perhaps you have multiple service instances running, and wish to partition the event handling 
+across these instances based on some criterion.
+Chronicle Services provides a mechanism for filtering (ignoring) events based on an argument that is attached to the 
+request. This could be part of the DTO for the event itself, or something else. The example demonstrated here extends 
+the Transaction Service application further, by creating two instances of the Transaction Service, each designed to 
+process requests for account numbers in a specific range.
+The diagram below illustrates the overall structure of the application:
+ 
+Each instance of the transaction service shares the same input queue, but has its own output queue. The instances 
+read each input message, and decide (based on the filtering logic) whether to handle the message. When an instance 
+handles a message, it posts the output to its output queue. The downstream service has both output queues as its 
+inputs, reads the messages and logs them (as in earlier recipes).
+API to Support Filtering
+In order to implement message filtering, the API for the Transaction Service is modified:
+Listing 72. Input interface for Transaction Service
+ 
+ 
+The method to post the request requires an additional argument, which is used in the filtering checks. As mentioned 
+above, filtering is carried out based on the account number, so that is used as the initial argument. The DTO still needs 
+to be passed as the second argument.
+Service Implementation
+To provide the filtering behaviour, the service implementation is required to implement the interface 
+MethodFilterOnFirstArg<T>, where T is the type of the value that is being checked. In this case the 
+transaction service implementation class will be:
+Listing 73. Transaction Service Implementation class with Method Filter interface
+ 
+The interface requires a method to be supplied to perform the filtering:
+Listing 74. Method to perform filtering of incoming events
+ 
+The method should examine the value of the firstArg parameter, and return:
+•	true if the message is to be ignored
+•	false if the message is to be processed
+Otherwise, the service implementation is as before.
+Service Configuration
+Each instance of the service should handle requests for account numbers in a specific range. The bounds of the range 
+for each service are supplied as configuration parameters, so the services.yaml file needs to have these added:
+1. Configuration showing multiple Transaction Service instances
+!ChronicleServicesCfg {
+ queues: {
+  transactionIn: { path: data/transactionIn, sourceId: 1 },
+  transactionOut1: { path: data/transactionOut1, sourceId: 2 },
+  transactionOut2: { path: data/transactionOut2, sourceId: 3 },
+  downstreamOut: { path: data/downstreamOut, sourceId: 100 },
+ },
+ services: {
+  transactionSvc1: {
+    inputs: [ transactionIn ],
+    output: transactionOut1,
+    implClass: !type 
+software.chronicle.services.cookbook.example7b.services.TransactionSvcImpl,
+    account: [ !Account { name: "currentAccount1", accountNumber: 01234567, 
+balance: 100.0 },
+               !Account { name: "savingsAccount2", accountNumber: 12345678, 
+balance: 200.0 },
+               !Account { name: "savingsAccount3", accountNumber: 45678901, 
+balance: 300.0 } ],
+    acceptFrom: 00000000,
+    acceptTo: 49999999,
+  },
+  transactionSvc2: {
+    inputs: [ transactionIn ],
+    output: transactionOut2,
+    implClass: !type 
+software.chronicle.services.cookbook.example7b.services.TransactionSvcImpl,
+    account: [ !Account { name: "currentAccount4", accountNumber: 78901234, 
+balance: 100.0 },
+               !Account { name: "savingsAccount5", accountNumber: 90123456, 
+balance: 200.0 } ],
+    acceptFrom: 50000000,
+    acceptTo: 99999999,
+  },
+  transactionUpstream: {
+   inputs: [ ],
+   output: transactionIn,
+   implClass: !type
+software.chronicle.services.cookbook.example7b.services.TransactionSvcUpstream,
+  },
+  transactionDownstream: {
+    inputs: [transactionOut1, transactionOut2],
+    output: downstreamOut,
+    implClass: !type
+software.chronicle.services.cookbook.example7b.services.TransactionSvcDownstream,
+  }
+ }
+}
+The configuration information is read and processed during service initialisation using the serviceContext() 
+method shown in earlier recipes:
+Listing 75. Applying instance specific configuration for a Transaction Service Instance
+  @Override
+  public void serviceContext(ServiceContext serviceContext) {
+    // Set up the accounts from the config in services yaml
+    accounts((List<Account>) 
+serviceContext.serviceCfg().serviceConfig().get("account"));   
+    // Set up the range of account numbers we will handle in this instance
+    this.instanceName = serviceContext.serviceId();                                         
+
+    this.acceptFrom = (Long) 
+serviceContext.serviceCfg().serviceConfig().get("acceptFrom"); 
+    this.acceptTo = (Long) 
+serviceContext.serviceCfg().serviceConfig().get("acceptTo");
+    LOG.info("{} accepting from {} to {}", instanceName, acceptFrom, acceptTo);
+
+
+ 
+1.	Set up some initial accounts, for demo purposes.
+2.	Extract the name of the service, for diagnostic messages.
+3.	Extract the range of account numbers to be handled by this service instance.
+Running the Service
+Transactions for the service are posted by the upstream service as in earlier recipes.
+See this example by running the example below:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example7b && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+Listing 76. Transaction events sent by upstream service
+    transaction.accountNumber(12345678).entry(Entry.DEBIT).amount(500);
+    out.transaction(transaction.accountNumber(), transaction);
+    transaction.accountNumber(45678901).entry(Entry.CREDIT).amount(75);
+    out.transaction(transaction.accountNumber(), transaction);
+    transaction.accountNumber(90123456).entry(Entry.CREDIT).amount(10);
+    out.transaction(transaction.accountNumber(), transaction);
+    transaction.accountNumber(99999999).entry(Entry.CREDIT).amount(1000);
+    out.transaction(transaction.accountNumber(), transaction);
+Messages logged by the downstream service show which instance of the service processed each transaction.
+Listing 77. Log output showing events and handling instances
+...
+[main/transactionDownstream] INFO TransactionSvcDownstream - *Success*  Account: 
+90123456 Balance
+of account 90123456 now 210.0 [transactionSvc2]
+[main/transactionDownstream] INFO ransactionSvcDownstream - *Failed*  Account: 
+12345678
+Insufficient funds 200.0 available for 500.0 [transactionSvc1]
+[main/transactionDownstream] ERROR TransactionSvcDownstream - Error for account 
+99999999: Unknown
+Account Number [transactionSvc2] [MEDIUM]
+[main/transactionDownstream] INFO TransactionSvcDownstream - *Success*  Account: 
+45678901 Balance
+of account 45678901 now 375.0 
+[transactionSvc1] ...
+From here we can see that messages are filtered correctly, even in the case where the account number is invalid.

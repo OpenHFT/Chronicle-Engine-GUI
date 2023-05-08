@@ -1,0 +1,2 @@
+"prompt": "How can you package a Chronicle Services Application as an executable JAR file?",
+"answer": "Use the Maven Shade Plugin to create an uber-jar. Add and configure the plugin in the pom.xml file. The 'package' goal for the build will generate the uber-jar file and store it in the target directory."

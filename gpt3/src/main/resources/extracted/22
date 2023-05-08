@@ -1,0 +1,103 @@
+8.1 Initializing State from a Single Input Queue
+Problem
+You want to initialize the state of a service with a single input queue following a (re)start by replaying messages from 
+the input queue.
+Solution
+Configure the service with startFromStrategy set to START and inputsReplayStrategy set to INPUTS.
+Discussion
+This recipe is based on a simple application, a Portfolio Manager that maintains a list of Foreign Exchange Positions, 
+updated by Trades.
+The following diagram shows the structure of the application:
+ 
+The main service manages a list of Positions, which are accumulated by processing Trades from a queue known as 
+"trades-out". Trades are posted onto this queue by an external application. On receipt of a message indicating a new 
+trade, the service updates the relevant position and posts the resulting positions to an output queue, which is read and 
+displayed by a second external application.
+Configuring the Service
+The application is configured in the services.yaml file:
+Listing 80. Configuration of the application
+# uses schema from https://github.com/ChronicleEnterprise/Chronicle-Services-
+ 
+The remaining components are not managed by Chronicle Services, and so do not appear in the file.
+From the perspective of state management, there are two important properties configured for the service, namely 
+startFromStrategy and inputsReplyStrategy. Taken together, these instruct the service to construct its 
+state by replaying all events in the input queue. Essentially this is running the service from scratch all over again.
+Running the Application
+Details of how to run the application can be found below.
+To run a demo of this, please click on the 'run' button below:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example8a && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+There are three components that need to be started.
+First, the Position service is started. On a clean start, i.e. one where the trades-out queue does not exist, or 
+where there are no pre-existing trades in the queue, it performs a standard Chronicle Services initialization sequence, 
+and waits for events to appear on its input queue.
+Next, the Tailer component is started. This is not a Chronicle Services application, although the functionality is 
+actually part of the Chronicle Queue package. It will initialize itself, wait for messages to be posted on the 
+position-out queue and display them on its standard output.
+Thirdly, the TradeEntry component is started. This is also external to the Chronicle Services framework. Its job is to 
+allow a user to manually enter details of a trade, which is then posted to the trades-out queue from where it is 
+read by the Position Service. As an example:
+Listing 81. Example interaction with the TradeEntry component
+ 
+ 
+Once the details are entered, the trade is posted and the application displays details. For example, the Position Service 
+log shows:
+Listing 82. Output from the main service in the application
+ 
+which is a log of the incoming trade, and the position details posted to the output queue. At the same time, the 
+Tailer application shows:
+Listing 83. Output showing the tail of the service's output queue
+ 
+ 
+which is a log of the latest information contained on the position-out queue.
+If a second trade is entered: Listing 84. 
+Second trade entered
+ 
+then the logged output will reflect this. First the Position service: Listing 85. 
+Output from the service reflecting the second trade
+ 
+and then the Tailer output:
+Listing 86. Output from the queue Tailer showing cumulative positions
+ 
+ 
+(Re)creating State after (Re)start
+As shown above, when the Positions Service performs a "clean" start, it is initialised with no information about 
+Positions. Therefore, if the service were to stop or crash, any current Positions information will be lost when the 
+service restarted.
+With the confguration shown above, when the service starts it will replay all events on its input queue, recreating the 
+state as it was when the service stopped. Of course, no output messages will be posted as a result of this replaying.
+The log messages from the service on startup will show this: Listing 87. Log 
+messages from the service following restart
+...
+[software.chronicle.services.demo.RunService/positionSvc] INFO InputsController - 
+#InputQueues=1
+[software.chronicle.services.demo.RunService/positionSvc] INFO InputsController - 
+building
+queue=data/trades-out
+[software.chronicle.services.demo.RunService/positionSvc] INFO InputsController - 
+Setting up
+queue reader for data/trades-out START
+[software.chronicle.services.demo.RunService/positionSvc] INFO Runner - 
+replayInputQueuesHistory
+begin
+[software.chronicle.services.demo.RunService/positionSvc] INFO 
+PositionServiceImpl - Processing
+Trade: !Trade {
+  eventId: "",
+  eventTime: 0,
+  ticker: AUDUSD,
+  buy: true,
+  qty: 100000,
+  price: 0.7777
+
+
+ 
+The log messages show the replaying of the (2) trade messages that were entered during the previous session. It is 
+possible to verify that the state has correctly been recreated by entering a further trade:
+Listing 88. Adding a further trade
+ 
+Now, checking the log output from the Tailer, we can see that the final Position report shows:
+Listing 89. Tailer output reflecting cumulative positions
+ 
+The quality of AUSUSD in the position is 2000, showing that the most recent trade was added to the previous position 
+for AUDUSD.

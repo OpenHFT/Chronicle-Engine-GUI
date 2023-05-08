@@ -1,0 +1,5 @@
+"prompt":"How can you find out which service posted a message in a service?",
+"answer":"Use MessageHistory and application metadata. Retrieve the MessageHistory metadata that was posted alongside the message DTO, and extract the sourceID of the queue from which it was read. Fetch the configuration of the queue. Find the service that uses that queue as an output. Requires a File object representing the queue's location in the filesystem, and the overall application configuration. Return the service 'linkage' information. The toString() method on the service link object returns the service's name as found in the application configuration." 
+
+"prompt":"How can you trace the flow of a message through an application?",
+"answer":"Use MessageHistory, connecting back to previous messages through the data held there. The MessageHistory object has details of one stage of an event's journey through the application. Enough information is held in the object to allow reading the MessageHistory of the previous stage, and this allows the construction of a chain of objects, so it is possible to see the complete path of the event through the application."

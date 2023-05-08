@@ -1,0 +1,26 @@
+"prompt": "How can you use information gathered from outside Chronicle Services to construct and send input messages to the application?",
+"answer": "Obtain a handle to the input Queue of the required service in the application and post messages to it. A Chronicle Service uses Chronicle Queue as the transport for messages into and out of the service. A public API allows access to post messages to a queue, however it is necessary to know the pathname used by the queue for its backing storage to set up the handle. Fortunately this information is available in the application configuration file, so this can be used as part of the initialisation process." 
+
+"prompt": "What is the structure of the application used in the example?",
+"answer": "The application uses a Transaction Service seen in earlier recipes. However, all the transaction requests to the service will be issued from an external application that will post them to the service's input queue. There is no 'upstream' service, the Transaction service does not change, but output messages will still be sent to the downstream service." 
+
+"prompt": "What is the purpose of the holder class used in the example?",
+"answer": "The holder class is used to build the transaction, in order to reduce object allocations." 
+
+"prompt": "What is the purpose of the MethodWriter created for the queue in the example?",
+"answer": "The MethodWriter is created for the queue so that request messages can be posted to it." 
+
+"prompt": "What happens when the client posts request messages to the service's input queue?",
+"answer": "The client simply posts the request messages, and does not receive an indication on whether or not the transaction is valid or has been handled successfully. All output is posted, by the service, to its output queue, which is read by the downstream service from where the messages are simply logged." 
+
+"prompt": "What is the purpose of the output queue in the example?",
+"answer": "All output is posted, by the service, to its output queue, which is read by the downstream service from where the messages are simply logged." 
+
+"prompt": "What is the purpose of the external source application in the example?",
+"answer": "The external source application issues all the transaction requests to the service by posting them to the service's input queue." 
+
+"prompt": "What is the output of the external source application in the example?",
+"answer": "The output from the external source application shows details of the transactions that are posted to the service." 
+
+"prompt": "Where can the log messages from the main service as the transactions are processed be seen?",
+"answer": "Log messages from the main service as the transactions are processed can be seen (main/transactionSvc), together with details of the output messages (main/transactionDownstream)."

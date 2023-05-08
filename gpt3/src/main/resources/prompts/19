@@ -1,0 +1,14 @@
+"prompt": "What is the solution for performing actions at regular time intervals?",
+"answer": "Use Periodic Events."
+"prompt": "What is the PeriodicUpdate event?",
+"answer": "The PeriodicUpdate event is an event that is posted on a service's input queue at regular time intervals, carrying a payload of a timestamp at microsecond granularity."
+"prompt": "What interface should a service implement to receive PeriodicUpdate events?",
+"answer": "A service should implement the PeriodicUpdateSource interface to receive PeriodicUpdate events."
+"prompt": "What is the configuration for the time intervals of the generated PeriodicEvents?",
+"answer": "The time intervals for the generated PeriodicEvents is configured in the service configuration section of the services.yaml file, with the first value being the time in milliseconds between the PeriodicEvents being posted, and the second value being the time in milliseconds to wait before posting the first PeriodicEvent."
+"prompt": "What is the purpose of the upstreamIn queue?",
+"answer": "The upstreamIn queue is necessary to receive PeriodicEvents for a service, as Periodic Events for a service are posted on the service's first named input queue."
+"prompt": "What should the handler method for PeriodicUpdate events do?",
+"answer": "The handler method for PeriodicUpdate events, periodicUpdate(), should post transaction request messages upon receipt of the events."
+"prompt": "What is the purpose of the runDemo.sh script?",
+"answer": "The runDemo.sh script is used to run a demo of the application driver class that creates and configures the services, then waits for 10 seconds before terminating."

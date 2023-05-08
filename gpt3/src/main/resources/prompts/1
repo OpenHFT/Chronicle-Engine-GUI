@@ -1,0 +1,17 @@
+"prompt":"How can you install Chronicle Services in your project?",
+"answer":"You can install Chronicle Services by adding the dependency to your project. If you are using Maven as your build tool, you can use the provided pom.xml file as a starting point. However, you need to obtain a license from Chronicle Software Ltd. before using the software."
+
+"prompt":"What do you need to do before using Chronicle Services?",
+"answer":"Before using Chronicle Services, you need to obtain a license from Chronicle Software Ltd."
+
+"prompt":"What build tool is recommended for using Chronicle Services?",
+"answer":"Maven is the recommended build tool for using Chronicle Services."
+
+"prompt":"What is the purpose of the <dependencyManagement> section in the pom.xml file?",
+"answer":"The <dependencyManagement> section in the pom.xml file is used to manage dependencies, including the Chronicle BOM (Bill of Materials) which is required for accessing Chronicle Services."
+
+"prompt":"What is the dependency required for accessing Chronicle Services?",
+"answer":"The dependency required for accessing Chronicle Services is provided in the pom.xml file and can be accessed using the following dependency: <dependency>\n<groupId>software.chronicle</groupId>\n<artifactId>services</artifactId>\n<version>enter version here</version>\n</dependency>"
+
+"prompt":"Are the additional dependencies shown in the pom.xml file necessary for using Chronicle Services?",
+"answer":"No, the additional dependencies shown in the pom.xml file (e.g. slf4j and junit) are not absolutely necessary for using Chronicle Services, but they are used in the demo code provided."

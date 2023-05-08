@@ -1,0 +1,136 @@
+4.2 Packaging a Services Application in a Docker Image
+Problem
+You want to package a Chronicle Services application as a Docker container, for more flexibility in deployment to a 
+cloud environment.
+Solution
+Use Maven with the Docker plugin to build and package the image.
+Discussion
+As more and more applications move to the Cloud, the model for deployment is increasingly based on containers such 
+as those produced and managed by tools like Docker.
+Chronicle Services based applications can be packaged as Docker images, which may then be run in Cloud 
+Environments. Plugins exist for Maven to support this, and they are easy to incorporate into a build. The build process 
+for a Docker container will most likely be an extension of that shown in Recipe 4.1, in that they will aim use the shaded 
+jar file as the simplest means of running the application.
+This recipe uses the fabric8 Kubernetes/Docker plugin for Maven to provide the functionality of generating a 
+Docker image from the build process. This is a very powerful plugin, that is evolving into newer variants managed as 
+Eclipse JKube, whose focus is on both containerising and deploying to Kubernetes or Openshift. For now, this recipe 
+demonstrates the simplest usage of the plugin to produce a Docker image that can be run in a Docker runtime 
+environment.
+The plugin may be added to the build:
+Listing 47. POM file extract showing inclusion of fabric8 plugin
+ 
+Where the version is set as a property:
+Listing 48. Fabric8 plugin version as a property
+ 
+Most of the functionality of the plugin and hence the Docker build can be controlled through configuration of the 
+plugin. Defaults exist for most of the properties, indeed there is no mandatory requirement even to supply a Dockerfile 
+as the plugin is able to build one for its own use by analysing the project.
+The plugin provides a number of goals, but the one that is used to build a Docker image is fabric:build. Default 
+behaviour expects the presence of an uber-jar file containing the application, so can be combined with the shade 
+plugin:
+Listing 49. Log excerpt from build showing fabric8 plugin
+$ mvn clean package fabric8:build
+... build shaded jar as before...
+[WARNING] See https://maven.apache.org/plugins/maven-shade-
+plugin/ [INFO] Attaching shaded artifact.
+[INFO]
+[INFO] --- fabric8-maven-plugin:4.4.1:build (default-cli) @ chronicle-services-
+example ---
+[WARNING] F8: Cannot access cluster for detecting mode: connect timed out
+[INFO] F8: Running in Kubernetes mode
+[INFO] F8: Building Container image with Docker in Kubernetes mode
+[WARNING] F8: Cannot access cluster for detecting mode: connect timed out
+[WARNING] F8: Cannot access cluster for detecting mode: connect timed out
+[INFO] F8: Running generator java-exec
+[INFO] F8: java-exec: Using Container image fabric8/java-centos-openjdk8-jdk:1.5 
+as base /
+builder
+[WARNING] F8: Cannot access cluster for detecting mode: connect timed out
+[WARNING] F8: Cannot access cluster for detecting mode: connect timed out
+[INFO] Copying files to /Users/george/work/Chronicle/Chronicle-Services-
+Videos/Example5-
+Docker/target/docker/chronicle/chronicle-services-example/latest/build/maven
+[INFO] Building tar: /Users/george/work/Chronicle/Chronicle-Services-
+Videos/Example5-
+Docker/target/docker/chronicle/chronicle-services-example/latest/tmp/docker-
+build.tar
+[INFO] F8: [chronicle/chronicle-services-example:latest] "java-exec": Created 
+docker-build.tar in
+181 milliseconds
+[INFO] F8: [chronicle/chronicle-services-example:latest] "java-exec": Built image 
+sha256:2c42d
+[INFO] F8: [chronicle/chronicle-services-example:latest] "java-exec": Removed old 
+image
+sha256:8d08c
+[INFO] F8: [chronicle/chronicle-services-example:latest] "java-exec": Tag with 
+latest
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  57.596 s
+[INFO] Finished at: 2022-12-08T14:50:11Z
+[INFO] ------------------------------------------------------------------------
+By default, the plugin assumes that it is building for a Kubernetes cluster, and
+ attempts to query the cluster for confirmation. It is not an error to build without a Kubernetes cluster as is the 
+case here.
+After the build has completed, the image is loaded into the local Docker registry. Configuration options exist to push to 
+an alternative repository such as Docker Hub. The newly generated image can be seen in this local registry:
+
+
+Listing 50. Docker image registered in local docker repo
+$docker images
+REPOSITORY                                        TAG        IMAGE ID       
+CREATED         SIZE chronicle/chronicle-services-cookbook-example4b   latest     
+1fdb721fa108   3 minutes ago   471MB ...
+Assuming a local Docker runtime is available, the image may then be run:
+Listing 51. Output from running the docker image
+$ docker run --rm -it chronicle/chronicle-services-
+cookbook-example4b ...
+ _____ _                     _      _        _____                 _
+/  __ \ |                   (_)    | |      /  ___|               (_)
+| /  \/ |__  _ __ ___  _ __  _  ___| | ___  \ `--.  ___ _ ____   ___  ___ ___  
+___
+| |   | '_ \| '__/ _ \| '_ \| |/ __| |/ _ \  `--. \/ _ \ '__\ \ / / |/ __/ _ \/ 
+__|
+| \__/\ | | | | | (_) | | | | | (__| |  __/ /\__/ /  __/ |   \ V /| | (_|  __/\__ 
+\
+ \____/_| |_|_|  \___/|_| |_|_|\___|_|\___| \____/ \___|_|    \_/ 
+|_|\___\___||___/
+:: Chronicle Services ::      (unknown version) Running under OpenJDK 
+Runtime Environment 1.8.0_201-b09 with 4 processors reported.
+Process id: unknown
+[main/transactionSvc] INFO software.chronicle.services.runner.Runner -
+ !ServiceCfg {
+  inputs: [
+    { input: transactionIn }
+  ],
+  output: transactionOut,
+  implClass: !type 
+software.chronicle.services.cookbook.example4a.services.TransactionSvcImpl
+}
+[main/transactionUpstream] INFO 
+net.openhft.chronicle.bytes.internal.SingleMappedFile - Took 6 ms
+to add mapping for /tmp/.time-stamp.jboss.dat
+[main/transactionUpstream] INFO software.chronicle.services.runner.Runner - 
+Starting service
+transactionUpstrea
+m ...
+Console output from the service will be the same as before.
+5. Configuration
+Overview
+Much of the functionality in a Chronicle Services application is controlled through configuration. This may be static, in 
+that it is specified in a YAML file, conventionally named services.yaml, which is read at application start. Once 
+read, the data may be accessed from the application and modified during execution although certain changes will not 
+be possible (such as the classname of a service's implementation).
+Recipes
+5.1 Using an Alternative Configuration File
+Describes how to use a configuration file named something other than services.yaml.
+5.2 Parameterising the Configuration File
+Shows how to utilise parameters set from outside in a configuration file.
+5.3 Runtime Access to Configuration
+Shows how an application can access its configuration at when running.
+5.4 Using the Configuration File for Application-specific configuration
+Shows how to extend the application file to include application specific configuration.
+/build/chronicle-services-cookbook/configuration/recipe5-5.html[5.5 Service Configuration]
+Shows the different approaches to configure services
+57 of 134 | Overview

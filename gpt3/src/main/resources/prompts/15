@@ -1,0 +1,14 @@
+"prompt": "How can you make the configuration file more general to allow for different values for properties to be supplied when the service is run?",
+"answer": "You can use system properties and reference them from within the configuration file. The services.yaml file syntax allows for the use of system property values, which are then substituted when the application is run. To parameterize the location of the backing files for the Queues used to communicate between services, you can introduce a system property into the configuration file and use the term ${queue.basedir} to substitute it when the file is read." 
+
+"prompt": "What is the syntax for using system property values in the services.yaml file?",
+"answer": "The syntax for using system property values in the services.yaml file is to use the term ${property.name} to substitute the value of the system property 'property.name' when the file is read." 
+
+"prompt": "How many times is the configuration file read during startup?",
+"answer": "The configuration file is read only once during startup." 
+
+"prompt": "What is required to change the configuration after the application has started?",
+"answer": "To change the configuration after the application has started, the application will need to be restarted." 
+
+"prompt": "What are some ways in which a system property can be set?",
+"answer": "A system property can be set using a command line argument or the standard Java API. An IDE can also permit the setting of system properties in the Run Configuration dialog for the application."

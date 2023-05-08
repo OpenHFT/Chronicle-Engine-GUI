@@ -1,0 +1,23 @@
+3.2 Testing a Service with Success or Failure in Output DTOs
+Problem
+You want to test a service that uses the pattern of returning success/failure indication in output DTOs.
+Solution
+Use the YAMLTester to construct scenarios that are expected to succeed and fail.
+Discussion
+It is straightforward to use YAMLTester to test for success or failure in output DTOs. Recipe 3.1 describes how to 
+incorporate this into a service; test cases can be constructed to exercise this approach in the same way as shown 
+before.
+The test setup is in the setup.yaml file:
+Listing 33. Set for the YAML test
+ 
+Input messages are the same as in the previous chapter:
+Listing 34. Input Messages for the test
+ 
+40	of 134 | 3.2 Testing a Service with Success or Failure in Output DTOs
+ 
+The second case should cause a failure, since the modified service does not allow the balance of an account to become 
+negative
+Listing 35. Expected output based on input messages
+ 
+ 
+41	of 134 | 3.2 Testing a Service with Success or Failure in Output DTOs

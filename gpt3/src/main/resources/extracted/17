@@ -1,0 +1,143 @@
+6.1 Receiving Events from an External Source
+Problem
+You want to use information gathered from outside Chronicle Services to construct and send input messages to the 
+application.
+Solution
+Obtain a handle to the input Queue of the required service in the application and post messages to it.
+Discussion
+A Chronicle Service uses Chronicle Queue as the transport for messages into and out of the service. A public API allows 
+access to post messages to a queue, however it is necessary to know the pathname used by the queue for its backing 
+storage to set up the handle.
+Fortunately this information is available in the application configuration file, so this can be used as part of the 
+initialisation process.
+The Service
+For this example, we will use the Transaction Service seen in earlier recipes.
+However, all the transaction requests to the service will be issued from an external application that will post them to 
+the service's input queue. There is no "upstream" service, the Transaction service does not change, but output 
+messages will still be sent to the downstream service.
+The following diagram illustrates the structure of the application:
+ 
+Note that the transactionSink queue is required as output for the transactionDownstream service, even 
+although the service does not produce any output.
+The External Source Application
+Requests are now issued from the SourceMain application, which runs separately from the main service application:
+Listing 62. External application posting events into Transaction Service
+public class SourceMain {   private static final Logger LOG = 
+LoggerFactory.getLogger(SourceMain.class);
+  static {
+    CLASS_ALIASES.addAlias(Transaction.class);
+  }
+  public static void main(String[] args) throws Exception {
+    String configFileName = "services.yaml";   
+    new SourceMain().run(configFileName);
+  }
+  private static final Transaction transactionHolder = new Transaction();   
+  public static void run(String configFile) throws InterruptedException {
+    RunnerConfiguration runnerCfg = LoadUtil.loadFromYaml(configFile);   
+    String svcName = "transactionSvc";   
+    ServiceCfg serviceCfg = runnerCfg.services().get(svcName);
+    String inQId = serviceCfg.inputs().get(0).input();
+    String inQPath = runnerCfg.queues().get(inQId).path();
+    TransactionSvcIn service = ChronicleQueue.single(inQPath)    
+        .methodWriter(TransactionSvcIn.class);                   
+    service.accounts(         
+        Arrays.asList(new Account("currentAccount", 34343434L, 100.0),
+            new Account("savingsAccount", 45454545L, 100.0)));
+    sendTransaction(service, 34343434, Entry.DEBIT, 50);     
+    sendTransaction(service, 34343434, Entry.DEBIT, 100);
+    sendTransaction(service, 99999999, Entry.CREDIT, 1000);
+    Scanner userInput = new Scanner(System.in);        
+    System.out.print("Enter Account Number: ");
+    long accNo = userInput.nextLong();
+    System.out.print("Enter [d]ebit or [c]redit: ");
+    char trType = userInput.next().charAt(0);
+    System.out.print("Enter amount: ");
+    double trAmount = userInput.nextDouble();
+    sendTransaction(service, accNo, (trType == 'c'  Entry.CREDIT : Entry.DEBIT), 
+trAmount);
+  }
+  private static void sendTransaction(TransactionSvcIn service,
+                                      long accountNum,
+                                      Entry entryType,
+                                      double amount) {    
+    transactionHolder.reset();
+
+
+ 
+1.	The name of the config file for the application, which will have the necessary information about the service's 
+input queue
+2.	A holder class to use for building the transaction, in order to reduce object allocations.
+3.	Read and parse the configuration file so queue information can be fetched.
+4.	Fetch information about the service we are passing messages to ("transactionSvc"), retrieve the names of the 
+input queue(s). If there is more than one then use the first named one for this demo. Retrieve the path of the 
+queue.
+5.	Create a handle to the service's input queue.
+6.	Create a MethodWriter for the queue, so request messages can be posted to it.
+7.	Send a message to create accounts to which transactions will be applied.
+8.	Post some request messages to the queue - these should be handled by the service
+9.	Gather data interactively, construct a further transaction request message and post it to the queue
+10.	Encapsulate the construction and posting of a request message to the service's input queue.
+The client simply posts the request messages, and does not receive an indication on whether or not the transaction is 
+valid or has been handled successfully. All output is posted, by the service, to its output queue, which is read by the 
+downstream service from where the messages are simply logged.
+Running the Applications
+The Service is run as before. After initialisation it waits for requests. The external source application can then be 
+started. Output from the external source application will contain:
+Listing 63. Output from external event source application
+[main] INFO software.chronicle.services.cookbook.example6a.external.SourceMain - 
+Sent 
+transaction: !software.chronicle.services.cookbook.example6a.dto.Transaction {
+  accountNumber: 34343434,
+  amount: 50.0,
+  entry: DEBIT
+}
+[main] INFO software.chronicle.services.cookbook.example6a.external.SourceMain - 
+Sent 
+transaction: !software.chronicle.services.cookbook.example6a.dto.Transaction {
+  accountNumber: 34343434,
+  amount: 100.0,
+ 
+You can try this out for yourself by clicking the run button below:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example6a && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+This simply shows details of the transactions that are posted to the service. The transaction handling and output 
+messages are seen in the log from the service application:
+Listing 64. Log excerpt from Transaction Service showing events from external source being handled
+... [main/transactionSvc] INFO TransactionSvcImpl - Adding account 34343434 
+with initial balance:
+100.0 [main/transactionSvc] INFO TransactionSvcImpl - Adding account 45454545 
+with initial balance:
+100.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 50.0 to account 
+34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+34343434 is now
+50.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 100.0 to 
+account 34343434
+[main/transactionDownstream] INFO TransactionSvcDownstream - Success: Success: 
+Balance of account
+34343434 now 50.0
+[main/transactionSvc] INFO TransactionSvcImpl - Bad transaction: Account 34343434 
+has
+insufficient funds for debit: 100.0 [50.0]
+[main/transactionSvc] INFO TransactionSvcImpl - Applying CREDIT of 1000.0 to 
+account 99999999
+[main/transactionDownstream] INFO TransactionSvcDownstream - Failed: Insufficient 
+funds 50.0
+available for 100.0
+[main/transactionSvc] ERROR TransactionSvcImpl - Unknown account number: 99999999
+[main/transactionDownstream] ERROR TransactionSvcDownstream - Error for account 
+99999999: Unknown
+Account Number [MEDIUM]
+[main/transactionSvc] INFO TransactionSvcImpl - Applying CREDIT of 300.0 to 
+account 45454545
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+45454545 is now
+400.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - Success: Success: 
+Balance of account
+Log messages from the main service as the transactions are processed can be seen
+(main/transactionSvc), together with details of the output messages (main/transactionDownstream).
+
+

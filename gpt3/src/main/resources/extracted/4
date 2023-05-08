@@ -1,0 +1,115 @@
+1.4 Running a Service in an Application
+Problem
+You want to run a service in a standalone Java application.
+Solution
+Define supporting components, and define the application declaratively in a configuration file.
+Discussion
+Chronicle Services provides a comprehensive runtime that takes care of the configuration and management of one or 
+more services inside a standalone Java application. From a single driver class, it is possible to start and configure 
+multiple service implementations, connecting them together using one or more Chronicle Queue instances as the 
+transport for messages and events. A service that has been implemented and unit-tested as described in earlier recipes 
+can be incorporated into such an application with no code changes.
+Chronicle Service based applications are designed to support an Event-based architecture, where events move through 
+a stream of services. This recipe describes an application that follows this architecture.
+In order to run the application completely within the Chronicle Services runtime, it is necessary to provide two 
+additional components. The main service receives messages/events from an upstream service, and resulting 
+messages/events are passed to a downstream service. These additional components serve purely as a source and a 
+sink for messages, and introduce no additional processing.
+The architecture of the application can be seen in the following diagram:
+ 
+The sumServiceSink Queue represents an output for the sumDownstream service. Although this service does 
+not generate any output messages, it is a requirement that every service has one and only one output queue.
+The main service implementation remains unchanged from Recipe 1.2.
+The Upstream Service
+The sumUpstream service exists as a source of messages that are sent via the sumServiceIn queue to the 
+sumService. Its implementation is very straightforward:
+Listing 9. Upstream service providing input to the main service
+ 
+By implementing the ServiceLifecycleListener interface, the service will receive a callback from the 
+Chronicle Services runtime, via the start() method, once initialisation is complete. At this time it constructs and 
+sends a single message to its output queue.
+The Downstream Service
+The sumDownstream service receives output messages that are posted by the sumService to the 
+sumServiceOut queue. It will simply log details of these messages, not posting any further output.
+Once again, its implementation is straightforward:
+Listing 10. Downstream service consuming output messages from the main service
+ 
+Defining the Application
+All of the components described above are wired together to form the application using a configuration file, by default 
+named services.yaml.
+Listing 11. services.yaml
+ 
+Firstly, the Chronicle Queues required by the application are specified. There are two queues that act as input and 
+output for the service, and a third that serves as an output for the downstream service. The path option specifies 
+where the file that is used as backing store for the queue is to be stored. In the example. For demo purposes, these 
+files are located in the target directory of the project so that they can easily be removed when required through a 
+Maven "clean" operation.
+For each service, the file specifies its connection to the appropriate queue(s), as well as the fully qualified name of the 
+service's implementation class.
+Further configuration is possible through this file, this will be seen in later recipes.
+Running the Application
+To run the application it is necessary to provide a class that acts as an application entrypoint. This class
+
+
+lives outside the Chronicle Services runtime; it serves principally to start the runtime using the services.yaml file 
+to drive the application.
+Listing 12. Application entry point
+ 
+When this class is used as the application entrypoint, three actions take place
+1.	All files in the queues' data directory are deleted. This is to ensure that no pre-existing queues are left from any 
+previous runs of the application since they may contain stale data that would interfere with the current run, and is 
+done primarily for demo purposes.
+2.	The Chronicle Services method ThreadRunner.runAll() reads the specified configuration file, and starts all 
+of the services that are defined therein. Chronicle Queues are started to carry messages between the services if 
+required (due to the previous action this should always result in new queues being created). Each service is started 
+in its own thread.
+3.	The main application thread pauses for 3 seconds and then terminates. Since by default all service threads created 
+in the previous step are daemon threads, this will cause all the services to shut down.
+The running demo service displays a significant number of log messages, including the following:
+...
+ _____ _                     _      _        _____                 _
+/  __ \ |                   (_)    | |      /  ___|               (_)
+| /  \/ |__  _ __ ___  _ __  _  ___| | ___  \ `--.  ___ _ ____   ___  ___ ___  
+___
+| |   | '_ \| '__/ _ \| '_ \| |/ __| |/ _ \  `--. \/ _ \ '__\ \ / / |/ __/ _ \/ 
+__|
+| \__/\ | | | | | (_) | | | | | (__| |  __/ /\__/ /  __/ |   \ V /| | (_|  __/\__ 
+\
+ \____/_| |_|_|  \___/|_| |_|_|\___|_|\___| \____/ \___|_|    \_/ 
+|_|\___\___||___/
+:: Chronicle Services ::              (3.23.38) Running under Java(TM) SE 
+Runtime Environment 1.8.0_162-b12 with 16 processors reported.
+Process id: 
+73566 ...
+[main/sumService] INFO Runner - Starting service sumService
+[main/sumUpstream] INFO Runner - Starting service 
+sumUpstream [main/sumDownstream] INFO Runner - Starting 
+service sumDownstream ...
+[main/sumUpstream] INFO RunLoopControllerMain - running 
+sumUpstream... ... [main/sumDownstream] INFO 
+RunLoopControllerMain - running sumDownstream... ...
+[main/sumService] INFO RunLoopControllerMain - running sumService...
+[main/sumService] INFO SumServiceImpl - Processing sum(3.0,7.0)
+[main/sumDownstream] INFO SumServiceDownstream - Result: 
+10.0 Process finished with exit code 0
+You can see this demo running by clicking the following button:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example1 && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+There are other ways to start and manage a Chronicle Services application - these will be shown in later recipes.
+Project Structure
+With all the features described in the recipes in this section, the project structure will be:
+ 
+2. Working With Structured Data
+Overview
+Normally, Chronicle Services will be defined to accept structured data rather than primitive values as input, and to 
+generate structured data as responses. This section will show how to define services that operate in this way, and how 
+to test them using the same mechanisms as in the simple example.
+Services using structured data are run inside applications in exactly the same way as for the simple example in the 
+previous section..
+Recipes
+2.1 Using Structured Data as Message Payloads 2.2 Testing With DTOs 2.3 Using DTOs in an 
+Application
+ 
+18 of 134 | Overview
+
+

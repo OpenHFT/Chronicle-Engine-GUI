@@ -1,0 +1,35 @@
+"prompt": "How can you ignore certain events based on the contents of the contained DTO?",
+"answer": "Use the method ignoreMethodBasedOnFirstArg() from the interface MethodFilterOnFirstArg<T>." 
+
+"prompt": "What is the purpose of filtering requests being handled by a handler method?",
+"answer": "To ignore the event. There are various reasons for this, perhaps you have multiple service instances running, and wish to partition the event handling across these instances based on some criterion." 
+
+"prompt": "What API does Chronicle Services provide for implementing message filtering?",
+"answer": "The API for the Transaction Service is modified to include the MethodFilterOnFirstArg<T> interface." 
+
+"prompt": "What is the purpose of the MethodFilterOnFirstArg<T> interface?",
+"answer": "To provide the filtering behaviour, the service implementation is required to implement the interface MethodFilterOnFirstArg<T>, where T is the type of the value that is being checked." 
+
+"prompt": "What should the method supplied to perform the filtering do?",
+"answer": "The method should examine the value of the firstArg parameter, and return true if the message is to be ignored, false if the message is to be processed." 
+
+"prompt": "What is the purpose of the service configuration in this example?",
+"answer": "Each instance of the service should handle requests for account numbers in a specific range. The bounds of the range for each service are supplied as configuration parameters." 
+
+"prompt": "How is the configuration information processed during service initialization?",
+"answer": "The configuration information is read and processed during service initialisation using the serviceContext() method." 
+
+"prompt": "What is the purpose of the accounts() method in the service implementation?",
+"answer": "To set up some initial accounts, for demo purposes." 
+
+"prompt": "What is the purpose of the acceptFrom and acceptTo variables in the service implementation?",
+"answer": "To extract the range of account numbers to be handled by this service instance." 
+
+"prompt": "What is the purpose of the runDemo.sh script?",
+"answer": "To run the example for this recipe." 
+
+"prompt": "What is the purpose of the out.transaction() method in the example?",
+"answer": "To post transactions for the service." 
+
+"prompt": "What is the purpose of the downstream service in this example?",
+"answer": "To read the messages and logs them."

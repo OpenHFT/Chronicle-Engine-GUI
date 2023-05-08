@@ -1,0 +1,35 @@
+"prompt": "What is the solution to define a Chronicle Service?",
+"answer": "Define the service's public input and output interface, then provide an implementation class."
+
+"prompt": "What does a Chronicle Service do?",
+"answer": "A Chronicle Service accepts input messages/events from one or more sources, and outputs messages/events to one sink."
+
+"prompt": "What are the steps to define a service?",
+"answer": "To define a service, you need to specify the message types expected as input and those generated as output as Java interface types. Then provide an implementation class."
+
+"prompt": "What are the input and output interfaces for the service in the example?",
+"answer": "Input interface: SumServiceIn. Output interface: SumServiceOut."
+
+"prompt": "What does the implementation class do?",
+"answer": "The implementation class implements the SumServiceIn interface, indicating that it will accept messages/events defined in this interface. A reference is maintained to an instance of the output interface, SumServiceOut, providing a channel to output messages from the service. This reference is injected into the implementation class during construction."
+
+"prompt": "How can the project be laid out for a Maven project?",
+"answer": "The project can be laid out following standard rule for a Maven project."
+
+"prompt": "What is the solution to define a Chronicle Service?",
+"answer": "Define the service's public input and output interface, then provide an implementation class."
+
+"prompt": "What does a Chronicle Service do?",
+"answer": "A Chronicle Service accepts input messages/events from one or more sources, and outputs messages/events to one sink."
+
+"prompt": "What are the steps to define a service?",
+"answer": "To define a service, you need to specify the message types expected as input and those generated as output as Java interface types. Then provide an implementation class."
+
+"prompt": "What are the input and output interfaces for the service in the example?",
+"answer": "Input interface: SumServiceIn. Output interface: SumServiceOut."
+
+"prompt": "What does the implementation class do?",
+"answer": "The implementation class implements the SumServiceIn interface, indicating that it will accept messages/events defined in this interface. A reference is maintained to an instance of the output interface, SumServiceOut, providing a channel to output messages from the service. This reference is injected into the implementation class during construction."
+
+"prompt": "How can the project be laid out for a Maven project?",
+"answer": "The project can be laid out following standard rule for a Maven project."

@@ -1,0 +1,108 @@
+2.1 Using Structured Data as Message Payload
+Problem
+You want to send and receive messages containing data structures.
+Solution
+Use DTOs encoded and decoded by Chronicle Wire.
+Discussion
+In order to effectively implement business logic, most services will require messages to contain more than just Java 
+primitive values. Ensuring data integrity, while at the same time maintaining performance and latency targets, is a 
+significant problem. In Chronicle Services, the Chronicle Wire library is used to provide an effective solution, with 
+minimal overhead in terms of memory or time.
+To examine this, we will use a different example from that in the previous section. The example service performs some 
+simple balance tracking on an account, based on credit and debit transactions. A second service acts as a mock client 
+for this service.
+The architecture of this example is shown below:
+ 
+Introducing Data Transfer Objects
+A Data Transfer Object (DTO) is a POJO that carries data relevant to a message/event that is persisted or sent as the 
+body of the message/event. Chronicle libraries use DTOs both as message payloads and as a means of efficiently 
+managing the storage of Java objects, especially those used in configuration, in persistent storage. We have already 
+seen an example of this, namely the application configuration file services.yaml.
+Using DTOs in a Chronicle Service
+The public interface of the Transaction Service for input is shown here:
+Listing 13. Input interface for Transaction Service
+ 
+The accounts message represents a request to add the list of accounts passed as the parameter to the list of 
+managed accounts. The transaction message is a request to apply the specified Credit or Debit transaction to the 
+relevant account.
+Output from the Transaction Service is specified here:
+Listing 14. Output interface for Transaction Service
+ 
+The message contains the details of a single account, after a given transaction has been applied.
+Defining the DTOs
+From the above, we can see there are two DTOs that we need to define. First, to hold details of an Account:
+Listing 15. Account DTO
+ 
+ 
+Next to hold details of a transaction
+Listing 16. Transaction DTO
+ 
+We also define a third type to describe the type of transaction that is being applied:
+Listing 17. Transaction type DTO
+ 
+In both DTOs, the classes extend the type SelfDescribingMarshallable. This acts as the hook into the 
+functionality of Chronicle Wire (through additional types not shown here), and also defines which of the efficient 
+binary formats to use (the SelfDescribing format, which encodes property names along with property values). 
+Functionality is also provided to support efficient comparison of DTOs (i.e. equals() and hashcode() 
+implementations) as well as a convenient way of generating a String representation for logging/diagnostics (i.e. 
+toString()).
+Defining the Service
+The service implementation for TransactionService is shown below.
+Listing 18. Transaction service implementation public class 
+TransactionSvcImpl implements TransactionSvcIn {   
+  private static Logger LOG = LoggerFactory.getLogger(TransactionSvcImpl.class);
+  static {
+    CLASS_ALIASES.addAlias(Account.class);    
+  }
+  private final TransactionSvcOut out;
+  private final Map<Long, Account> balanceByAccount = new HashMap<>();   
+  private final List<Account> balances = new ArrayList<>();
+  public TransactionSvcImpl(TransactionSvcOut out) {   
+    this.out = out;
+  }
+  @Override
+  public void transaction(Transaction transaction) {   
+    LOG.info("Applying {} of {} to account {}", transaction.entry(), 
+transaction.amount(),
+transaction.accountNumber());     Account account = 
+balanceByAccount.get(transaction.accountNumber());
+    account.add(transaction.entry() == Entry.CREDIT  transaction.amount() : -
+transaction. amount());
+    LOG.info("Balance of account {} is now {}", account.accountNumber(), 
+account.balance());
+    out.onTransaction(account);
+  }
+  @Override
+  public void accounts(List<Account> accounts) {    
+    for (Account account : accounts) {
+      LOG.info("Adding account {} with initial balance: {}", 
+account.accountNumber(), account
+.balance());
+      this.balanceByAccount.put(account.accountNumber(), account);
+ 
+1.	The class implements the public service interface.
+2.	This is an optimisation in Chronicle Wire that encodes the class name as its short form rather than its fully qualified 
+form. More details can be found in the Chronicle Wire documentation
+3.	Account details are stored in a Map, keyed by account number. Note this is purely for demo purposes and should 
+not be considered a recommendation for managing this state in general.
+4.	In the constructor, a reference to the transport for output messages is injected.
+5.	The handler for transaction messages. Updates the balance of the account and output a message containing the 
+new balance of the account.
+6.	This request adds the accounts in the list to the current set of accounts being monitored, and is important for 
+testing, as will be seen shortly.
+DTO Encoding
+The Chronicle Services runtime uses Chronicle Wire to encode the DTOs into messages that are sent to and from the 
+service. Firstly, the transaction requests: Listing 19. Sample Transaction message in YAML
+ 
+and the response messages:
+Listing 20. Sample response message in YAML
+ 
+Project Structure
+The layout of a project using DTOs is recommended to follow the structure below:
+
+
+ 
+The api directory contains the definitions of the various public interfaces. The dto directory contains the DTO class 
+definitions, and the services directory contains the definitions of the service implementation classes. No changes 
+are required to the pom.xml file from the one described in Recipe 1.1, since the Chronicle Wire library will 
+automatically be made available through the chronicle-services dependency and BOM.

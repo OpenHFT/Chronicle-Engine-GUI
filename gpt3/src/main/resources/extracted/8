@@ -1,0 +1,168 @@
+3.1 Using DTOs to Indicate Success
+Problem
+You want to indicate whether a message was successfully processed or not using the same response DTO.
+Solution
+Define DTOs to encapsulate success or failure.
+Discussion
+This recipe is based on the Transaction Service example discussed in earlier recipes.
+Consider the application of a debit transaction to an account. The result of this transaction may take the balance to 
+below 0, i.e. overdraft. The rules surrounding whether this should be allowed are part of the business logic of the 
+overall service. At the simplest level, for some accounts an overdraft may be allowed, whereas for others any 
+transaction that would result in an overdraft should be declined.
+The success or failure of a transaction for reasons such as this can be brought into the service through some relatively 
+straightforward refactoring. In terms of the public interface of the service, the input API is the same:
+Listing 28. Input interface for Transaction Service
+ 
+To introduce the notion of success/failure, we can alter the DTO to carry this information. We also need to alter the 
+outgoing API to reflect this: Listing 29. Output interface for Transaction Service
+ 
+The DTO can be seen below:
+Listing 30. DTO for Transaction Service output
+ 
+ 
+The DTO for output extends the corresponding DTO for which it is the result. It adds a boolean flag to indicate whether 
+processing completed successfully and an accompanying String giving more information. (Clearly it is possible to use 
+a more structured way of representing the "reason", for now String is used to make the demo easier to follow.)
+Setting the Response DTO
+The service implementation for the Transaction Service checks the incoming transaction request and builds the 
+response message based on the new DTO:
+Listing 31. Implementation of Transaction Service public class TransactionSvcImpl 
+implements TransactionSvcIn {   private static Logger LOG = 
+LoggerFactory.getLogger(TransactionSvcImpl.class);
+  static {
+    CLASS_ALIASES.addAlias(Account.class);
+  }
+  private final TransactionSvcOut out;
+  private final Map<Long, Account> balanceByAccount = new HashMap<>();
+  private final List<Account> balances = new ArrayList<>();
+  private OnTransaction onTransaction = new OnTransaction();   
+  public TransactionSvcImpl(TransactionSvcOut out) {
+    this.out = out;
+  }
+  @Override
+  public void transaction(Transaction transaction) {
+    LOG.info("Applying {} of {} to account {}", transaction.entry(), 
+transaction.amount(),
+transaction.accountNumber());
+
+
+    Account account = balanceByAccount.get(transaction.accountNumber());
+    onTransaction.reset();   
+    transaction.copyTo(onTransaction);
+    if ((transaction.entry() == Entry.DEBIT) && (account.balance() < 
+transaction.amount())) {
+
+      LOG.info("Bad transaction: Account {} has insufficient funds for debit: {} 
+[{}]",
+          account.accountNumber(), transaction.amount(), account.balance());
+      out.onTransaction(
+          onTransaction
+              .success(false)
+              .reason("Insufficient funds " + account.balance() + " available for " 
++
+transaction.amount()));
+      return;
+    }
+    account.add((transaction.entry() == Entry.CREDIT  transaction.amount() : -
+transaction. amount()));  
+    LOG.info("Succeeded: Balance of account {} is now {}", account.accountNumber(), 
+account
+.balance());
+    out.onTransaction(
+        onTransaction
+            .success(true)
+            .reason("Balance of account " + account.accountNumber() + " 
+now " + account. balance()));   }
+  @Override
+  public void accounts(List<Account> accounts) {
+    for (Account account : accounts) {
+      LOG.info("Adding account {} with initial balance: {}", 
+account.accountNumber(), account
+.balance());
+      this.balanceByAccount.put(account.accountNumber(), account);
+    }
+  }
+}
+1.	A single instance of the output DTO is created per service instance. There is no need to synchronize access since 
+Chronicle Services processes incoming messages on a single thread.
+2.	Reuse the output DTO to reduce object creation and hence garbage collection. The current contents are cleared 
+and then the non-transient state of the incoming transaction is copied into the object. These methods are part of 
+the Chronicle Wire library.
+3.	Check to see if the transaction should be allowed - in this case if the transaction would take the account balance 
+negative, then the remaining fields of the output DTO are filled in to indicate failure with an explanatory String 
+message. The output message is posted and the method returns.
+4.	By this stage, the transaction is allowed, so calculate and set the new balance, complete the output DTO with a 
+success indication, post the message and return.
+Processing the Output Message
+Because the same message type is used for successful and failed transactions, the service reading the output (in this 
+case the transactionDownstream service) must discriminate between the two cases.
+For example:
+Listing 32. Handler for Transaction Service output messages
+ 
+For a given message type, there can only be one handler. So the handler must decide on what processing is necessary 
+based on the success of the transaction that generated the message.
+Running the Application
+We can now run our modified application to observe how the transaction service cancels transactions that would 
+result in a negative account balance.
+Log messages will indicate the progress of the application.
+Run this yourself by clicking the button below:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example3a && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+ _____ _                     _      _        _____                 _
+/  __ \ |                   (_)    | |      /  ___|               (_)
+| /  \/ |__  _ __ ___  _ __  _  ___| | ___  \ `--.  ___ _ ____   ___  ___ ___  
+___
+| |   | '_ \| '__/ _ \| '_ \| |/ __| |/ _ \  `--. \/ _ \ '__\ \ / / |/ __/ _ \/ 
+__|
+| \__/\ | | | | | (_) | | | | | (__| |  __/ /\__/ /  __/ |   \ V /| | (_|  __/\__ 
+\
+ \____/_| |_|_|  \___/|_| |_|_|\___|_|\___| \____/ \___|_|    \_/ 
+|_|\___\___||___/
+:: Chronicle Services ::      (unknown version) Running under OpenJDK Runtime 
+Environment 11.0.17+8-jvmci-22.3-b08 with 8 processors reported.
+Process id: 
+45828 ...
+[main/transactionSvc] INFO Runner - Starting service transactionSvc
+[main/transactionUpstream] INFO Runner - Starting service 
+transactionUpstream [main/transactionDownstream] INFO Runner - 
+Starting service transactionDownstream ...
+[main/transactionUpstream] INFO Runner - runInitializationComplete
+[main/transactionUpstream] INFO RunLoopControllerMain - running 
+transactionUpstream...
+...
+[main/transactionDownstream] INFO Runner - runInitializationComplete 
+[main/transactionDownstream] INFO RunLoopControllerMain - running 
+transactionDownstream...
+...
+[main/transactionSvc] INFO Runner - runInitializationComplete 
+[main/transactionSvc] INFO RunLoopControllerMain - running transactionSvc... 
+[main/transactionSvc] INFO TransactionSvcImpl - Adding account 34343434 with 
+initial balance:
+100.0 [main/transactionSvc] INFO TransactionSvcImpl - Adding account 45454545 
+with initial balance:
+200.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 100.0 to 
+account 34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+34343434 is now 0.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 50.0 to account 
+34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Bad transaction: Account 34343434 
+has
+insufficient funds for debit: 50.0 [0.0]
+[main/transactionSvc] INFO TransactionSvcImpl - Applying CREDIT of 10.0 to 
+account 45454545
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+45454545 is now
+210.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - Success: Balance of 
+account 34343434
+now 0.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - Failed: Insufficient 
+funds 0.0
+available for 50.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - Success: Balance of 
+account 45454545
+now 210.0
+
+

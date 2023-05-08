@@ -1,0 +1,17 @@
+"prompt": "How can you test a service that uses a separate error message with its own DTO?",
+"answer": "Use the YAMLTester to construct test scenarios that should generate posting of the specific error messages."
+
+"prompt": "What can be used to test for the presence of a separate error message?",
+"answer": "The YAMLTester can be used to test for the presence of a separate error message."
+
+"prompt": "What is the purpose of the Packaging chapter?",
+"answer": "The Packaging chapter shows two ways in which a Chronicle Service application can be packaged."
+
+"prompt": "What are the two ways in which a Chronicle Service application can be packaged?",
+"answer": "A Chronicle Service is normally packaged as an executable JAR file or as a Docker image." 
+
+"prompt": "What is the purpose of Packaging a Services Application in a Jar File recipe?",
+"answer": "The purpose of Packaging a Services Application in a Jar File recipe is to package a Chronicle Services Application as an executable JAR file."
+
+"prompt": "What is the purpose of Packaging a Services Application in a Docker Image recipe?",
+"answer": "The purpose of Packaging a Services Application in a Docker Image recipe is to package a Chronicle Services application as a Docker container, for more flexibility in deployment to a cloud environment."

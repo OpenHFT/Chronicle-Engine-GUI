@@ -1,0 +1,2 @@
+"prompt": "How can you test a service that uses the pattern of returning success/failure indication in output DTOs?",
+"answer": "You can use the YAMLTester to construct scenarios that are expected to succeed and fail. The test cases can be constructed to exercise this approach in the same way as shown before. The test setup is in the setup.yaml file and input messages are the same as in the previous chapter. Expected output based on input messages can be defined in the YAML file as well."

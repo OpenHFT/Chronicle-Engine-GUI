@@ -1,0 +1,140 @@
+9.4 Simple Heartbeat Monitoring
+Problem
+You want to set up a simple heartbeat capability between two services.
+Solution
+Use HeartbeatSource and HeartbeatListener.
+Discussion
+Heartbeat is a useful feature of Chronicle services, which allows a service to verify that another service is available. 
+It is similar in concept to PeriodicUpdate, however its use cases are more focussed on discovering when there are 
+issues in communication between services.
+This recipe demonstrates the simplest use of Heartbeat, simply operating between a pair of services. The example 
+used is, once more, the transaction service seen in earlier recipes. The structure of the application can be seen below:
+ 
+and its configuration file is shown below:
+Listing 108. Application Configuration
+!ChronicleServicesCfg {
+    queues: {
+        transactionIn: { path: data/transactionIn, sourceId: 1 },
+        transactionOut: { path: data/transactionOut, sourceId: 2 },
+        upstreamIn: { path: data/upstreamIn, sourceId: 100 },
+        downstreamOut: { path: data/downstreamOut, sourceId: 101 },
+    },
+    services: {
+        transactionSvc: {
+            inputs: [ transactionIn ],
+            output: transactionOut,
+            implClass: !type
+software.chronicle.services.cookbook.example9c.services.Transact
+ionSvcImpl,         },
+        transactionUpstream: {
+            inputs: [upstreamIn ],        
+            output: transactionIn,
+            implClass: !type
+software.chronicle.services.cookbook.example9c.services.TransactionSvcUpstream,
+            periodicUpdateMS: 3000,       
+            periodicUpdateInitialMS: 500,
+            heartbeatMS: 2000,            
+            heartbeatMSInitial: 1000,
+        },
+        transactionDownstream: {
+            inputs: [ transactionOut ],
+            output: downstreamOut,
+            implClass: !type
+software.chronicle.services.cookbook.example9c.services.TransactionSvcDownstream,
+        }
+    },
+}
+The main changes from previous examples of this application are in the configuration of the 
+transactionUpstream service.
+1.	The input queue is required to supply the timer related events (periodicUpdate and heartbeat) to the service. Its 
+configuration is added to the queues section
+2.	Timers for the periodicUpdate events: every 3 seconds after an intial delay of 0.5 seconds (to allow 
+configuration to complete)
+3.	Timers for the heartbeat events: every 2 seconds after an initial delay of 1 second (to allow configuration to 
+complete)
+The Upstream Service
+The upstream service needs be defined to accept both periodicUpdate and heartbeat events, this is done by 
+implementing the necessary interfaces:
+Listing 109. Upstream service class header
+public class TransactionSvcUpstream     implements HeartbeatSource, 
+PeriodicUpdateSource, ServiceLifecycleListener {
+The required methods must be defined in the class. In the case of HeartbeatSource there are two methods:
+Listing 110. Methods for setting up Heartbeat
+ 
+ 
+The first of these, heartbeatDefinitions(), is required by the interface, but in this example we do not use any 
+of the functionality it represents. The implementation is therefore empty apart from a diagnostic log message. We will 
+see a more realistic use case for this method in the following recipe.
+The second of these, heartbeatTimer is the handler for the heartbeat events that are delivered to the service. 
+In this case, the handler will construct a heartbeat message containing the name of the sending service and the 
+current time. This is then posted to the output queue, from where it will be read by the downstream service 
+responsible for monitoring. In this example, this is the transactionSvc.
+Also required is a handler for the periodicUpdate events:
+Listing 111. Handler for Periodic Update events
+  @Override
+  public void periodicUpdate(long l) {
+    LOG.info("Sending......");
+    
+out.transaction(transaction.accountNumber(34343434).entry(Entry.DEBIT).amount(100));
+    
+out.transaction(transaction.accountNumber(34343434).entry(Entry.DEBIT).amount(50));
+    
+out.transaction(transaction.accountNumber(45454545).entry(Entry.CREDIT).amount(10));
+  }
+This handler is used to post transactions to the main transaction service. It will be called (in this example) every 3 
+seconds. The same transactions are posted each time; for demo purposes this is adequate as the main aim is to show 
+the heartbeat behaviour, so this service remains active indefinitely.
+The Main Service
+The API for the transaction service must allow heartbeat events to be passed, so the input interface needs to reflect 
+that:
+Listing 112. Input interface for main Transaction Service
+ 
+The service implementation needs to provide the handler for theheartbeat events, in this case this it is simply a logging 
+method to show that the event has been received.
+Listing 113. Handler for heartbeat events in Transaction Service
+ 
+ 
+Running the Application
+When the application is run, a number of log messages allow us to track its progress. We see the timer inputs (periodic 
+update and heartbeat) initialised.
+Try running this example by clicking on the 'run' button below:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example9d && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+Listing 114. Output excerpt showing basic functionality
+...
+[main/transactionUpstream] INFO PeriodicEventController - Writing periodic 
+updates to queue
+target/data/transactionDummyIn
+[main/transactionUpstream] INFO HeartbeatController - Writing heartbeats to queue
+target/data/transactionDumm
+yIn ...
+THe heartbeat functionality is shown through the following sequence, which occurs repeatedly:
+Listing 115. Output excerpt showing heartbeat handling
+ 
+In response to PeriodicEvents, the logs will show transactions being sent and processed: Listing 116. 
+Output excecrpt showing transaction processing in response to Periodic Events
+...
+[main/transactionUpstream] INFO TransactionSvcUpstream - Sending......
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 100.0 to 
+account 34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Bad transaction: Account 34343434 
+has
+insufficient funds for debit: 100.0 [0.0]
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 50.0 to account 
+34343434
+[main/transactionDownstream] INFO TransactionSvcDownstream - Account 34343434 has 
+balance 100.0
+[main/transactionSvc] INFO TransactionSvcImpl - Bad transaction: Account 34343434 
+has
+insufficient funds for debit: 50.0 [0.0]
+[main/transactionSvc] INFO TransactionSvcImpl - Applying CREDIT of 10.0 to 
+account 45454545
+[main/transactionDownstream] INFO TransactionSvcDownstream - Account 34343434 has 
+balance 50.0
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+45454545 is now
+280.0
+
+
+[main/transactionDownstream] INFO TransactionSvcDownstream - Account 45454545 
+has balance 10.0 ...

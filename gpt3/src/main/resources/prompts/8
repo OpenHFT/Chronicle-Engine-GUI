@@ -1,0 +1,29 @@
+"prompt": "What is the solution to indicate whether a message was successfully processed or not using the same response DTO?",
+"answer": "Define DTOs to encapsulate success or failure." 
+
+"prompt": "What is the DTO used to output the result of a transaction?",
+"answer": "The DTO for output extends the corresponding DTO for which it is the result. It adds a boolean flag to indicate whether processing completed successfully and an accompanying String giving more information." 
+
+"prompt": "What is the service implementation for the Transaction Service?",
+"answer": "The service implementation for the Transaction Service checks the incoming transaction request and builds the response message based on the new DTO." 
+
+"prompt": "What is the purpose of the TransactionSvcOut?",
+"answer": "The purpose of the TransactionSvcOut is to handle the output of the Transaction Service." 
+
+"prompt": "What is the purpose of the TransactionSvcIn?",
+"answer": "The purpose of the TransactionSvcIn is to handle the input of the Transaction Service." 
+
+"prompt": "What is the purpose of the OnTransaction?",
+"answer": "The purpose of the OnTransaction is to store the transaction information." 
+
+"prompt": "What is the purpose of the accounts method?",
+"answer": "The purpose of the accounts method is to add accounts to the balanceByAccount map." 
+
+"prompt": "What is the purpose of the transaction method?",
+"answer": "The purpose of the transaction method is to apply a transaction to an account and build the response message based on the new DTO." 
+
+"prompt": "What is the purpose of the TransactionSvcDownstream?",
+"answer": "The purpose of the TransactionSvcDownstream is to handle the output of the Transaction Service." 
+
+"prompt": "What is the purpose of the runDemo.sh file?",
+"answer": "The purpose of the runDemo.sh file is to run the modified application to observe how the transaction service cancels transactions that would result in a negative account balance."

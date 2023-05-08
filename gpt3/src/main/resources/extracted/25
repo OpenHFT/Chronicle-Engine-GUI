@@ -1,0 +1,256 @@
+9.1 Finding out which service posted a message
+Problem
+You want to find out which service posted the message being processed in a service.
+Solution
+Use MessageHistory and application metadata.
+Discussion
+There are different aspects to this problem, in this recipe we will look at the simplest, namely discovering the name of 
+the immediately upstream service that posted the message currently being processed.
+In order to do this, we will look at the MessageHistory - metadata that is posted to the Chronicle Queue carrying 
+the message by the Chronicle Services runtime. This currently provides information about the queue from which the 
+message was read. We also use a set of utility classes provided by Chronicle Services that assicates this queue with the 
+service for which this carries output messages.
+To illustrate this, we will use them "multi-instance" Transaction Service application described in recipe 7.2.
+The application structure is shown below:
+ 
+Our focus is on the downstream service, transactionDownstream, which receives output from all instances of 
+the main transaction service. Each instance of the service outputs to its own queue, and the job of the downstream 
+service is to consolidate the messages into a single output queuee and pass them on (in this case all that happens is 
+that the messages are logged).
+In the previous example, the output messages from the transaction service instances included the name of the sending 
+service instance. This may not always be possible, and in this example we remove the need to include the sending 
+instance name from the actual output. Instead, we use MessageHistory and application metadata to discover the 
+sending instance. From a design perspective, it is more desirable to take this approach as it is up to the message 
+receiver to decide whether the information is needed, and recover it, separately from the application protocol. No 
+changes are requred to the sending service to allow this to be done.
+Changes to the Receiving Service
+To gain access to the metadata necessary to decode the MessageHistory, the receiving service uses the mechanism 
+described in recipe 5.3 to access the main configuration, namely implementing the ServiceContextListener 
+interface:
+Listing 99. Downstream service implementing ServiceContextListener for access to configuration
+ 
+The configuration is stored in a RunnerConfiguration object:
+Listing 100. Capturing the application configuration data
+ 
+Now we can use methods from the package software.chronicle.services.tools, which is part of the core 
+Chronicle Services library, to encapsulate the logic to interpret MessageHistory in the context of this metadata in 
+the a method:
+Listing 101. Using metadata to extract sending service information from the message
+ 
+1.	Retrieve the MessageHistory metadata that was posted alongside the message DTO, and extract the sourceID 
+of the queue from which it was read.
+2.	Fetch the configuration of the queue.
+3.	Find the service that uses that queue as an output. Requires a File object representing the queue's location in 
+the filesystem, and the overall application configuration. Return the service "linkage" information.
+4.	The toString() method on the service link object returns the service's name as found in the application 
+configuration.
+The above method can be called in any message handlers, to return the name of the upstream service. For example:
+Listing 102. Handler for messages from the Transaction Service
+  @Override
+  public void onTransaction(OnTransaction onTransaction) {
+    if (onTransaction.success()) {
+      LOG.info("[{}] *Success*  Account: {} {}", upstreamService(), onTransaction. 
+accountNumber(), onTransaction.reason());
+    } else {
+      LOG.info("[{}] *Failed*  Account: {} {}", upstreamService(), 
+onTransaction.accountNumber(),
+onTransaction.reason());
+    }
+  }
+Log messages now display the sending service instance. You can also see this running by clicking the 'run' button below:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example9a && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+[main/transactionDownstream] INFO TransactionSvcDownstream - [transactionSvc1] 
+*Failed*  Account:
+12345678 Insufficient funds 200.0 available for 500.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - [transactionSvc2] 
+*Success*
+Account: 90123456 Balance of account 90123456 now 210.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - [transactionSvc1] 
+*Success*
+Account: 45678901 Balance of account 45678901 now 375.0
+[main/transactionDownstream] ERROR TransactionSvcDownstream - [transactionSvc2] 
+Error for account
+99999999: Unknown Account Number [MEDIUM]
+
+
+9.2 Tracing the flow of a message through an application
+Recipe 9.1 allows you to find out the immediate predecessor of the calling service in the application. Sometimes it is 
+desirable to be able to trace a message from its first occurrence (effectively its ingress) in the application, seeing all 
+stages through which it has passed.
+Problem
+You want to display the complete trace of an event through the application.
+Solution
+Use MessageHistory, connecting back to previous messages through the data held there.
+Discussion
+The MessageHistory object has details of one stage of an event's journey through the application. Enough 
+information is held in the object to allow reading the MessageHistory of the previous stage, and this allows the 
+construction of a chain of objects, so it is possible to see the complete path of the event through the application.
+A low level API is available for reading and writing from the Queues where the history information has been written, 
+and for presenting the history mechanism effectively.
+A Demo Application
+We can examine this capability using a demo application, whose structure is shown here:
+ 
+The application configuration is shown here:
+The configuration is shown here:
+Listing 103. Application configuration
+# uses schema from https://github.com/ChronicleEnterprise/Chronicle-
+ServicesDemo/blob/master/docs/services.schema.json
+!ChronicleServicesCfg {
+  queues: {
+    periodic-events: { path: data/periodic-events, sourceId: 100, name: periodic-
+events },
+    marketdata: { path: data/marketdata, sourceId: 1, name: marketdata },
+    position: { path: data/position, sourceId: 2, name: position },
+    daily-price: { path: data/daily-price, sourceId: 3, name: daily-price },
+    web-page: { path: data/web-page, sourceId: 4, name: web-page },
+  },
+  services: {
+    marketdata-service: {
+      inputs: [ periodic-events ],
+      output: marketdata,
+      implClass: !type
+software.chronicle.services.cookbook.example9b.service.impl.MarketDataServiceImpl,
+      periodicUpdateMS: 1000,
+    },
+    position-service: {
+      inputs: [ marketdata ],
+      output: position,
+      implClass: !type
+software.chronicle.services.cookbook.example9b.service.impl.PositionServiceImpl,
+    },
+    daily-price-service: {
+      inputs: [ marketdata ],
+      output: daily-price,
+      implClass: !type
+software.chronicle.services.cookbook.example9b.service.impl.DailyPriceServiceImpl,
+    },
+    web-page-service: {
+      inputs: [ position, daily-price ],
+      output: web-page,
+      implClass: !type
+software.chronicle.services.cookbook.example9b.service.impl.WebPageServiceImpl,
+    },
+  }
+}
+Market-data-service acts as ingress to the application, simulating an adapter that reads from an external data 
+feed. It responds to PeriodicUpdate events by generating pseudo-randomly generated price updates for a small 
+group of ticker symbols.
+These are posted to its output queue, marketdata, which is read by two separate services, positionservice 
+maintains position information and daily-price-service maintains price summary information.
+Each of these two services posts to its own output queue, which are read by web-page-service, which presents 
+renders the data into HTML for publication to a browser.
+In this example, we are not concerned with the actual rendering of the data into a browser.
+If we run the application, then log messages will display the HTML at regular intervals.
+Run this demo by clicking on the 'run' button below:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example9b && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+Listing 104. Log output excerpt
+ _____ _                     _      _        _____                 _
+/  __ \ |                   (_)    | |      /  ___|               (_)
+| /  \/ |__  _ __ ___  _ __  _  ___| | ___  \ `--.  ___ _ ____   ___  ___ ___  
+___
+| |   | '_ \| '__/ _ \| '_ \| |/ __| |/ _ \  `--. \/ _ \ '__\ \ / / |/ __/ _ \/ 
+__|
+| \__/\ | | | | | (_) | | | | | (__| |  __/ /\__/ /  __/ |   \ V /| | (_|  __/\__ 
+\
+ \____/_| |_|_|  \___/|_| |_|_|\___|_|\___| \____/ \___|_|    \_/ 
+|_|\___\___||___/
+:: Chronicle Services ::      (unknown version) Running under OpenJDK 
+Runtime Environment 1.8.0_345-b01 with 16 processors reported.
+Process id: 
+69764 ...
+[main/web-page-service] INFO Runner - Starting service web-page-service
+[main/daily-price-service] INFO Runner - Starting service daily-price-service
+[main/marketdata-service] INFO Runner - Starting service 
+marketdata-service [main/position-service] INFO Runner - 
+Starting service position-service... ...
+[main/position-service] INFO Runner - runInitializationComplete 
+[main/position-service] INFO RunLoopControllerMain - running position-
+service...
+[main/daily-price-service] INFO Runner - runInitializationComplete 
+[main/daily-price-service] INFO RunLoopControllerMain - running daily-price-
+service...
+[main/marketdata-service] INFO PeriodicEventController - Writing periodic updates 
+to queue
+target/data/periodic-events [main/marketdata-service] INFO Runner - 
+runInitializationComplete [main/marketdata-service] INFO 
+RunLoopControllerMain - running marketdata-service... ...
+[main/web-page-service] INFO Runner - runInitializationComplete 
+[main/web-page-service] INFO RunLoopControllerMain - running web-
+page-service... ...
+WebPageService: <!DOCTYPE html><html><head><style>body {font-family: poppins, 
+Helvetica}table, td, th {border:2px solid}table {border-collapse: collapse}th, 
+td {font-size: 24px;  text-align:
+center; width: 300px}th {color: #ffffff; background-color: 
+#181f43</style></head><body>
+<h1>Best Bank</h1>
+<h2>The Marketplace</h2>
+<p><table>
+<tr><th>Ticker</th><th>Open</th><th>Last</th><th>High</th><th>Low</th><th>Close</
+th><tr><tr><td>T
+SLA</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>129.27</td></tr>
+</table></p>
+<h2>My Portfolio</h2>
+<p><table>
+<tr><th>Ticker</th><th>#</th><th>Last</th><th>Value</th><tr></table></p>
+</html></body>
+ ...
+
+
+Tracing an Event
+ A separate application is used to display an event trace.
+For demonstration purposes,
+the application will read the latest event from the `web-
+page` queue and display the trace of this event through the 
+application.
+The details of the methods that perform the chaining of events through the application can be seen in the code << 
+here >>.
+After running the main application to populate the queues with data, we can run the tracer and the output will be:
+Listing 105. Output from event tracing for the first event in the queue
+... web-page-service: 
+web-page@0
+  !software.chronicle.services.demo.example9b.dto.WebPage {
+  eventId: periodicUpdate,
+  eventTime: 2023-02-06T13:24:26.548515803,
+  body: "<!DOCTYPE html><html><head><style>body {font-family: poppins, 
+Helvetica}table, td, th
+{border:2px solid}table {border-collapse: collapse}th, td {font-size: 24px;  
+text-align: center; width: 300px}th {color: #ffffff; background-color: 
+#181f43</style></head><body>\n<h1>Best
+Bank</h1>\n<h2>The
+Marketplace</h2>\n<p><table>\n<tr><th>Ticker</th><th>Open</th><th>Last</th><th>Hi
+gh</th><th>Low</ 
+th><th>Close</th><tr><tr><td>TSLA</td><td>0.00</td><td>0.00</td><td>0.00</td><td>
+0.00</td><td>120
+.86</td></tr>\n</table></p>\n<h2>My
+Portfolio</h2>\n<p><table>\n<tr><th>Ticker</th><th>#</th><th>Last</th><th>Value</
+th><tr></table><
+/p>\n</html></body>"
+}
+daily-price-service: daily-price@83296595738624
+  !software.chronicle.services.demo.example9b.dto.EndOfDayPrice {
+  eventId: periodicUpdate,
+  eventTime: 2023-02-06T13:24:26.548515803,
+  ticker: TSLA,
+  opening: 0.0,
+  last: 0.0,
+  high: 0.0,
+  low: 0.0,
+  closing: 120.8559341430664
+}
+marketdata-service: marketdata@83296595738624
+  !software.chronicle.services.demo.example9b.dto.MarketData {
+  eventId: periodicUpdate,
+  eventTime: 2023-02-06T13:24:26.548515803,
+  ticker: TSLA,
+  type: CLOSING,
+  last: 120.8559341430664
+}
+ 
+The events are shown in a "trace-back" order, from the end of the service processing pipeline to the beginning. At each 
+stage, the name of the service that posted the message is shown, together with the queue name and index from 
+where the message was read. The payload of the message is also shown. Notice that the eventId and eventTime 
+properties passed with the message do not change, the event data is enriched at each stage from the original empty 
+payload of the PeriodicUpdate event through to the HTML that can be sent to the web page.
+We can interpret the output against the service diagram shown above to illustrate the processing path.

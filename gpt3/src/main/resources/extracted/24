@@ -1,0 +1,123 @@
+8.3 Initializing State from the Output Queue
+Problem
+You want to initialise the state of a service without having to replay all significant input messages.
+Solution
+Design the service to include all relevant state in output messages, and configure replay options accordingly.
+Discussion
+The overhead of initialising state by replaying input messages has the potential to be significant in the case of long-
+running, high throughput services. However, often services are designed to include a significant amount of state 
+information in their output messages. This provides an opportunity to take a different approach to initialising state. It 
+considers output messages as a form of snapshot of state, perhaps partial but often complete.
+In this approach, the replay reads messages from the output queue in reverse order, i.e. latest message first, and 
+invokes a specific method in the service to use these messages to recreate state. The service can stop this process once 
+it is satisfied that all state has been recreated.
+If we look at the Position Service application again, although slightly modified, we can see how this would work:
+ 
+The main functionality of the application is the same as for Recipe 8.2. The difference here is that there is a path for 
+the position service to read the output events from the position-out queue during initialisation, in order to 
+recreate its state.
+The messages on this queue are posted either when a trade is processed, or on every third periodic update event. The 
+position service needs to be updated to include a handler for these messages, although this handler will only be 
+invoked during initialisation. The handler must use the data in the message to update the internal data structures that 
+contain the state used by the service.
+In this example, each message contains a complete summary of the positions held by the service, so all that is needed 
+to create the complete state when the service stopped is the last message posted to the queue. The service must also 
+provide a callback method that is used to indicate whether the replaying of messages from the output queue is to be 
+stopped, in this case the service should only process one message (the last one posted), and so this method will return 
+true on its first invocation.
+The configuration of the application to enable this form of replay is:
+Listing 94. Configuration for state replay using output queue
+ 
+The value OUTPUT_REVERSE indicates that this service will read events in most-recent-first order from its output 
+queue and replay them until satisfied that its state has been completely reconstructed. Setting the startFromStrategy 
+to LAST_WRITTEN is an instruction that once initialised, the service should begin processing input events that arrived 
+after the last event that on the output queue (which would be the first event that it reapplied to rebuild state). In 
+some cases, this value can be set to END to begin looking at events that arrive only after initialisation is complete.
+Changes to the Service Implementation
+(Re)building state from output messages requires some changes to be made to the service implementation. The 
+implementation class must be able to handle output events as well as input events. It must also contain logic to 
+determine whether the state has been completely reconstituted, as the output messages may not contain all state.
+This can be done by extending the "normal" service implementation class and introducing the additional functionality. 
+This is shown in the following class:
+ 
+1.	PositionsListener specifies that the service can handle positions() events, 
+OutputReverseListener specifies that the class has the stateReplayed() method to determine 
+whether replay of output messages should stop.
+2.	Populate the main positions structure with the information that was published in the event that is being replayed 
+here.
+3.	In this case, the output events we are replaying contain all the state, so only one is required.
+Running the Service
+Details of how to run the service can be found below.
+To see a demo, click on the 'run' button below:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example8c && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+For this demo, the Position service is started and a single trade is entered using the TradeEntry component. Excerpts 
+from the service logs show this happening:
+Listing 95. Log messages from Position Service
+[...demo.RunService/positionSvc] INFO RunLoopControllerMain - running 
+positionSvc... ...
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Posting 
+Position Summary ...
+
+
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Processing 
+Trade: !Trade {
+  eventId: "",
+  eventTime: 0,
+  ticker: AUDUSD,
+  buy: true,
+  qty: 100000,
+  price: 0.7777
+}
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Posting Position 
+Summary
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Posting Position 
+Summary
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+The Tailer component shows the events posted to the output queue:
+Listing 96. Output from queue Tailer process showing cumulative position data
+ 
+ 
+1.	Posted in response to the periodicUpdate event at the service and shows no positions.
+2.	Posted in response to the processing of the trade, and shows the resulting position.
+Replay Following Restart
+If the Position Service is stopped and then restarted, log messages will show the replay of the output queue to recreate 
+state:
+Listing 97. Log messages from Position Service following restart
+...
+[...demo.RunService/positionSvc] INFO Runner - replayInputQueuesHistory begin
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Replaying event from 
+output
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Checking if 
+replay complete: true ... [...demo.RunService/positionSvc] INFO 
+RunLoopControllerMain - running positionSvc... ...
+If a new event is posted, then the positions are updated correctly and posted to the output queue:
+Listing 98. Output from Tailer process following service restart
+ 
+1.	Positions posted due to first PeriodicUpdate event after restarting.
+2.	Positions posted after new trade issued.
+
+
+9. Diagnostics and Monitoring
+Overview
+It is often useful to be able to see what is happening "behind the scenes" in a Chronicle Services application, especially 
+while diagnosing issues. The recipes shown here demonstrate how to discover more about how messages pass 
+through an application.
+Recipes
+9.1 Finding Out Which Service Posted a Message
+Discovering which service posted a message.
+9.2 Tracing the Flow of a Message Through an Application
+Obtaining the path of a message through upstream services in an application.
+9.3 Displaying Latencies in Message Processing
+How to discover timings related to a message passing through an application.
+9.4 Simple Heartbeat Monitoring
+How to establish simple heartbeats between two services.
+9.5 Using Heartbeats to Monitor Service Availability
+How to determine availability of services and their dependencies using heartbeats.
+112 of 134 | Overview

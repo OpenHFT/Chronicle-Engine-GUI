@@ -1,0 +1,193 @@
+7.3 Performing Work When a Service is Idle
+Problem
+You want to arrange for work to be done when a service is not handling incoming requests.
+Solution
+Implement this work as a PollingUpdateSource.
+Discussion
+Regular tasks such as housekeeping or diagnostics are not always best performed on the basis of time intervals, as is 
+the case with Periodic Updates in Chronicle Services. It is often more appropriate to have a way of scheduling tasks on 
+the basis of how loaded a service may be with incoming requests, especially the load is subject to bursts of requests 
+interspersed with periods of relative inactivity.
+Chronicle Services offers the PollingUpdate facility to allow for this to be achieved.
+When a service implements the PollingUpdateSource interface, it will be integrated with this facility. The 
+interface requires the provision of two methods to define how this integration is to be performed:
+public boolean publishUpdateOnIdle()
+called when the service is "idle" - i.e. there are no incoming requests to be handled by the service, return true when 
+there is work to do and false when not.
+public void pollingUpdate(long currentTime)
+defines the work to be done when publishUpdateOnIdle() returns true 
+As an example, consider the transaction service application:
+ 
+The Periodic Update events cause the upstream service to post transaction requests at regular intervals; these are 
+processed and their output posted to the downstream service, which logs details.
+We can modify the transaction service so that, when there are no incoming requests to process, it will publish a 
+summary of all the accounts that it is currently managing. If there have not been any changes to any of the accounts, 
+then nothing will be published (for example, transactions may have been rejected by the service).
+The required changes to the transaction service are shown below.
+First, it is necessary to change the API so that the service implementation is seen to implement the 
+PollingUpdateSource interface:
+ 
+Then the functionality is added to the implementation class:
+public class TransactionSvcImpl implements TransactionSvcIn 
+{   private static Logger LOG = 
+LoggerFactory.getLogger(TransactionSvcImpl.class);
+  static {
+    CLASS_ALIASES.addAlias(Account.class);
+  }
+  private final TransactionSvcOut out;
+  private final Map<Long, Account> balanceByAccount = new HashMap<>();
+  private final List<Account> allAccounts = new ArrayList<>();
+  private volatile boolean accountsUpdated = true;
+  private OnTransaction onTransaction = new OnTransaction();
+  private AccountError accountError = new AccountError();
+  public TransactionSvcImpl(TransactionSvcOut out) {
+    this.out = out;
+  }
+  @Override
+  public void transaction(Transaction transaction) {
+    LOG.info("Applying {} of {} to account {}", transaction.entry(), 
+transaction.amount(),
+transaction.accountNumber());
+    Account account = balanceByAccount.get(transaction.accountNumber());
+    if (account == null) {
+      LOG.error("Unknown account number: {}", transaction.accountNumber());
+      accountError.reset();
+      accountError.accountNumber(transaction.accountNumber())
+          .errorMessage("Unknown Account Number")
+          .priority(Priority.MEDIUM);
+      out.accountError(accountError);
+      return;
+    }
+    onTransaction.reset();
+    transaction.copyTo(onTransaction);
+    if ((transaction.entry() == Entry.DEBIT) && (account.balance() < 
+transaction.amount())) {
+      out.onTransaction(onTransaction.success(false).reason("Insufficient funds " 
++ account
+.balance() + " available for " + transaction.amount()));
+
+
+ 
+The behaviour we are implementing is that, whenever the service is idle and the balance of one or more accounts has 
+changed, then a list of accounts is published to the service output whenever the service is idle.
+A global flag, accountsUpdated, indicates that there have been changes made since the accounts list was last 
+published. This flag is initialised to false, updated to true when a transaction is successfully applied to one of the 
+accounts, and reset to false again after the accounts list is posted. The checking callback method 
+publishUpdateOnIdle() simply returns the value of this flag.
+If a polling update is to be performed, then a list of all accounts is constructed and posted as the payload of the 
+accountBalances method. The downstream service will log a summary of this list in its message handler.
+ 
+ 
+Running the Service
+The demo application is run with two accounts, both initialised with a balance of 200. Repeated debit transactions will 
+reduce these balances until they reach a value that will not allow the debit, subsequent attempts to debit are refused. 
+The log will show this happening:
+Listing 78. Log output showing balance updates
+[main/transactionSvc] INFO TransactionSvcImpl - Adding account 34343434 with 
+initial balance:
+200.0 [main/transactionSvc] INFO TransactionSvcImpl - Adding account 45454545 
+with initial balance:
+200.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - Account Balances: 
+[45454545: 200.0,
+34343434: 200.0]
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 60.0 to account 
+34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 40.0 to account 
+45454545
+[main/transactionDownstream] INFO TransactionSvcDownstream - 34343434 Succeeded: 
+Balance of
+account 34343434 now 140.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - 45454545 Succeeded: 
+Balance of
+account 45454545 now 160.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - Account Balances: 
+[45454545: 160.0,
+34343434: 140.0]
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 60.0 to account 
+34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 40.0 to account 
+45454545
+[main/transactionDownstream] INFO TransactionSvcDownstream - 34343434 Succeeded: 
+Balance of
+account 34343434 now 80.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - 45454545 Succeeded: 
+Balance of
+account 45454545 now 120.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - Account Balances: 
+[45454545: 120.0,
+34343434: 
+80.0] ...
+To see this example running, click on the button below:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example7c && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+The account lists output from the messages initiated by the PollingUpdates can be seen. Eventually the account 
+balances reach a state where the transactions are rejected, after that point there is no change to the account balances 
+and so the account list updates do not occur.
+Listing 79. Log output showing failed transactions eventually preventing balance updates so balances not printed
+...
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 60.0 to account 
+34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 40.0 to account 
+45454545
+[main/transactionDownstream] INFO TransactionSvcDownstream - 34343434 Failed: 
+Insufficient funds
+20.0 available for 60.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - 45454545 Succeeded: 
+Balance of
+account 45454545 now 0.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - Account Balances: 
+[45454545: 0.0,
+34343434: 20.0]
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 60.0 to account 
+34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 40.0 to account 
+45454545
+[main/transactionDownstream] INFO TransactionSvcDownstream - 34343434 Failed: 
+Insufficient funds
+20.0 available for 60.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - 45454545 Failed: 
+Insufficient funds
+0.0 available for 40.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 60.0 to account 
+34343434
+[main/transactionDownstream] INFO TransactionSvcDownstream - 34343434 Failed: 
+Insufficient funds
+20.0 available for 60.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 40.0 to account 
+45454545
+[main/transactionDownstream] INFO TransactionSvcDownstream - 45454545 Failed: 
+Insufficient funds
+0.0 available for 40.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 60.0 to account 
+34343434
+[main/transactionDownstream] INFO sTransactionSvcDownstream - 34343434 Failed: 
+Insufficient funds
+20.0 available for 60.0
+...
+
+
+8. Managing State in Chronicle Services
+Overview
+In applications built using Chronicle Services, the ideal architecture is one where components minimise their 
+dependence on state, especially mutable state. A stateless approach is something that can be introduced at the design 
+level, in terms of the messages that are used to communicate between the components, or at the implementation 
+level in choice of algorithms or implementation strategies.
+Chronicle Services applications are built using Chronicle Queue as the underlying message transport. Chronicle Queue 
+offers an immutable, persistent store of events/messages whose size is limited only to the amount of persistent 
+storage available. In the majority of service components, state is typically constructed cumulatively based on the 
+results of handling events over time. Given that Chronicle Queue provides a reliable platform for holding these events, 
+it should be possible to use them to recreate the state of a service if it were to stop, either deliberately or through a 
+problem, and start again. All that is needed is to replay the events that built the state.
+In practice, however, it is not always necessary to do this (the service may be stateless), or practical (in some cases 
+there may be very large numbers of events - one deployed service has a queue that is measured in Terabytes of 
+memory). There are therefore a number of different approaches that can be taken when it comes to setting up 
+necessary state in a service when it (re)starts.
+Recipes
+8.1 Initializing State from a Single Input Queue
+Demonstrates how to initialize the state of a service with a single input queue following a (re)start.
+8.2 Initializing State from Multiple Input Queues
+This section delves into initialising the state of a service with multiple input queues following a (re)start.
+8.3 Initializing State from the Output Queue
+Explores initialising the state of a service without having to replay all significant input messages.
+91 of 134 | Overview

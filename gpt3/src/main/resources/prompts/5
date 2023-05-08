@@ -1,0 +1,11 @@
+"prompt": "What is a DTO in Chronicle Services and how is it used?",
+"answer": "A DTO (Data Transfer Object) is a POJO that carries data relevant to a message/event that is persisted or sent as the body of the message/event. Chronicle libraries use DTOs both as message payloads and as a means of efficiently managing the storage of Java objects, especially those used in configuration, in persistent storage. DTOs are used in Chronicle Services to effectively implement business logic by ensuring data integrity while maintaining performance and latency targets." 
+
+"prompt": "What is the purpose of the Transaction Service's input and output interfaces?",
+"answer": "The input interface for the Transaction Service represents a request to add a list of accounts or apply a credit or debit transaction to a relevant account. The output interface for the Transaction Service contains the details of a single account after a given transaction has been applied. These interfaces are used to send and receive messages containing data structures in the form of DTOs." 
+
+"prompt": "What is the purpose of the SelfDescribingMarshallable class in DTOs?",
+"answer": "The SelfDescribingMarshallable class acts as the hook into the functionality of Chronicle Wire and defines which of the efficient binary formats to use (the SelfDescribing format, which encodes property names along with property values). It also provides functionality to support efficient comparison of DTOs (i.e. equals() and hashcode() implementations) as well as a convenient way of generating a String representation for logging/diagnostics (i.e. toString())." 
+
+"prompt": "What is the recommended project structure for a project using DTOs in Chronicle Services?",
+"answer": "The recommended project structure for a project using DTOs in Chronicle Services is to have an api directory containing the definitions of the various public interfaces, a dto directory containing the DTO class definitions, and a services directory containing the definitions of the service implementation classes. No changes are required to the pom.xml file from the one described in Recipe 1.1, since the Chronicle Wire library will automatically be made available through the chronicle-services dependency and BOM."

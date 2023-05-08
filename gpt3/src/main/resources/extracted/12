@@ -1,0 +1,173 @@
+4.1 Packaging a Services Application in a Jar File
+Problem
+You want to package a Chronicle Services Application as an executable JAR file.
+Solution
+Use the Maven Shade Plugin to create an uber-jar.
+Discussion
+Chronicle Services does not mandate any special rules concerning the deployment of applications. The standard Maven 
+build such as that described in the pom.xml file shown earlier will package the application as a jar file. This jar file can 
+be used to establish a CLASSPATH for executing the application directly using the Main class as an entrypoint. 
+However, the CLASSPATH also needs to contain all the other libraries that are used by the application - including the 
+Chronicle libraries that form the Chronicle Services runtime.
+A common variant of this is to create a self-contained JAR file that contains the application code and data, plus all of 
+the dependencies required by the application. Such a jar file is often called an uber-jar, and can be executed directly 
+without the need to modify any existing CLASSPATH.
+The Maven shade plugin supports the construction of an uber-jar for an application.
+The term "shade" refers to localised modifications to some package names to avoid
+conflicts when multiple versions of the same library are used within the same application.
+It is straightforward to add and configure this plugin in the pom.xml file:
+Listing 44. POM file extract showing Shade plugin setup
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-shade-plugin</artifactId>
+  <version>3.4.1</version>
+  <executions>
+    <execution>
+      <goals>
+        <goal>shade</goal>
+      </goals>
+      <configuration>
+        <shadedArtifactAttached>true</shadedArtifactAttached>
+        <transformers>
+          <transformer implementation=
+              
+"org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+ 
+<mainClass>software.chronicle.services.cookbook.example8a.Mainsoftware.chronicle.
+services.cookboo k.example8a.Main</mainClass>
+ 
+Once added, the "package" goal for the build will generate the uber-jar file and store it in the target directory. Using 
+the Transaction Service example from the recipes in section 3 as an example: Listing 45. Log excerpt showing shade 
+plugin operation during build
+$ mvn clean package
+[INFO] Scanning for projects...
+... Normal build and test output ...
+[INFO]
+[INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ chronicle-services-example --
+-
+[INFO] Building jar: /Users/george/work/Chronicle/Chronicle-Services-
+Cookbook/Packaging/target/chronicle-services-example-1.0.0-SNAPSHOT.jar
+[INFO]
+[INFO] --- maven-shade-plugin:3.4.1:shade (default) @ chronicle-services-
+example --[INFO] Including software.chronicle:chronicle-
+services:jar:3.23ea37 in the shaded jar.
+[INFO] Including net.openhft:chronicle-core:jar:2.23ea34 in the shaded jar.
+[INFO] Including net.openhft:posix:jar:2.23ea0 in the shaded jar.
+[INFO] Including com.github.jnr:jnr-ffi:jar:2.2.11 in the shaded jar.
+[INFO] Including com.github.jnr:jffi:jar:1.3.9 in the shaded jar.
+[INFO] Including com.github.jnr:jffi:jar:native:1.3.9 in the shaded jar.
+[INFO] Including org.ow2.asm:asm:jar:9.2 in the shaded jar.
+[INFO] Including org.ow2.asm:asm-commons:jar:9.2 in the shaded jar.
+[INFO] Including org.ow2.asm:asm-analysis:jar:9.2 in the shaded jar.
+[INFO] Including org.ow2.asm:asm-tree:jar:9.2 in the shaded jar.
+[INFO] Including org.ow2.asm:asm-util:jar:9.2 in the shaded jar.
+[INFO] Including com.github.jnr:jnr-a64asm:jar:1.0.0 in the shaded jar.
+[INFO] Including com.github.jnr:jnr-x86asm:jar:1.0.2 in the shaded jar.
+[INFO] Including com.github.jnr:jnr-constants:jar:0.10.3 in the shaded jar.
+[INFO] Including net.openhft:chronicle-analytics:jar:2.23ea1 in the shaded jar.
+[INFO] Including net.openhft:chronicle-bytes:jar:2.23ea29 in the shaded jar.
+[INFO] Including net.openhft:chronicle-wire:jar:2.23ea38 in the shaded jar.
+[INFO] Including net.openhft:compiler:jar:2.23ea0 in the shaded jar.
+[INFO] Including net.openhft:chronicle-threads:jar:2.23ea24 in the shaded jar.
+[INFO] Including net.openhft:affinity:jar:3.23ea1 in the shaded jar.
+[INFO] Including net.openhft:chronicle-queue:jar:5.23ea34 in the shaded jar.
+[INFO] Including net.openhft:chronicle-network:jar:2.23ea21 in the shaded jar.
+[INFO] Including net.sf.trove4j:core:jar:3.1.0 in the shaded jar.
+[INFO] Including software.chronicle:chronicle-queue-enterprise:jar:2.23ea24 in 
+the shaded jar.
+[INFO] Including software.chronicle:chronicle-map-enterprise:jar:2.23ea3 in the 
+shaded jar.
+[INFO] Including net.openhft:chronicle-values:jar:2.23ea2 in the shaded jar.
+[INFO] Including com.squareup:javapoet:jar:1.13.0 in the shaded jar.
+[INFO] Including net.openhft:chronicle-map:jar:3.23ea4 in the shaded jar.
+[INFO] Including net.openhft:chronicle-algorithms:jar:2.23ea3 in the shaded jar.
+[INFO] Including net.java.dev.jna:jna:jar:5.8.0 in the shaded jar.
+[INFO] Including net.java.dev.jna:jna-platform:jar:5.8.0 in the shaded jar.
+[INFO] Including commons-cli:commons-cli:jar:1.4 in the shaded jar.
+[INFO] Including org.slf4j:slf4j-simple:jar:1.7.32 in the shaded jar.
+[INFO] Including org.slf4j:slf4j-api:jar:1.7.32 in the shaded jar.
+[INFO] Dependency-reduced POM written at: /Users/george/work/Chronicle/Chronicle-
+Services-
+Cookbook/Packaging/dependency-reduced-pom.xml [WARNING] Discovered 
+module-info.class. Shading will break its strong encapsulation.
+[WARNING] Discovered module-info.class. Shading will break its strong 
+encapsulation.
+[WARNING] Discovered module-info.class. Shading will break its strong 
+encapsulation.
+[WARNING] Discovered module-info.class. Shading will break its strong 
+encapsulation.
+[WARNING] Discovered module-info.class. Shading will break its strong 
+encapsulation.
+[WARNING] affinity-3.23ea1.jar, asm-9.2.jar, asm-analysis-9.2.jar, asm-commons-
+9.2.jar, asm-tree-
+9.2.jar, asm-util-9.2.jar, chronicle-algorithms-2.23ea3.jar, chronicle-analytics-
+2.23ea1.jar, chronicle-bytes-2.23ea29.jar, chronicle-core-2.23ea34.jar, 
+chronicle-map-3.23ea4.jar, chroniclemap-enterprise-2.23ea3.jar, chronicle-
+network-2.23ea21.jar, chronicle-queue-5.23ea34.jar, chronicle-queue-enterprise-
+2.23ea24.jar, chronicle-services-3.23ea37.jar, chronicle-servicesexample-1.0.0-
+SNAPSHOT.jar, chronicle-threads-2.23ea24.jar, chronicle-values-2.23ea2.jar, 
+chronicle-wire-2.23ea38.jar, commons-cli-1.4.jar, compiler-2.23ea0.jar, core-
+3.1.0.jar, javapoet-
+1.13.0.jar, jffi-1.3.9-native.jar, jffi-1.3.9.jar, jna-5.8.0.jar, jna-platform-
+5.8.0.jar, jnra64asm-1.0.0.jar, jnr-constants-0.10.3.jar, jnr-ffi-2.2.11.jar, 
+jnr-x86asm-1.0.2.jar, posix-
+2.23ea0.jar, slf4j-api-1.7.32.jar, slf4j-simple-1.7.32.jar define 1 overlapping 
+resource:
+[WARNING]   - META-INF/MANIFEST.MF [WARNING] jna-5.8.0.jar, jna-
+platform-5.8.0.jar define 3 overlapping resources:
+[WARNING]   - META-INF/AL2.0
+[WARNING]   - META-INF/LGPL2.1
+[WARNING]   - META-INF/LICENSE
+[WARNING] maven-shade-plugin has detected that some class files are
+[WARNING] present in two or more JARs. When this happens, only 
+one [WARNING] single version of the class is copied to the 
+uber jar.
+[WARNING] Usually this is not harmful and you can skip these warnings,
+[WARNING] otherwise try to manually exclude artifacts based 
+on [WARNING] mvn dependency:tree -Ddetail=true and the 
+above output.
+[WARNING] See https://maven.apache.org/plugins/maven-shade-
+plugin/ [INFO] Attaching shaded artifact.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.827 s
+[INFO] Finished at: 2022-12-08T13:49:22Z
+[INFO] ------------------------------------------------------------------------
+The output shows that the all dependencies, direct and transient, are loaded into the jar file. The plugin ensures that 
+dependencies are added only once.
+After completion, the generated jar files can be seen in the target directory:
+Listing 46. Shaded and non-shaded jar files are built
+$ ls -l target 
+total 29520
+-rw-r--r--  1 george  staff  14242346  1 Feb 18:04 chronicle-services-cookbook-
+example4a-1.0.0-
+SNAPSHOT-shaded.jar
+-rw-r--r--  1 george  staff     14286  1 Feb 18:04 chronicle-services-cookbook-
+example4a-1.0.0-
+
+
+ 
+The basic jar file mentioned above, chronicle-services-cookbook-example4a-1.0.0-SNAPSHOT.jar, 
+contains the compiled files from the service itself. No dependencies are included.
+The shaded jar file, chronicle-services-cookbook-example4a-1.0.0-SNAPSHOT-shaded.jar, 
+contains the service and all its dependencies. The manifest for the jar file include the main class that will form the 
+entrypoint of the application. We can run the application directly from the jar file:
+$ java -jar target/chronicle-services-cookbook-example4a-1.0.0-
+SNAPSHOT-shaded.jar ...
+ _____ _                     _      _        _____                 _
+/  __ \ |                   (_)    | |      /  ___|               (_)
+| /  \/ |__  _ __ ___  _ __  _  ___| | ___  \ `--.  ___ _ ____   ___  ___ ___  
+___
+| |   | '_ \| '__/ _ \| '_ \| |/ __| |/ _ \  `--. \/ _ \ '__\ \ / / |/ __/ _ \/ 
+__|
+| \__/\ | | | | | (_) | | | | | (__| |  __/ /\__/ /  __/ |   \ V /| | (_|  __/\__ 
+\
+ \____/_| |_|_|  \___/|_| |_|_|\___|_|\___| \____/ \___|_|    \_/ 
+|_|\___\___||___/
+:: Chronicle Services ::      (unknown version) Running under OpenJDK 
+Runtime Environment 1.8.0_345-b01 with 16 processors reported.
+Process id: 
+72429 ...
+The output is the same as for the earlier recipes, reflecting the fact that the application itself is unchanged. The 
+application can now be distributed and deployed as a standalone entity.

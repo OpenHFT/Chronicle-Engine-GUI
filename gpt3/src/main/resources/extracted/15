@@ -1,0 +1,34 @@
+5.2 Parameterising the Configuration File
+Problem
+You want to make the configuration file more general so that different values for properties can be supplied when the 
+service is run.
+Solution
+Use system properties and reference them from within the configuration file.
+Discussion
+The services.yaml file syntax allows you to use system property values, which are then substituted when the 
+application is run. This allows a certain degree of flexibility in defining configuration properties for the application. 
+Note however that the file is read only once during startup, so to change the configuration will require the application 
+to be restarted.
+For example, in the Transaction Service application, if you wanted to parameterise the location of the backing files for 
+the Queues used to communicate between services, this could be done by introducing a system property into the 
+configuration file:
+Listing 53. Excerpt from configuration showing use of properties in config values
+!ChronicleServicesCfg {
+ queues: {
+  transactionIn: { path: ${queue.basedir}/data/transactionIn, sourceId: 1 },
+  transactionOut: { path: ${queue.basedir}/data/transactionOut, sourceId: 2 },
+  transactionSink: { path: ${queue.basedir}/data/transactionSink, sourceId: 100 },
+ },
+The term ${queue.basedir} is substituted when the file is read, with the value of the system property 
+queue.basedir. There are different ways in which this property can be set, these are well documented in Java 
+documentation.
+For example, a command line argument can be used:
+Listing 54. Setting the property on running the application
+ 
+Or the standard Java API:
+Listing 55. Setting the property from within the application
+ 
+59	of 134 | 5.2 Parameterising the Configuration File
+ 
+An IDE will permit this to be set in the Run Configuration dialog for the application.
+60	of 134 | 5.2 Parameterising the Configuration File

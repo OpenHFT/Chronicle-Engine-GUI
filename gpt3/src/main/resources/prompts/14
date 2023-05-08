@@ -1,0 +1,14 @@
+"prompt":"How can you use an alternative configuration file in a Chronicle Services application?",
+"answer":"Pass the name of the configuration file to the call to ThreadRunner.runAll() method." 
+
+"prompt":"Is it required to use the name services.yaml for the configuration file in a Chronicle Services application?",
+"answer":"No, it is a convention and not explicitly required." 
+
+"prompt":"What is the method used to start an application from the main driver class in a Chronicle Services application?",
+"answer":"The method used is ThreadRunner.runAll(), which accepts a pathname to a configuration file as a parameter." 
+
+"prompt":"How can you maintain different configurations of the same application in a Chronicle Services application?",
+"answer":"You can maintain different configurations of the same application by using separate configuration files." 
+
+"prompt":"Can you provide a sample driver class for a Chronicle Services application?",
+"answer":"Please refer to Listing 52 in the documentation for a sample driver class for a Chronicle Services application."

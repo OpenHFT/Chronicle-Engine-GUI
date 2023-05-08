@@ -1,0 +1,14 @@
+"prompt": "How can you run a service in a standalone Java application using Chronicle Services? ",
+"answer": "Define supporting components and define the application declaratively in a configuration file. Use a single driver class to start and configure multiple service implementations, connecting them together using one or more Chronicle Queue instances as the transport for messages and events. Incorporate a service that has been implemented and unit-tested into such an application with no code changes. Chronicle Service based applications are designed to support an Event-based architecture, where events move through a stream of services." 
+
+"prompt": "What are the additional components required to run the application completely within the Chronicle Services runtime?",
+"answer": "The main service receives messages/events from an upstream service, and resulting messages/events are passed to a downstream service. These additional components serve purely as a source and a sink for messages, and introduce no additional processing." 
+
+"prompt": "How can you define the application using a configuration file?",
+"answer": "All of the components are wired together to form the application using a configuration file, by default named services.yaml. For each service, the file specifies its connection to the appropriate queue(s), as well as the fully qualified name of the service's implementation class. Further configuration is possible through this file, this will be seen in later recipes." 
+
+"prompt": "What are the three actions that take place when the class is used as the application entrypoint?",
+"answer": "1. All files in the queues' data directory are deleted. 2. The Chronicle Services method ThreadRunner.runAll() reads the specified configuration file, and starts all of the services that are defined therein. Chronicle Queues are started to carry messages between the services if required (due to the previous action this should always result in new queues being created). Each service is started in its own thread. 3. The main application thread pauses for 3 seconds and then terminates. Since by default all service threads created in the previous step are daemon threads, this will cause all the services to shut down." 
+
+"prompt": "What is the project structure for a Chronicle Services application that uses structured data?",
+"answer": "The project structure will include the features described in the recipes in this section."

@@ -1,0 +1,14 @@
+"prompt": "What is the solution to initialize the state of a service with a single input queue following a (re)start by replaying messages from the input queue?",
+"answer": "Configure the service with startFromStrategy set to START and inputsReplayStrategy set to INPUTS." 
+
+"prompt": "What are the important properties configured for the service from the perspective of state management?",
+"answer": "The important properties configured for the service from the perspective of state management are startFromStrategy and inputsReplyStrategy." 
+
+"prompt": "What are the three components that need to be started to run the application?",
+"answer": "The three components that need to be started to run the application are the Position service, the Tailer component, and the TradeEntry component." 
+
+"prompt": "What happens when the Positions Service performs a 'clean' start?",
+"answer": "When the Positions Service performs a 'clean' start, it is initialized with no information about Positions. Therefore, if the service were to stop or crash, any current Positions information will be lost when the service restarted." 
+
+"prompt": "What happens when the service starts with the configuration shown in the example?",
+"answer": "When the service starts with the configuration shown in the example, it will replay all events on its input queue, recreating the state as it was when the service stopped. Of course, no output messages will be posted as a result of this replaying."

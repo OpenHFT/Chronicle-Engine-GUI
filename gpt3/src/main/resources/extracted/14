@@ -1,0 +1,16 @@
+5.1 Using an Alternative Configuration File
+Problem
+You want to use an application configuration file named other than services.yaml.
+Solution
+Pass the name of the configuration file to the call to ThreadRunner.runAll() method.
+Discussion
+The use of the name services.yaml is a convention and not explicitly required. If you want to maintain different 
+configurations of the same application, you can do this easily by using separate configuration files.
+The method that is normally used to start an application from the main driver class is ThreadRunner.runAll(), 
+which accepts a pathname to a configuration file as a parameter:
+Listing 52. Sample driver class for a Chronicle Services application
+ 
+Simply changing this parameter will allow a different configuration file to be used.
+58 of 134 | 5.1 Using an Alternative Configuration File
+
+

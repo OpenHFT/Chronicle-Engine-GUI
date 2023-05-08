@@ -1,0 +1,20 @@
+"prompt": "How can you arrange for work to be done when a service is not handling incoming requests in Chronicle Services?",
+"answer": "Implement the work as a PollingUpdateSource by providing two methods: publishUpdateOnIdle() which is called when the service is idle and returns true when there is work to do and false when not, and pollingUpdate(long currentTime) which defines the work to be done when publishUpdateOnIdle() returns true." 
+
+"prompt": "What is the ideal architecture for components in Chronicle Services in terms of state?",
+"answer": "The ideal architecture is one where components minimise their dependence on state, especially mutable state. A stateless approach is something that can be introduced at the design level, in terms of the messages that are used to communicate between the components, or at the implementation level in choice of algorithms or implementation strategies." 
+
+"prompt": "What does Chronicle Queue offer as an underlying message transport in Chronicle Services?",
+"answer": "Chronicle Queue offers an immutable, persistent store of events/messages whose size is limited only to the amount of persistent storage available." 
+
+"prompt": "What is the purpose of initializing state in a service when it (re)starts in Chronicle Services?",
+"answer": "The purpose is to recreate the state of a service if it were to stop, either deliberately or through a problem, and start again. All that is needed is to replay the events that built the state." 
+
+"prompt": "What is the recipe for initializing state from a single input queue in Chronicle Services?",
+"answer": "The recipe is to read the input queue and process each message to build the state of the service. This can be done by implementing a stateful component that reads the input queue and updates its internal state accordingly." 
+
+"prompt": "What is the recipe for initializing state from multiple input queues in Chronicle Services?",
+"answer": "The recipe is to read each input queue and process each message to build the state of the service. This can be done by implementing a stateful component that reads each input queue and updates its internal state accordingly." 
+
+"prompt": "What is the recipe for initializing state from the output queue in Chronicle Services?",
+"answer": "The recipe is to use the output queue as a record of all significant input messages. When the service starts, it reads the output queue and processes each message to build the state of the service. This can be done by implementing a stateful component that reads the output queue and updates its internal state accordingly."

@@ -1,0 +1,21 @@
+1.1 Installing Chronicle Services
+Problem
+You want to use Chronicle Services in a project.
+Solution
+Install Chronicle Services by adding the dependency to your project.
+Discussion
+Chronicle Services is a commercial product of Chronicle Software Ltd. You need to
+obtain a license before you can use the software. More information can be found on Chronicle Software.
+Once you have a license you can add the dependency to your build environment. If you are using Maven as your build 
+tool (as we recommend) then you can use this pom.xml file as a starting point.
+Listing 1. pom.xml
+ 
+ 
+ 
+Chronicle libraries are distributed using a BOM, hence the need for the <dependencyManagement> section. With this 
+set, Chronicle Services is accessed using the following dependency.
+ 
+The additional dependencies shown in the file (e.g slf4j and junit) are used in our demo code but are not absolutely 
+necessary for Chronicle Services.
+
+

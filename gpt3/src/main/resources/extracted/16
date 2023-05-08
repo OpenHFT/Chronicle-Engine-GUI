@@ -1,0 +1,241 @@
+5.3 Runtime Access to Configuration
+Problem
+You want to make the configuration file more general so that different values for properties can be supplied when the 
+service is run.
+Solution
+Use system properties and reference them from within the configuration file.
+Discussion
+The configuration stored in the services.yaml file is read during application startup, and parsed into a set of data 
+structures that can be accessed in the application. The parsed data is known as the Service Context, it is made available 
+if a service implements the ServiceContextListener interface, through the serviceContext() method:
+Listing 56. Service Implementation with ServiceContextListener included
+ 
+Listing 57. Method required by ServiceContextListener interface
+    @Override
+    public void serviceContext( ServiceContext serviceContext ) {
+      System.out.println("  ");
+      System.out.println("Queues configured for this application");
+      serviceContext.runnerCfg().queues().keySet().stream().forEach(q -> 
+System.out.println("  "
++ q));
+      System.out.println("Services configured for this application");
+      serviceContext.runnerCfg().services().entrySet().stream().forEach(k -> 
+showSDetails(k
+.getKey(), k.getValue()));
+      System.out.println("  ");
+    }
+The parameter, of type ServiceContext, is populated by the method with the information that was parsed from 
+the file.
+The table below shows the main data available in this structure
+Table 1. Methods to access data from the Service Context
+Method
+Return Type
+Description
+serviceId()
+String
+ID of the service
+serviceCfg( )
+ServiceCfg
+Configuration data for the service
+61 of 134 | 5.3 Runtime Access to Configuration
+Method
+Return Type
+Description
+runnerCfg()
+RunnerConfiguration
+Overall container for confguration of the application
+eventLoop()
+EventLoop
+Main event loop for the service
+The id of the service making the call is returned by the serviceId() method, and its configuration is returned by 
+the serviceCfg() method. The general configuration for the application is returned by the runnerCfg() 
+method, which returns an object of type RunnerConfiguration. Some of the methods used to query this 
+structure are shown below:
+Table 2. Table Methods to access data from the Runner Configuration
+Method
+Return Type
+Description
+queues()
+Map<String,QueueCfg>
+Details of the queues used in the application
+services()
+Map<String,ServiceCfg>
+Details of the services used in the application
+gc()
+GcCfg
+Garbage Collection advice for the application
+Each of the sections in the services.yaml file is read and parsed into a structure that can be read using the 
+accessor methods shown here. (The serviceCfg() method from the ServiceContext object is a shortcut to 
+accessing the calling service's entry from the services() map here).
+For an individual service, its configuration can be accessed through the ServiceCfg structure, which contains all of 
+the information used by Chronicle Services to manage the service. Much of this information is specialised, but we can 
+see methods that provide access to some of the properties seen in the recipes in this cookbook
+Table 3. Table Selected methods from the Service Configuration
+Method
+Return Type
+Description
+implClass()
+Class<>
+Service implementation class
+inputs()
+List<InputCfg>
+List of queues providing input
+output()
+String
+Id of the output queue
+configs()
+List<String>
+List of ids of config queues
+serviceConf
+ig
+Map<String,Object>
+Service configuration properties parsed from configuration file
+periodicUpd 
+ateMS()
+int
+Time interval for periodic update events to the service
+heartbeatMS 
+()
+int
+Time interval for heartbeat events
+startFromSt 
+rategy()
+StartFromStrategy
+Strategy for constructing state after (re)start
+inputsRepla 
+yStrategy()
+InputsReplayStrategy
+Strategy for replaying inputs when (re)constructing state
+Having some knowledge of information available through these data structures and methods can be useful when 
+debugging issues with a service.
+62 of 134 | 5.3 Runtime Access to Configuration
+
+
+5.4 Using the Configuration File for Application-specific 
+configuration
+Problem
+You want to supply configuration to a service through its queue inputs
+Solution
+Define a config queue for the service, and supply the required configuration as messages on this queue.
+Discussion
+Chronicle Services provides a type of queue known as a config queue. This acts as an input queue to a service, however 
+on service startup it is guaranteed to be read before any of the normal input queues is read.
+This allows messages to be posted on this queue that control the configuration of the service, so that this is completed 
+before any "business" level messages are processed. It is also possible to pass configuration messages to the service 
+during normal operation, allowing the configuration to be changed without requiring a service restart.
+The config queue is defined in the configuration file:
+Listing 58. Configuration File with Config Queue definition
+ queues: {
+  transactionIn: { path: data/transactionIn, sourceId: 1 },
+  transactionOut: { path: data/transactionOut, sourceId: 2 },
+  transactionSink: { path: data/transactionSink, sourceId: 100 },
+  config: { path: data/transactionConfig, sourceId: 200 }
+   }, and attached to the service in the normal 
+way:
+Listing 59. Service configuration with config queue
+ 
+Notice that, unlike recipe 5.3, the additional service configuration is not now present in the configuration file.
+Passing the Configuration to the Service
+The configuration queue is read by the service before any other input queues. We can therefore write configuration 
+messages to this queue as part of the application startup, so that the necessary service configuration is complete 
+before any other messages are read. This can be done through the application's main() method:
+Listing 60. Application startup including posting configuration messages to the config queue 
+public class Main {     private static final String SERVICES_YAML 
+= "services.yaml";
+    public static void main(String[] args) throws InterruptedException, 
+IOException {
+      final Map<String, Object> configuration = new HashMap<>();
+      List<Account> initAccounts = Arrays.asList(
+          new Account("currentAccount", 12345678, 100.0),
+          new Account("currentAccount", 34343434, 100.0),
+          new Account("savingsAccount", 45454545, 200.0)
+      );
+      configuration.put("accounts", initAccounts);
+      QueueCfg config = Marshallable.fromFile(ChronicleServicesCfg.class, 
+SERVICES_YAML)
+          .queues().get("config");
+      // write the configuration to the chronicle queue
+      single(config.path())
+          .sourceId(config.sourceId())
+          .build()
+          .methodWriter(TransactionConfig.class)
+          .accounts(initAccounts);
+        ThreadRunner.runAll("services.yaml");
+        Thread.sleep(3_000);
+    
+} }
+Details of the queue are read from the configuration file (this is covered in more detail in recipe 6.1) and then a 
+message of type accounts is written to the queue. When the service is created and initialised through the call to 
+ThreadRunner.runall(...), this message will be read and the configuration from the message applied.
+An interesting aspect of this approach, as distinct from the earlier approach of having the account objects initialsed via 
+a message from some upstream service or client, is that the Account DTOs are constructed and initialised using Java 
+reflection, and there is no need for explicit setter methods, or a specific argument-based constructor.
+Running the service
+When the service is run, log output will show that the accounts are initialised correctly so that transaction messages 
+are handled appropriately
+Listing 61. Log output showing Transaction Service being initialised
+[main/transactionSvc] INFO ...RunLoopControllerMain - running transactionSvc... 
+[main/transactionSvc] INFO ...TransactionSvcImpl - Adding account 12345678 with 
+initial balance:
+100.0 [main/transactionSvc] INFO ...TransactionSvcImpl - Adding account 
+34343434 with initial balance:
+100.0 [main/transactionSvc] INFO ...TransactionSvcImpl - Adding account 
+45454545 with initial balance:
+200.0
+[main/transactionSvc] INFO ...TransactionSvcImpl - Applying DEBIT of 100.0 to 
+account 34343434
+[main/transactionSvc] INFO ...TransactionSvcImpl - Succeeded: Balance of account 
+34343434 is now
+0.0
+...
+[main/transactionSvc] INFO ...TransactionSvcImpl - Applying DEBIT of 50.0 to 
+account 34343434
+[main/transactionSvc] INFO ...TransactionSvcImpl - Bad transaction: Account 
+34343434 has
+insufficient funds for debit: 50.0 [0.0]
+[main/transactionDownstream] INFO ...TransactionSvcDownstream - Success: Balance 
+of account
+34343434 now 0.0
+[main/transactionSvc] INFO ...TransactionSvcImpl - Applying CREDIT of 10.0 to 
+account 45454545 [main/transactionDownstream] INFO ...TransactionSvcDownstream - 
+Failed: Insufficient funds 0.0
+available for 50.0
+[main/transactionSvc] INFO ...TransactionSvcImpl - Succeeded: Balance of account 
+45454545 is now
+210.0
+[main/transactionSvc] INFO ...TransactionSvcImpl - Applying CREDIT of 100.0 to 
+account 12345678
+[main/transactionDownstream] INFO ...TransactionSvcDownstream - Success: Balance 
+of account
+45454545 now 210.0
+[main/transactionSvc] INFO ...TransactionSvcImpl - Succeeded: Balance of account 
+12345678 is now
+200.0
+[main/transactionDownstream] INFO ...TransactionSvcDownstream - Success: Balance 
+of account
+12345678 now 200.0
+[main/transactionSvc] INFO ...TransactionSvcImpl - Applying CREDIT of 100.0 to 
+account 99999999
+[main/transactionSvc] ERROR ...TransactionSvcImpl - Unknown account number: 
+99999999 [main/transactionDownstream] ERROR ...TransactionSvcDownstream - Error 
+for account 99999999:
+Unknown Account Number [MEDIUM]
+Notice that the transaction for account 99999999 is rejected as an error, since this account was not configured into the 
+service.
+
+
+6. Interacting with External Components
+Overview
+So far, the applications discussed have been self-contained, in that there is no direct connection with components 
+from outside the application. However it is often a requirement to gather input data from sources outside the 
+application and then send messages based on that data to the application. Similarly, there may be a need to send 
+output messages outside the application to downstream components.
+This section discusses how an external component may send messages into a Chronicle Services application from 
+outside, or receive messages from a Chronicle Services application, or both.
+Recipes
+6.1 Receiving Events from an External Source
+This section explores how to construct and send input messages from outside Chronicle Services into the application.
+6.2 Sending Events to an External Sink
+This section delves into how to receive messages generated by a Chronicle Services Application in an external 
+component.
+66 of 134 | Overview

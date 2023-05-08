@@ -1,0 +1,16 @@
+Possible prompts and answers for fine tuning:
+
+1. What is the recommended approach for initializing the state of a service with multiple input queues following a (re)start by replaying messages from the input queues?
+{"prompt": "What is the recommended approach for initializing the state of a service with multiple input queues following a (re)start by replaying messages from the input queues?", "answer": "Configure the service with startFromStrategy set to START and inputsReplayStrategy set to OUTPUT."}
+
+2. Why is it not recommended to recreate state by configuring the service to replay using the INPUTS value for inputsReplayStrategy?
+{"prompt": "Why is it not recommended to recreate state by configuring the service to replay using the INPUTS value for inputsReplayStrategy?", "answer": "Chronicle Services does not guarantee the order in which multiple input queues are read during replay. Events that alter the state in a cumulative fashion may be read in a different order from that in which they originally occurred. If this happens then the state after replay may not be the same as that when the service stopped."}
+
+3. What is the inputReplayStrategy property set to in the configuration to avoid non-deterministic results?
+{"prompt": "What is the inputReplayStrategy property set to in the configuration to avoid non-deterministic results?", "answer": "OUTPUT"}
+
+4. What is the assumption made in the configuration when inputReplayStrategy is set to OUTPUT?
+{"prompt": "What is the assumption made in the configuration when inputReplayStrategy is set to OUTPUT?", "answer": "The assumption is that any event that, when processed, causes the service state to change, will result in a message being posted to the output queue. Event history metadata posted to the output queue allows these events to be correlated with input events, and this lets Chronicle Services know which events should be replayed - if an input event cannot be connected to an output event, it is considered to be an insignificant event, will be skipped during replay."}
+
+5. What is the significance of significant and insignificant events in the approach described in this recipe?
+{"prompt": "What is the significance of significant and insignificant events in the approach described in this recipe?", "answer": "The approach described here depends on the distinction between significant and insignificant events. Significant events are those that cause a service's state to be updated. Insignificant events may generate output messages, meaning that they would be replayed using this configuration, however this will not affect the recreated state."}

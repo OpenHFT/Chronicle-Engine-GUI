@@ -1,0 +1,102 @@
+2.2 Testing with DTOs
+Problem
+You want to perform functional tests on a stateful service that uses DTOs.
+Solution
+Use YAMLTester, which supports DTOs and simple state initialisation.
+Discussion
+As in Recipe 1.3, you can use YAMLTester to test the service's functionality. However, in this case a little more work 
+is required. The account manager service is stateful, in that it maintains a note of the current balance of each valid 
+account. To test functionality we need to provide some initial data in the form of accounts with an initial balance.
+Specifying Initial State for Tests
+Fortunately YAMLTester allows this to be done easily, by sending the service an "initialisation" message before the 
+core requests. Initialisation messages are specified in the file setup.yaml, which should be located in the same 
+directory as the other files used for YAMLTester:
+ 
+The contents of the file are a message for the TransactionService to add accounts to its current list:
+Listing 21. Setup for YAML test
+ 
+ 
+Defining Test Cases
+Now let's see the in.yaml file, containing the input messages to test: Listing 22. 
+Input messages for testing the Transaction Service
+ 
+and the expected output from these, from the out.yaml file:
+Listing 23. Expected output from the Transaction Service
+ 
+Running the Tests
+When the test is run, the log messages will display information to illustrate progress:
+[main] INFO software.chronicle.services.demo.services.TransactionSvcImpl - 
+Adding account 34343434 with initial balance: 100.0
+[main] INFO software.chronicle.services.demo.services.TransactionSvcImpl - Adding 
+account
+45454545 with initial balance: 200.0
+[main] INFO software.chronicle.services.demo.services.TransactionSvcImpl - 
+Applying DEBIT of
+100.0 to account 34343434
+[main] INFO software.chronicle.services.demo.services.TransactionSvcImpl - 
+Balance of account
+34343434 is now 0.0
+[main] INFO software.chronicle.services.demo.services.TransactionSvcImpl - 
+Applying DEBIT of 50.0
+to account 34343434
+[main] INFO software.chronicle.services.demo.services.TransactionSvcImpl - 
+Balance of account
+34343434 is now -50.0
+[main] INFO software.chronicle.services.demo.services.TransactionSvcImpl - 
+Applying CREDIT of
+10.0 to account 45454545
+[main] INFO software.chronicle.services.demo.services.TransactionSvcImpl - 
+Balance of account
+45454545 is now 210.0
+If any of the test cases fail, when actual and expected results are different, then an indication of where the difference 
+occurred will be shown. For example, if the second example output was entered as:
+ 
+then we would see:
+$ mvn test
+...
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running software.chronicle.services.demo.BalanceTest
+[main] INFO net.openhft.chronicle.core.Jvm - Chronicle core loaded from
+file:/Users/george/.m2/repository/net/openhft/chronicle-core/2.23ea34/chronicle-
+core-2.23ea34.jar
+[main] INFO software.chronicle.services.demo.services.TransactionSvcImpl - Adding 
+account
+34343434 with initial balance: 100.0
+...
+Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.881 sec <<< 
+FAILURE!
+testBalance(software.chronicle.services.demo.BalanceTest)  Time elapsed: 0.839 
+sec  <<< FAILURE! org.junit.ComparisonFailure: expected:<...4343434,
+  balance: []50.0
+} .
+.. 
+---
+accou...> but was:<...4343434,
+  balance: [-]50.0
+} .
+..
+
+
+--
+accou...>
+    at org.junit.Assert.assertEquals(Assert.java:117)
+    at org.junit.Assert.assertEquals(Assert.java:146)
+...
+Results :
+Failed tests:   
+testBalance(software.chronicle.services.demo.BalanceTest): 
+expected:<...4343434,(..) Tests run: 1, Failures: 1, Errors: 
+0, Skipped: 0
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.043 s
+[INFO] Finished at: 2022-11-04T14:03:33Z
+[INFO] ------------------------------------------------------------------------
+Running the test from Intellij Idea, we would see the same results presented through the test output window:
+ 
+By clicking to see the differences that caused the failure, we will be shown the expected and actual output side by side:
+ 
+From this output it's clear what needs to be changed, to make the test pass.

@@ -1,0 +1,32 @@
+3.4 Testing Separate Error Handling
+Problem
+You want to test a service that uses a separate error message with its own DTO.
+Solution
+Use the YAMLTester to construct test scenarios that should generate posting of the specific error messages.
+Discussion
+The YAMLTester can be used to test for the presence of a separate error message, the test case will simply check for 
+this in the output. For the test setup in setup.yaml:
+Listing 41. Setup for YAML test
+ 
+The test input:
+Listing 42. Input messages for test
+ 
+47	of 134 | 3.4 Testing Separate Error Handling
+The final test case references an account that has not been setup and so should yield the error message:
+Listing 43. Expected output messages from Transaction Service
+ 
+48	of 134 | 3.4 Testing Separate Error Handling
+4. Packaging
+Overview
+This chapter shows two ways in which a Chronicle Service application can be packaged. Normally a Chronicle Service is 
+packaged as an executable JAR file, leaving the precise details of how to deploy and run to the customer. However, it is 
+also possible to package the application as a Docker image.
+Recipes
+4.1 Packaging a Services Application in a Jar File
+You want to package a Chronicle Services Application as an executable JAR file.
+4.2 Packaging a Services Application in a Docker Image
+You want to package a Chronicle Services application as a Docker container, for more flexibility in deployment to a 
+cloud environment.
+49 of 134 | Overview
+
+

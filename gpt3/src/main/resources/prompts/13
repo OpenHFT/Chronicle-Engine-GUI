@@ -1,0 +1,17 @@
+"Prompt": "How can you package a Chronicle Services application as a Docker container?",
+"Answer": "Use Maven with the Docker plugin to build and package the image. Plugins exist for Maven to support this, and they are easy to incorporate into a build. The build process for a Docker container will most likely be an extension of that shown in Recipe 4.1, in that they will aim use the shaded jar file as the simplest means of running the application." 
+
+"Prompt": "What is the fabric8 Kubernetes/Docker plugin used for?",
+"Answer": "The fabric8 Kubernetes/Docker plugin for Maven is used to provide the functionality of generating a Docker image from the build process. This is a very powerful plugin, that is evolving into newer variants managed as Eclipse JKube, whose focus is on both containerising and deploying to Kubernetes or Openshift." 
+
+"Prompt": "What is the goal used to build a Docker image?",
+"Answer": "The goal used to build a Docker image is fabric:build. Default behaviour expects the presence of an uber-jar file containing the application, so can be combined with the shade plugin." 
+
+"Prompt": "What is the default behaviour of the fabric8 plugin?",
+"Answer": "By default, the plugin assumes that it is building for a Kubernetes cluster, and attempts to query the cluster for confirmation. It is not an error to build without a Kubernetes cluster." 
+
+"Prompt": "How can you access the configuration of a Chronicle Services application at runtime?",
+"Answer": "An application can access its configuration at runtime." 
+
+"Prompt": "What does recipe 5.5 in the Chronicle Services Cookbook show?",
+"Answer": "Recipe 5.5 in the Chronicle Services Cookbook shows the different approaches to configure services."

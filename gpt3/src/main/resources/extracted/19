@@ -1,0 +1,193 @@
+7.1 Periodic Events
+Problem
+You want to perform actions at regular time intervals.
+Solution
+Use Periodic Events.
+Discussion
+It is possible to configure the Chronicle Services runtime to post an event on a service's input queue at regular time 
+intervals, to allow the service to perform some work such as housekeeping or consolidation and reporting. The event is 
+known as PeriodicUpdate, and carries a payload of a timestamp at microsecond granularity. To receive the events, 
+a service should implement the PeriodicUpdateSource interface, and provide the method PeriodicUpdate.
+As an example, consider the Transaction Service from earlier recipes. We will change the way the upstream service 
+sends transaction requests to the main service. Currently, a small group of requests are sent once the upstream service 
+starts. In this example, the upstream service will subscribe to PeriodicUpdate events, and send transaction 
+requests when these are received.
+Configuration
+The modified service will have the following structure:
+ 
+The time intervals for the generated PeriodicEvents is configured in the service configuration section of the 
+services.yaml file:
+Listing 68. Configuration file showing periodic event configuration
+ 
+   output: transactionOut,
+   implClass: !type 
+software.chronicle.services.cookbook.example7a.services.TransactionSvcImpl,
+  },
+  # An upstream service and a downstream service.
+  # No input queue for the upstream, and a dummy queue for downstream (we can't 
+have an empty
+output)
+  transactionUpstream: {
+   inputs: [ upstreamIn ],
+   output: transactionIn,
+   implClass: !type
+software.chronicle.services.cookbook.example7a.services.TransactionSvcUpstream,
+   periodicUpdateMS: 2000,          #  
+   periodicUpdateMSInitial: 1000,   #  
+  },
+  transactionDownstream: {
+     inputs: [transactionOut],
+     output: downstreamOut,
+     implClass: !type
+software.chronicle.services.cookbook.example7a.services.TransactionSvcDownstream,
+  }
+ }
+}
+1.	Time in milliseconds between the PeriodicEvents being posted.
+2.	Time in milliseconds to wait before posting the first PeriodicEvent.
+Periodic Events for a service are posted on the service's first named input queue. It is therefore necessary to have at 
+least one input queue configured for the receiving service. So this example introduces the upstreamIn queue.
+If there is more than one input queue for the service, the PeriodicEvents will be posted to the first mentioned queue. 
+Note that PeriodicEvents are delivered to the service once all other input events have been processed. Therefore the 
+timing of delivery of these events is not guaranteed, and they should not be used when strict adherence to the time 
+intervals is critical.
+Handling Periodic Events in the Service
+The transactionUpstream service should post transaction request messages upon receipt of the 
+periodicUpdate events. The handler method for these events, periodicUpdate(), must be provided to do 
+this. So the upstream service implementation will look like this:
+Listing 69. Upstream service providing events for the Transaction Service
+public class TransactionSvcUpstream implements ServiceLifecycleListener, 
+PeriodicUpdateSource {
+    private static final Logger LOG = 
+LoggerFactory.getLogger(TransactionSvcUpstream.class);
+    private TransactionSvcIn out;
+    private final Transaction transaction = new Transaction();
+    public TransactionSvcUpstream(TransactionSvcIn out) {
+        this.out = out;
+ 
+The posting of events has been moved from previous recipes, where it was part of the start() method, into the 
+handler for the Periodic Update events. Based on the configuration shown above, the events will occur every 2 
+seconds, after an initial delay of 1 second.
+Running the Service
+The application driver class is written to create and configure the services, then wait for 10 seconds before terminating:
+Listing 70. Driver for application
+ 
+During this time, the upstream service will send blocks of transaction requests every 2 seconds.
+You can also see this demo running by clicking the button below:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example7a && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+Listing 71. Log output from the application
+ 
+/  __ \ |                   (_)    | |      /  ___|               (_)
+| /  \/ |__  _ __ ___  _ __  _  ___| | ___  \ `--.  ___ _ ____   ___  ___ ___  
+___
+| |   | '_ \| '__/ _ \| '_ \| |/ __| |/ _ \  `--. \/ _ \ '__\ \ / / |/ __/ _ \/ 
+__|
+| \__/\ | | | | | (_) | | | | | (__| |  __/ /\__/ /  __/ |   \ V /| | (_|  __/\__ 
+\
+\____/_| |_|_|  \___/|_| |_|_|\___|_|\___| \____/ \___|_|    \_/ 
+|_|\___\___||___/
+:: Chronicle Services ::             (3.23ea37) Running under Java(TM) SE 
+Runtime Environment 1.8.0_162-b12 with 16 processors reported.
+Process id: 
+5342 ...
+[main/transactionSvc] INFO TransactionSvcImpl - Adding account 34343434 with 
+initial balance:
+100.0 [main/transactionSvc] INFO TransactionSvcImpl - Adding account 45454545 
+with initial balance:
+200.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying CREDIT of 100.0 to 
+account 34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+34343434 is now
+200.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 50.0 to account 
+34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+34343434 is now
+150.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - 34343434 Succeeded: 
+Balance of
+account 34343434 now 200.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying CREDIT of 10.0 to 
+account 45454545 [main/transactionDownstream] INFO TransactionSvcDownstream - 
+34343434 Succeeded: Balance of
+account 34343434 now 150.0
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+45454545 is now
+210.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - 45454545 Succeeded: 
+Balance of
+account 45454545 now 210.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying CREDIT of 100.0 to 
+account 34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+34343434 is now
+250.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 50.0 to account 
+34343434
+[main/transactionDownstream] INFO TransactionSvcDownstream - 34343434 Succeeded: 
+Balance of
+account 34343434 now 250.0
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+34343434 is now
+200.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying CREDIT of 10.0 to 
+account 45454545 [main/transactionDownstream] INFO TransactionSvcDownstream - 
+34343434 Succeeded: Balance of
+account 34343434 now 200.0
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+45454545 is now
+220.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - 45454545 Succeeded: 
+Balance of
+account 45454545 now 220.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying CREDIT of 100.0 to 
+account 34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+34343434 is now
+300.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 50.0 to account 
+34343434
+[main/transactionDownstream] INFO TransactionSvcDownstream - 34343434 Succeeded: 
+Balance of
+account 34343434 now 300.0
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+34343434 is now
+250.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying CREDIT of 10.0 to 
+account 45454545
+
+
+[main/transactionDownstream] INFO TransactionSvcDownstream - 34343434 Succeeded: 
+Balance of
+account 34343434 now 250.0
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+45454545 is now
+230.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - 45454545 Succeeded: 
+Balance of
+account 45454545 now 230.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying CREDIT of 100.0 to 
+account 34343434
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+34343434 is now
+350.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying DEBIT of 50.0 to account 
+34343434
+[main/transactionDownstream] INFO TransactionSvcDownstream - 34343434 Succeeded: 
+Balance of
+account 34343434 now 350.0
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+34343434 is now
+300.0
+[main/transactionSvc] INFO TransactionSvcImpl - Applying CREDIT of 10.0 to 
+account 45454545 [main/transactionDownstream] INFO TransactionSvcDownstream - 
+34343434 Succeeded: Balance of
+account 34343434 now 300.0
+[main/transactionSvc] INFO TransactionSvcImpl - Succeeded: Balance of account 
+45454545 is now
+240.0
+[main/transactionDownstream] INFO TransactionSvcDownstream - 45454545 Succeeded: 
+Balance of account 45454545 now 240.0
+Process finished with exit code 0

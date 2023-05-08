@@ -1,0 +1,58 @@
+9.3 Displaying Message Latencies in the Application
+Problem
+You want to examine the latencies introduced at each stage of an application.
+Solution
+Use the built-in ChronicleHistoryReader.
+Discussion
+Sometimes it is useful to know how long a message takes to pass through the various stages of a Chronicle Services 
+application. The MessageHistory posted to queues alongside messages carries timestamps that allow this to be 
+calculated, and the ChronicleHistoryReaderMain application, which is part of the Chronicle Queue library, 
+allows these to be processed into a histogram of latencies for each stage of the target application.
+As an example, consider the simple Transaction service application used in Recipe 2.3 and others, with structure:
+ 
+A histogram for a short run of this application can be generated using the following command:
+Listing 106. Running Chronicle Queue History Reader
+$ java -cp <classpath containing all dependencies> \
+           software.chronicle.services.tools.ChronicleHistoryReaderMain \
+           -d target/data/transactionOut -s services.yaml
+We need to specify the path to the Chronicle Queue that contains the messages we want to check, and the service 
+configuration file.
+When this is run, the output is as below.
+This can also be run by clicking on the 'run' button:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example9c && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+Listing 107. Output from History Reader
+ 
+121 of 134 | 9.3 Displaying Message Latencies in the Application
+
+
+sourceId    transactionUpstream transactionUpstreamTotransactionSvc 
+transactionSvc     endToEnd count:                48                          
+48                          48            48 50:               225280                      
+966656                      466944       1474560
+90:               417792                     1998848                      835584       
+2555904
+99:              1277952                     5898240                     3604480       
+6422528 99.9:
+99.99:
+99.999:
+99.9999: worst:           1277952                     5898240                     
+3604480       6422528
+The demo application is short, and the queue contains only very few messages, so the histogram here is not fully 
+populated, however the basics can be seen. The leftmost column represents percentiles of the messages, the other 
+columns contain the latencies at each of these percentiles for eash stage of the application:
+transactionUpstream time for the message be generated and posted on the output of the upstream 
+service
+transactionUpstreamTotransactionSvc time taken for the message to 
+reach the transaction service
+transactionSvc time taken to handle the message in the transaction 
+service
+endToEnd
+total time in the application
+Various command line arguments allow more flexibility over what information is displayed (for example displaying 
+timings on a per method basis rather than per service), and the units used (for example microseconds rather than the 
+default of nanoseconds).
+The output shown here has been padded manually to make it slightly easier to read, owing to the long names in the 
+column headings. Output can also be generated in csv format, allowing the results to be imported into a spreadsheet 
+for further analysis.
+122 of 134 | 9.3 Displaying Message Latencies in the Application

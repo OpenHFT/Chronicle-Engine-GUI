@@ -1,0 +1,29 @@
+"prompt": "How can you run a DTO based service in an application?",
+"answer": "Use declarative configuration from the services.yaml file."
+ 
+"prompt": "What are the additional components required to run an application completely within the Chronicle Services runtime?",
+"answer": "Two additional components are required, a main service that receives messages/events from an upstream service and a downstream service that resulting messages/events are passed to."
+ 
+"prompt": "What is the purpose of the transactionSink Queue in the architecture of the application?",
+"answer": "The transactionSink Queue represents output for the transactionDownstream service, even although the service does not produce any output. It is a requirement of the API, however, that every service has one and only one output queue."
+ 
+"prompt": "What is the purpose of the transactionUpstream service?",
+"answer": "The transactionUpstream service exists as a source of messages that are sent via the transactionIn queue to the transactionService."
+ 
+"prompt": "What is the purpose of the transactionDownstream service?",
+"answer": "The transactionDownstream service receives output messages that are posted by the transactionService to the transactionServiceOut queue."
+ 
+"prompt": "What is the purpose of the services.yaml file?",
+"answer": "The services.yaml file contains details of the orchestration of the services."
+ 
+"prompt": "What is the purpose of the Driver program for Transaction Service?",
+"answer": "The Driver program for Transaction Service acts as an entrypoint for the application."
+ 
+"prompt": "What are the two broad types of errors in Chronicle Services?",
+"answer": "The two broad types of errors in Chronicle Services are expected errors and unexpected errors."
+ 
+"prompt": "What is an expected error in Chronicle Services?",
+"answer": "An expected error is one whose possibility is known about beforehand, and from which it may be possible to recover without restarting a service and invoking failover or other High Availability (HA) behaviour."
+ 
+"prompt": "What is an unexpected error in Chronicle Services?",
+"answer": "An unexpected error is essentially tied to the occurrence of a Java exception in the service, and will normally result in the service being unable to continue handling requests."

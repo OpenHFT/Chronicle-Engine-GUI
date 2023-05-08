@@ -1,0 +1,180 @@
+8.2 Initializing State from Multiple Input Queues
+Problem
+You want to initialise the state of a service with multiple input queues following a (re)start by replaying messages from 
+the input queues.
+Solution
+Configure the service with startFromStrategy set to START and inputsReplayStrategy set to OUTPUT.
+Discussion
+When the service reads its input from a single input queue, the approach described in recipe 8.1 is ideal, since all 
+messages are processed in order, although not in "real-time" (ie.without the delays between messages). When the 
+service reads from multiple queues, however, it is important to note that the ordering of messages across queues is 
+not guaranteed.
+In this recipe we will look at a slightly modified version of the application shown in recipe 8.1:
+ 
+The Position service now has two input queues. The first, position-in, will receive PeriodicUpdate events at 
+a configurable interval. The second, receives messages posted by the TradeEntry component when a new trade is 
+posted, as in receipe 8.1. The Position Service will post position information to the output queue when a trade is 
+received, and also on every third PeriodicUpdate event.
+While it may seem that it is possible to recreate state by configuring the service to replay using the INPUTS value for 
+inputsReplayStrategy, in practice this is not the recommended approach. Indeed a warning message is printed 
+if this is done:
+[main/positionSvc] WARN Runner - Replaying using InputsReplayStrategy.INPUTS with 
+more than one
+
+
+input may lead to non-deterministic results. Suggest to use OUTPUT
+The reason for this is that Chronicle Services does not guarantee the order in which multiple input queues are read 
+during replay. Events that alter the state in a cumulative fashion may be read in a different order from that in which 
+they originally occurred. If this happens then the state after replay may not be the same as that when the service 
+stopped.
+The warning message does suggest what the configuration should be to avoid this happening - the 
+inputReplayStrategy property should be set to OUTPUT:
+# uses schema from https://github.com/ChronicleEnterprise/Chronicle-Services-
+Demo/blob/master/docs/services.schema.json
+!ChronicleServicesCfg {
+  queues: {
+    position-in: { path: data/position-in, sourceId: 1 },
+    position-out: { path: data/position-out, sourceId: 2 },
+    trades-out: { path: data/trades-out, sourceId: 3 },
+  },
+  services: {
+    positionSvc: {
+      inputs: [ position-in, trades-out],
+      output: position-out,
+      startFromStrategy: START,
+      inputsReplayStrategy: OUTPUT,
+      implClass: !type
+software.chronicle.services.cookbook.example8b.services.impl.PositionServiceImpl,
+      periodicUpdateMS: 5000,
+    },
+  }
+}
+This is based on the assumption that any event that, when processed, causes the service state to change, will result in 
+a message being posted to the output queue. Event history metadata posted to the output queue allows these events 
+to be correlated with input events, and this lets Chronicle Services know which events should be replayed - if an input 
+event cannot be connected to an output event, it is considered to be an insignificant event, will be skipped during 
+replay.
+Running the Application
+Details of how to run the application can be found below.
+To run a demo, please click on the 'run' button below:
+<button onclick="run('cd SERVICES-COOKBOOK && cd Example8b && ./runDemo.sh')" 
+class="btn btn-primary btn-run">Run</button>
+After starting the three services (details in Recipe 8.1), two trades are entered.
+Shown below is an extract from the logs of the Position Service:
+Listing 90. Position Service log messages
+[software.chronicle...] INFO RunLoopControllerMain - running positionSvc...
+...
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event       
+
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Posting Position 
+Summary    
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Processing 
+Trade: !Trade {  
+  eventId: "",
+  eventTime: 0,
+  ticker: AUDUSD,
+  buy: true,
+  qty: 100000,
+  price: 0.7777
+}
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Posting Position 
+Summary    
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Posting Position 
+Summary
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Processing 
+Trade: !Trade {
+  eventId: "",
+  eventTime: 0,
+  ticker: EURUSD,
+  buy: true,
+  qty: 100000,
+  price: 1.2222
+}
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Posting Position 
+Summary [...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update 
+Event
+1.	Receipt of a periodicUpdate event, but without posting the position summary.
+2.	Posting position summary as a result of receiving the PeriodicUpdate event. shown on the previous line (ie on 
+every third periodicUpdate).
+3.	Receipt of a trade, entered through the TradeEntry component.
+4.	Posting position summary after processing a received trade as indicated by the previous log message.
+The Tailer shows the posted positions:
+Listing 91. Output from the queue Tailer component showing cumulative positions
+ 
+ 
+
+
+ 
+1.	No positions, this message was posted before the first trade was entered.
+2.	After the first trade.
+3.	After the second trade.
+Replay following service restart
+When the Position Service is stopped and started again, the logs show the replaying of messages to rebuild the 
+state. No output messages will be posted as a result of this replaying:
+Listing 92. Log output from Position Service following restart
+[...demo.RunService/positionSvc] INFO Runner - replayInputQueuesHistory begin
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Processing 
+Trade: !Trade {
+  eventId: "",
+  eventTime: 0,
+  ticker: AUDUSD,
+  buy: true,
+  qty: 100000,
+  price: 0.7777
+}
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Posting Position 
+Summary
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Periodic Update Event
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Processing 
+Trade: !Trade {
+  eventId: "",
+  eventTime: 0,
+  ticker: EURUSD,
+  buy: true,
+  qty: 100000,
+  price: 1.2222
+}
+[...demo.RunService/positionSvc] INFO PositionServiceImpl - Posting Position 
+Summary
+[...demo.RunService/positionSvc] INFO Runner - 
+replayInputQueuesFromOutputQueueHistory replayed=4
+[...demo.RunService/positionSvc] INFO Runner - replayInputQueuesHistory end 
+replayedCount=4
+replayError=false
+[...demo.RunService/positionSvc] INFO PeriodicEventController - Writing periodic 
+updates to queue
+data/position-in [...demo.RunService/positionSvc] INFO Runner - 
+runInitializationComplete [...demo.RunService/positionSvc] INFO 
+RunLoopControllerMain - running positionSvc...
+The amount of events replayed is less than the amount that occurred in the original run of the service. However, only 
+every third periodicUpdate event resulted in the position summary being posted to the output queue so only 
+these are replayed.
+Output from the Tailer process verifies that the state has been recreated correctly:
+Listing 93. Output from the queue Tailer component showing correctly reconstructed position data
+ 
+ 
+1.	Displayed following the position service restart, shows the state correctly recreated.
+2.	Displayed following the submission of a further trade.
+Points To Note
+The approach described here depends on the distinction between significant and insignificant events. Significant 
+events are those that cause a service's state to be updated. As already mentioned, the expectation is that all significant 
+events will generate output messages. Insignificant events may generate output messages, meaning that they would 
+be replayed using this configuration, however this will not affect the recreated state.
+For example, in the example shown here, periodicUpdate events can trigger the posting of an informational 
+message but do not change the service's state. In the example, only every third periodicUpdate event causes the 
+posting of this message, meaning that 2 out of every 3 of these input events is ignored.
+Replaying an insignificant event is not an issue, other than that the replay may include needless work. Some care 
+should be taken when defining the events and their flow to keep this situation from not occurring.
+If the inputReplayStrategy is set to OUTPUT_ALL, then all events, significant and insignificant, will be replayed, 
+although the relative ordering of insignificant events may be altered between significant events.
+If a service is invoked with the system property replayOutput set (e.g. -DreplayOutput), then the 
+startFromStrategy and inputsReplayStrategy configuration will be overridden, and set to START and 
+OUTPUT respectively.
+
+
