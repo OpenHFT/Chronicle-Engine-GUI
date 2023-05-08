@@ -1,0 +1,24 @@
+This code reads one or more log files and looks for thread profiles to summarize. It groups the profiles by line and by method, and prints the top 20 most frequently occurring profiles. It also allows for the input files to be monitored at a specified interval. 
+
+Possible prompts and answers for fine tuning:
+
+1. What is the purpose of this code?
+{"prompt": "What is the purpose of this code?", "answer": "This code reads one or more log files and looks for thread profiles to summarize. It groups the profiles by line and by method, and prints the top 20 most frequently occurring profiles. It also allows for the input files to be monitored at a specified interval."}
+
+2. What is the maximum number of lines that can be included in a thread profile?
+{"prompt": "What is the maximum number of lines that can be included in a thread profile?", "answer": "The maximum number of lines that can be included in a thread profile is 8."}
+
+3. What is the default value for the interval at which the input files are monitored?
+{"prompt": "What is the default value for the interval at which the input files are monitored?", "answer": "There is no default value for the interval at which the input files are monitored. If the 'interval' system property is not set or is set to a non-positive value, the input files are processed once and the program exits."}
+
+4. How are the thread profiles grouped by line?
+{"prompt": "How are the thread profiles grouped by line?", "answer": "The thread profiles are grouped by line by storing each profile as a string and using a LinkedHashMap to count the number of occurrences of each unique string. The top 20 most frequently occurring strings are printed to the console."}
+
+5. How are the thread profiles grouped by method?
+{"prompt": "How are the thread profiles grouped by method?", "answer": "The thread profiles are grouped by method by replacing the line numbers in each profile with a placeholder and using a LinkedHashMap to count the number of occurrences of each unique profile. The top 20 most frequently occurring profiles are printed to the console."}
+
+6. What is the purpose of the 'ignoreSubStrings' list?
+{"prompt": "What is the purpose of the 'ignoreSubStrings' list?", "answer": "The 'ignoreSubStrings' list is used to filter out thread profiles that contain any of the specified substrings. If a profile contains any of the substrings in the list, it is not counted towards the final result."}
+
+7. How are the thread profiles filtered using the 'ignoreSubStrings' list?
+{"prompt": "How are the thread profiles filtered using the 'ignoreSubStrings' list?", "answer": "Each thread profile is checked against each substring in the 'ignoreSubStrings' list. If the profile contains any of the substrings, it is not counted towards the final result."}
