@@ -1,0 +1,11 @@
+"prompt":"What is the ErrorMessage event used for in Chronicle Services?",
+"answer":"The ErrorMessage event is used to represent low-level, perhaps system related issues, and allow individual components to deal with them appropriately. It represents unexpected errors, such as assertion failures or detection of unexpected data, that may still occur during service execution. The fields of the ErrorMessage object include logLevel, srcMessage, srcArgs, triggerClass, reason, throwable, logTime, and source."
+ 
+"prompt":"What is MessageHistory in Chronicle Services?",
+"answer":"MessageHistory is a type in Chronicle Services that represents details of the 'path' that data has taken to get to the current module. It keeps track of the modules that a message passes through in an instance. An initial timestamp is recorded when the message is first written to the queue by the initiating source, representing the start of the 'lifetime' of the message. The message history also stores the SourceId of the service that wrote the message to the queue."
+ 
+"prompt":"How can MessageHistory be used to measure message latencies?",
+"answer":"Using the MessageHistory data, it is possible to derive measurements of latencies in each of the stages of processing for a given set of data. This is done using the pre-built tool (software.chronicle.services.tools.ChronicleHistoryReaderMain). The tool can be run from the command line, using the available options listed in Table 2. The output produced by the tool shows message latencies between a number of services."
+ 
+"prompt":"How can MessageHistory be queried in Chronicle Services?",
+"answer":"As MessageHistory contains a list of all previous messages that leads to the current message, it is possible to run a query against it using software.chronicle.services.tools.links.ServiceLinksQuery.fetchLinkedInfo by providing a queue and an index to identify the current (last) message. The output of the query is a list of QueryResult objects that contain information about the message and the services that processed it."

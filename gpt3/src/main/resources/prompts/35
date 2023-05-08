@@ -1,0 +1,14 @@
+"prompt":"What is the purpose of queue replication in Chronicle Services?",
+"answer":"The purpose of queue replication in Chronicle Services is to prevent data loss and ensure reliable persistence of data by replicating queues across multiple hosts." 
+
+"prompt":"What is the key feature of queue replication in Chronicle Services?",
+"answer":"The key feature of queue replication in Chronicle Services is the ability to copy messages written to a queue to replicas of the queue on different hosts, ensuring that multiple copies of the queue exist and reducing the likelihood of data loss." 
+
+"prompt":"How does Chronicle Services address the issue of data loss in queue persistence?",
+"answer":"Chronicle Services addresses the issue of data loss in queue persistence by supporting the replication of queues across multiple hosts, ensuring that multiple copies of the queue exist and reducing the likelihood of all queues being subject to the data loss problem." 
+
+"prompt":"What is the impact of queue replication on write performance?",
+"answer":"The time taken to replicate writes across a TCP network to another queue is substantially less than the time taken to perform a synchronous write operation to a local disk, so replication can be achieved without a significant impact on write performance." 
+
+"prompt":"What is the role of Chronicle Queue Enterprise in queue replication?",
+"answer":"Chronicle Queue Enterprise is used for replication of queues on remote hosts using TCP/IP in Chronicle Services framework."

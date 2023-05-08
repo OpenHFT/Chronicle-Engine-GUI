@@ -1,0 +1,17 @@
+"1. What is the purpose of acknowledged replication in Chronicle Services?"
+{"prompt": "What is the purpose of acknowledged replication in Chronicle Services?", "answer": "To enable the source to keep track of the highest message which has been replicated to at least one other node and to determine the largest number of messages which could potentially be lost in the event of a network outage."}
+
+"2. What is the replication and replay strategy in Chronicle Services?"
+{"prompt": "What is the replication and replay strategy in Chronicle Services?", "answer": "Chronicle Services can ensure that an output message is not written to the output queue until the replication acknowledgment for the corresponding input message has been received. This is important if you are using the output queue to determine replay order (Replay Strategies) and both input and output queues are replicated."}
+
+"3. How can user-defined strategies be used to control the number of potentially losable messages in Chronicle Services?"
+{"prompt": "How can user-defined strategies be used to control the number of potentially losable messages in Chronicle Services?", "answer": "User-defined strategies can be used to control this number of 'potentially losable' messages, with smaller permitted gaps coming at the cost of higher net latencies as the source message rate will be increasingly sensitive to the network round-trip for acknowledgements."}
+
+"4. Where can a runnable example of processing events after acknowledged replication be found in Chronicle Services?"
+{"prompt": "Where can a runnable example of processing events after acknowledged replication be found in Chronicle Services?", "answer": "A runnable example of processing events after acknowledged replication can be found in Chronicle-Services-Demo/Replication/Example2."}
+
+"5. What should be considered when using the output queue to determine replay order in Chronicle Services?"
+{"prompt": "What should be considered when using the output queue to determine replay order in Chronicle Services?", "answer": "It is important to ensure that an output message is not written to the output queue until the replication acknowledgment for the corresponding input message has been received, especially if both input and output queues are replicated. This is to prevent the services framework from being unable to restart the service if an input queue message was not replicated before a failure, but the corresponding output message was."}
+
+"6. Where can more information about enabling replication and replay strategies in Chronicle Services be found?"
+{"prompt": "Where can more information about enabling replication and replay strategies in Chronicle Services be found?", "answer": "More information about enabling this feature and other options can be found in the Startup Strategies and Replay Strategies sections."}

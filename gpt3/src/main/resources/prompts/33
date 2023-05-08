@@ -1,0 +1,23 @@
+"1.2. Inputs Replay Strategies":
+- "What are the available options for inputsReplayStrategy when startFromStrategy is set to START?": "INPUTS, OUTPUT, OUTPUT_ALL, OUTPUT-REVERSED"
+- "What does the INPUTS strategy do?": "Replay messages from the input queues whereby individual input queues may be read in any order"
+- "What does the OUTPUT strategy do?": "Replay messages from the input queues in the order they were actually processed in previous runs by looking at the output queue. Only events that triggered an output event are replayed. Input events that were processed 'silently' are considered not important and skipped."
+- "What does the OUTPUT_ALL strategy do?": "Replay messages from the input queues in the order they were actually processed in previous runs by looking at the output queue. All events are replayed. Requires a system property for recovering exact order of all events, see From input queues"
+- "What does the OUTPUT-REVERSED strategy do?": "Replay messages from the output queue in reverse order. If you have defined a config queue for your service, this config queue is always replayed first."
+
+"1.3. Triggering Replay":
+- "When is replay triggered if inputsReplayStrategy is set to OUTPUT_REVERSE?": "See From output queue"
+- "When is replay triggered if startFromStrategy is set to START?": "See From input queues"
+- "What system property can be set to manually trigger replay?": "-DreplayOutput property"
+
+"1.4. No Replay":
+- "What startFromStrategy value can be used for services that do not contain significant internal state?": "END"
+- "What startFromStrategy values can be used to begin where the service last left off before shutdown?": "NAMED, LAST_WRITTEN"
+
+"1.5. From Input Queues":
+- "What inputsReplayStrategy values can be used to replay from inputs when inputs and outputs do not contain a huge amount of data?": "OUTPUT, OUTPUT_ALL"
+- "What inputsReplayStrategy value is only recommended for use when there is only one input queue?": "INPUT"
+- "What is the purpose of configuring a service to generate output messages for significant input events when using InputsReplayStrategy.OUTPUT?": "To ensure the input event can be replayed"
+- "What system property can be set to false to fully restore the exact order of 'insignificant' events when using InputsReplayStrategy.OUTPUT_ALL?": "chronicle.service.dontWriteHistoryForEventsWithNoOutput"
+- "What is the purpose of setting the -DreplayOutput system property when running a service?": "To replay exactly what happened in another environment and warm up the service before processing any new data"
+- "After replay is done, where are the input queues' tailers positioned?": "Where we left off from when last running, meaning any new messages that have appeared in the input queues since will now be played."

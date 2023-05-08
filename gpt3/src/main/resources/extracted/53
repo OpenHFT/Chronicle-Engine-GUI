@@ -1,0 +1,44 @@
+Running the Service
+A Chronicle Service is typically started using an invocation of the main method of a driver class. Two command line arguments are normally provided:
+Table 5. Startup arguments
+Argument	Description
+args[0]
+Name of the main config file (eg services.yaml)
+args[1]
+Name of the service to start - acts as key into the services map read from the file as described above
+If the service is to be run in a clustered environment, a third argument is normally used to indicate the specific host on a cluster on which the service is to be started.
+The following code snippet shows a template for a service startup class:
+Running a service
+public class Main {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+    static {
+        DtoAlias.addAlias();
+    }
+
+    public static void main(String[] args) throws IOException {
+        String cfgFileName = args[0];
+        String serviceName = args[1];
+
+        int hostId = args.length <= 2 ? -1 : Integer.parseInt(args[2]);
+        if(hostId<0)
+          ThreadRunner.runService(cfgFileName, serviceName);
+        else
+          ThreadRunner.runService(cfgFileName, serviceName, hostId);
+    }
+}
+There are several methods which can be used to run a service for example ThreadRunner.runAll(cfgFileName) gets only a YAML configuration file as argument and runs all the configured services in the file. See more options in the demos.
+Normal practice is to create a shell script that will be capable of starting all services, in a particular order. Individual services may be started directly, if appropriate, for example to reflect a major change in configuration.
+A number of things happen under the bonnet upon running a service, as can be seen at the following diagram:
+Lifecycle
+Figure 1. Service lifecycle
+The initial behavior of the service - after start up and before processing new events - is determined by configured start-up and replay strategies. These strategies have been explained in Replay Strategies.
+5. Shutdown
+On an orderly shutdown, if the service implements java.io.Closeable then the close method will be called and the service can perform any shutdown processing. The output queue is still open so messages can be written out. To cleanly stop all running services configured in a YAML file you can use the atomic boolean in runAll(@NotNull final String yamlFileName, AtomicBoolean running) and change running to false. The following excerpt runs and then stops all the services defined in services.yaml.
+final AtomicBoolean running = new AtomicBoolean(true);
+
+// Runs all services in services.yaml
+ThreadRunner.runAll("services.yaml", running);
+...
+
+// Cleanly stops services' loops and triggers shutdown()
+running.set(false);

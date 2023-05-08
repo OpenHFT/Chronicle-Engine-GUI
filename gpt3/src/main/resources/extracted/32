@@ -1,0 +1,28 @@
+State Management
+This section provides information on service startup options, restoring state and the provided strategies. The initial behavior of the service - after start up and before processing new events - is determined by configured start-up and replay strategies. These strategies can be selected according to the nature of service and provide benefits such as rapid restarts, state management, and failover while maintaining the state of the service. The strategies are pluggable and there are hooks for the developer to override their behaviour.
+1. Replay Strategies
+To restart a service, restore state, and get it ready to service requests, you have a number of options e.g. no replay, replay from input queues or replay from the output queue. Whether replay should be performed or not, it is configured using the startFromStrategy property. What queue(s) to use for the replay is configured using inputsReplayStrategy. The following sections describe how to achieve some common replay patterns.
+During a replay, the enableOutputDuringReplayOfInput configuration parameter determines whether output should be sent to the output queue or not.
+1.1. Startup Strategies
+You can configure what action the service takes when started by setting startFromStrategy. It controls how to handle messages that are at the input queue(s) at start-up. The table below shows the available strategies:
+Table 1. Startup Strategies
+Strategy	Details
+START
+Read and process all messages in the queue(s)
+LAST_WRITTEN
+Read and process all messages in the input queue(s) that arrived in the input queue(s) after the last message written to the output queue
+REPLAY_LAST_INPUT_MESSAGE
+Read the last message in the input queue and then any messages after that
+END
+Read and process only messages added to the queue after the service started
+NAMED
+Remember where we last read from and restart from there. Makes use of named tailers
+1.1.1. Override startFromStrategy Default
+The chosen startFromStrategy for the service applies to all input queues, but can be overridden using InputCfg for each queue. An example is demonstrated below:
+service: {
+    inputs: [ mdbb-timer-in,
+            !InputCfg { input: config-out, startFromStrategy: END }],
+    config:  config-out,
+    output:  mdbb-out,
+},
+This is useful to be able to read the config queue (config-out) from the end, so that it is not read twice.

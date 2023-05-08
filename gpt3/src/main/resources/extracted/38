@@ -1,0 +1,101 @@
+3. Configuration
+Services Replication builds directly on Queue Replication, wrapping it in the Services framework to provide additional features. Services Replication is multi-way, unidirectional with switchable master: at any given time the master host is defined and data flows from the source queues on the master host to all sinks. The master can be switched on-the-fly in order to failover, changing the direction of replication flows where appropriate.
+The configuration of Services Replication closely follows that for Queue Replication, with one or more replicaSets configured across two or more hosts. Any host can be a member of one or more replicaSets. For example the following configuration file, configures replication of queues that Services are built on.
+Queue replication configuration
+!ChronicleServicesCfg {
+  context: {
+    baseSourcePath: "replica/source",
+    baseSinkPath: "replica/sink$hostId",
+  },
+
+  queues: {
+    queue-1: { path: queue-1, sourceId: 1 },
+    queue-2: { path: queue-2, sourceId: 2, replicaSets: [ prod ], master: hostA, acknowledge: true },
+    queue-3: { path: queue-3, sourceId: 3, replicaSets: [ prod ], master: hostA },
+    queue-4: { path: queue-4, sourceId: 4, replicaSets: [ dr ], master: hostB }
+  },
+
+  # services can be run individually or together in or out of process
+  services: {
+    # bespoke services
+    ...
+  },
+
+  # replication config
+  hosts: {
+    # higher hostId connects to lower
+    hostA: { hostId: 1, connectUri: address1:7001 },
+    hostB: { hostId: 2, connectUri: address2:7002 },
+    hostC: { hostId: 3, connectUri: address3:7003 }
+  },
+  replicaSets: {
+    prod: [ hostA, hostB ],
+    dr: [ hostB, hostC ]
+  },
+}
+The replicaSets block defines sets of hosts that are in a replication group. The above configuration shows two separate replicaSets - prod and dr - spanning three hosts, with hostA & hostB in prod, and hostB & hostC in dr.
+The hosts block defines hosts for the queues and assigns them hostId and socket number (for hosts' communication over network) using parameters hostId and connectUri respectively.
+The queues block configures the queues so that:
+queue-1 is not replicated.
+queue-2 and queue-3 are normally writeable on hostA (master: hostA), and any writes are replicated to the other hosts in the prod replicaSet ie hostB. The master can be changed to hostB when needed.
+queue-2 uses acknowledged replication.
+queue-4 is normally writeable on hostB, with any writes replicated to hostC (all the other queues in dr).The master can be changed to hostC when needed.
+Alternatively, masterId: 1 can be used instead of master: hostA in the above configuration.
+The context block holds the context or state about the cluster such storage path for the queues. See more information in Chronicle Queue Configuration Parameters.
+4. Chronicle Replication Disconnect Notification
+A DisconnectListener can be used to receive notifications whenever a replication connection with a remote host has been dropped:
+public interface DisconnectListener {
+    /**
+     * called when the sync replication handler disconnects
+     *
+     * @param disconnectEvent information about the disconnect
+     */
+    void disconnect(DisconnectEvent disconnectEvent);
+}
+The DisconnectEvent provided in the callback contains the corresponding hostId and timestamp as follows:
+public class DisconnectEvent extends SelfDescribingMarshallable {
+    private  long timestamp;
+    private int remoteIdentifier;
+
+    public long timestamp() {
+        return timestamp;
+    }
+
+    public DisconnectEvent timestamp(final long timestamp) {
+        this.timestamp = timestamp;
+        return this;
+    }
+
+    public int remoteIdentifier() {
+        return remoteIdentifier;
+    }
+
+    public DisconnectEvent remoteIdentifier(final int remoteIdentifier) {
+        this.remoteIdentifier = remoteIdentifier;
+        return this;
+    }
+}
+4.1. Heartbeats
+Chronicle Queue replication sends heartbeats periodically to detect whether a connection has stalled. The interval of how often these heartbeats are checked, and how often they are sent, can be changed by configuration as follows:
+!ChronicleServicesCfg {
+  context: !QueueClusterContext {
+    ...
+    heartbeatIntervalMs: 2000,
+    heartbeatTimeoutMs: 3000,
+  },
+  queues: {
+    ...
+  },
+
+  services: {
+    ...
+  },
+
+  hosts: {
+    ...
+  },
+  replicaSets: {
+    ...
+  },
+}
+The queue replication heartbeat differs from the service heartbeat, which can be configured in the services block of the configuration file using parameter heartbeatMS. See the Services section in the reference guide.

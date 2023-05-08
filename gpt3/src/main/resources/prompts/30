@@ -1,0 +1,14 @@
+"prompt":"What is the Lambda Architecture and how is it used in Chronicle's approach to microservices?",
+"answer":"The Lambda Architecture is a model for Chronicle's view of microservices, where a function (microservice) receives events from a data source, reacts to the events, and generates output based on processing the input data. The data source for the function contains the complete history of all events and operates in an append-only manner. The function is stateless and any state information it requires is derived from its input event(s). This approach allows Chronicle microservices to be chained together to produce more sophisticated processing pipelines." 
+
+"prompt":"What is the difference between the Lambda Architecture and the Lambda Architecture with State?",
+"answer":"The Lambda Architecture is stateless and any state information it requires is derived from its input event(s). The Lambda Architecture with State is a slight variation of the approach where a function caches state locally. The function is still stateless and the semantics of the function do not change as a result of storing state. It is purely an optimization, and at any point the state can be recreated from the inputs if necessary." 
+
+"prompt":"What is the most efficient mechanism for inter-service communication in Chronicle's microservices approach?",
+"answer":"Asynchronous messaging is the most efficient mechanism for inter-service communication in Chronicle's microservices approach." 
+
+"prompt":"What is the purpose of the 'Normalising Function' and the 'Function for External Messages' in the Chained Services diagram?",
+"answer":"The 'Normalising Function' and the 'Function for External Messages' are examples of the simpler form of Lambda architecture. Their job is to convert to and from an application specific canonical representation of the messages being sent to and from the system." 
+
+"prompt":"What is the aim of the individual Function components in the trading system diagram?",
+"answer":"The aim of the individual Function components in the trading system diagram is to keep them operating as efficiently as possible in order to minimize the latency between an inbound FIX message and any resulting order being placed as a result of its analysis."

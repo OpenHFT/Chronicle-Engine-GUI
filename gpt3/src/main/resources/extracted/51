@@ -1,0 +1,40 @@
+2. Static Configuration
+2.1. System Properties
+Chronicle Services make good use of system properties. System properties are automatically substituted when the YAML file is loaded. This provides a mechanism to supply static configuration i.e. configuration that is not expected to change during runtime. For example, set the output queue below dynamically using the system property MD_OUTPUT_QUEUE:
+  services: {
+    marketdata-service: {
+      inputs: [ periodic-events ],
+      output: ${MD_OUTPUT_QUEUE},
+      implClass: !type software.chronicle.services.demo.stocks.service.impl.MarketDataServiceImpl,
+      periodicUpdateMS: 1000,
+    },
+Set the value of this system property:
+with System.setProperty().
+with the java -D command line options, e.g. java -DMD_OUTPUT_KEY=default_output.
+as a setting in a YAML configuration file.
+as a setting in a Maven pom.xml file
+2.2. Additional Properties
+Additional properties can be added at the end of the service definition. See the below example of a DB integration service:
+Service Definition
+!ChronicleServicesCfg {
+      ...
+      services: {
+        ...
+        db: {
+          inputs: [ oms-out, pricer-out ],
+          implClass: software.chronicle.services.integration.DbIntegration,
+          startFromStrategy: NAMED,
+
+          jdbcUrl: ${jdbcurl},
+          dbenv: ${deploy.env}
+        },
+       ...
+      }
+}
+These properties will be delivered to the service if it implements software.chronicle.services.api.listener.ServiceContextListener.
+@Override
+public void serviceContext(ServiceContext serviceContext) {
+    final Map<String, Object> properties = serviceContext.serviceCfg().serviceConfig();
+    final String url = properties.get("jdbcUrl");
+}
+Learn more about using ServiceContextListener in Processing the YAML configuration at runtime.

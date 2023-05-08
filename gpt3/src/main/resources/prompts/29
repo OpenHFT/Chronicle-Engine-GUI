@@ -1,0 +1,11 @@
+"prompt":"What is the concept behind Microservices?",
+"answer":"The concept behind Microservices is to minimize coupling between the components of a system while maximizing the cohesion of the components themselves. Microservices are intended to perform single tasks, in isolation, and to communicate with other microservices using well-defined protocols."
+
+"prompt":"What is the difference between Microservices and SOA?",
+"answer":"Microservices are a refinement of the ideas in SOA. Microservices are more self-contained than the more traditional SOA services, adopting a 'share nothing' approach wherever possible. While the name implies that they should be very small, in reality, this means 'small' in a functional sense rather than necessarily in the code-size sense."
+
+"prompt":"What is the communication approach used in Microservices?",
+"answer":"Microservices communicate with other microservices using well-defined protocols. Communication between them becomes inter-process communication, which is significantly slower and more error-prone than the simple 'procedure-call' approach that is used in the traditional monolithic approach."
+
+"prompt":"What is Chronicle's philosophy regarding Microservices?",
+"answer":"At Chronicle, our philosophy is based strongly on the use of Microservices in constructing sophisticated systems, especially in latency-sensitive areas such as Financial trading systems. Chronicle Services has evolved to support this approach, providing the capability to implement low-latency, reliable, flexible and extensible microservice-based software systems that have been successfully deployed with customers in the Financial Services Industry."

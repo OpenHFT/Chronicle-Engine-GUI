@@ -1,0 +1,23 @@
+"prompt":"What is Chronicle Queue Enterprise Replication?",
+"answer":"Chronicle Queue Enterprise Replication is a replication system designed to ensure that the contents of a source queue are copied to one or more sink queues on other hosts, using TCP/IP network connections. All write operations are performed on one queue, the source or master. These are copied in real time to the sink queues. In this way the ordering of messages is maintained, and the sink queues are exact replicas of the source queue."
+
+"prompt":"How does the replication component lock the specified source queue during service startup?",
+"answer":"During service startup, the replication component locks the specified source queue and handshakes with the sink queues to ensure the source has the most up-to-date queue in the cluster."
+
+"prompt":"What happens if there are messages in a sink which are not in the source queue?",
+"answer":"If there are messages in a sink which are not in the source queue, it would indicate that the source queue had failed in some way (eg TCP/IP connection or power failure) and a failover to using a sink queue had occurred. When any such messages are replayed to the source queue the queue will be unlocked, and the application may proceed."
+
+"prompt":"What is the maximum number of hosts that can be contained in a replicaSet?",
+"answer":"The replicaSet can contain up to 127 hosts."
+
+"prompt":"What is the purpose of acknowledgements in Chronicle Queue Enterprise Replication?",
+"answer":"Sinks can optionally send acknowledgments back to the source to confirm receipt of a replication update."
+
+"prompt":"Can a sink queue be used to write to the queue?",
+"answer":"No, a sink queue may be used as a live read-only copy of the data, but is not able to write to the queue."
+
+"prompt":"What is the purpose of the backfill mechanism in Chronicle Queue Enterprise Replication?",
+"answer":"A backfill mechanism ensures a source node has no gaps prior to becoming the master node within a cluster."
+
+"prompt":"What is the format of an example configuration for setting up Queue replication across 3 hosts?",
+"answer":"An example configuration which sets up Queue replication across 3 hosts (host1, host2, host3) forming a replica set group1, with host1 as the master instance, and with acknowledgements enabled is as follows: !ChronicleQueueReplicationCfg { context: { baseSourcePath: 'replica/source', baseSinkPath: 'replica/sink', }, hosts: { host1: { hostId: 1, connectUri: host.port1 }, host2: { hostId: 2, connectUri: host.port2 }, host3: { hostId: 3, connectUri: host.port3 } }, replicaSets: { group1: [ host1, host2, host3 ] }, queues: { queue1: { path: queue1, replicaSets: [ group1 ], masterId: 1, acknowledge: true } } }"

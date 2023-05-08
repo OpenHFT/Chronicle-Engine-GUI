@@ -1,0 +1,14 @@
+"prompt":"What are the considerations that should be taken into account when selecting a service's configuration parameters?",
+"answer":"When selecting a service's configuration parameters, the following considerations should be taken into account to maximise the performance: Queue rollCycle, Queue blockSize, Thread Affinity, Pauser Mode, and Pretoucher." 
+
+"prompt":"What is the purpose of the @MethodId() annotation?",
+"answer":"The @MethodId() annotation is used to assign method ids to methods in interfaces that represent input and output events. This results in saving memory when calling the methods through a MethodReader/MethodWrite and consequently having faster method calls." 
+
+"prompt":"What is DTO Filtering and how is it implemented in Chronicle Services?",
+"answer":"DTO Filtering is a tool provided by Chronicle Wire that skips the deserialization of arguments of a method based on its first argument. To use this tool in services, a service needs to implement MethodFilterOnFirstArg interface and override ignoreMethodBasedOnFirstArg(String filter, Object dto) method. If this method returns false, input DTOs will be deserialized." 
+
+"prompt":"What are Converters and how are they used in Chronicle Services?",
+"answer":"Converters are used to convert all DTO fields to primitives to make the messages Trivially Copyable and compress the size of the data. Chronicle Wire supplies several Converter types, such as Base64LongConverter and ServicesTimestampLongConverter. To use the converters, an appropriate annotation is placed on any convertible data field." 
+
+"prompt":"What is the best practice regarding Queue Writers in Chronicle Queue?",
+"answer":"Regarding the output queue of services, the best practice is that every service has its own output queue, so the writes never contend. If high-frequency data is being written into a queue, it is advised not to write to this queue from any other source."

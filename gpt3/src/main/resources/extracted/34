@@ -1,0 +1,16 @@
+1.6. From Output Queue
+If your service can reconstruct its internal state from the contents of the output queue (e.g. a position server outputs all changed positions when it receives a trade) then a suitable strategy is to start at the end of the output queue and iterate backwards until all state is reconstituted. inputsReplayStrategy=OUTPUT_REVERSE can be used to replay the output queue from the end (backwards) in to the service. The service must implement OutputReverseListener to notify when enough data has been replayed.
+Appropriate startFromStrategy to use with this are LAST_WRITTEN or END.
+1.7. Custom
+Custom replay strategies include:
+Replay from snapshot - Your can configure your service to output periodic snapshots that can be used to recreate the latest state and then continue replay from there.
+Replay from map backing queue - If using a QueueBackedMap then your service can implement QueueBackedMapSource and replay from that.
+Chronicle-Services-Demo/StateQuery/Example 1 demonstrates how to restore the internal service state from an input and output queue.
+2. Integration
+A common use case is for a service to read from a queue and integrate with an external system e.g. a tick DB. For this purpose, you should ensure that the AbstractEvent.eventId or eventTime is written to the tick DB in this case. Now when the integration service is restarted, it can query the tick DB for the last eventId that it has stored, and start replaying from there/filter events before then.
+Alternatively you can use a Chronicle Queue named tailer (startFromStrategy=NAMED) to record where you were up to in reading the queue. However, this will only work if you can guarantee that events have been committed to the external system if your method reader returns without an exception - see below.
+If your integration service is reading from a Chronicle Queue, use either the following
+try (DocumentContext dc = tailer.readingDocument()) {
+    ...
+}
+or a method reader, then throwing an exception from inside the try block, or from the method reader method, will rollback the read from the queue. The next time you try to read from the tailer you will get the same message. This provides a simple re-try mechanism if the external service is transiently unavailable.

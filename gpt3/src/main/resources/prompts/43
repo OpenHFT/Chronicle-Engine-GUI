@@ -1,0 +1,14 @@
+"prompt":"What is the purpose of HeartbeatRecords in a service?",
+"answer":"The purpose of HeartbeatRecords in a service is to maintain a list of its dependencies and update the lastHeartbeatReceived field with the timestamp from the latest message received from each service to detect whenever a service has failed."
+
+"prompt":"What happens when the heartbeat timer in the Chronicle infrastructure fires?",
+"answer":"When the heartbeat timer in the Chronicle infrastructure fires, the service publishes its own Hearbeat message to its output queue and each of the dependencies is checked to see if the timeout has expired since the last Heartbeat event from that dependency."
+
+"prompt":"What happens if the timeout for a given dependency has not expired?",
+"answer":"If the timeout for a given dependency has not expired, then lastHeartbeatReceived is updated with the timestamp from the incoming message."
+
+"prompt":"What happens if the timeout for a given dependency has expired?",
+"answer":"If the timeout for a given dependency has expired, then a HeartbeatError message is constructed and published."
+
+"prompt":"What is the purpose of HeartbeatErrorListener?",
+"answer":"The purpose of HeartbeatErrorListener is to capture and act on HeartbeatErrors. It is implemented by each component which needs to receive error notifications regarding heartbeats."

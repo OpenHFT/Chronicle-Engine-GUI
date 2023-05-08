@@ -1,0 +1,36 @@
+2. Chronicle Queue Enterprise Replication
+Replication within Chronicle Services is based on Chronicle Queue Enterprise Replication, which is designed to ensure that the contents of a source queue are copied to one or more sink queues on other hosts, using TCP/IP network connections.
+All write operations are performed on one queue, the source or master. These are copied in real time to the sink queues. In this way the ordering of messages is maintained, and the sink queues are exact replicas of the source queue.
+During service startup, the replication component locks the specified source queue and handshakes with the sink queues to ensure the source has the most up-to-date queue in the cluster. If there are messages in a sink which are not in the source queue, it would indicate that the source queue had failed in some way (eg TCP/IP connection or power failure) and a failover to using a sink queue had occurred. When any such messages are replayed to the source queue the queue will be unlocked, and the application may proceed.
+Basic Queue Replication
+Figure 1. Basic Chronicle Queue Replication
+A single Chronicle Queue can be replicated across a set of N hosts (the replicaSet) according to the following:
+The replicaSet can contain up to 127 hosts.
+Within a replicaSet, one host (the master) acts as the source of data and is the only instance which may add data to the queue.
+The remaining N-1 hosts (the sinks) within the replicaSet receive updates from the source.Updates are applied atomically, and a sink may be used as a live read-only copy of the data (but is not able to write to the queue).
+Each host has an assigned hostId, and host-host connections are always initiated by the host with higher hostId.
+Sinks can optionally send acknowledgments back to the source to confirm receipt of a replication update.
+The source node can be changed dynamically, hence a sink queue is able to take over from a source if a failure occurs on the source.
+A backfill mechanism ensures a source node has no gaps prior to becoming the master node within a cluster.
+The ordering of messages is identical across all instances of a queue within a replicaSet.
+An example configuration which sets up Queue replication across 3 hosts (host1, host2, host3) forming a replica set group1, with host1 as the master instance, and with acknowledgements enabled is as follows:
+!ChronicleQueueReplicationCfg {
+  context: {
+    baseSourcePath: "replica/source",
+    baseSinkPath: "replica/sink",
+  },
+  hosts: {
+    host1: { hostId: 1, connectUri: host.port1 },
+    host2: { hostId: 2, connectUri: host.port2 },
+    host3: { hostId: 3, connectUri: host.port3 }
+  },
+  replicaSets: {
+    group1: [ host1, host2, host3 ]
+  },
+  queues: {
+    queue1: { path: queue1, replicaSets: [ group1 ], masterId: 1, acknowledge: true }
+  }
+}
+In the above configuration, the queue queue1 is set to be replicated from host1 (as indicated by masterId) to all other hosts which are defined for replicaSet group1. Queues will use storage paths defined by baseSourcePath/baseSinkPath for source and sink, respectively, followed by the value of path variable. For the example above, the source queue will be at replica/source/queue1 while the sink will be written to replica/sink/queue1. acknowledge: true activates acknowledged replication.
+Both the input queues and the output queue of a microservice can be replicated.
+See runnable examples of queue replication in Chronicle-Services-Demo/Replication.

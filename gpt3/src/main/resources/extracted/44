@@ -1,0 +1,136 @@
+3. Diagnostics
+Various methods are available to support diagnostics on Chronicle Services. This section examines these.
+3.1. Low-level Errors
+Unexpected errors, such as assertion failures or detection of unexpected data, may still occur during service execution. In the Java ecosystem these are normally manifested as exceptions. However, while exceptions allow the separation of the occurrence of an error from its handling (to a degree anyway), there are still issues that can arise from inadequate handling of the exception notifications.
+Chronicle Services uses the ErrorMessage event to represent low-level, perhaps system related issues, and allow individual components to deal with them appropriately.
+The ErrorMessage fields are listed in the table below:
+Table 1. ErrorMessage Object
+Field	Type	Description
+logLevel
+LogLevel
+The message log level, either ERROR, WARN, PERF, DEBUG
+srcMessage
+String
+srcArgs
+Object
+triggerClass
+String
+Name of the class that triggered the error
+reason
+String
+Description of the error
+throwable
+Throwable
+The exception type
+logTime
+long
+source
+String
+Often an ErrorMessage object will be published to reflect the occurrence of an exception. In this case, the fields throwable and triggerClass capture the exception, and the class where it was thrown. The throwable object may contain the stacktrace for the exception, increasing the potential for diagnosing the root cause of the problem.
+3.2. Message History
+Chronicle Services based applications work by processing data from an initial source, which passes through a series of modules, to generate some output. Chronicle Queues are the means by which data passes from module to module, so any message that is published to a queue is likely to be based on data that has passed through one or more modules beforehand. Chronicle keeps track of the modules that a message passes through in an instance of the MessageHistory type.
+It represents details of the "path" that data has taken to get to the current module. An initial timestamp is recorded when the message is first written to the queue by the initiating source, representing the start of the "lifetime" of the message. The message history also stores the SourceId of the service that wrote the message to the queue.
+See how MessageHistory can be used to find out the source of events in the runnable example Chronicle-Services-Demo/GettingStarted/Example9.
+3.2.1. Measuring Message Latencies
+Using the MessageHistory data, it is possible to derive measurements of latencies in each of the stages of processing for a given set of data. This is done using the pre-built tool (software.chronicle.services.tools.ChronicleHistoryReaderMain).
+The tool can be run from the command line, using the following interface:
+ChronicleHistoryReaderMain -d <directory> [options]
+The available options are listed in the table below:
+Table 2. Command line options for ChronicleHistoryReaderMain
+Option	Description
+-d <directory>
+Directory containing chronicle queue files
+-h <hostId>
+hostId for parsing services.yaml and constructing multi-q
+-i <ignore>
+Number of items to ignore from start
+-m
+By method
+-p
+Show progress
+-s <services.yaml>
+The services.yaml file. If not provided, get from jar
+-t <time unit>
+Time unit - defaults to nanos
+-u <histo offset>
+Summary output. Instead of histograms, will show one value only in CSV format. Set this to 0 for 50th, 1 for 90th etc., -1 for worst
+-w <window>
+Window duration in time unit. Instead of one output at the end, will output every window period
+Here is an example of a typical execution:
+java -Dproperties.to.substitute.in.services.yaml software.chronicle.services.tools.ChronicleHistoryReaderMain -d mid-out -s .../services.yaml
+This produces the following output, showing message latencies between a number of services:
+Timings below in MICROSECONDS
+sourceId         startTomdbb          mdbb    mdbbtomidmaker      midmaker      endToEnd
+count:               1009736       1009736        1009736          1009736       1009736
+50:                        3             7              9               11            33
+90:                       10             8             13               12            41
+99:                       62            11             16               14            96
+99.9:                    184            13             17               16           241
+99.99:                  1146            16             26               16          1540
+99.999:                 2818            18            966               23          2818
+99.9999:
+worst:                 49283          3342           3604             2949         49283
+The output above is in regard to this fragment of services.yaml:
+!ChronicleServicesCfg {
+  queues: {
+    mdbb-in: { path: mdbb-in, sourceId: 1 },
+    mdbb-out: { path: mdbb-out, sourceId: 2 },
+    mid-in: { path: mid-in, sourceId: 8 },
+    mid-out: { path: mid-out, sourceId: 9 },
+    ...
+  },
+  services: {
+    mdbb: {
+      inputs: [ mdbb-in, config-out ],
+      output: mdbb-out,
+      ...
+    },
+    midmaker: {
+      inputs: [ mid-in, mdbb-out, config-out ],
+      output: mid-out,
+      ...
+    }
+    ...
+  }
+...
+}
+3.2.2. Querying Using MessageHistory
+As MessageHistory contains a list of all previous messages that leads to the current message, it is possible to run a query against it using software.chronicle.services.tools.links.ServiceLinksQuery.fetchLinkedInfo by providing a queue and an index to identify the current (last) message.
+Using the above example, if you were to call fetchLinkedInfo for a message in mid-out, you would get back a list of QueryResult looking something like:
+[!QueryResult {
+  queue: "mid-out",
+  index: xxxxxx,
+  readByService: 1586741559145700,
+  wroteByService: 1586741559245700,
+  service: midmaker,
+  object: !MidRate {
+    eventId: e1,
+    eventTime: 2019-11-07T14:07:01,
+    ...
+  }
+}
+, !QueryResult {
+  queue: "mdbb-out",
+  index: yyyyyy,
+  readByService: 1586741556375400,
+  wroteByService: 1586741559045700,
+  service: mdbb,
+  object: !LadderByRate {
+    eventId: e1,
+    eventTime: 2019-11-07T14:07:01,
+    ...
+  }
+}
+, !QueryResult {
+  queue: "mdbb-in",
+  index: zzzzz,
+  readByService: 1586741555375400,
+  wroteByService: 1586741549045700,
+  service: "",
+  object: !MarketDataUpdate {
+    eventId: e1,
+    eventTime: 2019-11-07T14:07:01,
+    ...
+  }
+}
+]

@@ -1,0 +1,26 @@
+"prompt":"What is Chronicle Services?",
+"answer":"Chronicle Services is a framework for implementing low-latency microservice-based applications and systems. It allows large complex software applications to be broken up into a set of smaller loosely coupled applications (services) that can be independently built, tested, deployed and scaled. The services communicate using event-driven messaging and leverage open source Chronicle technologies such as Chronicle Queues to provide efficient messaging between application components."
+
+"prompt":"What are the benefits of using Chronicle Services?",
+"answer":"Chronicle Services allows for the easy implementation of microservice-based applications and systems. It provides enterprise class reliability and availability, supports state recovery strategies, and offers tools for testing, monitoring, visualizing, investigating and diagnosing faults. Additionally, it leverages open source Chronicle technologies such as Chronicle Queues to provide efficient messaging between application components and provides additional optimizations and features to improve performance."
+
+"prompt":"What topics are covered in the Quick Start section of the User Guide?",
+"answer":"The Quick Start section of the User Guide covers a simple overview of Chronicle’s Microservice Framework, including a video tutorial and a step-by-step guide on setting up two microservices that send events using Chronicle Queues. It also covers the Services Testing Framework through the use of a YamlTester and shows a more detailed example of Chronicle’s Microservices Framework, including the addition of DTOs and periodic updates. It also explores DTO Schema Evolution; presenting a number of strategies to manage changes to DTOs during development."
+
+"prompt":"What is discussed in the State Management section of the User Guide?",
+"answer":"The State Management section of the User Guide describes different options for starting a service and outlines the supported replay strategies to restore state after a restart."
+
+"prompt":"What is discussed in the Queue Replication section of the User Guide?",
+"answer":"The Queue Replication section of the User Guide discusses the Chronicle Services approach to enterprise class levels of availability and reliability through replication of Chronicle Queues."
+
+"prompt":"What is discussed in the Monitoring section of the User Guide?",
+"answer":"The Monitoring section of the User Guide discusses the diagnostic and monitoring tools available for Chronicle Services."
+
+"prompt":"What is discussed in the Performance Tuning section of the User Guide?",
+"answer":"The Performance Tuning section of the User Guide covers how to adapt your hardware and software implementation to achieve optimal performance."
+
+"prompt":"What is discussed in the Use Cases section of the User Guide?",
+"answer":"The Use Cases section of the User Guide explores use cases of Chronicle Services with real-world examples."
+
+"prompt":"What is included in the Reference Guide section of the User Guide?",
+"answer":"The Reference Guide section of the User Guide provides a reference guide of templates and configuration parameters for Chronicle Services."

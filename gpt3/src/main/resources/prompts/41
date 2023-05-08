@@ -1,0 +1,23 @@
+"Prompt": "What is the purpose of this page?",
+"Answer": "This page describes performance monitoring tools and techniques available to the programmer."
+
+"Prompt": "What is the purpose of monitoring the event-loop thread?",
+"Answer": "The purpose of monitoring the event-loop thread is to allow capturing the causes of rare but significant millisecond delays."
+
+"Prompt": "What are the limitations of CPU profilers?",
+"Answer": "CPU profilers are generally poor at finding blocking system calls and the outliers causing rare delays, e.g. in the 99.9% or 99.99% percentiles."
+
+"Prompt": "What is the recommended tool to use before proceeding with Chronicle Software event loop-monitoring?",
+"Answer": "Before proceeding with Chronicle Software event loop-monitoring, it is recommended to use a profiler like Flight Recorder to resolve common delays."
+
+"Prompt": "What is the default period for monitoring the critical thread?",
+"Answer": "The default period for monitoring the critical thread is 10 ms."
+
+"Prompt": "How can you adjust the snapshot frequency?",
+"Answer": "You can adjust the snapshot frequency with the system property runner.monitor_limit (the unit is nanoseconds). For example -Drunner.monitor_limit=1000000 will show a snapshot after any delay of 1 ms."
+
+"Prompt": "What is the purpose of the tool software.chronicle.services.runner.MonitorProfileAnalyserMain?",
+"Answer": "The tool software.chronicle.services.runner.MonitorProfileAnalyserMain can help you analyse the logs of a program and find the most common stack trace, allowing analysis of results."
+
+"Prompt": "What is the purpose of adding -XX:+PrintCompilation to the commandline?",
+"Answer": "By adding -XX:+PrintCompilation to the commandline, the analyser can also give you a histogram of the most common methods re-optimised."

@@ -1,0 +1,20 @@
+"prompt":"What is Services Replication and how does it differ from Queue Replication?",
+"answer":"Services Replication builds directly on Queue Replication, wrapping it in the Services framework to provide additional features. Services Replication is multi-way, unidirectional with switchable master. The configuration of Services Replication closely follows that for Queue Replication, with one or more replicaSets configured across two or more hosts. The replicaSets block defines sets of hosts that are in a replication group. The hosts block defines hosts for the queues and assigns them hostId and socket number (for hosts' communication over network) using parameters hostId and connectUri respectively. The queues block configures the queues so that queue-1 is not replicated, queue-2 and queue-3 are normally writeable on hostA (master: hostA), and any writes are replicated to the other hosts in the prod replicaSet ie hostB. The master can be changed to hostB when needed. queue-2 uses acknowledged replication. queue-4 is normally writeable on hostB, with any writes replicated to hostC (all the other queues in dr). The master can be changed to hostC when needed."
+ 
+"prompt":"What is the purpose of the replicaSets block in the configuration file?",
+"answer":"The replicaSets block defines sets of hosts that are in a replication group. It is used to configure one or more replicaSets across two or more hosts."
+ 
+"prompt":"What is the purpose of the hosts block in the configuration file?",
+"answer":"The hosts block defines hosts for the queues and assigns them hostId and socket number (for hosts' communication over network) using parameters hostId and connectUri respectively."
+ 
+"prompt":"What is the purpose of the context block in the configuration file?",
+"answer":"The context block holds the context or state about the cluster such storage path for the queues."
+ 
+"prompt":"What is the purpose of the DisconnectListener interface?",
+"answer":"The DisconnectListener interface can be used to receive notifications whenever a replication connection with a remote host has been dropped."
+ 
+"prompt":"What information is provided in the DisconnectEvent callback?",
+"answer":"The DisconnectEvent provided in the callback contains the corresponding hostId and timestamp."
+ 
+"prompt":"What is the purpose of the heartbeatIntervalMs and heartbeatTimeoutMs parameters in the context block of the configuration file?",
+"answer":"The heartbeatIntervalMs and heartbeatTimeoutMs parameters in the context block of the configuration file are used to configure the interval of how often heartbeats are checked and how often they are sent for the queue replication heartbeat."

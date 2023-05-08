@@ -1,0 +1,12 @@
+3. Polling Updates
+Polling updates have no time interval, instead, by implementing them an event handler is installed on the service event loops that polls for data continuously to check if there is work to do.
+To use Polling Updates events, implement the PollingUpdateSource interface and override the methods pollingUpdate(long) and publishUpdateOnIdle(). When publishUpdateOnIdle() returns true, pollingUpdate() is invoked with the current timestamp as its argument. pollingUpdate(long) will continue to be invoked every time the service event loop runs as long as publisherUpdateOnIdle() returns true. So if you want to run pollingUpdate(long) only once every time publishUpdateOnIdle() returns true, do not forget to make publishUpdateOnIdle() returns false before one run of the pollingUpdate(long) method finishes e.g. you can do this somewhere inside the pollingUpdate(long) method.
+PollingUpdateSource interface
+public interface PollingUpdateSource {
+
+   // Implement this method so that when there is work to do, it returns true, consequently, pollingUpdate(long) will be invoked
+   boolean publishUpdateOnIdle();
+
+   void pollingUpdate(long currentTime);
+}
+Queue Replication

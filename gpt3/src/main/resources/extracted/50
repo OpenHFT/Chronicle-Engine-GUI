@@ -1,0 +1,37 @@
+1.3. replicaSets
+This section in the services.cfg file specifies the configuration for queue replication. The replicaSets section defines clusters of hosts whose queues are replicated.
+1.4. context
+The context section holds the context or state about the clusters such as baseSourcePath, baseSinkPath, heartbeatTimeoutMs, etc.
+1.5. hosts
+The hosts section defines the hosts of replicated queues and their socket numbers for hosts' communication over network.
+For more information see Queue Replication.
+1.6. Garbage Collection
+To minimise latency in applications with the Chronicle Software Suite is to minimise, or even eliminate totally, the running of the JVM garbage collector.
+Careful design and development techniques are used in Chronicle to achieve this. If similar techniques are deployed in the implementation of services, then it is possible for services to run for long periods, as long as an entire business day for example, without requiring garbage collection at all.
+However, it is possible to arrange for garbage collection to be performed on a running service at specific times. Such housekeeping can ensure that the requirement to run the garbage collector is minimised.
+If required, details of the way in which garbage collections are explicitly scheduled can be specified in the gc section of the services.yaml file. The configuration object for Garbage Collector is shown in the following table and the config file below shows how to configure it.
+Table 4. Garbage collector configuration object
+Field	Type	Description
+times
+List<LocalTime>
+Lists specific times when garbage collect should be run
+after
+List<String>
+Indicate durations after service start-up where a garbage collection is scheduled, see Duration.parse(CharSequence).
+!ChronicleServicesCfg {
+
+  queues: {
+       ...
+  },
+  services: {
+      ...
+  },
+  gc: {
+    # this will trigger GC at 00:00 and 02:00 UTC
+    times: [ 00:00, 02:00 ],
+
+    # this will trigger GC 30 seconds after service start
+    after: [ PT30S ]
+  }
+}
+Garbage collection can be scheduled at times when the service is not "active", for example when markets are closed, by setting the times property.

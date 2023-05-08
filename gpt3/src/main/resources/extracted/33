@@ -1,0 +1,34 @@
+1.2. Inputs Replay Strategies
+If startFromStrategy=START the inputsReplayStrategy controls what queue(s) are used for replay. The available options are listed below:
+Table 2. Inputs Replay Strategies
+Strategy	Details
+INPUTS
+Replay messages from the input queues whereby individual input queues may be read in any order
+OUTPUT
+Replay messages from the input queues in the order they were actually processed in previous runs by looking at the output queue. Only events that triggered an output event are replayed. Input events that were processed "silently" are considered not important and skipped.
+OUTPUT_ALL
+Replay messages from the input queues in the order they were actually processed in previous runs by looking at the output queue. All events are replayed. Requires a system property for recovering exact order of all events, see From input queues
+OUTPUT-REVERSED
+Replay messages from the output queue in reverse order.
+If you have defined a config queue for your service, this config queue is always replayed first.
+1.3. Triggering Replay
+Replay is triggered if any of the following are true:
+inputsReplayStrategy=OUTPUT_REVERSE - See From output queue
+startFromStrategy=START - See From input queues
+-DreplayOutput property is set to manually trigger replay - See From input queues
+1.4. No Replay
+Some services may not contain significant internal state, or may be happy to generate state while running, e.g. a pricer service. For these, you can use startFromStrategy=END and the service will start playing messages that arrive after it has started.
+If you would like to begin where the service last left off before shutdown, you can use one of
+startFromStrategy=NAMED remembers where the service last read from and restart from there. Makes use of named tailers.
+startFromStrategy=LAST_WRITTEN positions input queues to the place where they left off reading (indicated by what was last written on the output queue)
+1.5. From Input Queues
+If your inputs and outputs do not contain a huge amount of data then you can replay from inputs using StartFromStrategy.START and InputsReplayStrategy.OUTPUT / InputsReplayStrategy.OUTPUT_ALL. InputsReplayStrategy.INPUT is only deterministic if you have only one input queue, and so only recommended for this use case.
+InputsReplayStrategy.OUTPUT generally requires that any "significant" input event (one that changes internal state) generates an output message to ensure the input event can be replayed. Configuring your service like this will ensure that when it is started, it will replay all messages it was previously given in the exact same order to build up the same internal state as when it was last running. The service’s framework will prevent output to the output queue while the replay is taking place. Once replay is complete, the service framework will resume reading from the input queues in the normal round-robin manner.
+InputReplayStrategy.OUTPUT_ALL` relaxes the requirement above: both "significant" and "insignificant" events are always replayed. However, as "insignificant" events didn’t leave a trace in the output queue, they may be reordered between "significant" events.
+The exact order of "insignificant" events will be fully restored if chronicle.service.dontWriteHistoryForEventsWithNoOutput system property is set to false (the default is true). If this is the case, the Services framework will detect the following scenario:
+a number of messages have been read from an input queue 'A', and no output has been written
+a message has been read from another input queue
+and will write a MessageHistory for the last message from the input queue 'A' before the message from the other input queue is processed. This enables more predictable behaviour for the case where periodicUpdateMS is set and incoming time ticks are arriving.
+If you set the -DreplayOutput system property when running your service, it will override and set startFromStrategy=START and inputsReplayStrategy=OUTPUT (see #1 above) as well as force replay from the output queue. This is useful to replay exactly what happened in another environment e.g. production.
+Replaying from the start has the nice side effect that your service will be warmed up before processing any new data.
+After replay is done, the input queues' tailers are positioned where we left off from when last running. This means that any new messages that have appeared in the input queues since, will now be played.

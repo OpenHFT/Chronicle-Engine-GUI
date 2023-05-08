@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 public class ConvertExtractToPrompts {
 
     public static void main(String[] args) throws IOException {
-        for (int i = 4; i < 28; i++) {
+        for (int i = 31; i < 54; i++) {
             extracted("/Users/robaustin/git-projects/gpt3/src/main/resources/extracted/"+i, "/Users/robaustin/git" +
                     "-projects" +
                     "/gpt3/src/main/resources/prompts/"+i);

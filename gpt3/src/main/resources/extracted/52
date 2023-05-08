@@ -1,0 +1,41 @@
+3. Additional Queues
+When a service is run, as well as the normal input and output queues, it is given access to some further queues that have more specialised uses. The specific queues used are configured through the services.yaml entry for the service.
+3.1. Configuration Queue(s)
+A configuration queue is a queue that if specified their full contents will be played into the service at the service startup hence they can hold service configuration to configure a queue at start up. This also allows the service starts with the latest or desired configuration/state. Configuration queue(s) are configured, if required, using the config property for passing configuration messages to a service.
+To pick up on config changes while the service is running, the config queue should also be added to the services' input queues. To accept a configuration message, in addition to declare the config queue, a service will need to install a handler for appropriate configuration events. If more than one config queues are specified, then the contents of each queue are played in to the service one-by-one.
+Then, config events should be represented using a Java interface, specifying the handling method for the events. Moreover, the implementing class for the service should implement this interface.
+Check out Chronicle-Services-Demo/StateQuery/Example3 for a runnable example of configuration queue.
+4. Running the Service
+A Chronicle Service is typically started using an invocation of the main method of a driver class. Two command line arguments are normally provided:
+Table 5. Startup arguments
+Argument	Description
+args[0]
+Name of the main config file (eg services.yaml)
+args[1]
+Name of the service to start - acts as key into the services map read from the file as described above
+If the service is to be run in a clustered environment, a third argument is normally used to indicate the specific host on a cluster on which the service is to be started.
+The following code snippet shows a template for a service startup class:
+Running a service
+public class Main {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+    static {
+        DtoAlias.addAlias();
+    }
+
+    public static void main(String[] args) throws IOException {
+        String cfgFileName = args[0];
+        String serviceName = args[1];
+
+        int hostId = args.length <= 2 ? -1 : Integer.parseInt(args[2]);
+        if(hostId<0)
+          ThreadRunner.runService(cfgFileName, serviceName);
+        else
+          ThreadRunner.runService(cfgFileName, serviceName, hostId);
+    }
+}
+There are several methods which can be used to run a service for example ThreadRunner.runAll(cfgFileName) gets only a YAML configuration file as argument and runs all the configured services in the file. See more options in the demos.
+Normal practice is to create a shell script that will be capable of starting all services, in a particular order. Individual services may be started directly, if appropriate, for example to reflect a major change in configuration.
+A number of things happen under the bonnet upon running a service, as can be seen at the following diagram:
+Lifecycle
+Figure 1. Service lifecycle
+The initial behavior of the service - after start up and before processing new events - is determined by configured start-up and replay strategies. These strategies have been explained in Replay Strategies.

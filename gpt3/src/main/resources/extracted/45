@@ -1,0 +1,90 @@
+Performance Tuning
+This section outlines various parameters and practices that should be chosen/applied carefully to achieve optimal performance when implementing Chronicle Services. We will consider the service configuration, its input/output queues, and its Java implementation.
+Performance can be further enhanced by tuning the runtime environment. To learn about tuning the runtime environment and the Chronicle Tuning package, contact sales@chronicle.software.
+1. Service Configuration
+When selecting a service’s configuration parameters, the following considerations should be taken into account to maximise the performance.
+Queue rollCycle
+For a queue that is written to at high frequency, and then is read from forward only (i.e. very few if any indexed lookups) a sparse rollCycle is advised e.g. LARGE_HOURLY_SPARSE. This will write fewer indexes and make writing faster at the expense of indexed lookups, see net.openhft.chronicle.queue.RollCycles and Custom rollCycles in the reference guide.
+rollCycle also impacts the size of queue files. It is important to select the queue file sizes reasonably base on the actual requirement.
+Queue blockSize
+This is the size of the memory mapping block, so setting a large blockSize makes reads/writes faster as with larger blocks, the number of disk read/write operations is reduced as more data is transferred each time.
+As blockSize relates to the size of the memory mapped segment, larger block sizes need corresponding more available memory.
+Thread Affinity
+To prevent the OS scheduler from moving a service thread from one core to another, you can use thread affinity by using the configurable parameter ServiceCfg.affinity. Threads are pinned to cores so that the local cache always contains their relevant data (and instructions). When moving from core to core, the new core’s cache must be loaded, and there’s a performance hit because the core cannot do anything else while the cache is being loaded.
+In latency-critical applications, the use of thread affinity (pinning) together with CPU isolation can be used to restrict thread movement, and also avoid contention from other threads. To achieve this, you need to isolate cores and then assign the threads of these applications to them.
+To make efficient core isolation and CPU pinning, you need to know the topology of your system. Communication of data between cores incurs latency and this latency is higher among cores on separate sockets, see the article Why Core-to-Core Latency Matters. Therefore, in latency-critical service applications where several services need to communicate, it is crucial to pin those services to the cores of one CPU (and for Ryzen CPUs the same core complex, CCX).
+Pauser Mode
+For best performance, the default PauserMode.busy will dramatically minimise jitter (reduce high percentile latencies), however, it will maximise CPU usage. However, if there are too many threads in busy mode, the machine might become slow.
+See alternative Pauser modes in Pauser modes.
+Pretoucher
+Chronicle Services allows configuration of the Chronicle Queue Pretoucher for all output queues. The Pretoucher runs in a separate monitor thread and will try and pre-touch memory pages that it expects to be written to shortly. Read more about the Pretoucher in Queue Pretoucher.
+The following configuration file shows how to set the above parameters for a service called simple. The service’s thread has been pinned to CPU 12 and Pretoucher is enabled and runs every 250 ms, so it does not run very often to reduce latency.
+Service configuration
+!ChronicleServicesCfg {
+  queues: {
+    input: {
+      path: input,
+      builder: !SingleChronicleQueueBuilder {
+        blockSize: 4294967296,
+        rollCycle: LARGE_HOURLY_SPARSE,
+      }
+    },
+    output: {
+      path: output,
+      builder: !SingleChronicleQueueBuilder {
+        blockSize: 4294967296,
+        rollCycle: LARGE_HOURLY_SPARSE,
+      }
+    },
+  },
+  services: {
+    simple: {
+      inputs: [ input ],
+      output: output,
+      implClass: !type software.chronicle.services.example.ServiceImpl,
+      pauser: busy,
+      pretouchMS: 250,
+      affinityCpu: 12
+    },
+  },
+}
+2. @MethodId() Annotation
+Method ids can be assigned to methods in interfaces that represent input and output events using the annotation @MethodId(long). In this way, these methods' names can be determined from their method id and this results in saving memory when calling the methods through a MethodReader/MethodWrite and consequently having faster method calls.
+For more information see MethodId documentation and check out the runnable example Chronicle-Services-Demo/Performance/Example2 that uses method id to enhance performance.
+3. DTO Filtering
+Chronicle Wire provides MethodFilterOnFirstArg interface to skip the deserialization of arguments of a method based on its first argument. This tool is useful in cases when a DTO is heavy and deserialization is expensive, and we would like to determine whether to deserialize it or not based on a single attribute. As the result, performance is gained by skipping the deserialization of DTOs that we do not want to process. To use this tool in services, a service needs to implement MethodFilterOnFirstArg interface and override ignoreMethodBasedOnFirstArg(String filter, Object dto) method. If this method returns false, input DTOs will be deserialized.
+Read more about Filtering with MethodReader
+See a runnable demo of DTO filtering in Chronicle-Services-Demo/GettingStarted/Example7.
+4. Converters
+To exchange messages as efficiently as possible between services, the read/write operations to the transporting queues must be efficient. Increased efficiency can be achieved by converting all DTO fields to primitives, as this makes the messages Trivially Copyable (can be serialized by a single memory copy) and compresses the size of the data. To facilitate data conversion, Chronicle Wire supplies several Converter types, such as Base64LongConverter and ServicesTimestampLongConverter. To use the converters place an appropriate annotation on any convertible data field as the below example shows.
+Using data converters
+public class InputData extends AbstractEvent<InputData> {
+
+    @LongConversion(Base64LongConverter.class)
+    private long message = 0;
+
+    @LongConversion(ServicesTimestampLongConverter.class)
+    private long timestamp = 0;
+
+    public CharSequence message() {
+        final StringBuilder sb = Wires.acquireStringBuilder();
+        Base64LongConverter.INSTANCE.append(sb, message);
+        return sb;
+    }
+
+    public void message(CharSequence message) {
+        this.message = Base64LongConverter.INSTANCE.parse(message);
+    }
+
+    public long timestamp() {
+        return timestamp;
+    }
+
+    public void timestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+}
+Using the converters and their effect on Chronicle Services' performance are demonstrated in Chronicle-Services-Demo/Performance/Example1 and Chronicle-Services-Demo/Performance/Example2 as well as the article Chronicle Wire: Object Marshalling.
+5. Queue Writers
+Chronicle Queue supports multiple writers (either threads or processes) to a single Chronicle Queue, but these can contend and cause latency. If high-frequency data is being written into a queue, it is advised not to write to this queue from any other source. For example, writing low-frequency data to this queue from another source at the same time can experience high latencies. Also, ensure that the first queue in ServiceCfg.inputs into which low-frequency periodic events are written, does not also have high-frequency data written to it.
+Regarding the output queue of services, the best practice is that every service has its own output queue, so the writes never contend.

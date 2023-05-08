@@ -1,0 +1,11 @@
+"prompt": "What is the purpose of queues in a Chronicle Services application?",
+"answer": "Queues are used for input and output in each main service component of a Chronicle Services application. They are defined in the queues section of the services.yaml file and are described by an instance of the QueueCfg class which is Wire-Marshallable. The queue configurations are stored in a map, using the supplied name as the key."
+
+"prompt": "What is the AbstractMarshallableCfg base type used for?",
+"answer": "The AbstractMarshallableCfg base type mixes in Chronicle Services functionality to marshal and unmarshal Java objects to and from a format that is based on YAML, supporting the reading of the configuration from the services.yaml file."
+
+"prompt": "What fields are included in the Queue Configuration Object?",
+"answer": "The Queue Configuration Object includes the following fields: sourceId (int), name (String), path (String), builder (SingleChronicleQueueBuilder), replicaSets (List<String>), masterId (byte), master (String), and acknowledge (boolean)."
+
+"prompt": "What are some examples of roll cycles available from the RollCycles class?",
+"answer": "Some examples of roll cycles available from the RollCycles class are: MINUTELY (yyyyMMdd-HHmm), HOURLY (yyyyMMdd-HH), FAST_DAILY (yyyyMMdd’F'), and DAILY (yyyyMMdd)."

@@ -1,0 +1,13 @@
+"1.6. From Output Queue":
+[
+{"prompt": "What is the recommended strategy if a service can reconstruct its internal state from the contents of the output queue?", "answer": "The recommended strategy is to start at the end of the output queue and iterate backwards until all state is reconstituted. The inputsReplayStrategy=OUTPUT_REVERSE can be used to replay the output queue from the end (backwards) in to the service. The service must implement OutputReverseListener to notify when enough data has been replayed. Appropriate startFromStrategy to use with this are LAST_WRITTEN or END."},
+{"prompt": "What are the custom replay strategies?", "answer": "The custom replay strategies include replay from snapshot and replay from map backing queue. If using a QueueBackedMap then your service can implement QueueBackedMapSource and replay from that. Chronicle-Services-Demo/StateQuery/Example 1 demonstrates how to restore the internal service state from an input and output queue."}
+]
+
+"2. Integration":
+[
+{"prompt": "What is the common use case for a service to integrate with an external system?", "answer": "A common use case is for a service to read from a queue and integrate with an external system e.g. a tick DB."},
+{"prompt": "What should be written to the tick DB when integrating with an external system?", "answer": "The AbstractEvent.eventId or eventTime should be written to the tick DB."},
+{"prompt": "What is the alternative to using a Chronicle Queue named tailer when recording where you were up to in reading the queue?", "answer": "Alternatively, you can use a Chronicle Queue named tailer (startFromStrategy=NAMED) to record where you were up to in reading the queue."},
+{"prompt": "What happens if the method reader returns without an exception when reading from a Chronicle Queue?", "answer": "If the method reader returns without an exception when reading from a Chronicle Queue, events must have been committed to the external system. If an exception is thrown from inside the try block or from the method reader method, it will rollback the read from the queue. The next time you try to read from the tailer you will get the same message. This provides a simple re-try mechanism if the external service is transiently unavailable."}
+]

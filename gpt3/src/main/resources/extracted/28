@@ -1,0 +1,18 @@
+Introduction
+Chronicle Services is a framework for implementing low-latency microservice-based applications and systems. Using the framework, large complex software applications can easily be broken up into a set of smaller loosely coupled applications (services) that can be independently built, tested, deployed and scaled. In this architecture, each service implements a small portion of business logic independently and is not required to know about the other services. The services communicate using event-driven messaging. Messages are persisted and can be replicated on secondary hosts. This, combined with provided state recovery strategies, ensures the high availability of Chronicle Services. To facilitate implementation and deployment of Chronicle Services applications, tools for testing, monitoring, visualizing, investigating and diagnosing faults are provided.
+Chronicle Services leverages open source Chronicle technologies such as Chronicle Queues to provide efficient messaging between application components. Additionally, Chronicle Services provides features that support enterprise class reliability and availability, together with additional optimisations and features of Chronicle Queue so that performance is further improved.
+Services may be defined following the guidelines described in this user guide. Additional components and features may then be mixed in to the service definitions as required, to access the additional capabilities.
+The User Guide starts with a Quick Start section, which delves into the following topics with video tutorials and documentation:
+Quick Start: Demonstrates a simple overview of Chronicle’s Microservice Framework and includes both a video tutorial and a step-by-step guide on setting up two microservices that send events using Chronicle Queues.
+Services Testing Framework: Demonstrates a simple overview of Chronicle’s Testing Framework through the use of a YamlTester.
+Defining Microservices with DTOs: Shows a more detailed example of Chronicle’s Microservices Framework, including the addition of DTOs and periodic updates. It also explores DTO Schema Evolution; presenting a number of strategies to manage changes to DTOs during development.
+The User Guide then continues into the following sections:
+State Management: Describes different options for starting a service and outlines the supported replay strategies to restore state after a restart.
+Queue Replication: Discusses the Chronicle Services approach to enterprise class levels of availability and reliability through replication of Chronicle Queues.
+Internal Events: Describes how to trigger events using periodic updates and polling updates.
+Monitoring: Discusses the diagnostic and monitoring tools available for Chronicle Services.
+Third-party Monitoring Tools: Describes how to integrate Chronicle Services with third-party monitoring tools.
+Performance Tuning: Learn how to adapt your hardware and software implementation to achieve optimal performance.
+Service Diagram Tool: Describes service diagramming.
+Use Cases: Explores use cases of Chronicle Services with real-world examples.
+Reference Guide: A reference guide of templates and configuration parameters for Chronicle Services.

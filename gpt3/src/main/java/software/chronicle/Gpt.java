@@ -12,8 +12,7 @@ import com.theokanning.openai.service.OpenAiService;
 public class Gpt {
 
     private static final String GPT_MODEL = "gpt-3.5-turbo";
-    private OpenAiService openAiService=  new OpenAiService("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",
-            Duration.ofSeconds(40));
+    private OpenAiService openAiService = new OpenAiService(System.getenv("OPENAI_TOKEN"), Duration.ofSeconds(60));
 
     public static void main(String[] args) {
         new Gpt().callGpt("hi", "answer formally and factually");

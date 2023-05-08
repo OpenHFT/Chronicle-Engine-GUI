@@ -1,0 +1,48 @@
+1.1. Queues
+Each of the main service components in a Chronicle Services application normally requires at least a pair of queues - one for input and one for output. Services may have more than one input queue but only one output queue.
+All the queues used in the application are defined in the queues section of the services.yaml file. Queues are described by an instance of the QueueCfg class which is Wire-Marshallable, allowing them to be read and written in different formats. This documentation looks at YAML format, but they could be read and written in JSON and raw binary as well.
+The AbstractMarshallableCfg base type mixes in Chronicle Services functionality to marshal and unmarshal Java objects to and from a format that is based on YAML, supporting the reading of the configuration from the services.yaml file.
+The queue configurations are stored in a map, using the supplied name as the key.
+The map entry contains the data that is used to populate a QueueCfg object to describe the queue:
+Table 1. Queue Configuration Object
+Field	Type	Description
+sourceId
+int
+The internal unique identifier of the queue
+name
+String
+The name of the queue
+path
+String
+The base directory for queue files
+builder
+SingleChronicleQueueBuilder
+Queue builder object to configure the queue further, e.g. setting the roll cycle, see Custom Roll Cycles.
+replicaSets
+List<String>
+Names of clusters to replicate to, see Services Replication.
+masterId
+byte
+Id of the host that acts as the source of the replication, see Services Replication. Set either master or masterId but not both.
+master
+String
+Name of the host that acts as the source of the replication, see Services Replication. Set either master or masterId but not both.
+acknowledge
+boolean
+Controls if messages are acknowledged when being replicated, see Acknowledged Replication.
+1.1.1. Custom RollCycles
+Queue files are rolled daily by default but, the roll time can be configured using the YAML configuration file. Some of the most common rollCycle available from the RollCycles class are:
+Table 2. Roll cycle examples
+Name	Format	Description
+MINUTELY
+yyyyMMdd-HHmm
+Rolls when the time provider changes minutes (e.g. goes from 12:03 to 12:04).
+HOURLY
+yyyyMMdd-HH
+Rolls when the time provider changes hours (e.g. goes from 12:59 to 13:00).
+FAST_DAILY (default)
+yyyyMMdd’F'
+Rolls when the time provider changes days (e.g. goes from 2020-12-02 to 2020-12-03). This variant is using less index markers than DAILY in the queue files.
+DAILY
+yyyyMMdd
+Rolls when the time provider changes days (e.g. goes from 2020-12-02 to 2020-12-03). This variant is using more index markers than FAST_DAILY in the queue files.

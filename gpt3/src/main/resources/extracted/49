@@ -1,0 +1,74 @@
+1.2. Services
+Services are also defined in the services.yaml file, in the services section. See a complete list of configuration parameters for a service in Table 3 below.
+The ServiceCfg object manages how the service is to be run. The following table describes the structure of this object, and describes the configurable properties:
+Table 3. ServiceCfg Configuration Parameters
+Parameter	type	Default	Description
+inputs
+List<InputCfg>
+List of input queues for this service (at least one)
+output
+String
+Name of output queue for this service
+config
+String or List<String>
+Name(s) of the queue(s) that is always replayed first when the service starts, see Additional Queues
+mapBackingQueue
+String
+The name of a queue to be used for initializing the service instance if the service implements the interface QueueBackedMapSource
+implClass
+Class
+The implementing class of this service
+startFromStrategy
+StartFromStrategy
+LAST_WRITTEN
+Controls how to process existing events in the queue(s) when a service is restarted, see Startup Strategies
+inputsReplayStrategy
+InputsReplayStrategy
+null
+Defines how the input queues are replayed when the service is restarted, if startFromStrategy is set to StartFromStrategy.START, see Replay Strategies. Note: if inputsReplayStrategy is set to InputsReplayStrategy.OUTPUT_REVERSE it will be replayed regardless of the startFromStrategy.
+pauser
+PauserMode
+The pauser that handles the service idle times
+recordInputHistoryInOutputQueue
+boolean
+If true, this service records input history messages in its output queue.
+periodicUpdatesInMonitorThread
+boolean
+If true, the monitor thread will provide the message history output otherwise the main event loop thread does this.
+enableOutputDuringReplayOfInput
+boolean
+If true, this service will output messages when replaying messages from the input queues.
+loopMonitor
+boolean
+true
+If true, a loop monitor is created for this service. The loop monitor supervises the main service execution thread and is notified if the main thread gets blocked or interrupted.
+periodicUpdateMS
+int
+0
+The interval between periodic events in milliseconds, see Periodic updates
+periodicUpdateMSInitial
+int
+0
+The initial period before first periodic event in milliseconds, see Periodic updates
+heartbeatMS
+int
+0
+The interval between heartbeat messages in milliseconds, see Heartbeat monitoring
+heartbeatMSInitial
+int
+30_000
+The initial period before the first heartbeat message in milliseconds
+pretouchMS
+int
+0
+The intervals that pre-toucher is run for writing to the output queue in milliseconds, if 0 no pre-touching is performed, see Queue Pretoucher
+affinityCpu
+String
+The CPU to which the running thread of this service will be attached to
+eventLoop
+boolean
+false
+If false, the service runner is run in the main thread otherwise an EventLoop is used.
+serviceConfig
+Map<String, Object>
+The map of service configuration

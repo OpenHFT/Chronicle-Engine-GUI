@@ -1,0 +1,23 @@
+"prompt":"What is Chronicle's Services Diagram tool used for?",
+"answer":"Chronicle's Services Diagram tool is used to generate an image that effectively communicates how services are connected."
+
+"prompt":"Where can the Services Diagram Tool be found?",
+"answer":"The Services Diagram Tool can be found on https://services-diagram.chronicle.software."
+
+"prompt":"What should be uploaded to the Services Diagram Tool?",
+"answer":"A JAR file with at least one valid Yaml configuration file (eg services.yaml) should be uploaded to the Services Diagram Tool."
+
+"prompt":"What happens if the JAR file contains just one valid Yaml configuration file?",
+"answer":"An image (png) will be automatically generated if the JAR file contains just one valid Yaml configuration file."
+
+"prompt":"What happens if the JAR file contains more than one valid configuration files?",
+"answer":"An image of the first configuration file will be automatically generated, and a dropdown menu will appear to choose a different configuration file."
+
+"prompt":"What must the JAR file contain for the Services Diagram Tool to work?",
+"answer":"The JAR file must contain all the class files used by the services diagram as it uses reflection on the method signatures to build up the diagram, and as such, all Java classes within the jar must be correctly compiled and able to work with Chronicle Services."
+
+"prompt":"Can the Services Diagram Tool be used for a new incomplete project?",
+"answer":"The Services Diagram Tool is best used to render a previously written working Chronicle Services project, rather than a new incomplete project. However, it can be used to render a skeleton project as long as all the interface and method signatures used by the Chronicle Services yaml config file are first established, even if they are perhaps mocked out."
+
+"prompt":"What happens if a JAR file is not uploaded or if the JAR file uploaded does not contain any valid configuration files?",
+"answer":"An error message will be printed to the screen if a JAR file is not uploaded or if the JAR file uploaded does not contain any valid configuration files."

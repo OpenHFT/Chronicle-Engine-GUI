@@ -1,0 +1,14 @@
+"prompt":"What is the name of the default configuration file for a Chronicle Services application?",
+"answer":"The default configuration file for a Chronicle Services application is services.yaml."
+
+"prompt":"What is the format of the configuration file for a Chronicle Services application?",
+"answer":"The configuration file for a Chronicle Services application is written in YAML format."
+
+"prompt":"What is the purpose of the configuration file for a Chronicle Services application?",
+"answer":"The configuration file for a Chronicle Services application contains details of objects such as queues and services that need to be initialised and started, together with any clustering configuration."
+
+"prompt":"What is the purpose of the YAML tags used in the configuration file for a Chronicle Services application?",
+"answer":"The YAML tags (e.g. !ChronicleServicesCfg) are used by the Chronicle unmarshalling code to determine the Java type that will be used to store the information."
+
+"prompt":"What is the internal representation of the configuration in a Chronicle Services application?",
+"answer":"Internally, the configuration is stored as a LinkedHashMap with String valued keys and corresponding values of type Object to cater for the range of types used in configuration."

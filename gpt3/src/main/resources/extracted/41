@@ -1,0 +1,94 @@
+Monitoring
+This page describes performance monitoring tools and techniques available to the programmer. For a high level explanation of integrating the output from this tooling into a third party monitoring tool see Third-party Monitoring Tools.
+1. Performance Monitoring
+In production, the microservice may experience rare but significant millisecond delays. The Chronicle Service event-loop thread is monitored to allow capturing the causes of these delays. This section shows how to configure the monitor as well as interpret its results.
+1.1. The Limitations of CPU Profilers
+CPU profilers are commonly used to analyze where the CPU processing power is spent on average. However, profilers are generally poor at finding:
+blocking system calls
+the outliers causing rare delays, e.g. in the 99.9% or 99.99% percentiles
+Instead, Chronicle Software offers monitoring of the event-loop thread to detect whenever the thread is paused for longer time durations.
+Before proceeding with Chronicle Software event loop-monitoring, we recommend using a profiler like Flight Recorder to resolve common delays. Otherwise, the event-loop monitor may spam your logs.
+1.2. Monitoring the Critical Thread
+The critical thread runs an event loop of very short-lived tasks, very quickly. If any of these tasks pause, it impacts all the other tasks in that loop as well.
+By default, there is a background thread which monitors the critical thread to detect when it has paused and print a snapshot.
+[main/event-loop-monitor] INFO software.chronicle.runner.v2.Monitor - THIS IS NOT AN ERROR, but a profile of the thread, Core thread oms 1 /dma/flow/busy-services-1.yaml interrupted false blocked for 3 ms. new report
+        at software.chronicle.services.util.MultiExcerptTailer.readingDocument(MultiExcerptTailer.java:47)
+        at net.openhft.chronicle.wire.VanillaMethodReader.readOne(VanillaMethodReader.java:383)
+        at software.chronicle.runner.v2.AbstractRunnerMethodReader.readOne(AbstractRunnerMethodReader.java:30)
+        at software.chronicle.runner.v2.RunLoopController.readInputs(VanillaRunnerRunLoopController.java:150)
+        at software.chronicle.runner.v2.RunLoopController.runLoop(VanillaRunnerRunLoopController.java:110)
+        at software.chronicle.runner.v2.Runner.run(Runner.java:627)
+        at software.chronicle.services.api.runner.ServiceCfg.run(ServiceCfg.java:222)
+        at software.chronicle.services.api.runner.RunnerCfg.run(RunnerCfg.java:64)
+        at software.chronicle.dma.flow.DmaFlowTest.run(DmaFlowTest.java:92)
+        at software.chronicle.dma.flow.DmaFlowTest.lambda$doTest$1(DmaFlowTest.java:179)
+        at software.chronicle.dma.flow.DmaFlowTest$$Lambda$52/731260860.run(Unknown Source)
+        at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+The critical thread takes a System.nanoTime() when the loop starts. The monitor thread polls that value and if too much time has elapsed, it takes a stack trace of the critical thread periodically.
+When the critical thread is not busy, or it is shutting down, it sets the time to Long.MAX_VALUE which effectively turns off monitoring.
+1.2.1. Monitoring Granularity and Safe-Points
+The JVM only takes a stack trace on a safe point. This can be after the cause of the problem, or show a method call which is not the specific line of code.
+If investigating a performance issue using this mechanism then you can apply Jvm.safepoint() calls to your code to improve the accuracy of the measuring mechanism.
+Jvm.safepoint() calls do nothing unless the -Djvm.safepoint.enabled system parameter is set.
+1.2.2. Increasing the Monitoring Period
+The default period is 10 ms which should only print the most extreme pauses, however for profiling purposes you are likely to need more fine-grained snapshotting.
+You can adjust the snapshot frequency with the system property runner.monitor_limit (the unit is nanoseconds). For example -Drunner.monitor_limit=1000000 will show a snapshot after any delay of 1 ms.
+1.2.3. Summarising the Results
+When you take snapshots at random points, some of them will not be meaningful. However, if the same snapshot comes up repeatably, this may be significant.
+The tool software.chronicle.services.runner.MonitorProfileAnalyserMain can help you analyse the logs of a program and find the most common stack trace, allowing analysis of results.
+To run it from your IDE, right click on MonitorProfileAnalyserMain and select "Modify Run Configuration…​" and add the log files as arguments, then run it.
+monitor profile analyzer main
+Alternatively, from the command line run:
+java -cp {class-path} software.chronicle.services.runner.MonitorProfileAnalyserMain {chronicle-services-logfile}
+When you run this, it shows:
+the stack traces by line which occur the most often
+of the stack traces left, which methods show up the most often
+e.g.
+Grouped by line
+149     at software.chronicle.services.util.MultiExcerptTailer.readingDocument(MultiExcerptTailer.java:55)
+        at software.chronicle.services.util.MultiExcerptTailer.readingDocument(MultiExcerptTailer.java:47)
+        at net.openhft.chronicle.wire.VanillaMethodReader.readOne(VanillaMethodReader.java:383)
+        at software.chronicle.runner.v2.AbstractRunnerMethodReader.readOne(AbstractRunnerMethodReader.java:30)
+        at software.chronicle.runner.v2.RunLoopController.readInputs(VanillaRunnerRunLoopController.java:153)
+        at software.chronicle.runner.v2.RunLoopController.runLoop(VanillaRunnerRunLoopController.java:113)
+        at software.chronicle.runner.v2.Runner.run(Runner.java:626)
+        at software.chronicle.services.api.runner.ServiceCfg.run(ServiceCfg.java:222)
+
+80      at software.chronicle.services.util.MultiExcerptTailer.readingDocument0(MultiExcerptTailer.java:65)
+        at software.chronicle.services.util.MultiExcerptTailer.readingDocument(MultiExcerptTailer.java:61)
+        at software.chronicle.services.util.MultiExcerptTailer.readingDocument(MultiExcerptTailer.java:47)
+        at net.openhft.chronicle.wire.VanillaMethodReader.readOne(VanillaMethodReader.java:383)
+        at software.chronicle.runner.v2.AbstractRunnerMethodReader.readOne(AbstractRunnerMethodReader.java:30)
+        at software.chronicle.runner.v2.RunLoopController.readInputs(VanillaRunnerRunLoopController.java:153)
+        at software.chronicle.runner.v2.RunLoopController.runLoop(VanillaRunnerRunLoopController.java:113)
+        at software.chronicle.runner.v2.Runner.run(Runner.java:626)
+
+Grouped by method.
+7       at software.chronicle.fix44min.messages.datamodel.DefaultExecutionReport.readMarshallable( * )
+        at software.chronicle.services.perftest.oms.OmsInMethodReader.readOne(OmsInMethodReader.java:48)
+        at software.chronicle.runner.v2.bytesmarshallable.VanillaFieldNumberParselet.readOne(VanillaFieldNumberParselet.java:47)
+        at net.openhft.chronicle.wire.VanillaWireParser.parseOne(VanillaWireParser.java:57)
+        at net.openhft.chronicle.wire.WireParser.accept(WireParser.java:56)
+        at net.openhft.chronicle.wire.VanillaMethodReader.readOne(VanillaMethodReader.java:411)
+        at software.chronicle.runner.v2.AbstractRunnerMethodReader.readOne(AbstractRunnerMethodReader.java:30)
+        at software.chronicle.runner.v2.RunLoopController.readInputs(VanillaRunnerRunLoopController.java:153)
+
+4       at software.chronicle.services.perftest.DefaultNewOrderSingle.readMarshallable( * )
+        at software.chronicle.services.perftest.oms.OmsInMethodReader.readOne(OmsInMethodReader.java:43)
+        at software.chronicle.runner.v2.bytesmarshallable.VanillaFieldNumberParselet.readOne(VanillaFieldNumberParselet.java:47)
+        at net.openhft.chronicle.wire.VanillaWireParser.parseOne(VanillaWireParser.java:57)
+        at net.openhft.chronicle.wire.WireParser.accept(WireParser.java:56)
+        at net.openhft.chronicle.wire.VanillaMethodReader.readOne(VanillaMethodReader.java:411)
+        at software.chronicle.runner.v2.AbstractRunnerMethodReader.readOne(AbstractRunnerMethodReader.java:30)
+        at software.chronicle.runner.v2.RunLoopController.readInputs(VanillaRunnerRunLoopController.java:153)
+1.2.4. PrintCompilation
+By adding -XX:+PrintCompilation to the commandline, the analyser can also give you a histogram of the most common methods re-optimised
+e.g.
+PrintCompilation count
+22	net.openhft.chronicle.network.TcpEventHandler::action (521 bytes)
+22	net.openhft.chronicle.network.TcpEventHandler$WriteEventHandler::action (161 bytes)
+20	net.openhft.chronicle.network.TcpEventHandler::invokeHandler (344 bytes)
+16	java.lang.StringBuilder::append (8 bytes)
+16	java.lang.String::lastIndexOf (151 bytes)
+16	net.openhft.chronicle.bytes.AbstractBytes::readLimit (6 bytes)
+16	net.openhft.chronicle.bytes.AbstractBytes::readLimit (37 bytes)

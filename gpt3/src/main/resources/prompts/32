@@ -1,0 +1,8 @@
+"prompt":"What are the options for replay strategies?",
+"answer":"The options for replay strategies are no replay, replay from input queues or replay from the output queue. The startFromStrategy property is used to configure whether replay should be performed or not. The inputsReplayStrategy property is used to configure what queue(s) to use for the replay. The enableOutputDuringReplayOfInput configuration parameter determines whether output should be sent to the output queue or not during a replay." 
+
+"prompt":"What are the available startup strategies?",
+"answer":"The available startup strategies are START, LAST_WRITTEN, REPLAY_LAST_INPUT_MESSAGE, END, and NAMED. The startFromStrategy property is used to configure what action the service takes when started. The strategy selected controls how to handle messages that are at the input queue(s) at start-up. The strategy can be overridden using InputCfg for each queue." 
+
+"prompt":"How can the startFromStrategy be overridden for a specific input queue?",
+"answer":"The startFromStrategy for the service applies to all input queues, but can be overridden using InputCfg for each queue. An example is demonstrated below: service: { inputs: [ mdbb-timer-in, !InputCfg { input: config-out, startFromStrategy: END }], config: config-out, output: mdbb-out, }"

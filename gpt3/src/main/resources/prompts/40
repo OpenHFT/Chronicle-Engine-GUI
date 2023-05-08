@@ -1,0 +1,23 @@
+"prompt":"What is the purpose of Polling Updates?",
+"answer":"The purpose of Polling Updates is to continuously poll for data to check if there is work to do by installing an event handler on the service event loops that has no time interval."
+
+"prompt":"What interface should be implemented to use Polling Updates events?",
+"answer":"The PollingUpdateSource interface should be implemented to use Polling Updates events."
+
+"prompt":"What methods should be overridden when implementing the PollingUpdateSource interface?",
+"answer":"The methods that should be overridden when implementing the PollingUpdateSource interface are publishUpdateOnIdle() and pollingUpdate(long)."
+
+"prompt":"What happens when publishUpdateOnIdle() returns true?",
+"answer":"When publishUpdateOnIdle() returns true, pollingUpdate(long) is invoked with the current timestamp as its argument."
+
+"prompt":"How often is pollingUpdate(long) invoked?",
+"answer":"pollingUpdate(long) will continue to be invoked every time the service event loop runs as long as publisherUpdateOnIdle() returns true."
+
+"prompt":"What should be done to run pollingUpdate(long) only once every time publishUpdateOnIdle() returns true?",
+"answer":"To run pollingUpdate(long) only once every time publishUpdateOnIdle() returns true, make publishUpdateOnIdle() returns false before one run of the pollingUpdate(long) method finishes e.g. this can be done somewhere inside the pollingUpdate(long) method."
+
+"prompt":"What is the signature of the pollingUpdate(long) method?",
+"answer":"The signature of the pollingUpdate(long) method is void pollingUpdate(long currentTime)."
+
+"prompt":"What is the signature of the publishUpdateOnIdle() method?",
+"answer":"The signature of the publishUpdateOnIdle() method is boolean publishUpdateOnIdle()."

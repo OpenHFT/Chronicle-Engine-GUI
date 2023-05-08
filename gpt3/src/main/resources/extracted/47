@@ -1,0 +1,32 @@
+Reference Guide
+1. Configuration
+Global configuration of a Chronicle Services application is provided through a single configuration file. The file is written in YAML, and by default has the name services.yaml. An alternative name for the file can be provided as an argument when the service is started.
+The file contains details of objects such as queues and services that need to be initialised and started, together with any clustering configuration.
+When the YAML file is loaded then system properties are automatically substituted - see Static Configuration for an example.
+Global Chronicle Services Configuration File - services.yaml
+!ChronicleServicesCfg {
+    context: {
+         ...
+    },
+
+    queues: {
+         ...
+    },
+
+    services: {
+         ...
+    },
+
+    hosts: {
+         ...
+    },
+
+    replicaSets: {
+        ...
+    },
+
+    gc: {
+        ...
+    }
+}
+The YAML tags (e.g. !ChronicleServicesCfg) are used by the Chronicle unmarshalling code to determine the Java type that will be used to store the information. Internally, the configuration is stored as a LinkedHashMap with String valued keys and corresponding values of type Object to cater for the range of types used in configuration.

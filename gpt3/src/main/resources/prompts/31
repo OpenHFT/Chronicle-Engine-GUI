@@ -1,0 +1,23 @@
+"Prompt": "What is the key to being able to reproduce the data flow through the system in the Chronicle Approach?",
+"Answer": "At each stage, all messages that have passed through the stage are stored in perpetuity."
+
+"Prompt": "What are the advantages of storing all messages that have passed through the stage in perpetuity?",
+"Answer": "Diagnosing and fixing bugs in any part of the system becomes easier, examining behaviour with the actual data being passed may identify algorithmic or data flow improvements, prospective performance improvements may be easily tested and refined using production class data."
+
+"Prompt": "Why is the normal Java heap not suitable for storing all messages in the Chronicle Approach?",
+"Answer": "The size required is likely to be well above the available physical memory on the machine where the application is running, and when a Java application heap size exceeds the amount of available physical memory there are seriously detrimental effects on the performance of the system."
+
+"Prompt": "What is the solution to storing all messages in the Chronicle Approach?",
+"Answer": "The solution is to use memory mapped files, which increase the amount of virtual memory that is available to a running Java application without affecting the size or operation of the garbage collected heap."
+
+"Prompt": "What is Chronicle Queue?",
+"Answer": "Chronicle Queue is open source software that provides functionality through which data structures are overlaid on the mapped files, allowing transparent access to the data in them from the application. Additionally, since files can be mapped into multiple processes, concurrent access to Queues from multiple JVMs (Microservices) is supported."
+
+"Prompt": "What is the benefit of using mapped files in the Chronicle Approach?",
+"Answer": "Mapped files provide high performance in this area because changes to the data in the process are not directly written back to the file. The mapped files act as a write-back cache of the data on disk."
+
+"Prompt": "How does Chronicle avoid the delay in persisting messages to the disk file?",
+"Answer": "Chronicle avoids this by replicating a Queue to another JVM on a separate machine rather than relying on synchronising the messages to disk."
+
+"Prompt": "What is Flow Control in the Chronicle Approach?",
+"Answer": "Flow Control is not considered an issue in the Chronicle Approach because the sizes of the mapped files used by Chronicle Queues are such that the files act as buffers between the components that are large enough to store enough data flow control is not needed."

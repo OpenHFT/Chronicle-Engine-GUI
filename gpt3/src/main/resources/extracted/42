@@ -1,0 +1,90 @@
+2. Monitoring Availability
+Services Framework supports service heartbeating so that each service can be aware of whether its dependent services are running by monitoring their hearbeats. The dependent services are upstream services of a service.
+Service heartbeating is not the same as queue replication heartbeating.
+2.1. Heartbeat Monitoring
+There are two options to add heartbeat capability to a service by:
+Implementing the HeartbeatSource and/or HeartbeatListener interfaces which allows more customisation. In this case HeartbeatService implementation code can be used as a self-enclosed example of heartbeat management logic.
+Extending HeartbeatService and everything will work out of the box, given that the HeartbeatDefinitions event is provided and heartbeatMS is set.
+2.1.1. Implementing the HeartbeatSource and/or HeartbeatListener interfaces
+The Heartbeat capability can be added to a service by it implementing the HeartbeatSource and/or HeartbeatListener. By implementing HeartbeatSource, a service will generate heartbeat DTOs at intervals defined by the heartbeatMS during the service configuration. The HeartbeatSource interface defines a method heartbeatTimer() that is called on a time interval defined by heartbeatMS configuration parameter, see Heartbeat configuration.
+/**
+ * implemented by each service which needs to produce heartbeats.
+ */
+public interface HeartbeatSource extends HeartbeatDefinitionsListener {
+    /**
+     * called periodically under normal operation
+     * @param currentTime
+     */
+    void heartbeatTimer(@LongConversion(ServicesTimestampLongConverter.class) long currentTime);
+}
+HeartbeatSource extends the HeartbeatDefinitionsListener interface which defines a method called heartbeatDefinitions(). Hence, each service implementing HeartbeatSource should override both methods heartbeatTimer() and heartbeatDefinitions(). In addition to any functionality that might be required, the heartbeatTimer() method should publish a Heartbeat event downstream that can be detected by one or more other services, which implement the HeartbeatListener interface.
+heartbeatDefinitions() can be used to configure the services heartbeating, it receives a HeartbeatDefinitions object as an argument which configures heartbeat monitoring. HeartbeatDefinitions includes a List of HeartbeatDefinition objects. A HeartbeatDefinition has the following fields.
+HeartbeatDefinition fields
+public class HeartbeatDefinition extends AbstractEventCfg<HeartbeatDefinition> implements Validatable {
+    // Name of the service that generates heartbeats
+    public String source;
+
+    // Timeout for receiving heartbeats from upstream services in seconds
+    public double timeoutInSecs;
+
+    // Upstream services of this source
+    public List<String> dependsOn = new ArrayList<>();
+    ...
+In the following example, a HeartbeatDefinitions has been passed to the heartbeatDefinitions() method and then to the HeartbeatDefinition.configureMonitor() to configure the monitoring.
+Example using heartbeatDefinitions() to configure monitoring
+@Override
+public void heartbeatDefinitions(HeartbeatDefinitions definitions) {
+    HeartbeatDefinition.configureMonitor(definitions, this.heartbeat.source(), this.heartbeatMonitor);
+}
+The heartbeatDefinitions() method can be invoked by writing a HeartbeatDefinitions events to the input queue of the service, or it can be called explicitly. In the latter case, alternatively you can only run the following:
+HeartbeatDefinition.configureMonitor(HeartbeatDefinitions definitions, String source, HeartbeatMonitor heartbeatMonitor)
+If there’s a config service in the system, the best practice is to make it responsible for distributing HeartbeatDefinitions event to the services interested in the heartbeat monitoring.
+You can populate a HeartbeatDefinitions by reading a YAMl file as below.
+!HeartbeatDefinitions {
+  list: [
+    { source: upstream, timeoutInSecs: 6.0 },
+    { source: mdbb, timeoutInSecs: 6.0, dependsOn: [ upstream ] },
+    { source: pricer, timeoutInSecs: 6.0, dependsOn: [ upstream, mdbb ] },
+    { source: downstream, timeoutInSecs: 6.0, dependsOn: [ pricer ] }
+  ]
+}
+The HeartbeatDefinitions also can be generated using the software.chronicle.services.tools.HeartbeatDefnFromServices tool.
+Generating HeartbeatDefinitions from configuration file
+//Populates a serviceCfg object from a configuration file
+RunnerConfiguration serviceCfg = LoadUtil.loadFromYaml("services.yaml");
+
+//Generates a `HeartbeatDefinitions` from the configuration file and sets the heartbeat timeout to 6 seconds
+HeartbeatDefinitions hbdefns = new HeartbeatDefnFromServices().generate(6, serviceCfg);
+To see an example of using this tool see HeartbeatDefnFromServicesTest.java.
+Services receiving heartbeats should implement the HeartbeatListener interface.
+HeartbeatListener interface
+/**
+ * implemented by each component which needs to receive heartbeats.
+ */
+public interface HeartbeatListener {
+    /**
+     * called periodically under normal operation
+     * @param heartbeat
+     */
+    void heartbeat(Heartbeat heartbeat);
+}
+2.1.2. Extending HeartbeatService
+Alternatively a service can extend software.chronicle.services.heartbeat.HeartbeatService which implements both of these interfaces, and appropriate processing. If you can’t descend from software.chronicle.services.heartbeat.HeartbeatService, it is suggested to copy/paste the implementation.
+2.2. Heartbeat Configuration
+The minimal configuration required for Heartbeats is to configure heartbeatMS in the ServiceCfg. If this is not done for the required services then default configuration will apply - a HeartbeatError is generated whenever an upstream service does not send a heartbeat for 60 seconds.
+Heartbeat Configuration
+!ChronicleServicesCfg {
+
+    ...
+    services: {
+      ...
+
+      oms: {
+        inputs: oms-in,
+        output: oms-out,
+        implClass: software.chronicle.services.Oms,
+        heartbeatMS: 3000, # frequency of heartbeat postings
+      },
+    },
+    ...
+}
